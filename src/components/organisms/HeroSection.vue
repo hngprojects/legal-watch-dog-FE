@@ -8,7 +8,7 @@ import PillTag from '@/components/atoms/PillTag.vue'
 <template>
   <section class="relative flex w-full flex-1 items-center justify-center py-8 sm:py-16">
     <div
-      class="mx-auto flex w-full max-w-[900px] flex-col gap-7 rounded-[40px] bg-[linear-gradient(135deg,#fff8f0,#fefefe)] px-6 py-12 text-center shadow-[0_25px_60px_rgba(82,43,14,0.15),_inset_0_1px_0_rgba(255,255,255,0.7)] sm:px-8 sm:py-16"
+      class="mx-auto flex w-full items-center max-w-[900px] flex-col gap-7 px-6 py-12 text-center sm:px-8 sm:py-16"
     >
       <PillTag>AI-Powered Regulatory Intelligence</PillTag>
       <HeadingText tag="h1" align="center">

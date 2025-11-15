@@ -18,7 +18,7 @@ const props = withDefaults(
 const componentTag = computed(() => props.as)
 
 const baseClasses =
-  'inline-flex items-center justify-center rounded-full font-semibold text-[0.95rem] text-[#2a0d00] transition duration-200 ease-out hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4b1e00] cursor-pointer select-none'
+  'inline-flex items-center justify-center rounded-[8px] font-semibold text-[0.95rem] text-[#2a0d00] transition duration-200 ease-out hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4b1e00] cursor-pointer select-none'
 
 const variantClasses: Record<'primary' | 'ghost', string> = {
   primary:

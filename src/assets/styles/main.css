@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 
 @theme {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
     Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  --color-brand-brown: #4b1e00;
+  --color-brand-brown: #401903;
   --color-brand-deep: #2a0d00;
   --color-text-main: #2a1d15;
   --color-text-muted: #6c5b52;
@@ -12,26 +13,22 @@
 }
 
 body {
-  min-height: 100vh;
-  color: var(--color-text-main);
-  background: radial-gradient(circle at top, rgba(255, 182, 122, 0.15), transparent 60%),
-    var(--color-page-bg);
-  line-height: 1.6;
   font-family: var(--font-sans);
-  font-size: 16px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding: 1.5rem;
 }
 
-#app {
-  width: min(1200px, 100%);
-  margin: 0 auto;
-  padding: 2rem 0;
-  font-weight: 500;
-}
+@layer base {
+  body {
+    @apply min-h-screen text-text-main bg-[radial-gradient(circle_at_top,rgba(255,182,122,1),transparent_60%),var(--color-page-bg)] leading-[1.6] text-base antialiased p-2;
+  }
 
-a {
-  color: inherit;
+  #app {
+    @apply mx-auto w-full max-w-[1200px] py-8 font-medium;
+  }
+
+  a {
+    @apply text-inherit;
+  }
 }
