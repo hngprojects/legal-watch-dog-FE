@@ -1,54 +1,103 @@
-# legal-watch-dog-FE
+# LegalWatchDog
 
-This template should help get you started developing with Vue 3 in Vite.
+An AI-powered monitoring platform that automates legal and policy monitoring across jurisdictions.
 
-## Recommended IDE Setup
+## Overview
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+LegalWatchDog is a smart tool designed to help legal teams, compliance officers, and global businesses stay on top of regulatory changes. The platform tracks, summarizes, and validates real-time legal updates, turning complex data into actionable insights.
 
-## Recommended Browser Setup
+## Problem Statement
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+Legal teams and global businesses struggle to keep up with constant regulatory changes. Updates are scattered, inconsistent, and manual tracking is time-consuming.
 
-## Type Support for `.vue` Imports in TS
+## Solution
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+An AI platform that centralizes and simplifies legal monitoring, transforming complex data into clear, actionable summaries.
 
-## Customize configuration
+## Target Audience
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- Legal practitioners
+- Business consultants
+- Visa specialists
+- Compliance teams
 
-## Project Setup
+## Key Benefits
 
-```sh
-npm install
-```
+1. **Saves Time** - No more manually checking multiple government sites
+2. **Reduces Risk** - Alerts ensure nothing critical is missed
+3. **Increases Clarity** - AI summaries simplify complex language
+4. **Centralized Monitoring** - Everything organized in one dashboard
+5. **Better Decisions** - Confidence scoring shows reliability
 
-### Compile and Hot-Reload for Development
+## Core Features
 
-```sh
-npm run dev
-```
+### 1. Create Project
+Organize monitoring into separate topics or areas.
 
-### Type-Check, Compile and Minify for Production
+### 2. Add Jurisdiction
+Define regions or legal domains under each project.
 
-```sh
-npm run build
-```
+### 3. Add Sources
+Add and validate websites for AI monitoring.
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+### 4. AI Web Monitoring
+Continuously checks websites for updates and detects changes.
 
-```sh
-npm run test:unit
-```
+### 5. AI Summarization
+Converts detected changes into clear, structured summaries.
 
-### Lint with [ESLint](https://eslint.org/)
+## Key Screens
 
-```sh
-npm run lint
-```
+### Project Dashboard
+Provides a quick snapshot of key metrics, overall activity, and allows users to set up new projects with clear steps.
+
+### Jurisdiction Management
+Add and manage jurisdictions with custom monitoring instructions.
+
+### AI Monitoring Dashboard
+Shows source status, last updated timestamps, and real-time monitoring activity.
+
+### Add Source
+Input and validate URLs with source health and status indicators.
+
+### AI Summary
+Displays AI-generated summaries with key change highlights, confidence levels (High/Medium/Low), and links to view sources.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm package manager
+
+### Installation
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/<your-username>/legal-watch-dog-FE.git
+   ```
+
+2. Navigate to the project directory:
+   ```sh
+   cd legal-watch-dog-FE
+   ```
+
+3. Install dependencies:
+   ```sh
+   npm install
+   ```
+
+4. Start the development server:
+   ```sh
+   npm run dev
+   ```
+
+5. Open your browser and navigate to `http://localhost:3000`
+
+## Future Features
+
+- **Timeline View** - Historical timeline of changes with AI impact scoring
+- **Ticketing and Commenting** - Create follow-up tasks and assign to teammates
+- **Bulk Import Sources** - Upload CSV or paste multiple URLs for auto-validation
+- **Collaboration and Roles** - Admin/Editor/Viewer access with project-level permissions
+
