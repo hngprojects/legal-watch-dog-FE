@@ -39,7 +39,7 @@
     </div>
 
     <!-- Brown CTA Section -->
-    <div class="rounded-2xl bg-[#3c2610] h-130 flex flex-col items-center justify-center text-white relative overflow-hidden p-5 md:p-12 text-center">
+    <div class="rounded-2xl bg-[#3c2610] min-h-130 text-white relative overflow-hidden p-12 text-center">
       <div
         class="absolute left-0 top-0 h-full w-40 md:w-60 lg:w-90 bg-no-repeat bg-bottom"
         style="background-image: url('images/logo.png'); background-size: contain"
