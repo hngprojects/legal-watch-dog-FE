@@ -39,17 +39,17 @@
     </div>
 
     <!-- Brown CTA Section -->
-    <div class="rounded-2xl bg-[#3c2610] text-white relative overflow-hidden p-12 text-center">
+    <div class="rounded-2xl bg-[#3c2610] h-130 flex flex-col items-center justify-center text-white relative overflow-hidden p-5 md:p-12 text-center">
       <div
-        class="absolute left-0 top-0 h-full w-40 bg-no-repeat bg-bottom"
+        class="absolute left-0 top-0 h-full w-40 md:w-60 lg:w-90 bg-no-repeat bg-bottom"
         style="background-image: url('images/logo.png'); background-size: contain"
       ></div>
       <div
-        class="absolute right-0 top-0 h-full w-40 bg-no-repeat bg-bottom scale-x-[-1]"
+        class="absolute right-0 top-0 h-full w-40 md:w-60 lg:w-90 bg-no-repeat bg-bottom scale-x-[-1]"
         style="background-image: url('images/logo.png'); background-size: contain"
       ></div>
 
-      <div class="relative z-10 space-y-4 max-w-2xl mx-auto">
+      <div class="relative z-10 flex flex-col gap-5 max-w-2xl mx-auto">
         <h2 class="text-3xl font-bold">Gain your Strategic Advantage</h2>
 
         <p class="text-gray-200">
@@ -58,7 +58,7 @@
         </p>
 
         <button
-          class="bg-white text-[#5A3A1A] px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition mt-4"
+          class="bg-white text-[#5A3A1A] px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition mt-8"
         >
           Get Monitoring For Free
         </button>
