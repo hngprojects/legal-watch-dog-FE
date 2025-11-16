@@ -25,9 +25,9 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
       <div class="flex flex-col gap-8">
         
         <!-- Card 1: AI Powered Summaries -->
-        <div class="flex flex-col gap-6 rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[320px] sm:flex-row sm:items-center sm:gap-8 sm:p-12">
+        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
           <!-- Text Section -->
-          <div class="flex-1">
+          <div class="relative z-10 sm:max-w-[46%]">
             <h3 class="mb-4 text-[2rem] font-bold leading-tight text-[#000000] sm:text-[2.5rem]">
               AI Powered Summaries
             </h3>
@@ -35,28 +35,28 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
               Turn Complex legal jargon into plain English summaries you can act on immediately
             </p>
           </div>
-          <!-- Image Section (White Card Inside) -->
-          <div class="flex items-center justify-center rounded-[24px] bg-white p-8 sm:w-[45%] sm:p-10">
+          <!-- Image Section (White Card Anchored to Bottom-Right) -->
+          <div class="relative overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:bottom-0 sm:right-0 sm:top-16 sm:w-[50%] sm:rounded-b-none sm:rounded-r-none sm:px-6 sm:pt-6 sm:pb-0">
             <img 
               :src="aiBrainImage" 
               alt="AI Brain illustration" 
-              class="h-auto w-full max-w-[280px] object-contain sm:max-w-[320px]"
+              class="w-full object-contain"
             />
           </div>
         </div>
 
         <!-- Card 2: Change Timeline -->
-        <div class="flex flex-col gap-6 rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[320px] sm:flex-row sm:items-center sm:gap-8 sm:p-12">
-          <!-- Image Section (White Card Inside) - comes first on desktop -->
-          <div class="order-2 flex items-center justify-center rounded-[24px] bg-white p-8 sm:order-1 sm:w-[45%] sm:p-10">
+        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
+          <!-- Image Section (White Card Anchored to Bottom-Left) -->
+          <div class="relative order-2 overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:bottom-0 sm:left-0 sm:top-16 sm:w-[50%] sm:rounded-b-none sm:rounded-l-none sm:px-6 sm:pt-6 sm:pb-0">
             <img 
               :src="timelineHandsImage" 
               alt="Timeline illustration" 
-              class="h-auto w-full max-w-[280px] object-contain sm:max-w-[320px]"
+              class="w-full object-contain"
             />
           </div>
           <!-- Text Section -->
-          <div class="order-1 flex-1 sm:order-2">
+          <div class="relative order-1 z-10 sm:ml-auto sm:max-w-[46%]">
             <h3 class="mb-4 text-[2rem] font-bold leading-tight text-[#000000] sm:text-[2.5rem]">
               Change Timeline
             </h3>
@@ -67,9 +67,9 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
         </div>
 
         <!-- Card 3: Source Verification -->
-        <div class="flex flex-col gap-6 rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[320px] sm:flex-row sm:items-center sm:gap-8 sm:p-12">
+        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
           <!-- Text Section -->
-          <div class="flex-1">
+          <div class="relative z-10 sm:max-w-[46%]">
             <h3 class="mb-4 text-[2rem] font-bold leading-tight text-[#000000] sm:text-[2.5rem]">
               Source Verification
             </h3>
@@ -77,12 +77,12 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
               Get real time notifications with direct links to the source of any change or full transparency.
             </p>
           </div>
-          <!-- Image Section (White Card Inside) -->
-          <div class="flex items-center justify-center rounded-[24px] bg-white p-8 sm:w-[45%] sm:p-10">
+          <!-- Image Section (White Card Anchored to Bottom-Right) -->
+          <div class="relative overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:bottom-0 sm:right-0 sm:top-16 sm:w-[50%] sm:rounded-b-none sm:rounded-r-none sm:px-6 sm:pt-6 sm:pb-0">
             <img 
               :src="verificationDashboardImage" 
               alt="Verification dashboard" 
-              class="h-auto w-full max-w-[320px] object-contain sm:max-w-[360px]"
+              class="w-full object-contain"
             />
           </div>
         </div>
