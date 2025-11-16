@@ -7,7 +7,10 @@ import MainHeader from '@/components/organisms/MainHeader.vue'
 <template>
   <div class="flex min-h-screen flex-col gap-6">
     <MainHeader />
-    <HeroSection />
-    <HowItWorks />
+
+    <div class="px-4 md:px-10 lg:px-24">
+      <HeroSection />
+      <HowItWorks />
+    </div>
   </div>
 </template>
