@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import GlobalStatsSection from '@/components/organisms/GlobalStatsSection.vue';
 import HeroSection from '@/components/organisms/HeroSection.vue'
+import MainFooter from '@/components/organisms/MainFooter.vue';
 import MainHeader from '@/components/organisms/MainHeader.vue'
 import DashboardPreview from '@/components/organisms/DashboardPreview.vue'
 </script>
@@ -11,5 +12,6 @@ import DashboardPreview from '@/components/organisms/DashboardPreview.vue'
     <HeroSection />
     <DashboardPreview />
     <GlobalStatsSection/>
+    <MainFooter/>
   </div>
 </template>
