@@ -22,12 +22,8 @@ body {
 }
 
 @layer base {
-  body {
-    @apply min-h-screen text-text-main bg-[radial-gradient(circle_at_top,rgba(255,182,122,1),transparent_60%),var(--color-page-bg)] leading-[1.6] text-base antialiased p-2;
-  }
-
   #app {
-    @apply mx-auto w-full max-w-[1200px] py-8 font-medium;
+    /* @apply mx-auto w-full max-w-[1200px] py-8 font-medium; */
   }
 
   a {

@@ -40,16 +40,11 @@
 
     <!-- Brown CTA Section -->
     <div
-      class="rounded-2xl bg-[#3c2610] min-h-130 text-white relative flex flex-col items-center justify-center overflow-hidden p-5 md:p-12 text-center"
-    >
-      <div
-        class="absolute left-0 top-0 h-full w-40 md:w-60 lg:w-90 bg-no-repeat bg-bottom"
-        style="background-image: url('images/logo.png'); background-size: contain"
-      ></div>
-      <div
-        class="absolute right-0 top-0 h-full w-40 md:w-60 lg:w-90 bg-no-repeat bg-bottom scale-x-[-1]"
-        style="background-image: url('images/logo.png'); background-size: contain"
-      ></div>
+      class="rounded-2xl bg-[#3c2610] min-h-130 text-white relative flex flex-col items-center justify-center overflow-hidden p-5 md:p-12 text-center">
+      <div class="absolute left-0 top-0 h-full w-40 md:w-60 lg:w-90 bg-no-repeat bg-bottom"
+        style="background-image: url('images/logo.png'); background-size: contain"></div>
+      <div class="absolute right-0 top-0 h-full w-40 md:w-60 lg:w-90 bg-no-repeat bg-bottom scale-x-[-1]"
+        style="background-image: url('images/logo.png'); background-size: contain"></div>
 
       <div class="relative z-10 flex flex-col gap-5 max-w-2xl mx-auto">
         <h2 class="text-3xl font-bold">Gain your Strategic Advantage</h2>
@@ -58,12 +53,12 @@
           Stop reacting to change. Start predicting it. See how LegalWatchDog can transform your
           workflow with intelligence and autonomous updates in real time.
         </p>
+        <div>
+          <button class="bg-white text-[#5A3A1A] px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition mt-8">
+            Get Monitoring For Free
+          </button>
+        </div>
 
-        <button
-          class="bg-white text-[#5A3A1A] px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition mt-8"
-        >
-          Get Monitoring For Free
-        </button>
       </div>
     </div>
   </section>
