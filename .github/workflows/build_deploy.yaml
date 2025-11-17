@@ -75,11 +75,11 @@ jobs:
             cd /home/ubuntu
 
             # If project directory doesn't exist, clone it
-            if [ ! -d "legal-watch-dog-FE" ]; then
-              git clone https://github.com/sheezylion/test-legal-watch-dog-FE.git legal-watch-dog-FE
+            if [ ! -d "test-legal-watch-dog-FE" ]; then
+              git clone git@github.com:sheezylion/test-legal-watch-dog-FE.git
             fi
 
-            cd legal-watch-dog-FE
+            cd test-legal-watch-dog-FE
             git pull origin main
 
             # Clean old dist and extract new build
@@ -87,7 +87,7 @@ jobs:
             tar -xzf /tmp/build.tar.gz -C .
 
             # Set permissions (optional but safe)
-            sudo chmod -R o+rx /home/ubuntu/legal-watch-dog-FE/dist
+            sudo chmod -R o+rx /home/ubuntu/test-legal-watch-dog-FE/dist
 
             # Restart Nginx here
             sudo systemctl restart nginx
