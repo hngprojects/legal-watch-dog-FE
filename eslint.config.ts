@@ -19,6 +19,13 @@ export default defineConfigWithVueTs(
 
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
+  {
+    name: 'app/vue-overrides',
+    files: ['**/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
+  },
   
   {
     ...pluginVitest.configs.recommended,
