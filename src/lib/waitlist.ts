@@ -3,18 +3,26 @@ export type WaitlistPayload = {
   organization_email: string
 }
 
-/**
- * Temporary waitlist submission helper.
- * Replace this with a real API request when the backend is available.
- */
-export async function submitWaitlist(payload: WaitlistPayload) {
-  // Placeholder network request
-  await new Promise((resolve) => setTimeout(resolve, 800))
 
-  console.info('[waitlist] submission payload (stub)', payload)
-  // Simulate API response
+export async function submitWaitlist(payload: WaitlistPayload) {
+  const response = await fetch('http://minamoto.emerj.net/api/api/v1/waitlist/signup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Submission failed with status ${response.status}`)
+  }
+
+  const data = await response.json()
+  console.log(data)
+  
   return {
     ok: true,
-    message: 'Submission received. Confirmation email will be sent when the service is live.',
+    message: data.message || 'You have been added to the waitlist',
+    data: data.data,
   }
 }
