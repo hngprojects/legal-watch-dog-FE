@@ -30,7 +30,10 @@ const handleSubmit = async () => {
     console.error('waitlist submission failed', error)
     feedback.value = {
       type: 'error',
-      message: 'Unable to submit right now. Please try again shortly.',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Unable to submit right now. Please try again shortly.',
     }
   } finally {
     isSubmitting.value = false
