@@ -64,7 +64,7 @@ jobs:
           SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
           echo "$SSH_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          sudo chmod 600 private_key.pem
 
           # Copy build artifact to server
           scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
