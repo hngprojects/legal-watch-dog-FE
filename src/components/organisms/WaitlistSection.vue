@@ -68,7 +68,7 @@ const handleSubmit = async () => {
               name="organization_name"
               placeholder="Organization Name"
               required
-              class="h-12 flex-1 border-border bg-card/90 text-base"
+              class="flex-1 border-border bg-card/90 text-base"
             />
             <Input
               v-model="form.organization_email"
@@ -76,12 +76,12 @@ const handleSubmit = async () => {
               name="organization_email"
               placeholder="Organization Email"
               required
-              class="h-12 flex-1 border-border bg-card/90 text-base"
+              class="flex-1 border-border bg-card/90 text-base"
             />
             <Button
               size="lg"
               type="submit"
-              class="h-12 w-full whitespace-nowrap md:w-auto"
+              class="w-full whitespace-nowrap md:w-auto"
               :disabled="isSubmitting"
             >
               {{ isSubmitting ? 'Submitting...' : 'Join the Waitlist' }}

@@ -136,7 +136,7 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <nav class="flex flex-col gap-2 p-6" aria-label="Mobile navigation">
+        <nav class="flex flex-col gap-2 p-6 bg-white" aria-label="Mobile navigation">
           <RouterLink
             v-for="link in navLinks"
             :key="link.name"
