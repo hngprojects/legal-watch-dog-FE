@@ -83,7 +83,7 @@
   </footer>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import Frame from '@/assets/Frame.png'
 import Facebook from '@/assets/Facebook.png'
 import linkdin from '@/assets/linkdin.png'

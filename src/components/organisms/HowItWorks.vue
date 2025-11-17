@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import BaseButton from '../atoms/BaseButton.vue'
 import BodyText from '../atoms/BodyText.vue'
 import HeadingText from '../atoms/HeadingText.vue'
+import { Button } from '@/components/ui/button'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 import monitorIcon from '@/assets/icons/monitor.svg'
 import analyzeIcon from '@/assets/icons/translation.svg'
@@ -29,7 +30,7 @@ const cards = [
 </script>
 
 <template>
-  <section class="relative flex w-full items-center justify-center py-8 sm:py-16">
+  <section id="how-it-works" class="relative flex w-full items-center justify-center py-8 sm:py-16">
     <div class="flex w-full flex-col gap-11">
       <div class="mx-auto flex w-full items-center flex-col gap-5 text-center">
         <HeadingText tag="h2" align="center">
@@ -42,27 +43,28 @@ const cards = [
       </div>
 
       <div class="mx-auto flex md:items-stretch flex-wrap lg:flex-nowrap items-center gap-5">
-        <article
-          :key="i"
+        <Card
           v-for="(card, i) in cards"
-          class="flex flex-col bg-white rounded-2xl shadow-md px-10 py-12 basis-full md:basis-[calc(50%-0.625rem)] md:max-w-[400px]"
+          :key="i"
+          class="basis-full space-y-4 rounded-2xl bg-card px-8 py-10 text-left md:basis-[calc(50%-0.625rem)] md:max-w-[400px]"
         >
-          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-accent mb-5">
-            <img :src="card.icon" :alt="`${card.title} icon`" class="size-8" />
-          </div>
-
-          <HeadingText tag="h3" align="left" class="mb-2.5 font-semibold!">
-            {{ card.title }}
-          </HeadingText>
-          <BodyText align="left" tone="muted">
+          <CardHeader class="gap-4 p-0">
+            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-sm">
+              <img :src="card.icon" :alt="`${card.title} icon`" class="size-8" />
+            </div>
+            <CardTitle class="text-2xl font-semibold text-foreground">
+              {{ card.title }}
+            </CardTitle>
+          </CardHeader>
+          <CardDescription class="text-base leading-relaxed">
             {{ card.description }}
-          </BodyText>
-        </article>
+          </CardDescription>
+        </Card>
       </div>
 
-      <BaseButton size="lg" class="self-center"
-        ><span class="font-normal!">How it Works</span></BaseButton
-      >
+      <Button size="lg" variant="secondary" class="self-center px-10">
+        <span class="font-normal!">How it Works</span>
+      </Button>
     </div>
   </section>
 </template>

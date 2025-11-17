@@ -1,32 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import './tokens.css';
 @import 'tailwindcss';
-
-@theme {
-  --font-sans:
-    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  --color-brand-brown: #401903;
-  --color-brand-deep: #2a0d00;
-  --color-text-main: #2a1d15;
-  --color-text-muted: #6c5b52;
-  --color-page-bg: #f8f5f1;
-  --color-surface-soft: #fdf9f4;
-  --color-accent: #f1a75f;
-}
-
-body {
-  font-family: var(--font-sans);
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@import 'tw-animate-css';
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-page-bg);
+    color: var(--color-text-main);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+  }
+
   #app {
-    /* @apply mx-auto w-full max-w-[1200px] py-8 font-medium; */
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 
   a {
-    @apply text-inherit;
+    color: inherit;
+    text-decoration: none;
   }
 }
