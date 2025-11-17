@@ -89,6 +89,6 @@ jobs:
             # Set permissions (optional but safe)
             sudo chmod -R o+rx /home/ubuntu/legal-watch-dog-FE/dist
 
-            # Restart Nginx
+            # Restart Nginx here
             sudo systemctl restart nginx
           EOF
