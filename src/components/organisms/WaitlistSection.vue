@@ -8,7 +8,7 @@ import { submitWaitlist, type WaitlistPayload } from '@/lib/waitlist'
 import previewImage from '../../assets/img/dashboard-preview.png'
 
 const form = reactive<WaitlistPayload>({
-  organization_name: '',
+  // organization_name: '',
   organization_email: '',
 })
 
@@ -25,7 +25,7 @@ const handleSubmit = async () => {
       type: 'success',
       message: response.message ?? 'You are on the waitlist. Check your email soon!',
     }
-    form.organization_name = ''
+    // form.organization_name = ''
     form.organization_email = ''
   } catch (error) {
     console.error('waitlist submission failed', error)
@@ -70,12 +70,12 @@ const handleSubmit = async () => {
               name="organization_email"
               placeholder="Enter Email"
               required
-              class="flex-1 border-border bg-card/90 text-base w-[70%] rounded-lg"
+              class="flex-1 border-border bg-card/90 text-base w-[70%] rounded-md"
             />
             <Button
               size="lg"
               type="submit"
-              class="w-[30%] whitespace-nowrap md:w-auto"
+              class="w-[30%] whitespace-nowrap md:w-auto rounded-md!"
               :disabled="isSubmitting"
             >
               {{ isSubmitting ? 'Submitting...' : 'Join the Waitlist' }}
@@ -95,7 +95,7 @@ const handleSubmit = async () => {
           {{ feedback.message }}
         </p>
 
-        
+
         <!-- <div class="mt-4 w-full max-w-[800px]">
           <img
           src="/images/dashboard.png"
@@ -112,6 +112,6 @@ const handleSubmit = async () => {
         </section>
       </CardContent>
     </Card>
-    
+
   </section>
 </template>
