@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { submitWaitlist, type WaitlistPayload } from '@/lib/waitlist'
+import previewImage from '../../assets/img/dashboard-preview.png'
 
 const form = reactive<WaitlistPayload>({
   organization_name: '',
@@ -50,38 +51,31 @@ const handleSubmit = async () => {
 
       <CardHeader class="w-full max-w-[820px] gap-5 p-0 text-center">
         <CardTitle class="text-4xl font-bold leading-tight sm:text-5xl">
-          Stay Ahead of Legal Changes<br />
-          Without the Weekly Stress
+          Never Miss a Policy<br />
+          Update Again
         </CardTitle>
         <CardDescription class="mx-auto max-w-[780px] text-base text-muted-foreground sm:text-lg">
-          LegalWatchDog tracks government updates, policy shifts, and regulatory changes for you. Get
-          clear summaries, real-time alerts, and complete visibility across all your jurisdictions.
+          Legal WatchDog tracks visa rules, employment laws,
+          and compliance updates, automatically delivering clear,
+          easy-to-read summaries. Join the waitlist to try it first.
         </CardDescription>
       </CardHeader>
 
       <CardContent class="flex w-full flex-col items-center gap-6 p-0">
         <form class="flex w-full max-w-[760px] flex-col gap-3" @submit.prevent="handleSubmit">
-          <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-5">
-            <Input
-              v-model="form.organization_name"
-              type="text"
-              name="organization_name"
-              placeholder="Organization Name"
-              required
-              class="flex-1 border-border bg-card/90 text-base"
-            />
+          <div class="flex md:gap-5">
             <Input
               v-model="form.organization_email"
               type="email"
               name="organization_email"
-              placeholder="Organization Email"
+              placeholder="Enter Email"
               required
-              class="flex-1 border-border bg-card/90 text-base"
+              class="flex-1 border-border bg-card/90 text-base w-[70%] rounded-lg"
             />
             <Button
               size="lg"
               type="submit"
-              class="w-full whitespace-nowrap md:w-auto"
+              class="w-[30%] whitespace-nowrap md:w-auto"
               :disabled="isSubmitting"
             >
               {{ isSubmitting ? 'Submitting...' : 'Join the Waitlist' }}
@@ -101,14 +95,23 @@ const handleSubmit = async () => {
           {{ feedback.message }}
         </p>
 
-        <div class="mt-4 w-full max-w-[800px]">
+        
+        <!-- <div class="mt-4 w-full max-w-[800px]">
           <img
-            src="/images/dashboard.png"
-            alt="Legal WatchDog Dashboard"
-            class="h-auto w-full rounded-xl border border-border/70 shadow-2xl"
+          src="/images/dashboard.png"
+          alt="Legal WatchDog Dashboard"
+          class="h-auto w-full rounded-xl border border-border/70 shadow-2xl"
           />
-        </div>
+        </div> -->
+        <section id="features" class="relative flex w-full flex-1 items-center justify-center">
+          <div
+            class="mx-auto flex w-full items-center max-w-[900px] flex-col pt-8 text-center"
+          >
+            <img :src="previewImage" alt="Dashboard preview" class="w-full h-auto" />
+          </div>
+        </section>
       </CardContent>
     </Card>
+    
   </section>
 </template>
