@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-// import { Transition } from 'vue'
-import BaseButton from '@/components/atoms/BaseButton.vue'
+import { ref, onUnmounted, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import BrandLogo from '@/components/molecules/BrandLogo.vue'
+import { Button } from '@/components/ui/button'
+
+type NavLink = {
+  name: string
+  to: string | { path: string; hash?: string }
+}
 
 const isMenuOpen = ref(false)
 
-const navLinks = [
-  { name: 'Home', href: '#' },
-  { name: 'How it Works', href: '#' },
-  { name: 'Features', href: '#' },
+const navLinks: NavLink[] = [
+  { name: 'Home', to: '/' },
+  { name: 'How it Works', to: { path: '/', hash: '#how-it-works' } },
+  { name: 'Features', to: { path: '/', hash: '#features' } }
 ]
 
 // Handle body scroll lock for mobile menu
@@ -31,97 +36,122 @@ watch(isMenuOpen, (newVal) => {
   toggleBodyScroll(newVal)
 })
 
-onMounted(() => {
-  // Initial setup if needed
-})
+const closeMenu = () => {
+  isMenuOpen.value = false
+}
 
 onUnmounted(() => {
-  toggleBodyScroll(false) 
+  toggleBodyScroll(false)
 })
 </script>
 
 <template>
   <header
-    class="z-100 w-full font-sans text-text-main bg-white backdrop-blur-md shadow-[0_10px_25px_rgba(14,13,11,0.05),inset_0_1px_0_rgba(255,255,255,0.6)] border border-white/80 rounded-3xl lg:rounded-none lg:border-none lg:shadow-[0_10px_25px_rgba(14,13,11,0.05)]">
-    <!-- Main nav container: full-width bg, centered content up to 1440px, counter body p-2 -->
+    class="sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 text-text-main backdrop-blur-md shadow-[0_10px_25px_rgba(14,13,11,0.05)]"
+  >
     <div
-      class="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-8 lg:h-[100px] lg:mx-0 lg:px-8 xl:px-16">
-      <!-- Logo -->
-      <a href="#" aria-label="Homepage" class="shrink-0">
+      class="mx-auto flex w-full max-w-[1240px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:py-5"
+    >
+      <RouterLink to="/" aria-label="Homepage" class="shrink-0">
         <BrandLogo />
-      </a>
-      <!-- Desktop nav and CTA: hidden on mobile -->
-      <div class="hidden lg:flex items-center justify-center gap-10 flex-1">
-        <nav aria-label="Main navigation" class="flex-1">
-          <ul class="flex items-center justify-center gap-10">
-            <li v-for="link in navLinks" :key="link.name">
-              <a :href="link.href"
-                class="text-base font-medium text-[#666666] transition-all duration-200 ease-out hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-brown">
-                {{ link.name }}
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <!-- Desktop CTA -->
-        <div>
-          <BaseButton variant="ghost" size="md" class="ml-10">
-            Join Waitlist
-          </BaseButton>
-          <BaseButton variant="primary" size="md" class="ml-5">
-            Sign In
-          </BaseButton>
-        </div>
+      </RouterLink>
 
+      <nav aria-label="Primary" class="hidden flex-1 lg:flex lg:items-center lg:justify-center">
+        <ul class="flex items-center gap-8">
+          <li v-for="link in navLinks" :key="link.name">
+            <RouterLink
+              :to="link.to"
+              class="text-base font-medium text-gray-500 transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            >
+              {{ link.name }}
+            </RouterLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <Button
+          :as="RouterLink"
+          :to="{ path: '/waitlist'}"
+          variant="ghost"
+          size="lg"
+          class="hidden lg:inline-flex"
+        >
+          Join Waitlist
+        </Button>
+        <Button
+          :as="RouterLink"
+          :to="{ path: '/waitlist' }"
+          size="lg"
+          class="hidden lg:inline-flex"
+        >
+          Request Access
+        </Button>
+
+        <button
+          @click="isMenuOpen = !isMenuOpen"
+          class="ml-auto inline-flex items-center justify-center rounded-full border border-gray-200 p-2 text-text-main transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white lg:hidden"
+          aria-label="Toggle navigation"
+          :aria-expanded="isMenuOpen"
+          aria-controls="mobile-menu"
+        >
+          <span class="sr-only">Toggle main menu</span>
+          <svg v-if="!isMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg v-else class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
-      <!-- Mobile hamburger button -->
-      <button @click="isMenuOpen = !isMenuOpen"
-        class="lg:hidden ml-auto p-2 text-text-main transition-colors duration-200 ease-out hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-brown"
-        aria-label="Toggle menu" :aria-expanded="isMenuOpen" aria-controls="mobile-menu">
-        <span class="sr-only">Toggle main menu</span>
-        <!-- Open hamburger icon -->
-        <svg v-if="!isMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-        <!-- Close X icon -->
-        <svg v-else class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
     </div>
 
-    <!-- Mobile menu sidebar (no backdrop for solid white appearance) -->
-    <Transition enter-active-class="transition-transform ease-in-out duration-300" enter-from-class="-translate-x-full"
-      enter-to-class="translate-x-0" leave-active-class="transition-transform ease-in-out duration-300"
-      leave-from-class="translate-x-0" leave-to-class="-translate-x-full">
-      <div v-if="isMenuOpen" id="mobile-menu"
-        class="fixed left-0 top-0 z-100 h-full w-full max-w-sm bg-white lg:hidden shadow-2xl" role="dialog"
-        aria-modal="true" aria-labelledby="mobile-menu-title">
-        <!-- Mobile header with logo and close -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-100">
-          <a href="#" aria-label="Homepage" class="shrink-0">
+    <Transition
+      enter-active-class="transition-transform duration-300 ease-in-out"
+      enter-from-class="-translate-x-full"
+      enter-to-class="translate-x-0"
+      leave-active-class="transition-transform duration-300 ease-in-out"
+      leave-from-class="translate-x-0"
+      leave-to-class="-translate-x-full"
+    >
+      <div
+        v-if="isMenuOpen"
+        id="mobile-menu"
+        class="fixed left-0 top-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="flex items-center justify-between border-b border-gray-100 p-6">
+          <RouterLink to="/" aria-label="Homepage" class="shrink-0" @click="closeMenu">
             <BrandLogo />
-          </a>
-          <button @click="isMenuOpen = false"
-            class="p-2 text-text-main transition-colors duration-200 ease-out hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-brown"
-            aria-label="Close menu">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          </RouterLink>
+          <button
+            @click="closeMenu"
+            class="rounded-full p-2 text-text-main transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            aria-label="Close menu"
+          >
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <!-- Mobile nav links -->
-        <nav class="flex flex-col p-6 space-y-4" aria-label="Mobile navigation">
-          <a v-for="link in navLinks" :key="link.name" :href="link.href" @click="isMenuOpen = false"
-            class="block py-2 px-3 text-lg font-medium text-[#666666] rounded-md transition-all duration-200 ease-out hover:bg-surface-soft hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-brown">
+
+        <nav class="flex flex-col gap-2 p-6 bg-white" aria-label="Mobile navigation">
+          <RouterLink
+            v-for="link in navLinks"
+            :key="link.name"
+            :to="link.to"
+            @click="closeMenu"
+            class="rounded-lg px-3 py-2 text-lg font-medium text-gray-600 transition-colors duration-200 hover:bg-surface-soft hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          >
             {{ link.name }}
-          </a>
+          </RouterLink>
         </nav>
-        <!-- Mobile CTA -->
-        <div class="p-6 border-t border-gray-100">
-          <BaseButton variant="primary" size="md" class="w-full" @click="isMenuOpen = false">
-            Join the Waitlist
-          </BaseButton>
+
+        <div class="border-t border-gray-100 p-6">
+          <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full" @click="closeMenu">
+            Request Access
+          </Button>
         </div>
       </div>
     </Transition>
