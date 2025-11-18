@@ -1,25 +1,20 @@
 name: Build and Deploy FE
-
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-
 jobs:
   build:
     name: Build Frontend
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Cache npm dependencies
         uses: actions/cache@v3
         with:
@@ -27,36 +22,27 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-
       - name: Install dependencies
         run: npm install
-
       - name: Build application
         run: npm run build
-
       - name: Archive build output
-        run: |
-          tar -czf build.tar.gz dist
-        # Make build artifact available to next job
+        run: tar -czf build.tar.gz dist
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: build.tar.gz
-
-
   deploy:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     environment: staging
     needs: build
-
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-
       - name: Set up SSH and Deploy
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
@@ -64,31 +50,28 @@ jobs:
           SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
           echo "$SSH_KEY" > private_key.pem
-          sudo chmod 600 private_key.pem
-
+          chmod 600 private_key.pem
           # Copy build artifact to server
           scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
-
-          # SSH into server and deploy
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
-            set -e
-            cd /home/ubuntu
-
-            # If project directory doesn't exist, clone it
-            if [ ! -d "test-legal-watch-dog-FE" ]; then
-              git clone git@github.com:sheezylion/test-legal-watch-dog-FE.git
-            fi
-
-            cd test-legal-watch-dog-FE
-            git pull origin main
-
-            # Clean old dist and extract new build
-            rm -rf dist
-            tar -xzf /tmp/build.tar.gz -C .
-
-            # Set permissions (optional but safe)
-            sudo chmod -R o+rx /home/ubuntu/test-legal-watch-dog-FE/dist
-
-            # Restart Nginx here
-            sudo systemctl restart nginx
+          # SSH into server and run deploy script
+          ssh -T -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+          cd /home/ubuntu/
+          # If project directory doesn't exist, clone it
+          if [ ! -d "legal-watch-dog-FE-fork" ]; then
+            git clone git@github.com:Joeonome/legal-watch-dog-FE-fork.git
+          fi
+          cd legal-watch-dog-FE-fork
+          git pull origin main
+          # Clean old dist and extract new build
+          npm install
+          #npm run build
+          sudo rm -rf dist
+          tar -xzf /tmp/build.tar.gz -C .
+          # Set permissions
+          sudo chmod -R o+rx /home/ubuntu/legal-watch-dog-FE-fork/dist
+          sudo chmod o+rx /home/ubuntu/legal-watch-dog-FE-fork
+          sudo chmod o+rx /home/ubuntu
+          # Restart Nginx
+          sudo systemctl restart nginx
+          echo "DEPLOY COMPLETE"
           EOF
