@@ -1,8 +1,23 @@
 <script setup lang="ts">
-import { ref, onUnmounted, watch } from 'vue'
+import { onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import { Menu, X } from 'lucide-vue-next'
 import BrandLogo from '@/components/molecules/BrandLogo.vue'
 import { Button } from '@/components/ui/button'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from '@/components/ui/navigation-menu'
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 
 type NavLink = {
   name: string
@@ -14,10 +29,9 @@ const isMenuOpen = ref(false)
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
   { name: 'How it Works', to: { path: '/', hash: '#how-it-works' } },
-  { name: 'Features', to: { path: '/', hash: '#features' } }
+  { name: 'Features', to: { path: '/', hash: '#features' } },
 ]
 
-// Handle body scroll lock for mobile menu
 let bodyOverflow: string | null = null
 const toggleBodyScroll = (lock: boolean) => {
   if (typeof window !== 'undefined' && window.document) {
@@ -36,10 +50,6 @@ watch(isMenuOpen, (newVal) => {
   toggleBodyScroll(newVal)
 })
 
-const closeMenu = () => {
-  isMenuOpen.value = false
-}
-
 onUnmounted(() => {
   toggleBodyScroll(false)
 })
@@ -57,22 +67,26 @@ onUnmounted(() => {
       </RouterLink>
 
       <nav aria-label="Primary" class="hidden flex-1 lg:flex lg:items-center lg:justify-center">
-        <ul class="flex items-center gap-8">
-          <li v-for="link in navLinks" :key="link.name">
-            <RouterLink
-              :to="link.to"
-              class="text-base font-medium text-gray-500 transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-            >
-              {{ link.name }}
-            </RouterLink>
-          </li>
-        </ul>
+        <NavigationMenu :viewport="false" class="w-full justify-center bg-transparent shadow-none">
+          <NavigationMenuList class="flex items-center gap-8 bg-transparent p-0 shadow-none">
+            <NavigationMenuItem v-for="link in navLinks" :key="link.name">
+              <NavigationMenuLink as-child>
+                <RouterLink
+                  :to="link.to"
+                  class="rounded-md px-3 py-2 text-base font-medium text-gray-500 transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                >
+                  {{ link.name }}
+                </RouterLink>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
       </nav>
 
       <div class="flex items-center gap-3">
         <Button
           :as="RouterLink"
-          :to="{ path: '/waitlist'}"
+          :to="{ path: '/waitlist' }"
           variant="ghost"
           size="lg"
           class="hidden lg:inline-flex"
@@ -88,72 +102,61 @@ onUnmounted(() => {
           Request Access
         </Button>
 
-        <button
-          @click="isMenuOpen = !isMenuOpen"
-          class="ml-auto inline-flex items-center justify-center rounded-full border border-gray-200 p-2 text-text-main transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white lg:hidden"
-          aria-label="Toggle navigation"
-          :aria-expanded="isMenuOpen"
-          aria-controls="mobile-menu"
-        >
-          <span class="sr-only">Toggle main menu</span>
-          <svg v-if="!isMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <svg v-else class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        <Sheet v-model:open="isMenuOpen">
+          <SheetTrigger as-child>
+            <Button
+              variant="outline"
+              size="icon"
+              class="ml-auto border-gray-200 text-text-main hover:text-brand-deep lg:hidden"
+              aria-label="Toggle navigation"
+            >
+              <Menu v-if="!isMenuOpen" class="size-5" />
+              <X v-else class="size-5" />
+              <span class="sr-only">Toggle main menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" class="w-full max-w-sm gap-0 p-0">
+            <SheetHeader
+              class="flex flex-row items-center justify-between border-b border-gray-100 px-6 py-5 text-left"
+            >
+              <SheetClose as-child>
+                <RouterLink to="/" aria-label="Homepage" class="shrink-0">
+                  <BrandLogo />
+                </RouterLink>
+              </SheetClose>
+              <SheetClose as-child>
+                <Button variant="ghost" size="icon" class="text-text-main hover:text-brand-deep">
+                  <X class="size-5" />
+                  <span class="sr-only">Close menu</span>
+                </Button>
+              </SheetClose>
+            </SheetHeader>
+
+            <nav class="flex flex-col gap-2 px-6 py-6" aria-label="Mobile navigation">
+              <SheetClose
+                v-for="link in navLinks"
+                :key="link.name"
+                as-child
+              >
+                <RouterLink
+                  :to="link.to"
+                  class="rounded-lg px-3 py-2 text-lg font-medium text-gray-600 transition-colors duration-200 hover:bg-surface-soft hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                >
+                  {{ link.name }}
+                </RouterLink>
+              </SheetClose>
+            </nav>
+
+            <SheetFooter class="px-6 pb-6 pt-0">
+              <SheetClose as-child>
+                <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full">
+                  Request Access
+                </Button>
+              </SheetClose>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
-
-    <Transition
-      enter-active-class="transition-transform duration-300 ease-in-out"
-      enter-from-class="-translate-x-full"
-      enter-to-class="translate-x-0"
-      leave-active-class="transition-transform duration-300 ease-in-out"
-      leave-from-class="translate-x-0"
-      leave-to-class="-translate-x-full"
-    >
-      <div
-        v-if="isMenuOpen"
-        id="mobile-menu"
-        class="fixed left-0 top-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden"
-        role="dialog"
-        aria-modal="true"
-      >
-        <div class="flex items-center justify-between border-b border-gray-100 p-6">
-          <RouterLink to="/" aria-label="Homepage" class="shrink-0" @click="closeMenu">
-            <BrandLogo />
-          </RouterLink>
-          <button
-            @click="closeMenu"
-            class="rounded-full p-2 text-text-main transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-            aria-label="Close menu"
-          >
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        <nav class="flex flex-col gap-2 p-6 bg-white" aria-label="Mobile navigation">
-          <RouterLink
-            v-for="link in navLinks"
-            :key="link.name"
-            :to="link.to"
-            @click="closeMenu"
-            class="rounded-lg px-3 py-2 text-lg font-medium text-gray-600 transition-colors duration-200 hover:bg-surface-soft hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-          >
-            {{ link.name }}
-          </RouterLink>
-        </nav>
-
-        <div class="border-t border-gray-100 p-6">
-          <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full" @click="closeMenu">
-            Request Access
-          </Button>
-        </div>
-      </div>
-    </Transition>
   </header>
 </template>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import BodyText from '@/components/atoms/BodyText.vue'
-import HeadingText from '@/components/atoms/HeadingText.vue'
-import PillTag from '@/components/atoms/PillTag.vue'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { TypographyHeading, TypographyText } from '@/components/ui/typography'
 </script>
 
 <template>
@@ -10,15 +9,20 @@ import { Button } from '@/components/ui/button'
     <div
       class="mx-auto flex w-full items-center max-w-[900px] flex-col gap-7 px-6 py-12 text-center sm:px-8 sm:py-16"
     >
-      <PillTag>AI-Powered Regulatory Intelligence</PillTag>
-      <HeadingText tag="h1" align="center">
+      <Badge
+        variant="secondary"
+        class="border border-white/80 bg-white px-6 py-1.5 text-sm font-semibold text-brand-brown shadow-[0_15px_35px_rgba(15,17,20,0.12)]"
+      >
+        AI-Powered Regulatory Intelligence
+      </Badge>
+      <TypographyHeading level="h1" align="center">
         Automate Legal Monitoring,<br />
         Never Miss A Critical Update
-      </HeadingText>
-      <BodyText class="mx-auto max-w-[600px]" align="center" tone="muted">
+      </TypographyHeading>
+      <TypographyText class="mx-auto max-w-[600px]" align="center" tone="muted">
         LegalWatchDog uses AI to track all changes on any website, from Visa portals to employment
         laws and delivers concise actionable summaries.
-      </BodyText>
+      </TypographyText>
       <Button class="self-center cursor-pointer" size="lg">
         Get Monitoring For Free
       </Button>
