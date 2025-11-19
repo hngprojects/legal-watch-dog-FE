@@ -19,25 +19,30 @@ const router = createRouter({
       name: 'waitlist',
       component: WaitlistView,
     },
-     {
+    {
       path: '/login',
       name: 'login',
       component: LoginView,
     },
-     {
+    {
       path: '/signup',
       name: 'signup',
       component: SignupView,
     },
-       {
+    {
       path: '/otp',
       name: 'otp',
       component: OtpView,
     },
-       {
+    {
       path: '/success',
       name: 'success',
       component: SuccessView,
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/NotFoundView.vue'),
     },
   ],
   scrollBehavior: () => ({ top: 0 }),
