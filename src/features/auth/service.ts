@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { RegisterPayload, LoginPayload, User, Organisation } from '@/stores/auth'
+import type { RegisterPayload, LoginPayload, User, Organisation } from '@/features/auth/store'
 
 interface RegisterResponse {
   message: string
