@@ -12,6 +12,7 @@ const confirmPassword = ref('');
 const agreeToTerms = ref(false);
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const errors = ref<string[]>([]);
 
 const router = useRouter();
 
@@ -31,6 +32,7 @@ const resetForm = () => {
   agreeToTerms.value = false;
   showPassword.value = false;
   showConfirmPassword.value = false;
+  errors.value = [];
 };
 
 const validateSignupForm = () => {
@@ -39,37 +41,37 @@ const validateSignupForm = () => {
   const sanitizedPassword = sanitize(password.value);
   const sanitizedConfirm = sanitize(confirmPassword.value);
 
+  const validationErrors: string[] = [];
+
   if (!sanitizedCompany) {
-    window.alert('Company name is required.');
-    return false;
+    validationErrors.push('Company name is required.');
   }
 
   if (!sanitizedEmail || !emailPattern.test(sanitizedEmail)) {
-    window.alert('Enter a valid company email address.');
-    return false;
+    validationErrors.push('Enter a valid company email address.');
   }
 
   if (!sanitizedPassword) {
-    window.alert('Password is required.');
-    return false;
+    validationErrors.push('Password is required.');
+  } else {
+    if (sanitizedPassword.length < MIN_PASSWORD_LENGTH) {
+      validationErrors.push('Password must be at least 8 characters.');
+    }
+    if (!hasLetter.test(sanitizedPassword) || !hasNumber.test(sanitizedPassword) || !hasSpecial.test(sanitizedPassword)) {
+      validationErrors.push('Password must include a letter, number, and special character.');
+    }
   }
 
-  if (sanitizedPassword.length < MIN_PASSWORD_LENGTH || !hasLetter.test(sanitizedPassword) || !hasNumber.test(sanitizedPassword) || !hasSpecial.test(sanitizedPassword)) {
-    window.alert('Password must be at least 8 characters and include a letter, number, and special character.');
-    return false;
-  }
-
-  if (sanitizedPassword !== sanitizedConfirm) {
-    window.alert('Passwords do not match.');
-    return false;
+  if (sanitizedPassword && sanitizedConfirm && sanitizedPassword !== sanitizedConfirm) {
+    validationErrors.push('Passwords do not match.');
   }
 
   if (!agreeToTerms.value) {
-    window.alert('Please agree to the terms of service to proceed.');
-    return false;
+    validationErrors.push('You must agree to the terms to continue.');
   }
 
-  return true;
+  errors.value = validationErrors;
+  return validationErrors.length === 0;
 };
 
 const handleCreateAccount = () => {
@@ -111,6 +113,16 @@ const handleCreateAccount = () => {
           </div>
 
           <form @submit.prevent="handleCreateAccount" class="space-y-5">
+
+            <div
+              v-if="errors.length"
+              class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
+            >
+              <p class="font-semibold mb-2">Please fix the following:</p>
+              <ul class="list-disc space-y-1 pl-4">
+                <li v-for="issue in errors" :key="issue">{{ issue }}</li>
+              </ul>
+            </div>
             
             <div class="relative">
               <label class="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 pointer-events-none">

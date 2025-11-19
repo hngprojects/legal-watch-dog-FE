@@ -10,6 +10,7 @@ const email = ref('');
 const password = ref('');
 const rememberMe = ref(false);
 const showPassword = ref(false);
+const errors = ref<string[]>([]);
 
 const router = useRouter();
 
@@ -21,20 +22,20 @@ const handleLogin = () => {
   const sanitizedEmail = sanitize(email.value).toLowerCase();
   const sanitizedPassword = sanitize(password.value);
 
+  const validationErrors: string[] = [];
+
   if (!sanitizedEmail || !emailPattern.test(sanitizedEmail)) {
-    window.alert('Enter a valid company email.');
-    return;
+    validationErrors.push('Enter a valid company email.');
   }
 
   if (!sanitizedPassword) {
-    window.alert('Password is required.');
-    return;
+    validationErrors.push('Password is required.');
+  } else if (sanitizedPassword.length < MIN_PASSWORD_LENGTH) {
+    validationErrors.push('Password must be at least 8 characters long.');
   }
 
-  if (sanitizedPassword.length < MIN_PASSWORD_LENGTH) {
-    window.alert('Password must be at least 8 characters long.');
-    return;
-  }
+  errors.value = validationErrors;
+  if (validationErrors.length > 0) return;
 
   router.push({ name: 'coming-soon' });
 };
@@ -62,6 +63,16 @@ const handleLogin = () => {
           </div>
 
           <form @submit.prevent="handleLogin" class="space-y-6">
+
+            <div
+              v-if="errors.length"
+              class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
+            >
+              <p class="font-semibold mb-2">Please fix the following:</p>
+              <ul class="list-disc space-y-1 pl-4">
+                <li v-for="issue in errors" :key="issue">{{ issue }}</li>
+              </ul>
+            </div>
             
             <div class="relative">
               <label class="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 pointer-events-none">
