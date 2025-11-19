@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import AuthBranding from '@/components/authentication/AuthBranding.vue';
 
 const companyName = ref('');
-const lastName = ref('');
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
@@ -11,7 +10,6 @@ const showPassword = ref(false);
 const handleCreateAccount = () => {
   console.log('Create Account clicked', {
     companyName: companyName.value,
-    lastName: lastName.value,
     email: email.value,
     password: password.value
   });
@@ -51,20 +49,6 @@ const handleCreateAccount = () => {
                 </svg>
               </span>
               <input v-model="companyName" type="text" placeholder="Company Name"
-                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900 focus:border-transparent" />
-            </div>
-          </div>
-
-          <!-- Last Name Input -->
-          <div>
-            <div class="relative">
-              <span class="absolute left-3 top-3 text-gray-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </span>
-              <input v-model="lastName" type="text" placeholder="Last Name"
                 class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-900 focus:border-transparent" />
             </div>
           </div>
