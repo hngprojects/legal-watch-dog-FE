@@ -10,6 +10,8 @@ import type {
   VerifyOTPPayload,
   ForgetPasswordPayload,
   ForgetPasswordResponse,
+  ResetPasswordPaylod,
+  ResetPasswordResponse,
   AuthError,
   FailureResponse,
 } from './types'
@@ -111,6 +113,27 @@ export const authService = {
       return res.data
     } catch (err: unknown) {
       throw new Error(extractErrorMessage(err, 'Password reset request failed'))
+    }
+  },
+
+  verifyResetOtp: async (payload: VerifyOTPPayload): Promise<unknown> => {
+    try {
+      const res = await axios.post('/api/api/v1/password-reset/verify-otp', payload)
+      return res.data
+    } catch (err: unknown) {
+      throw new Error(extractErrorMessage(err, 'OTP verification failed'))
+    }
+  },
+
+  resetPassword: async (payload: ResetPasswordPaylod): Promise<ResetPasswordResponse> => {
+    try {
+      const res = await axios.post<ResetPasswordResponse>(
+        '/api/api/v1/auth/password-reset/confirm',
+        payload,
+      )
+      return res.data
+    } catch (err: unknown) {
+      throw new Error(extractErrorMessage(err, 'Reset password failed'))
     }
   },
 }
