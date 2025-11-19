@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import HeadingText from '@/components/atoms/HeadingText.vue'
-import BodyText from '@/components/atoms/BodyText.vue'
+import HeadingText from '@/components/reusable/HeadingText.vue'
+import BodyText from '@/components/reusable/BodyText.vue'
 
 // Import images
 import aiBrainImage from '@/assets/images/ai-brain.png'
@@ -23,9 +23,9 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
 
       <!-- Features Cards -->
       <div class="flex flex-col gap-8">
-        
+
         <!-- Card 1: AI Powered Summaries -->
-        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
+        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
           <!-- Text Section -->
           <div class="relative z-10 sm:max-w-[46%]">
             <h3 class="mb-4 text-[2rem] font-bold leading-tight text-[#000000] sm:text-[2.5rem]">
@@ -37,21 +37,21 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
           </div>
           <!-- Image Section (White Card Anchored to Bottom-Right) -->
           <div class="relative overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:bottom-0 sm:right-0 sm:top-16 sm:w-[50%] sm:rounded-b-none sm:rounded-r-none sm:px-6 sm:pt-6 sm:pb-0">
-            <img 
-              :src="aiBrainImage" 
-              alt="AI Brain illustration" 
+            <img
+              :src="aiBrainImage"
+              alt="AI Brain illustration"
               class="w-full object-contain"
             />
           </div>
         </div>
 
         <!-- Card 2: Change Timeline -->
-        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
+        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
           <!-- Image Section (White Card Anchored to Bottom-Left) -->
           <div class="relative order-2 overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:bottom-0 sm:left-0 sm:top-16 sm:w-[50%] sm:rounded-b-none sm:rounded-l-none sm:px-6 sm:pt-6 sm:pb-0">
-            <img 
-              :src="timelineHandsImage" 
-              alt="Timeline illustration" 
+            <img
+              :src="timelineHandsImage"
+              alt="Timeline illustration"
               class="w-full object-contain"
             />
           </div>
@@ -67,7 +67,7 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
         </div>
 
         <!-- Card 3: Source Verification -->
-        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-[32px] bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
+        <div class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12">
           <!-- Text Section -->
           <div class="relative z-10 sm:max-w-[46%]">
             <h3 class="mb-4 text-[2rem] font-bold leading-tight text-[#000000] sm:text-[2.5rem]">
@@ -79,9 +79,9 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
           </div>
           <!-- Image Section (White Card Anchored to Bottom-Right) -->
           <div class="relative overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:bottom-0 sm:right-0 sm:top-16 sm:w-[50%] sm:rounded-b-none sm:rounded-r-none sm:px-6 sm:pt-6 sm:pb-0">
-            <img 
-              :src="verificationDashboardImage" 
-              alt="Verification dashboard" 
+            <img
+              :src="verificationDashboardImage"
+              alt="Verification dashboard"
               class="w-full object-contain"
             />
           </div>
