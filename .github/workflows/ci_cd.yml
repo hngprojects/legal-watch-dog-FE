@@ -18,7 +18,7 @@ jobs:
   # -------------------------
   build:
     name: Build Frontend
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
 
     steps:
       - name: Checkout Code
@@ -58,7 +58,7 @@ jobs:
   # -------------------------
   deploy_staging:
     name: CD - Frontend Deploy (Staging)
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: [self-hosted]
     needs: build
     if: github.ref == 'refs/heads/staging'
     environment: staging
@@ -103,12 +103,12 @@ jobs:
           EOF
 
 
-  # -------------------------
+  # ------------------------
   # 3. DEPLOY TO PRODUCTION (MAIN BRANCH)
-  # -------------------------
+  # ------------------------
   deploy_production:
     name: CD - Frontend Deploy (Production)
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: [self-hosted]
     needs: build
     if: github.ref == 'refs/heads/main'
     environment: production
@@ -159,7 +159,7 @@ jobs:
   # -------------------------
   notify_slack:
     name: Notify Slack
-    runs-on: [self-hosted, ubuntu-latest]
+    runs-on: [self-hosted]
     needs: 
       - build
       - deploy_staging
