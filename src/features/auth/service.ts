@@ -1,25 +1,12 @@
 import axios from 'axios'
-import type { RegisterPayload, LoginPayload, User, Organisation } from '@/features/auth/store'
-
-interface RegisterResponse {
-  message: string
-  organisation: Organisation
-  user: User
-  token: string
-}
-
-interface LoginResponse {
-  user: User
-  token: string
-}
-
-interface RefreshResponse {
-  token: string
-}
-
-interface LogoutResponse {
-  message: string
-}
+import type {
+  LoginPayload,
+  LoginResponse,
+  LogoutResponse,
+  RefreshTokenResponse,
+  RegisterPayload,
+  RegisterResponse,
+} from './types'
 
 export const authService = {
   register: (payload: RegisterPayload) => axios.post<RegisterResponse>('/auth/register', payload),
@@ -34,5 +21,5 @@ export const authService = {
     ),
 
   refreshToken: (refreshToken: string) =>
-    axios.post<RefreshResponse>('/auth/refresh', { refresh_token: refreshToken }),
+    axios.post<RefreshTokenResponse>('/auth/refresh', { refresh_token: refreshToken }),
 }

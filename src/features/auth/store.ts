@@ -1,26 +1,14 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/features/auth/service'
+import type { LoginPayload, RegisterPayload } from './types'
 
-export interface RegisterPayload {
-  organisation_name: string
-  first_name: string
-  last_name: string
-  email: string
-  password: string
-}
-
-export interface LoginPayload {
-  email: string
-  password: string
-}
-
-export interface Organisation {
+interface Organisation {
   id: string
   name: string
   created_at: string
 }
 
-export interface User {
+interface User {
   id: string
   first_name: string
   last_name: string
@@ -29,11 +17,17 @@ export interface User {
   organisation_id: string
 }
 
+interface State {
+  user: User | null
+  organisation: Organisation | null
+  token: string | null
+}
+
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: null as User | null,
-    organisation: null as Organisation | null,
-    token: localStorage.getItem('token') || null,
+  state: (): State => ({
+    user: null,
+    organisation: null,
+    token: null,
   }),
 
   getters: {

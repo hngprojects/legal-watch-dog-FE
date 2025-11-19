@@ -1,56 +1,49 @@
-// src/types/auth.ts
-
-export interface RegisterRequest {
-  organisation_name: string
-  first_name: string
-  last_name: string
+export interface RegisterPayload {
+  name: string
   email: string
   password: string
+  confirm_password: string
+  industry: string
 }
 
 export interface RegisterResponse {
   message: string
-  organisation: {
-    id: string
-    name: string
-    created_at: string // ISO date string
-  }
-  user: {
-    id: string
-    first_name: string
-    last_name: string
-    email: string
-    role: 'ADMIN' | 'USER' // can extend later
-    organisation_id: string
-  }
-  token: string // JWT access token
+  email: string
 }
 
-export interface LoginRequest {
+export interface LoginPayload {
   email: string
   password: string
 }
 
 export interface LoginResponse {
-  token: string
-  user: {
-    id: string
-    first_name: string
-    last_name: string
-    email: string
-    role: 'ADMIN' | 'USER'
-    organisation_id: string
-  }
+  access_token: string
+  refresh_token: string
+  token_type: string
+  expires_in: number
+  user: unknown // TODO: implement user type from backend docs
 }
 
 export interface LogoutResponse {
-  message: 'Logged out'
+  message: string
+  success: boolean
 }
 
-export interface RefreshTokenRequest {
+export interface RefreshTokenPayload {
   refresh_token: string
 }
 
 export interface RefreshTokenResponse {
-  token: string // new access token
+  access_token: string
+  refresh_token: string
+  token_type: string
+  expires_in: number
+}
+
+export interface AuthError {
+  detail: {
+    loc: (string | number)[]
+    msg: string
+    type: string
+  }[]
 }
