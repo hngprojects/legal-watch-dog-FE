@@ -7,7 +7,7 @@
     <div
       class="mx-auto flex w-full items-center max-w-[900px] flex-col gap-7 px-6 py-12 text-center sm:px-8 sm:py-16"
     >
-      <img :src="previewImage" alt="Dashboard preview" class="w-full h-auto" />
+      <img :src="previewImage" alt="Dashboard preview" class="w-full h-auto shadow-2xl" />
     </div>
   </section>
 </template>

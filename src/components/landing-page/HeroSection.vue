@@ -6,9 +6,9 @@ import { Button } from '../ui/button';
 </script>
 
 <template>
-  <section id="hero" class="relative flex w-full flex-1 items-center justify-center py-8 sm:py-16">
+  <section id="hero" class="relative flex w-full flex-1 items-center justify-center ">
     <div
-      class="mx-auto flex w-full items-center max-w-[900px] flex-col gap-7 px-6 py-12 text-center sm:px-8 sm:py-16"
+      class="mx-auto flex w-full items-center max-w-[900px] flex-col gap-7 px-6 pt-12 text-center "
     >
       <PillTag>AI-Powered Regulatory Intelligence</PillTag>
       <HeadingText tag="h1" align="center">
