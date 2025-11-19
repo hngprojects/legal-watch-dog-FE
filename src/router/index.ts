@@ -6,6 +6,7 @@ import SignupView from '@/views/SignupView.vue'
 import OtpView from '@/views/OtpView.vue'
 import SuccessView from '@/views/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,6 +45,11 @@ const router = createRouter({
       path: '/skeleton',
       name: 'skeleton',
       component: SkeletonView,
+    },
+        {
+      path: '/coming-soon',
+      name: 'coming-soon',
+      component: NotFoundView,
     },
   ],
   scrollBehavior: () => ({ top: 0 }),
