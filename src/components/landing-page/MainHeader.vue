@@ -81,11 +81,11 @@ onUnmounted(() => {
         </Button>
         <Button
           :as="RouterLink"
-          :to="{ path: '/waitlist' }"
+          :to="{ path: '/login' }"
           size="lg"
           class="hidden lg:inline-flex"
         >
-          Request Access
+          Sign In
         </Button>
 
         <button
