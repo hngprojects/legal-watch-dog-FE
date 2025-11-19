@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DashboardPreview from '@/components/landing-page/DashboardPreview.vue';
+import FeaturesSection from '@/components/landing-page/FeaturesSection.vue';
 import GlobalStatsSection from '@/components/landing-page/GlobalStatsSection.vue';
 import HeroSection from '@/components/landing-page/HeroSection.vue';
 import HowItWorks from '@/components/landing-page/HowItWorks.vue';
@@ -16,6 +17,7 @@ import MainHeader from '@/components/landing-page/MainHeader.vue';
       <HeroSection />
       <DashboardPreview />
       <HowItWorks />
+      <FeaturesSection />
       <GlobalStatsSection />
     </main>
     <MainFooter/>
