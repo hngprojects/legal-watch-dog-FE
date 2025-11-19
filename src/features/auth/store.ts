@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/features/auth/service'
-import type { LoginPayload, RegisterPayload } from './types'
+import type { LoginPayload, RegisterPayload, VerifyOTPPayload } from './types'
 
 interface Organisation {
   id: string
@@ -56,6 +56,12 @@ export const useAuthStore = defineStore('auth', {
       this.user = data.user as User
 
       localStorage.setItem('refreshToken', data.refresh_token)
+
+      return data
+    },
+
+    async verifyOTP(payload: VerifyOTPPayload) {
+      const { data } = await authService.verifyOtp(payload)
 
       return data
     },
