@@ -11,7 +11,7 @@ import type {
 } from './types'
 
 export const authService = {
-  register: (payload: RegisterPayload) =>
+  registerOrganisation: (payload: RegisterPayload) =>
     axios.post<RegisterResponse>('/api/api/v1/auth/register', payload),
 
   login: (payload: LoginPayload) => axios.post<LoginResponse>('/api/api/v1/auth/register', payload),
