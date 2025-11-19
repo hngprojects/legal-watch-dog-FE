@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+<<<<<<<< HEAD:src/features/waitlist/components/WaitlistSection.vue
+import { Badge } from '@/shared/components/ui/badge'
+import { Button } from '@/shared/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Input } from '@/shared/components/ui/input'
 import { submitWaitlist, type WaitlistPayload } from '@/features/waitlist/api/waitlist'
-
-
+========
+import PillTag from '../reusable/PillTag.vue'
+import { Button } from '../ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Input } from '../ui/input'
+import { submitWaitlist, type WaitlistPayload } from '../../lib/waitlist'
+>>>>>>>> 2dbf94defbe3a4f9b1b225cca6199a2e3cd6390f:src/shared/components/landing-page/WaitlistSection.vue
 
 const form = reactive<WaitlistPayload>({
   organization_name: '',
