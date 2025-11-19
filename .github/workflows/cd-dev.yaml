@@ -14,6 +14,7 @@ jobs:
   deploy:
     name: Deploy to Staging
     runs-on: ubuntu-latest
+    environment: staging
 
     steps:
       - name: Download build artifact
