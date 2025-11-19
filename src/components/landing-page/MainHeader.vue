@@ -14,7 +14,7 @@ const isMenuOpen = ref(false)
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
   { name: 'How it Works', to: { path: '/', hash: '#how-it-works' } },
-  { name: 'Features', to: { path: '/', hash: '#features' } }
+  { name: 'Features', to: { path: '/', hash: '#features' } },
 ]
 
 // Handle body scroll lock for mobile menu
@@ -72,19 +72,14 @@ onUnmounted(() => {
       <div class="flex items-center gap-3">
         <Button
           :as="RouterLink"
-          :to="{ path: '/waitlist'}"
+          :to="{ path: '/waitlist' }"
           variant="ghost"
           size="lg"
           class="hidden lg:inline-flex"
         >
           Join Waitlist
         </Button>
-        <Button
-          :as="RouterLink"
-          :to="{ path: '/login' }"
-          size="lg"
-          class="hidden lg:inline-flex"
-        >
+        <Button :as="RouterLink" :to="{ path: '/login' }" size="lg" class="hidden lg:inline-flex">
           Sign In
         </Button>
 
@@ -96,11 +91,27 @@ onUnmounted(() => {
           aria-controls="mobile-menu"
         >
           <span class="sr-only">Toggle main menu</span>
-          <svg v-if="!isMenuOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <svg
+            v-if="!isMenuOpen"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
           <svg v-else class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -117,7 +128,7 @@ onUnmounted(() => {
       <div
         v-if="isMenuOpen"
         id="mobile-menu"
-        class="fixed left-0 top-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden"
+        class="fixed left-0 top-0 z-50 h-screen w-full max-w-sm bg-white shadow-2xl lg:hidden"
         role="dialog"
         aria-modal="true"
       >
@@ -131,7 +142,12 @@ onUnmounted(() => {
             aria-label="Close menu"
           >
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -148,10 +164,11 @@ onUnmounted(() => {
           </RouterLink>
         </nav>
 
-        <div class="border-t border-gray-100 p-6">
+        <div class="border-t border-gray-100 p-6 space-y-4">
           <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full" @click="closeMenu">
             Request Access
           </Button>
+          <Button variant="outline" :as="RouterLink" to="/signup" class="w-full">Sign up</Button>
         </div>
       </div>
     </Transition>
