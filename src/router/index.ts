@@ -5,6 +5,7 @@ import LoginView from '@/views/LoginView.vue'
 import SignupView from '@/views/SignupView.vue'
 import OtpView from '@/views/OtpView.vue'
 import SuccessView from '@/views/SuccessView.vue'
+import SkeletonView from '@/views/SkeletonView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,9 +41,9 @@ const router = createRouter({
       component: SuccessView,
     },
     {
-      path: '/:pathMatch(.*)*',
-      name: 'not-found',
-      component: () => import('@/views/NotFoundView.vue'),
+      path: '/skeleton',
+      name: 'skeleton',
+      component: SkeletonView,
     },
   ],
   scrollBehavior: () => ({ top: 0 }),
