@@ -13,7 +13,7 @@ on:
 jobs:
   build:
     name: Build Frontend
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, hng-13-runner]
 
     steps:
       - name: Checkout Code
