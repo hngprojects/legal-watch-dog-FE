@@ -13,7 +13,7 @@ on:
 jobs:
   build:
     name: Build Frontend
-    runs-on: [self-hosted, hng-13-runner]
+    runs-on: [self-hosted]
 
     steps:
       - name: Checkout Code
