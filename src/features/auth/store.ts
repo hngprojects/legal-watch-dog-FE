@@ -18,58 +18,70 @@ interface User {
 }
 
 interface State {
+  accessToken: string | null
   user: User | null
+  email: string | null
   organisation: Organisation | null
-  token: string | null
 }
 
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
+    accessToken: null,
     user: null,
+    email: null,
     organisation: null,
-    token: null,
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.token,
+    isAuthenticated: (state) => !!state.accessToken,
   },
 
   actions: {
+    setAccessToken(token: string) {
+      this.accessToken = token
+    },
+
     async register(payload: RegisterPayload) {
-      const { data } = await authService.register(payload)
+      const { data } = await authService.registerOrganisation(payload)
 
-      this.user = data.user
-      this.organisation = data.organisation
-      this.token = data.token
+      this.email = data.email
 
-      localStorage.setItem('token', data.token)
       return data
     },
 
     async login(payload: LoginPayload) {
       const { data } = await authService.login(payload)
 
-      this.user = data.user
-      this.token = data.token
+      this.setAccessToken(data.access_token)
+      this.user = data.user as User
 
-      localStorage.setItem('token', data.token)
+      localStorage.setItem('refreshToken', data.refresh_token)
+
       return data
     },
 
     async logout() {
-      await authService.logout(this.token)
+      await authService.logout(this.accessToken)
 
+      localStorage.removeItem('refreshToken')
+
+      this.email = null
       this.user = null
       this.organisation = null
-      this.token = null
-      localStorage.removeItem('token')
+      this.accessToken = null
     },
 
-    async refreshToken(refreshToken: string) {
-      const { data } = await authService.refreshToken(refreshToken)
+    async refreshToken() {
+      const refreshToken = localStorage.getItem('refreshToken')
 
-      this.token = data.token
-      localStorage.setItem('token', data.token)
+      if (!refreshToken) {
+        return
+      }
+
+      const { data } = await authService.refreshToken({ refresh_token: refreshToken })
+
+      this.setAccessToken(data.access_token)
+
       return data
     },
   },
