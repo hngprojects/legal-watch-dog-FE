@@ -1,0 +1,184 @@
+name: Frontend CI/CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+
+  # -------------------------
+  # 1. BUILD JOB
+  # -------------------------
+  build:
+    name: Build Frontend
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build application
+        run: npm run build
+
+      - name: Archive build output
+        run: tar -czf build.tar.gz dist
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: build.tar.gz
+
+
+  # -------------------------
+  # 2. DEPLOY TO STAGING (DEV BRANCH)
+  # -------------------------
+  deploy_staging:
+    name: CD - Frontend Deploy (Staging)
+    runs-on: [self-hosted]
+    needs: build
+    if: github.ref == 'refs/heads/staging'
+    environment: staging
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+
+      - name: Set up SSH and Deploy
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SERVER_USER: ${{ secrets.STAGING_USER }}
+          SERVER_IP: ${{ secrets.STAGING_IP }}
+        run: |
+          echo "$SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+
+          scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+            set -e
+            # Clone if the directory doesn't exist
+            if [ ! -d "/home/watchdog/apps/frontend/legal-watch-dog-FE" ]; then
+              cd /home/watchdog/apps/frontend/
+              git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            fi
+
+
+            #cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            cd legal-watch-dog-FE
+            git pull origin staging
+            rm -rf dist
+            tar -xzf /tmp/build.tar.gz -C .
+            sudo chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
+            sudo chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
+            sudo chmod o+rx /home/watchdog
+            sudo chmod o+rx /home/watchdog/apps
+            sudo chmod o+rx /home/watchdog/apps/frontend
+            sudo systemctl restart nginx
+          EOF
+
+
+  # ------------------------
+  # 3. DEPLOY TO PRODUCTION (MAIN BRANCH)
+  # ------------------------
+  deploy_production:
+    name: CD - Frontend Deploy (Production)
+    runs-on: [self-hosted]
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+
+      - name: Set up SSH and Deploy
+        env:
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          SERVER_USER: ${{ secrets.PROD_USER }}
+          SERVER_IP: ${{ secrets.PROD_IP }}
+        run: |
+          echo "$SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+
+          scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+            set -e
+            
+            # Clone if the directory doesn't exist
+            if [ ! -d "/home/watchdog/apps/frontend/legal-watch-dog-FE" ]; then
+              cd /home/watchdog/apps/frontend/
+              git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            fi
+
+
+            #cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            cd legal-watch-dog-FE
+            git pull origin main
+            rm -rf dist
+            tar -xzf /tmp/build.tar.gz -C .
+            sudo chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
+            sudo chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
+            sudo chmod o+rx /home/watchdog
+            sudo chmod o+rx /home/watchdog/apps
+            sudo chmod o+rx /home/watchdog/apps/frontend
+            sudo systemctl restart nginx
+          EOF
+
+
+  # -------------------------
+  # 4. Slack Notification
+  # -------------------------
+  notify_slack:
+    name: Notify Slack
+    runs-on: [self-hosted]
+    needs: 
+      - build
+      - deploy_staging
+      - deploy_production
+    if: always()
+    steps:
+      - name: Send Slack Notification
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          STATUS="✅ SUCCESS"
+          if [ "${{ job.status }}" != "success" ]; then
+            STATUS="❌ FAILURE"
+          fi
+
+          PAYLOAD="{
+            \"text\": \"Frontend CI/CD Pipeline finished with status: $STATUS\",
+            \"username\": \"CI/CD Bot\",
+            \"icon_emoji\": \":rocket:\"
+          }"
+
+          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" $SLACK_WEBHOOK
