@@ -15,7 +15,7 @@ export const authService = {
     axios.post<RegisterResponse>('/api/api/v1/auth/register', payload),
 
   login: (payload: LoginPayload) =>
-    axios.post<LoginResponse>('/api/api/v1/auth/register', payload, {
+    axios.post<LoginResponse>('/api/api/v1/auth/login', payload, {
       withCredentials: true,
     }),
 
