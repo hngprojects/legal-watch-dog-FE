@@ -1,3 +1,17 @@
+<script setup lang="ts">
+import Frame from '@/assets/Frame.png'
+import Facebook from '@/assets/Facebook.png'
+import linkdin from '@/assets/linkdin.png'
+import Instagram from '@/assets/Instagram.png'
+import Twitter from '@/assets/Twitter.png'
+import YouTube from '@/assets/YouTube.png'
+
+const Products = ['Features', 'Pricing', 'Case studies', 'Reviews', 'Updates']
+const Companys = ['About', 'Contact Us', 'Careers', 'Blog']
+const Supports = ['Getting started', 'Help center', 'Server status', 'Report a bug', 'Chat support']
+const Privacys = ['Copyright', 'Terms of Services']
+</script>
+
 <template>
   <footer class="bg-white text-gray-800">
     <div class="max-w-7xl mx-auto px-6 py-10">
@@ -83,16 +97,4 @@
   </footer>
 </template>
 
-<script setup lang="ts">
-import Frame from '@/assets/Frame.png'
-import Facebook from '@/assets/Facebook.png'
-import linkdin from '@/assets/linkdin.png'
-import Instagram from '@/assets/Instagram.png'
-import Twitter from '@/assets/Twitter.png'
-import YouTube from '@/assets/YouTube.png'
 
-const Products = ['Features', 'Pricing', 'Case studies', 'Reviews', 'Updates']
-const Companys = ['About', 'Contact Us', 'Careers', 'Blog']
-const Supports = ['Getting started', 'Help center', 'Server status', 'Report a bug', 'Chat support']
-const Privacys = ['Copyright', 'Terms of Services']
-</script>

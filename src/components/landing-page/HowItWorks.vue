@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import BodyText from '../atoms/BodyText.vue'
-import HeadingText from '../atoms/HeadingText.vue'
-import { Button } from '@/components/ui/button'
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import BodyText from '../reusable/BodyText.vue'
+import HeadingText from '../reusable/HeadingText.vue'
+import { Button } from '../ui/button'
+import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card'
 
 import monitorIcon from '@/assets/icons/monitor.svg'
 import analyzeIcon from '@/assets/icons/translation.svg'
