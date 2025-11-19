@@ -40,6 +40,11 @@ export interface RefreshTokenResponse {
   expires_in: number
 }
 
+export interface VerifyOTPPayload {
+  email: string
+  code: string
+}
+
 export interface AuthError {
   detail: {
     loc: (string | number)[]

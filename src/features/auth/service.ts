@@ -7,6 +7,7 @@ import type {
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
+  VerifyOTPPayload,
 } from './types'
 
 export const authService = {
@@ -21,6 +22,8 @@ export const authService = {
       {},
       { headers: { Authorization: `Bearer ${token}` } },
     ),
+
+  verifyOtp: (payload: VerifyOTPPayload) => axios.post('/api/api/v1/auth/verify-otp', payload),
 
   refreshToken: (payload: RefreshTokenPayload) =>
     axios.post<RefreshTokenResponse>('/api/api/v1/auth/refresh', payload),
