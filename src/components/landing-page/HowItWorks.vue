@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import BodyText from '../reusable/BodyText.vue'
-import HeadingText from '../reusable/HeadingText.vue'
 import { Button } from '../ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { TypographyHeading, TypographyText } from '../ui/typography'
 
 import monitorIcon from '@/assets/icons/monitor.svg'
 import analyzeIcon from '@/assets/icons/translation.svg'
@@ -33,13 +32,13 @@ const cards = [
   <section id="how-it-works" class="relative flex w-full items-center justify-center py-8 sm:py-16">
     <div class="flex w-full flex-col gap-11">
       <div class="mx-auto flex w-full items-center flex-col gap-5 text-center">
-        <HeadingText tag="h2" align="center">
+        <TypographyHeading level="h2" align="center">
           How <span class="text-accent">Legal WatchDog</span> Works
-        </HeadingText>
-        <BodyText align="center" tone="muted" class="max-w-lg">
+        </TypographyHeading>
+        <TypographyText align="center" tone="muted" class="max-w-lg">
           Discover how LegalWatchDog continuously monitors legal sources, detects changes, and
           delivers reliable, AI-summarized updates — all in just a few steps.
-        </BodyText>
+        </TypographyText>
       </div>
 
       <div class="mx-auto flex md:items-stretch flex-wrap lg:flex-nowrap items-center gap-5">

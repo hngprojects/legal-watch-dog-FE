@@ -16,17 +16,18 @@
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache",
     "format": "prettier --write src/"
-  
   },
   "dependencies": {
     "@vueuse/core": "^14.0.0",
+    "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "lucide-vue-next": "^0.554.0",
+    "pinia": "^3.0.3",
     "reka-ui": "^2.6.0",
     "tailwind-merge": "^3.4.0",
     "vue": "^3.5.22",
-    "vue-router": "^4.6.3",
-    "pinia": "^3.0.3"
+    "vue-router": "^4.6.3"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.17",
