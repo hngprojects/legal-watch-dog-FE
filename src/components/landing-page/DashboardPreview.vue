@@ -1,9 +1,5 @@
 <script setup lang="ts">
-<<<<<<<< HEAD:src/features/home/components/DashboardPreview.vue
-import previewImage from '@/assets/Images/dashboard-preview.png';
-========
   import previewImage from '/images/dashboard-preview.png';
->>>>>>>> 2dbf94defbe3a4f9b1b225cca6199a2e3cd6390f:src/shared/components/landing-page/DashboardPreview.vue
 </script>
 
 <template>

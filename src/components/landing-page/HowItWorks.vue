@@ -1,14 +1,7 @@
 <script setup lang="ts">
-<<<<<<<< HEAD:src/features/home/components/HowItWorks.vue
-import { Button } from '@/shared/components/ui/button'
-import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { TypographyHeading, TypographyText } from '@/shared/components/ui/typography'
-========
-import BodyText from '../reusable/BodyText.vue'
-import HeadingText from '../reusable/HeadingText.vue'
 import { Button } from '../ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card'
->>>>>>>> 2dbf94defbe3a4f9b1b225cca6199a2e3cd6390f:src/shared/components/landing-page/HowItWorks.vue
+import { TypographyHeading, TypographyText } from '../ui/typography'
 
 import monitorIcon from '@/assets/icons/monitor.svg'
 import analyzeIcon from '@/assets/icons/translation.svg'

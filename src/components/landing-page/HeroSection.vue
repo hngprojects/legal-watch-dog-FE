@@ -1,14 +1,7 @@
 <script setup lang="ts">
-<<<<<<<< HEAD:src/features/home/components/HeroSection.vue
-import { Badge } from '@/shared/components/ui/badge'
-import { Button } from '@/shared/components/ui/button'
-import { TypographyHeading, TypographyText } from '@/shared/components/ui/typography'
-========
-import BodyText from '../reusable/BodyText.vue'
-import HeadingText from '../reusable/HeadingText.vue'
-import PillTag from '../reusable/PillTag.vue'
-import { Button } from '../ui/button';
->>>>>>>> 2dbf94defbe3a4f9b1b225cca6199a2e3cd6390f:src/shared/components/landing-page/HeroSection.vue
+import { Badge } from '../ui/badge'
+import { Button } from '../ui/button'
+import { TypographyHeading, TypographyText } from '../ui/typography'
 </script>
 
 <template>

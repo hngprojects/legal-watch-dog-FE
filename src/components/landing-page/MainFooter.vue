@@ -96,15 +96,3 @@ const Privacys = ['Copyright', 'Terms of Services']
   </footer>
 </template>
 
-<<<<<<<< HEAD:src/shared/components/layout/MainFooter.vue
-<script setup lang="ts">
-import { Separator } from '@/shared/components/ui/separator'
-import Frame from '@/assets/Frame.png'
-import Facebook from '@/assets/Facebook.png'
-import linkdin from '@/assets/linkdin.png'
-import Instagram from '@/assets/Instagram.png'
-import Twitter from '@/assets/Twitter.png'
-import YouTube from '@/assets/YouTube.png'
-========
->>>>>>>> 2dbf94defbe3a4f9b1b225cca6199a2e3cd6390f:src/shared/components/landing-page/MainFooter.vue
-
