@@ -1,0 +1,44 @@
+name: CD - Frontend Deploy (Staging)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+jobs:
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+
+      - name: Set up SSH and Deploy
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SERVER_USER: ${{ secrets.STAGING_USER }}
+          SERVER_IP: ${{ secrets.STAGING_IP }}
+        run: |
+          echo "$SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+
+          scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+
+          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+            set -e
+            cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            git legal-watch-dog-FE
+            cd legal-watch-dog-FE
+            git pull origin develop
+            rm -rf dist
+            tar -xzf /tmp/build.tar.gz -C .
+            sudo systemctl restart nginx
+          EOF
