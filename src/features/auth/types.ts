@@ -45,10 +45,40 @@ export interface VerifyOTPPayload {
   code: string
 }
 
+export interface ForgetPasswordPayload {
+  email: string
+}
+
+export interface ForgetPasswordResponse {
+  status: string
+  status_code: number
+  message: string
+  data: Record<string, unknown>
+}
+
+export interface ResetPasswordPaylod {
+  token: string
+  new_password: string
+  confirm_password: string
+}
+
+export interface ResetPasswordResponse {
+  message: string
+}
+
+//Validation Error
 export interface AuthError {
   detail: {
     loc: (string | number)[]
     msg: string
     type: string
   }[]
+}
+
+// other errors like 404
+export interface FailureResponse {
+  status: string
+  status_code: number
+  message: string
+  data: Record<string, unknown>
 }
