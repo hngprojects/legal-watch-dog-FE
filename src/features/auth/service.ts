@@ -1,40 +1,35 @@
 import axios from 'axios'
-import type { RegisterPayload, LoginPayload, User, Organisation } from '@/stores/auth'
-
-interface RegisterResponse {
-  message: string
-  organisation: Organisation
-  user: User
-  token: string
-}
-
-interface LoginResponse {
-  user: User
-  token: string
-}
-
-interface RefreshResponse {
-  token: string
-}
-
-interface LogoutResponse {
-  message: string
-}
+import type {
+  LoginPayload,
+  LoginResponse,
+  LogoutResponse,
+  RefreshTokenPayload,
+  RefreshTokenResponse,
+  RegisterPayload,
+  RegisterResponse,
+  VerifyOTPPayload,
+} from './types'
 
 export const authService = {
-  register: (payload: RegisterPayload) =>
-    axios.post<RegisterResponse>('/auth/register', payload),
+  registerOrganisation: (payload: RegisterPayload) =>
+    axios.post<RegisterResponse>('/api/api/v1/auth/register', payload),
 
   login: (payload: LoginPayload) =>
-    axios.post<LoginResponse>('/auth/login', payload),
+    axios.post<LoginResponse>('/api/api/v1/auth/login', payload, {
+      withCredentials: true,
+    }),
 
   logout: (token: string | null) =>
     axios.post<LogoutResponse>(
-      '/auth/logout',
+      '/api/api/v1/auth/logout',
       {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` }, withCredentials: true },
     ),
-    
-  refreshToken: (refreshToken: string) =>
-    axios.post<RefreshResponse>('/auth/refresh', { refresh_token: refreshToken })
+
+  verifyOtp: (payload: VerifyOTPPayload) => axios.post('/api/api/v1/auth/verify-otp', payload),
+
+  refreshToken: (payload: RefreshTokenPayload) =>
+    axios.post<RefreshTokenResponse>('/api/api/v1/auth/refresh', payload, {
+      withCredentials: true,
+    }),
 }
