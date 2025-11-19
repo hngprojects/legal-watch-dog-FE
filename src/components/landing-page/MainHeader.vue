@@ -13,8 +13,8 @@ const isMenuOpen = ref(false)
 
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
-  { name: 'How it Works', to: { path: '/', hash: '#how-it-works' } },
-  { name: 'Features', to: { path: '/', hash: '#features' } },
+  { name: 'How it Works', to: { path: '/coming-soon', } },
+  { name: 'Features', to: { path: '/coming-soon' } },
 ]
 
 // Handle body scroll lock for mobile menu

@@ -29,7 +29,7 @@ const Privacys = ['Copyright', 'Terms of Services']
         <p class="text-gray-500 mt-3 max-w-2xl pb-[30px]">
           LegalWatchDog helps us track cross-border regulation updates in hours, not weeks.
         </p>
-        <div class="mt-6 border-t border-gray-200"></div>
+        <Separator class="mt-6 bg-gray-200" />
       </div>
 
       <!-- Links  -->
@@ -73,28 +73,26 @@ const Privacys = ['Copyright', 'Terms of Services']
         </div>
       </nav>
 
-      <div class="border-t border-gray-200 mt-6 pt-6">
-        <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4">
-          <p class="text-sm text-[#3C2610]"> &copy; 2025 LegalWatchDog | All Rights Reserved</p>
-          <div class="flex items-center gap-4">
-            <RouterLink to="/"> <img :src="Facebook" alt="Facebook" class="w-[7px]" /></RouterLink>
-            <RouterLink to="/">
-              <img :src="linkdin" alt="linkdin" class="w-3.5" />
-            </RouterLink>
-            <RouterLink to="/">
-              <img :src="Instagram" alt="Instagram" class="w-3.5" />
-            </RouterLink>
-            <RouterLink to="/">
-              <img :src="Twitter" alt="Twitter" class="w-3.5" />
-            </RouterLink>
-            <RouterLink to="/">
-              <img :src="YouTube" alt="YouTube" class="w-3.5" />
-            </RouterLink>
-          </div>
+      <Separator class="mt-6 bg-gray-200" />
+      <div class="flex flex-col-reverse gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm text-[#3C2610]"> &copy; 2025 LegalWatchDog | All Rights Reserved</p>
+        <div class="flex items-center gap-4">
+          <RouterLink to="/"> <img :src="Facebook" alt="Facebook" class="w-[7px]" /></RouterLink>
+          <RouterLink to="/">
+            <img :src="linkdin" alt="linkdin" class="w-3.5" />
+          </RouterLink>
+          <RouterLink to="/">
+            <img :src="Instagram" alt="Instagram" class="w-3.5" />
+          </RouterLink>
+          <RouterLink to="/">
+            <img :src="Twitter" alt="Twitter" class="w-3.5" />
+          </RouterLink>
+          <RouterLink to="/">
+            <img :src="YouTube" alt="YouTube" class="w-3.5" />
+          </RouterLink>
         </div>
       </div>
     </div>
   </footer>
 </template>
-
 
