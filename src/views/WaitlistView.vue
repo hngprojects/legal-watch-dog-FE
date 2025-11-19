@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import WaitlistSection from '@/components/organisms/WaitlistSection.vue';
-import MainHeader from '@/components/organisms/MainHeader.vue'
-import MainFooter from '@/components/organisms/MainFooter.vue';
+import MainFooter from '@/components/landing-page/MainFooter.vue';
+import MainHeader from '@/components/landing-page/MainHeader.vue';
+import WaitlistSection from '@/components/landing-page/WaitlistSection.vue';
 </script>
 
 <template>

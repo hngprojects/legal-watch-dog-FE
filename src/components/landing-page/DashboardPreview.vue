@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import previewImage from '../../assets/img/dashboard-preview.png'
+  import previewImage from '/images/dashboard-preview.png';
 </script>
 
 <template>

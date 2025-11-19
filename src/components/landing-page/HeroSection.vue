@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import BodyText from '@/components/atoms/BodyText.vue'
-import HeadingText from '@/components/atoms/HeadingText.vue'
-import PillTag from '@/components/atoms/PillTag.vue'
-import { Button } from '@/components/ui/button'
+import BodyText from '../reusable/BodyText.vue'
+import HeadingText from '../reusable/HeadingText.vue'
+import PillTag from '../reusable/PillTag.vue'
+import { Button } from '../ui/button';
 </script>
 
 <template>

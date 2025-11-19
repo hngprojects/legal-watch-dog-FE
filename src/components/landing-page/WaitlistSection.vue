@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import PillTag from '@/components/atoms/PillTag.vue'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { submitWaitlist, type WaitlistPayload } from '@/lib/waitlist'
+import PillTag from '../reusable/PillTag.vue'
+import { Button } from '../ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Input } from '../ui/input'
+import { submitWaitlist, type WaitlistPayload } from '../../lib/waitlist'
 
 const form = reactive<WaitlistPayload>({
   organization_name: '',
@@ -106,7 +106,7 @@ const handleSubmit = async () => {
 
         <div class="mt-4 w-full max-w-[800px]">
           <img
-            src="/images/dashboard.png"
+            src="/images/dashboard-preview.png"
             alt="Legal WatchDog Dashboard"
             class="h-auto w-full rounded-xl border border-border/70 shadow-2xl"
           />

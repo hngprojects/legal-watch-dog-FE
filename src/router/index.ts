@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '@/pages/HomePage.vue'
-import WailistPage from '@/pages/WailistPage.vue'
+import HomeView from '@/views/HomeView.vue'
+import WaitlistView from '@/views/WaitlistView.vue'
+import LoginView from '@/views/LoginView.vue'
+import SignupView from '@/views/SignupView.vue'
+import OtpView from '@/views/OtpView.vue'
+import SuccessView from '@/views/SuccessView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,12 +12,32 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomePage,
+      component: HomeView,
     },
     {
       path: '/waitlist',
       name: 'waitlist',
-      component: WailistPage,
+      component: WaitlistView,
+    },
+     {
+      path: '/login',
+      name: 'login',
+      component: LoginView,
+    },
+     {
+      path: '/signup',
+      name: 'signup',
+      component: SignupView,
+    },
+       {
+      path: '/otp',
+      name: 'otp',
+      component: OtpView,
+    },
+       {
+      path: '/success',
+      name: 'success',
+      component: SuccessView,
     },
   ],
   scrollBehavior: () => ({ top: 0 }),

@@ -1,3 +1,5 @@
+<script setup lang="ts"></script>
+
 <template>
   <section class="px-4 py-12 space-y-12">
     <!-- Top White Card Section -->
@@ -64,4 +66,4 @@
   </section>
 </template>
 
-<script setup lang="ts"></script>
+

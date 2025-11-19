@@ -16,7 +16,7 @@ withDefaults(
     <img
       :src="LogoImage"
       alt="Legal Watchdog Logo"
-      class="h-11 w-11 flex-shrink-0 rounded-full shadow-[0_15px_30px_rgba(75,30,0,0.2)]"
+      class="h-11 w-11 shrink-0 rounded-full shadow-[0_15px_30px_rgba(75,30,0,0.2)]"
     />
     <span class="text-xl font-bold leading-none">{{ label }}</span>
   </div>
