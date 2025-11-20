@@ -5,6 +5,8 @@ import LoginView from '@/views/LoginView.vue'
 import SignupView from '@/views/SignupView.vue'
 import OtpView from '@/views/OtpView.vue'
 import SuccessView from '@/views/SuccessView.vue'
+import SkeletonView from '@/views/SkeletonView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,25 +21,35 @@ const router = createRouter({
       name: 'waitlist',
       component: WaitlistView,
     },
-     {
+    {
       path: '/login',
       name: 'login',
       component: LoginView,
     },
-     {
+    {
       path: '/signup',
       name: 'signup',
       component: SignupView,
     },
-       {
+    {
       path: '/otp',
       name: 'otp',
       component: OtpView,
     },
-       {
+    {
       path: '/success',
       name: 'success',
       component: SuccessView,
+    },
+    {
+      path: '/skeleton',
+      name: 'skeleton',
+      component: SkeletonView,
+    },
+        {
+      path: '/coming-soon',
+      name: 'coming-soon',
+      component: NotFoundView,
     },
   ],
   scrollBehavior: () => ({ top: 0 }),

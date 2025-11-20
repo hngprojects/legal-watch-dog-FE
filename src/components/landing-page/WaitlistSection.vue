@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import PillTag from '../reusable/PillTag.vue'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Input } from '../ui/input'
-import { submitWaitlist, type WaitlistPayload } from '../../lib/waitlist'
+import { submitWaitlist, type WaitlistPayload } from '@/features/waitlist/api/waitlist'
+
 
 const form = reactive<WaitlistPayload>({
   organization_name: '',
@@ -49,7 +49,12 @@ const handleSubmit = async () => {
     <Card
       class="mx-auto flex w-full max-w-[900px] flex-col items-center gap-6 border-0 bg-transparent px-4 py-10 text-center shadow-none sm:px-10 sm:py-16"
     >
-      <PillTag>Join the Waitlist</PillTag>
+      <Badge
+        variant="secondary"
+        class="border border-white/80 bg-white px-6 py-1.5 text-sm font-semibold text-brand-brown shadow-[0_15px_35px_rgba(15,17,20,0.12)]"
+      >
+        Join the Waitlist
+      </Badge>
 
       <CardHeader class="w-full max-w-[820px] gap-5 p-0 text-center">
         <CardTitle class="text-4xl font-bold leading-tight sm:text-5xl">

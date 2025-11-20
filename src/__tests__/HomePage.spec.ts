@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
 
 import { mount } from '@vue/test-utils'
-import HomePage from '@/pages/HomePage.vue'
+import HomeView from '@/views/HomeView.vue'
 
-describe('HomePage', () => {
+describe('HomeView', () => {
   it('renders properly', () => {
-    const wrapper = mount(HomePage, { props: { msg: 'AI present' } })
+    const wrapper = mount(HomeView, { props: { msg: 'AI present' } })
     expect(wrapper.text()).toContain('AI')
   })
 })
