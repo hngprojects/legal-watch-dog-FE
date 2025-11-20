@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { submitWaitlist, type WaitlistPayload } from '@/api/waitlist'
+import { submitWaitlist, type WaitlistPayload } from '@/features/waitlist/api/waitlist'
 
 const form = reactive<WaitlistPayload>({
   organization_name: '',

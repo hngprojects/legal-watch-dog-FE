@@ -13,7 +13,7 @@ const isMenuOpen = ref(false)
 
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
-  { name: 'How it Works', to: { path: '/coming-soon', } },
+  { name: 'How it Works', to: { path: '/coming-soon' } },
   { name: 'Features', to: { path: '/coming-soon' } },
 ]
 
@@ -47,7 +47,7 @@ onUnmounted(() => {
 
 <template>
   <header
-    class="sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 text-text-main backdrop-blur-md shadow-[0_10px_25px_rgba(14,13,11,0.05)]"
+    class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 shadow-[0_10px_25px_rgba(14,13,11,0.05)] backdrop-blur-md"
   >
     <div
       class="mx-auto flex w-full max-w-[1240px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:py-5"
@@ -61,7 +61,7 @@ onUnmounted(() => {
           <li v-for="link in navLinks" :key="link.name">
             <RouterLink
               :to="link.to"
-              class="text-base font-medium text-gray-500 transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              class="hover:text-brand-deep focus-visible:ring-brand-brown text-base font-medium text-gray-500 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none"
             >
               {{ link.name }}
             </RouterLink>
@@ -85,7 +85,7 @@ onUnmounted(() => {
 
         <button
           @click="isMenuOpen = !isMenuOpen"
-          class="ml-auto inline-flex items-center justify-center rounded-full border border-gray-200 p-2 text-text-main transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white lg:hidden"
+          class="text-text-main hover:text-brand-deep focus-visible:ring-brand-brown ml-auto inline-flex items-center justify-center rounded-full border border-gray-200 p-2 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none lg:hidden"
           aria-label="Toggle navigation"
           :aria-expanded="isMenuOpen"
           aria-controls="mobile-menu"
@@ -128,7 +128,7 @@ onUnmounted(() => {
       <div
         v-if="isMenuOpen"
         id="mobile-menu"
-        class="fixed left-0 top-0 z-50 h-screen w-full max-w-sm bg-white shadow-2xl lg:hidden"
+        class="fixed top-0 left-0 z-50 h-screen w-full max-w-sm bg-white shadow-2xl lg:hidden"
         role="dialog"
         aria-modal="true"
       >
@@ -138,7 +138,7 @@ onUnmounted(() => {
           </RouterLink>
           <button
             @click="closeMenu"
-            class="rounded-full p-2 text-text-main transition-colors duration-200 hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            class="text-text-main hover:text-brand-deep focus-visible:ring-brand-brown rounded-full p-2 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none"
             aria-label="Close menu"
           >
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,19 +152,19 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <nav class="flex flex-col gap-2 p-6 bg-white" aria-label="Mobile navigation">
+        <nav class="flex flex-col gap-2 bg-white p-6" aria-label="Mobile navigation">
           <RouterLink
             v-for="link in navLinks"
             :key="link.name"
             :to="link.to"
             @click="closeMenu"
-            class="rounded-lg px-3 py-2 text-lg font-medium text-gray-600 transition-colors duration-200 hover:bg-surface-soft hover:text-brand-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-brown focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            class="hover:bg-surface-soft hover:text-brand-deep focus-visible:ring-brand-brown rounded-lg px-3 py-2 text-lg font-medium text-gray-600 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none"
           >
             {{ link.name }}
           </RouterLink>
         </nav>
 
-        <div class="border-t border-gray-100 p-6 space-y-4">
+        <div class="space-y-4 border-t border-gray-100 p-6">
           <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full" @click="closeMenu">
             Request Access
           </Button>

@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import DashboardPreview from '@/components/landing-page/DashboardPreview.vue'
-import FeaturesSection from '@/components/landing-page/FeaturesSection.vue';
-import GlobalStatsSection from '@/components/landing-page/GlobalStatsSection.vue';
-import HeroSection from '@/components/landing-page/HeroSection.vue';
-import HowItWorks from '@/components/landing-page/HowItWorks.vue';
-import MainFooter from '@/components/landing-page/MainFooter.vue';
-import MainHeader from '@/components/landing-page/MainHeader.vue';
-
-
+import FeaturesSection from '@/components/landing-page/FeaturesSection.vue'
+import GlobalStatsSection from '@/components/landing-page/GlobalStatsSection.vue'
+import HeroSection from '@/components/landing-page/HeroSection.vue'
+import HowItWorks from '@/components/landing-page/HowItWorks.vue'
+import MainFooter from '@/components/landing-page/MainFooter.vue'
+import MainHeader from '@/components/landing-page/MainHeader.vue'
 </script>
 
 <template>
@@ -20,6 +18,6 @@ import MainHeader from '@/components/landing-page/MainHeader.vue';
       <FeaturesSection />
       <GlobalStatsSection />
     </main>
-    <MainFooter/>
+    <MainFooter />
   </div>
 </template>
