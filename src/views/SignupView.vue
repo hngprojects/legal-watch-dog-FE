@@ -63,7 +63,11 @@ const validateSignupForm = () => {
     if (sanitizedPassword.length < MIN_PASSWORD_LENGTH) {
       validationErrors.push('Password must be at least 8 characters.')
     }
-    if (!hasLetter.test(sanitizedPassword) || !hasNumber.test(sanitizedPassword) || !hasSpecial.test(sanitizedPassword)) {
+    if (
+      !hasLetter.test(sanitizedPassword) ||
+      !hasNumber.test(sanitizedPassword) ||
+      !hasSpecial.test(sanitizedPassword)
+    ) {
       validationErrors.push('Password must include a letter, number, and special character.')
     }
   }
@@ -150,7 +154,7 @@ const handleCreateAccount = async () => {
               v-if="errors.length"
               class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
             >
-              <p class="font-semibold mb-2">Please fix the following:</p>
+              <p class="mb-2 font-semibold">Please fix the following:</p>
               <ul class="list-disc space-y-1 pl-4">
                 <li v-for="issue in errors" :key="issue">{{ issue }}</li>
               </ul>
@@ -199,7 +203,7 @@ const handleCreateAccount = async () => {
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+                class="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600 focus:outline-none"
               >
                 <svg
                   v-if="!showPassword"
@@ -247,7 +251,7 @@ const handleCreateAccount = async () => {
               <button
                 type="button"
                 @click="showConfirmPassword = !showConfirmPassword"
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+                class="absolute top-1/2 right-4 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600 focus:outline-none"
               >
                 <svg
                   v-if="!showConfirmPassword"
@@ -310,7 +314,7 @@ const handleCreateAccount = async () => {
             <button
               type="submit"
               :disabled="isSubmitting"
-              class="w-full rounded-md bg-[#3C2610] py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+              class="w-full cursor-pointer rounded-md bg-[#3C2610] py-3.5 text-sm font-bold tracking-wide text-white uppercase shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span v-if="!isSubmitting">Signup</span>
               <span v-else>Creating account...</span>
@@ -326,22 +330,28 @@ const handleCreateAccount = async () => {
             </div>
 
             <div class="space-y-3">
-              <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
-                <img src="/images/google.png" alt="Google" class="w-5 h-5">
-                <span class="text-gray-700 text-sm font-medium">Continue with Google</span>
+              <button
+                type="button"
+                class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-md border border-gray-300 bg-white py-3 transition-colors hover:bg-gray-50"
+              >
+                <img src="/images/google.png" alt="Google" class="h-5 w-5" />
+                <span class="text-sm font-medium text-gray-700">Continue with Google</span>
               </button>
 
-              <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
-                <img src="/images/apple.png" alt="Apple" class="w-5 h-5">
-                <span class="text-gray-700 text-sm font-medium">Continue with Apple</span>
+              <button
+                type="button"
+                class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-md border border-gray-300 bg-white py-3 transition-colors hover:bg-gray-50"
+              >
+                <img src="/images/apple.png" alt="Apple" class="h-5 w-5" />
+                <span class="text-sm font-medium text-gray-700">Continue with Apple</span>
               </button>
 
-              <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
-                <img src="/images/microsoft.png" alt="Microsoft" class="w-5 h-5">
-                <span class="text-gray-700 text-sm font-medium">Continue with Microsoft</span>
+              <button
+                type="button"
+                class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-md border border-gray-300 bg-white py-3 transition-colors hover:bg-gray-50"
+              >
+                <img src="/images/microsoft.png" alt="Microsoft" class="h-5 w-5" />
+                <span class="text-sm font-medium text-gray-700">Continue with Microsoft</span>
               </button>
             </div>
 
