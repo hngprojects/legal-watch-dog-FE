@@ -96,12 +96,12 @@ jobs:
             git pull origin staging
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            sudo chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
-            sudo chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
-            sudo chmod o+rx /home/watchdog
-            sudo chmod o+rx /home/watchdog/apps
-            sudo chmod o+rx /home/watchdog/apps/frontend
-            sudo systemctl restart nginx
+            chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
+            chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
+            chmod o+rx /home/watchdog
+            chmod o+rx /home/watchdog/apps
+            chmod o+rx /home/watchdog/apps/frontend
+            sudo nginx -s reload
           EOF
 
 
@@ -149,12 +149,12 @@ jobs:
             git pull origin main
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            sudo chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
-            sudo chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
-            sudo chmod o+rx /home/watchdog
-            sudo chmod o+rx /home/watchdog/apps
-            sudo chmod o+rx /home/watchdog/apps/frontend
-            sudo systemctl restart nginx
+            chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
+            chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
+            chmod o+rx /home/watchdog
+            chmod o+rx /home/watchdog/apps
+            chmod o+rx /home/watchdog/apps/frontend
+            sudo nginx -s reload
           EOF
 
 
