@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import { authService } from '@/features/auth/service'
-import type { LoginPayload, RegisterPayload, VerifyOTPPayload } from './types'
+import { authService } from '@/api/auth'
+import type { LoginPayload, RegisterPayload, VerifyOTPPayload } from '@/types/auth'
 
 interface Organisation {
   id: string
