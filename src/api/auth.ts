@@ -8,7 +8,7 @@ import type {
   RegisterPayload,
   RegisterResponse,
   VerifyOTPPayload,
-} from './types'
+} from '@/types/auth'
 
 export const authService = {
   registerOrganisation: (payload: RegisterPayload) =>
