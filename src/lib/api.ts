@@ -2,6 +2,7 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/auth-store'
 
 const api = axios.create({
+  baseURL: 'https://minamoto.emerj.net/api/api/v1',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
