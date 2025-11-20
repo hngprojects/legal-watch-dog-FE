@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { Button } from '../ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
-import { Input } from '../ui/input'
-import { submitWaitlist, type WaitlistPayload } from '@/features/waitlist/api/waitlist'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { submitWaitlist, type WaitlistPayload } from '@/api/waitlist'
 
 const form = reactive<WaitlistPayload>({
   organization_name: '',
