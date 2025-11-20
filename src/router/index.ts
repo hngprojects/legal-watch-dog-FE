@@ -7,12 +7,11 @@ import OtpView from '@/views/OtpView.vue'
 import SuccessView from '@/views/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
-import HowItWorksView from '@/views/HowItWorksView.vue'
-import OnboardingView from '@/views/OnboardingView.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
+import AdminSettingsView from '@/views/dashboard/AdminSettings.vue'   
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,11 +25,6 @@ const router = createRouter({
       path: '/waitlist',
       name: 'waitlist',
       component: WaitlistView,
-    },
-    {
-      path: '/how-it-works',
-      name: 'how-it-works',
-      component: HowItWorksView,
     },
     {
       path: '/login',
@@ -48,11 +42,6 @@ const router = createRouter({
       component: OtpView,
     },
     {
-      path: '/onboarding',
-      name: 'onboarding',
-      component: OnboardingView,
-    },
-    {
       path: '/success',
       name: 'success',
       component: SuccessView,
@@ -63,7 +52,7 @@ const router = createRouter({
       component: SkeletonView,
     },
     {
-      path: '/coming-soon',
+      path: '/coming-soon-soon',
       name: 'coming-soon',
       component: ComingSoonView,
     },
@@ -74,22 +63,25 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          component: DashboardView,
+          component: DashboardView
         },
         {
           path: 'projects',
-          name: 'projects',
-          component: ProjectView,
-          alias: '/projects',
+          name: 'dashboard-projects',
+          component: ProjectView
         },
         {
           path: 'jurisdictions',
-          name: 'jurisdictions',
-          component: JurisdictionView,
-          alias: '/jurisdictions',
+          name: 'dashboard-jurisdictions',
+          component: JurisdictionView
         },
-      ],
-    },
+        {
+          path: 'admin-settings',                  
+          name: 'dashboard-admin-settings',
+          component: AdminSettingsView
+        }                                          
+      ]
+    }
   ],
   scrollBehavior: () => ({ top: 0 }),
 })
