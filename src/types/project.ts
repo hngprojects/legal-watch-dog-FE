@@ -4,7 +4,7 @@ export interface Project {
   id: string
   name: string
   description: string
-  jurisdiction: string
+  prompt: string
   status: ProjectStatus
   created_at: string
 }
@@ -12,7 +12,7 @@ export interface Project {
 export interface CreateProjectPayload {
   name: string
   description: string
-  jurisdiction: string
+  prompt: string
   status: ProjectStatus
 }
 

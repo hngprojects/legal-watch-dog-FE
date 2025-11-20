@@ -9,12 +9,10 @@ const { projects, loading, error } = storeToRefs(projectStore)
 
 const editingId = ref<string | null>(null)
 const isSaving = ref(false)
-const statuses: ProjectStatus[] = ['active', 'paused', 'completed']
-
 const formState = reactive({
   name: '',
   description: '',
-  jurisdiction: '',
+  prompt: '',
   status: 'active' as ProjectStatus,
 })
 
@@ -26,7 +24,7 @@ const resetForm = () => {
   editingId.value = null
   formState.name = ''
   formState.description = ''
-  formState.jurisdiction = ''
+  formState.prompt = ''
   formState.status = 'active'
 }
 
@@ -34,13 +32,13 @@ const populateForm = (project: Project) => {
   editingId.value = project.id
   formState.name = project.name
   formState.description = project.description
-  formState.jurisdiction = project.jurisdiction
+  formState.prompt = project.prompt
   formState.status = project.status
 }
 
 const handleSubmit = async () => {
-  if (!formState.name.trim() || !formState.jurisdiction.trim()) {
-    projectStore.setError('Name and jurisdiction are required.')
+  if (!formState.name.trim() || !formState.description.trim() || !formState.prompt.trim()) {
+    projectStore.setError('Name, description, and prompt are required.')
     return
   }
 
@@ -50,14 +48,14 @@ const handleSubmit = async () => {
       await projectStore.updateProject(editingId.value, {
         name: formState.name.trim(),
         description: formState.description.trim(),
-        jurisdiction: formState.jurisdiction.trim(),
+        prompt: formState.prompt.trim(),
         status: formState.status,
       })
     } else {
       await projectStore.addProject({
         name: formState.name.trim(),
         description: formState.description.trim(),
-        jurisdiction: formState.jurisdiction.trim(),
+        prompt: formState.prompt.trim(),
         status: formState.status,
       })
     }
@@ -116,15 +114,6 @@ onMounted(() => {
               />
             </div>
             <div>
-              <label class="text-xs font-medium text-gray-600">Jurisdiction</label>
-              <input
-                v-model="formState.jurisdiction"
-                type="text"
-                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-700/30"
-                placeholder="Select or type a jurisdiction"
-              />
-            </div>
-            <div>
               <label class="text-xs font-medium text-gray-600">Description</label>
               <textarea
                 v-model="formState.description"
@@ -134,15 +123,13 @@ onMounted(() => {
               />
             </div>
             <div>
-              <label class="text-xs font-medium text-gray-600">Status</label>
-              <select
-                v-model="formState.status"
-                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm capitalize focus:border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-700/30"
-              >
-                <option v-for="status in statuses" :key="status" :value="status">
-                  {{ status }}
-                </option>
-              </select>
+              <label class="text-xs font-medium text-gray-600">Prompt</label>
+              <textarea
+                v-model="formState.prompt"
+                rows="3"
+                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-700/30"
+                placeholder="Instructions for AI briefings (e.g. tone, scope, frequency)"
+              />
             </div>
           </div>
 
@@ -190,7 +177,7 @@ onMounted(() => {
                 <div>
                   <p class="text-sm font-semibold text-gray-900">{{ project.name }}</p>
                   <p class="text-xs text-gray-500">
-                    {{ project.jurisdiction }} • {{ new Date(project.created_at).toLocaleDateString() }}
+                    Created {{ new Date(project.created_at).toLocaleDateString() }}
                   </p>
                 </div>
                 <span
@@ -201,6 +188,9 @@ onMounted(() => {
               </div>
               <p class="mt-2 text-sm text-gray-600">
                 {{ project.description || 'No description provided.' }}
+              </p>
+              <p class="mt-2 text-xs text-amber-900">
+                Prompt: {{ project.prompt }}
               </p>
               <div class="mt-3 flex gap-3 text-sm">
                 <button
