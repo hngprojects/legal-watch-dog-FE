@@ -89,14 +89,51 @@ const saveUsers = (users: StoredUser[]) => writeToStorage(USERS_KEY, users)
 const getOtpStore = () => readFromStorage<Record<string, StoredOtp>>(OTP_KEY, {})
 const saveOtpStore = (store: Record<string, StoredOtp>) => writeToStorage(OTP_KEY, store)
 
+const TEST_USER = {
+  name: 'Mark Boss',
+  email: 'marktheboss@hng.com',
+  password: 'marks123.passwork@now',
+  industry: 'Legal Research',
+}
+
+const showOtpAlert = (email: string, code: string, purpose: OtpPurpose) => {
+  if (typeof window === 'undefined' || typeof window.alert !== 'function') {
+    return
+  }
+
+  window.alert(`[TEST ONLY] OTP for ${purpose} (${email}): ${code}`)
+}
+
+const ensureTestUserExists = () => {
+  const users = getUsers()
+
+  if (!users.some((user) => user.email === TEST_USER.email)) {
+    users.push({
+      id: randomId(),
+      name: TEST_USER.name,
+      email: TEST_USER.email,
+      password: TEST_USER.password,
+      industry: TEST_USER.industry,
+      createdAt: new Date().toISOString(),
+      verified: true,
+      onboarded: true,
+    })
+    saveUsers(users)
+  }
+}
+
+ensureTestUserExists()
+
 const issueOtp = (email: string, purpose: OtpPurpose) => {
   const otpStore = getOtpStore()
+  const code = generateOtp()
   otpStore[email] = {
-    code: generateOtp(),
+    code,
     expiresAt: Date.now() + 5 * 60 * 1000,
     purpose,
   }
   saveOtpStore(otpStore)
+  showOtpAlert(email, code, purpose)
 }
 
 const getSessions = () => readFromStorage<Session[]>(SESSIONS_KEY, [])
