@@ -13,6 +13,6 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 
-await useAuthStore().refreshToken()
+useAuthStore().refreshToken()
 
 app.mount('#app')
