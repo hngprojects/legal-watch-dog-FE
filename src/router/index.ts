@@ -62,20 +62,20 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          component: DashboardView
+          component: DashboardView,
         },
         {
           path: 'projects',
           name: 'dashboard-projects',
-          component: ProjectView
+          component: ProjectView,
         },
         {
           path: 'jurisdictions',
           name: 'dashboard-jurisdictions',
-          component: JurisdictionView
-        }
-      ]
-    }
+          component: JurisdictionView,
+        },
+      ],
+    },
   ],
   scrollBehavior: () => ({ top: 0 }),
 })
