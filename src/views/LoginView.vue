@@ -111,7 +111,7 @@ const handleLogin = async () => {
                 <li v-for="issue in errors" :key="issue">{{ issue }}</li>
               </ul>
             </div>
-            
+
             <div class="relative">
               <label
                 class="pointer-events-none absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500"
@@ -196,7 +196,7 @@ const handleLogin = async () => {
             <button
               type="submit"
               :disabled="isSubmitting"
-              class="w-full rounded-md bg-[#3C2610] py-3.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70"
+              class="w-full rounded-md bg-[#3C2610] py-3.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
             >
               <span v-if="!isSubmitting">Login</span>
               <span v-else>Checking credentials...</span>
