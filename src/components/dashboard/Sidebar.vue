@@ -31,8 +31,8 @@ const JurisdictionsIcon = {
 </script>
 
 <template>
-  <aside class="w-64 bg-amber-50 text-gray-800 flex flex-col">
-    <div class="px-6 py-3.5  border-b border-amber-200">
+  <aside class="w-64 bg-white text-gray-800 flex flex-col">
+    <div class="px-6 py-3.5  border-b border-gray-200">
       <div class="flex items-center space-x-4">
         <RouterLink to="/" aria-label="Homepage" class="shrink-0">
           <BrandLogo />
