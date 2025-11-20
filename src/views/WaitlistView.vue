@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MainFooter from '@/components/landing-page/MainFooter.vue';
 import MainHeader from '@/components/landing-page/MainHeader.vue';
-import WaitlistSection from '@/features/waitlist/components/WaitlistSection.vue';
+import WaitlistSection from '@/components/waitlist/WaitlistSection.vue';
 </script>
 
 <template>
