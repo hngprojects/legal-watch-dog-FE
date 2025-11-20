@@ -6,8 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { submitWaitlist, type WaitlistPayload } from '@/features/waitlist/api/waitlist'
 
-
-
 const form = reactive<WaitlistPayload>({
   organization_name: '',
   organization_email: '',
@@ -53,19 +51,20 @@ const handleSubmit = async () => {
     >
       <Badge
         variant="secondary"
-        class="border border-white/80 bg-white px-6 py-1.5 text-sm font-semibold text-brand-brown shadow-[0_15px_35px_rgba(15,17,20,0.12)]"
+        class="text-brand-brown border border-white/80 bg-white px-6 py-1.5 text-sm font-semibold shadow-[0_15px_35px_rgba(15,17,20,0.12)]"
       >
         Join the Waitlist
       </Badge>
 
       <CardHeader class="w-full max-w-[820px] gap-5 p-0 text-center">
-        <CardTitle class="text-4xl font-bold leading-tight sm:text-5xl">
+        <CardTitle class="text-4xl leading-tight font-bold sm:text-5xl">
           Stay Ahead of Legal Changes<br />
           Without the Weekly Stress
         </CardTitle>
-        <CardDescription class="mx-auto max-w-[780px] text-base text-muted-foreground sm:text-lg">
-          LegalWatchDog tracks government updates, policy shifts, and regulatory changes for you. Get
-          clear summaries, real-time alerts, and complete visibility across all your jurisdictions.
+        <CardDescription class="text-muted-foreground mx-auto max-w-[780px] text-base sm:text-lg">
+          LegalWatchDog tracks government updates, policy shifts, and regulatory changes for you.
+          Get clear summaries, real-time alerts, and complete visibility across all your
+          jurisdictions.
         </CardDescription>
       </CardHeader>
 
@@ -78,7 +77,7 @@ const handleSubmit = async () => {
               name="organization_name"
               placeholder="Organization Name"
               required
-              class="flex-1 border-border bg-card/90 text-base"
+              class="border-border bg-card/90 flex-1 text-base"
             />
             <Input
               v-model="form.organization_email"
@@ -86,7 +85,7 @@ const handleSubmit = async () => {
               name="organization_email"
               placeholder="Organization Email"
               required
-              class="flex-1 border-border bg-card/90 text-base"
+              class="border-border bg-card/90 flex-1 text-base"
             />
             <Button
               size="lg"
@@ -97,7 +96,7 @@ const handleSubmit = async () => {
               {{ isSubmitting ? 'Submitting...' : 'Join the Waitlist' }}
             </Button>
           </div>
-          <p class="text-center text-xs text-muted-foreground">
+          <p class="text-muted-foreground text-center text-xs">
             We respect your privacy. No spam, unsubscribe anytime.
           </p>
         </form>
@@ -115,7 +114,7 @@ const handleSubmit = async () => {
           <img
             src="/images/dashboard-preview.png"
             alt="Legal WatchDog Dashboard"
-            class="h-auto w-full rounded-xl border border-border/70 shadow-2xl"
+            class="border-border/70 h-auto w-full rounded-xl border shadow-2xl"
           />
         </div>
       </CardContent>

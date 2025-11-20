@@ -46,7 +46,7 @@ const router = createRouter({
       name: 'skeleton',
       component: SkeletonView,
     },
-        {
+    {
       path: '/coming-soon',
       name: 'coming-soon',
       component: NotFoundView,

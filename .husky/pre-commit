@@ -6,7 +6,7 @@ echo "styling your work" 🎨✨
 
 
 # Check Prettier standards
-pnpm run check-format ||
+npm run check-format ||
 (
     echo '🤢🤮🤢🤮 Its so ugly!! - Your styling looks disgusting. 🤢🤮🤢🤮
             Prettier Check Failed. Running npm run format...';
@@ -22,7 +22,7 @@ pnpm run check-format ||
 echo '🏗️👷 checking for eslint errors' 🔍🧐
 
 # Check ESLint Standards
-pnpm run lint ||
+npm run lint ||
 	(
 		echo '😤🏀👋😤 Get that beans code out of here! 😤🏀👋😤
                 ESLint Check Failed. Make the required changes listed above, add changes and try to commit again.'
@@ -32,7 +32,7 @@ pnpm run lint ||
 echo '🏗️👷 checking for typescript errors' 🔍🧐
 
 # Check tsconfig standards
-pnpm run check-types ||
+npm run type-check ||
 	(
 		echo '🤡😂❌🤡 Failed Type check. 🤡😂❌🤡
            Are you seriously trying to write that? Make the changes required above.'
