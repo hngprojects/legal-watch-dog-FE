@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AuthBranding from '@/components/authentication/AuthBranding.vue';
 import MainHeader from '@/components/landing-page/MainHeader.vue';
 import MainFooter from '@/components/landing-page/MainFooter.vue';
@@ -11,15 +12,72 @@ const confirmPassword = ref('');
 const agreeToTerms = ref(false);
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const errors = ref<string[]>([]);
+
+const router = useRouter();
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const hasLetter = /[A-Za-z]/;
+const hasNumber = /[0-9]/;
+const hasSpecial = /[^A-Za-z0-9]/;
+const MIN_PASSWORD_LENGTH = 8;
+
+const sanitize = (value: string) => value.trim();
+
+const resetForm = () => {
+  companyName.value = '';
+  email.value = '';
+  password.value = '';
+  confirmPassword.value = '';
+  agreeToTerms.value = false;
+  showPassword.value = false;
+  showConfirmPassword.value = false;
+  errors.value = [];
+};
+
+const validateSignupForm = () => {
+  const sanitizedCompany = sanitize(companyName.value);
+  const sanitizedEmail = sanitize(email.value).toLowerCase();
+  const sanitizedPassword = sanitize(password.value);
+  const sanitizedConfirm = sanitize(confirmPassword.value);
+
+  const validationErrors: string[] = [];
+
+  if (!sanitizedCompany) {
+    validationErrors.push('Company name is required.');
+  }
+
+  if (!sanitizedEmail || !emailPattern.test(sanitizedEmail)) {
+    validationErrors.push('Enter a valid company email address.');
+  }
+
+  if (!sanitizedPassword) {
+    validationErrors.push('Password is required.');
+  } else {
+    if (sanitizedPassword.length < MIN_PASSWORD_LENGTH) {
+      validationErrors.push('Password must be at least 8 characters.');
+    }
+    if (!hasLetter.test(sanitizedPassword) || !hasNumber.test(sanitizedPassword) || !hasSpecial.test(sanitizedPassword)) {
+      validationErrors.push('Password must include a letter, number, and special character.');
+    }
+  }
+
+  if (sanitizedPassword && sanitizedConfirm && sanitizedPassword !== sanitizedConfirm) {
+    validationErrors.push('Passwords do not match.');
+  }
+
+  if (!agreeToTerms.value) {
+    validationErrors.push('You must agree to the terms to continue.');
+  }
+
+  errors.value = validationErrors;
+  return validationErrors.length === 0;
+};
 
 const handleCreateAccount = () => {
-  console.log('Create Account clicked', {
-    companyName: companyName.value,
-    email: email.value,
-    password: password.value,
-    confirmPassword: confirmPassword.value,
-    agreed: agreeToTerms.value
-  });
+  if (!validateSignupForm()) return;
+  router.push({ name: 'success' });
+  resetForm();
 };
 </script>
 
@@ -55,6 +113,16 @@ const handleCreateAccount = () => {
           </div>
 
           <form @submit.prevent="handleCreateAccount" class="space-y-5">
+
+            <div
+              v-if="errors.length"
+              class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
+            >
+              <p class="font-semibold mb-2">Please fix the following:</p>
+              <ul class="list-disc space-y-1 pl-4">
+                <li v-for="issue in errors" :key="issue">{{ issue }}</li>
+              </ul>
+            </div>
             
             <div class="relative">
               <label class="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 pointer-events-none">
@@ -93,7 +161,7 @@ const handleCreateAccount = () => {
               <button 
                 type="button" 
                 @click="showPassword = !showPassword"
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
               >
                 <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
@@ -118,7 +186,7 @@ const handleCreateAccount = () => {
               <button 
                 type="button" 
                 @click="showConfirmPassword = !showConfirmPassword"
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
               >
                 <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
@@ -147,7 +215,7 @@ const handleCreateAccount = () => {
             </div>
 
             <button type="submit"
-              class="w-full bg-[#3C2610] text-white py-3.5 rounded-md text-sm font-bold hover:bg-[#2a1b0b] transition-colors shadow-sm uppercase tracking-wide">
+              class="w-full bg-[#3C2610] text-white py-3.5 rounded-md text-sm font-bold hover:bg-[#2a1b0b] transition-colors shadow-sm uppercase tracking-wide cursor-pointer">
               Signup
             </button>
 
@@ -162,19 +230,19 @@ const handleCreateAccount = () => {
 
             <div class="space-y-3">
               <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors">
+                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
                 <img src="/images/google.png" alt="Google" class="w-5 h-5">
                 <span class="text-gray-700 text-sm font-medium">Continue with Google</span>
               </button>
 
               <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors">
+                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
                 <img src="/images/apple.png" alt="Apple" class="w-5 h-5">
                 <span class="text-gray-700 text-sm font-medium">Continue with Apple</span>
               </button>
 
               <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors">
+                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
                 <img src="/images/microsoft.png" alt="Microsoft" class="w-5 h-5">
                 <span class="text-gray-700 text-sm font-medium">Continue with Microsoft</span>
               </button>

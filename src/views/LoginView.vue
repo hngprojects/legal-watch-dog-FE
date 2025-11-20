@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AuthBranding from '@/components/authentication/AuthBranding.vue';
 import MainHeader from '@/components/landing-page/MainHeader.vue';
 // 1. Import the Footer Component
@@ -9,9 +10,34 @@ const email = ref('');
 const password = ref('');
 const rememberMe = ref(false);
 const showPassword = ref(false);
+const errors = ref<string[]>([]);
+
+const router = useRouter();
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSWORD_LENGTH = 8;
+const sanitize = (value: string) => value.trim();
 
 const handleLogin = () => {
-  console.log('Login clicked', { email: email.value, password: password.value });
+  const sanitizedEmail = sanitize(email.value).toLowerCase();
+  const sanitizedPassword = sanitize(password.value);
+
+  const validationErrors: string[] = [];
+
+  if (!sanitizedEmail || !emailPattern.test(sanitizedEmail)) {
+    validationErrors.push('Enter a valid company email.');
+  }
+
+  if (!sanitizedPassword) {
+    validationErrors.push('Password is required.');
+  } else if (sanitizedPassword.length < MIN_PASSWORD_LENGTH) {
+    validationErrors.push('Password must be at least 8 characters long.');
+  }
+
+  errors.value = validationErrors;
+  if (validationErrors.length > 0) return;
+
+  router.push({ name: 'coming-soon' });
 };
 </script>
 
@@ -37,6 +63,16 @@ const handleLogin = () => {
           </div>
 
           <form @submit.prevent="handleLogin" class="space-y-6">
+
+            <div
+              v-if="errors.length"
+              class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
+            >
+              <p class="font-semibold mb-2">Please fix the following:</p>
+              <ul class="list-disc space-y-1 pl-4">
+                <li v-for="issue in errors" :key="issue">{{ issue }}</li>
+              </ul>
+            </div>
             
             <div class="relative">
               <label class="absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500 pointer-events-none">
@@ -64,7 +100,7 @@ const handleLogin = () => {
               <button 
                 type="button" 
                 @click="showPassword = !showPassword"
-                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
               >
                 <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
@@ -91,7 +127,7 @@ const handleLogin = () => {
             </div>
 
             <button type="submit"
-              class="w-full bg-[#3C2610] text-white py-3.5 rounded-md text-sm font-bold hover:bg-[#2a1b0b] transition-colors shadow-sm">
+              class="w-full bg-[#3C2610] text-white py-3.5 rounded-md text-sm font-bold hover:bg-[#2a1b0b] transition-colors shadow-sm cursor-pointer">
               Login
             </button>
 
@@ -106,19 +142,19 @@ const handleLogin = () => {
 
             <div class="space-y-3">
               <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors">
+                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
                 <img src="/images/google.png" alt="Google" class="w-5 h-5">
                 <span class="text-gray-700 text-sm font-medium">Continue with Google</span>
               </button>
 
               <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors">
+                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
                 <img src="/images/apple.png" alt="Apple" class="w-5 h-5">
                 <span class="text-gray-700 text-sm font-medium">Continue with Apple</span>
               </button>
 
               <button type="button"
-                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors">
+                class="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 py-3 rounded-md hover:bg-gray-50 transition-colors cursor-pointer">
                 <img src="/images/microsoft.png" alt="Microsoft" class="w-5 h-5">
                 <span class="text-gray-700 text-sm font-medium">Continue with Microsoft</span>
               </button>
