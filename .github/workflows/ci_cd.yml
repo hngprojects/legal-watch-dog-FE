@@ -84,7 +84,7 @@ jobs:
             set -e
             # Clone if the directory doesn't exist
             if [ ! -d "/home/watchdog/apps/frontend/legal-watch-dog-FE" ]; then
-              cd /home/watchdog/apps/frontend/
+              # cd /home/watchdog/apps/frontend/
               git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             fi
 
@@ -135,7 +135,7 @@ jobs:
             
             # Clone if the directory doesn't exist
             if [ ! -d "/home/watchdog/apps/frontend/legal-watch-dog-FE" ]; then
-              cd /home/watchdog/apps/frontend/
+              # cd /home/watchdog/apps/frontend/
               git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             fi
 
