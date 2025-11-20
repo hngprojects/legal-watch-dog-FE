@@ -82,15 +82,16 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
+              REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE"
             # Clone if the directory doesn't exist
-            if [ ! -d "/home/watchdog/apps/frontend/legal-watch-dog-FE" ]; then
+            if [ ! -d "$REMOTE_DIR" ]; then
               # cd /home/watchdog/apps/frontend/
-              git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+              git clone git@github.com:hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
 
             #cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
-            cd legal-watch-dog-FE
+            cd "$REMOTE_DIR"
             git pull origin staging
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
@@ -132,16 +133,17 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
-            
+
+            REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE"
             # Clone if the directory doesn't exist
-            if [ ! -d "/home/watchdog/apps/frontend/legal-watch-dog-FE" ]; then
+            if [ ! -d "$REMOTE_DIR" ]; then
               # cd /home/watchdog/apps/frontend/
-              git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+              git clone git@github.com:hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
 
             #cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
-            cd legal-watch-dog-FE
+            cd "$REMOTE_DIR"
             git pull origin main
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
@@ -154,7 +156,7 @@ jobs:
           EOF
 
 
-  # -------------------------
+   # -------------------------
   # 4. Slack Notification
   # -------------------------
   notify_slack:
@@ -169,14 +171,21 @@ jobs:
       - name: Send Slack Notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          STAGING_RESULT: ${{ needs.deploy_staging.result }}
+          PROD_RESULT: ${{ needs.deploy_production.result }}
         run: |
-          STATUS="✅ SUCCESS"
-          if [ "${{ job.status }}" != "success" ]; then
+          # Determine overall status
+          if [ "$BUILD_RESULT" != "success" ] || [ "$STAGING_RESULT" != "success" ] || [ "$PROD_RESULT" != "success" ]; then
             STATUS="❌ FAILURE"
+          else
+            STATUS="✅ SUCCESS"
           fi
 
+          LOG_LINK="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
           PAYLOAD="{
-            \"text\": \"Frontend CI/CD Pipeline finished with status: $STATUS\",
+            \"text\": \"Frontend CI/CD Pipeline finished with status: $STATUS\nLogs: $LOG_LINK\",
             \"username\": \"CI/CD Bot\",
             \"icon_emoji\": \":rocket:\"
           }"
