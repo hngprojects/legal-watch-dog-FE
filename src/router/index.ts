@@ -7,6 +7,8 @@ import OtpView from '@/views/OtpView.vue'
 import SuccessView from '@/views/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
+import HowItWorksView from '@/views/HowItWorksView.vue'
+import OnboardingView from '@/views/OnboardingView.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
 import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
@@ -26,6 +28,11 @@ const router = createRouter({
       component: WaitlistView,
     },
     {
+      path: '/how-it-works',
+      name: 'how-it-works',
+      component: HowItWorksView,
+    },
+    {
       path: '/login',
       name: 'login',
       component: LoginView,
@@ -39,6 +46,11 @@ const router = createRouter({
       path: '/otp',
       name: 'otp',
       component: OtpView,
+    },
+    {
+      path: '/onboarding',
+      name: 'onboarding',
+      component: OnboardingView,
     },
     {
       path: '/success',
@@ -62,20 +74,22 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          component: DashboardView
+          component: DashboardView,
         },
         {
           path: 'projects',
-          name: 'dashboard-projects',
-          component: ProjectView
+          name: 'projects',
+          component: ProjectView,
+          alias: '/projects',
         },
         {
           path: 'jurisdictions',
-          name: 'dashboard-jurisdictions',
-          component: JurisdictionView
-        }
-      ]
-    }
+          name: 'jurisdictions',
+          component: JurisdictionView,
+          alias: '/jurisdictions',
+        },
+      ],
+    },
   ],
   scrollBehavior: () => ({ top: 0 }),
 })
