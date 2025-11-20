@@ -85,7 +85,7 @@ jobs:
               REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE"
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
-              # cd /home/watchdog/apps/frontend/
+              cd /home/watchdog/apps/frontend/
               git clone git@github.com:hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
@@ -138,7 +138,7 @@ jobs:
             REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE"
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
-              # cd /home/watchdog/apps/frontend/
+              cd /home/watchdog/apps/frontend/
               git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             fi
 
