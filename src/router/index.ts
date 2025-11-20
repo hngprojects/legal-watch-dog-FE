@@ -7,6 +7,10 @@ import OtpView from '@/views/OtpView.vue'
 import SuccessView from '@/views/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
+import DashboardLayout from '@/layout/DashboardLayout.vue'
+import DashboardView from '@/views/dashboard/DashboardView.vue'
+import ProjectView from '@/views/dashboard/ProjectView.vue'
+import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,6 +55,27 @@ const router = createRouter({
       name: 'coming-soon',
       component: ComingSoonView,
     },
+    {
+      path: '/dashboard',
+      component: DashboardLayout,
+      children: [
+        {
+          path: '',
+          name: 'dashboard',
+          component: DashboardView
+        },
+        {
+          path: 'projects',
+          name: 'dashboard-projects',
+          component: ProjectView
+        },
+        {
+          path: 'jurisdictions',
+          name: 'dashboard-jurisdictions',
+          component: JurisdictionView
+        }
+      ]
+    }
   ],
   scrollBehavior: () => ({ top: 0 }),
 })
