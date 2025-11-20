@@ -68,9 +68,16 @@ const updateProjectArray = (projects: Project[], id: string, payload: UpdateProj
     throw new Error('Project not found.')
   }
 
+  const existing = projects[idx] as Project
+
   const updatedProject: Project = {
-    ...projects[idx],
-    ...payload,
+    ...existing,
+    name: payload.name ?? existing.name,
+    description: payload.description ?? existing.description,
+    jurisdiction: payload.jurisdiction ?? existing.jurisdiction,
+    status: payload.status ?? existing.status,
+    id: existing.id,
+    created_at: existing.created_at,
   }
 
   projects[idx] = updatedProject
