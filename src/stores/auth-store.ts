@@ -1,6 +1,13 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
-import type { LoginPayload, RegisterPayload, VerifyOTPPayload } from '@/types/auth'
+import type {
+  LoginOtpChallenge,
+  LoginPayload,
+  LoginResponse,
+  RegisterPayload,
+  VerifyOTPPayload,
+  OtpPurpose,
+} from '@/types/auth'
 
 interface Organisation {
   id: string
@@ -22,6 +29,13 @@ interface State {
   user: User | null
   email: string | null
   organisation: Organisation | null
+  otpPurpose: OtpPurpose | null
+}
+
+const isOtpChallenge = (
+  response: LoginResponse | LoginOtpChallenge,
+): response is LoginOtpChallenge => {
+  return 'requires_otp' in response && response.requires_otp
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -30,6 +44,7 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     email: null,
     organisation: null,
+    otpPurpose: null,
   }),
 
   getters: {
@@ -41,10 +56,17 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = token
     },
 
+    handleLoginSuccess(response: LoginResponse) {
+      this.setAccessToken(response.access_token)
+      this.user = response.user as User
+      localStorage.setItem('refreshToken', response.refresh_token)
+    },
+
     async register(payload: RegisterPayload) {
       const { data } = await authService.registerOrganisation(payload)
 
       this.email = data.email
+      this.otpPurpose = 'signup'
 
       return data
     },
@@ -52,16 +74,28 @@ export const useAuthStore = defineStore('auth', {
     async login(payload: LoginPayload) {
       const { data } = await authService.login(payload)
 
-      this.setAccessToken(data.access_token)
-      this.user = data.user as User
+      if (isOtpChallenge(data)) {
+        this.email = data.email
+        this.otpPurpose = data.otp_purpose
+        return data
+      }
 
-      localStorage.setItem('refreshToken', data.refresh_token)
+      this.handleLoginSuccess(data)
+      this.email = (data.user as User | undefined)?.email ?? payload.email
 
       return data
     },
 
     async verifyOTP(payload: VerifyOTPPayload) {
       const { data } = await authService.verifyOtp(payload)
+
+      if (data?.login_data) {
+        this.handleLoginSuccess(data.login_data)
+      }
+
+      if (data?.next === 'login' || data?.next === 'dashboard') {
+        this.otpPurpose = null
+      }
 
       return data
     },
@@ -75,6 +109,7 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.organisation = null
       this.accessToken = null
+      this.otpPurpose = null
     },
 
     async refreshToken() {
