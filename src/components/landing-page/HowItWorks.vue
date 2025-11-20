@@ -31,7 +31,7 @@ const cards = [
 <template>
   <section id="how-it-works" class="relative flex w-full items-center justify-center py-8 sm:py-16">
     <div class="flex w-full flex-col gap-11">
-      <div class="mx-auto flex w-full items-center flex-col gap-5 text-center">
+      <div class="mx-auto flex w-full flex-col items-center gap-5 text-center">
         <TypographyHeading level="h2" align="center">
           How <span class="text-accent">Legal WatchDog</span> Works
         </TypographyHeading>
@@ -41,17 +41,19 @@ const cards = [
         </TypographyText>
       </div>
 
-      <div class="mx-auto flex md:items-stretch flex-wrap lg:flex-nowrap items-center gap-5">
+      <div class="mx-auto flex flex-wrap items-center gap-5 md:items-stretch lg:flex-nowrap">
         <Card
           v-for="(card, i) in cards"
           :key="i"
-          class="basis-full space-y-4 rounded-2xl bg-card px-8 py-10 text-left md:basis-[calc(50%-0.625rem)] md:max-w-[400px]"
+          class="bg-card basis-full space-y-4 rounded-2xl px-8 py-10 text-left md:max-w-[400px] md:basis-[calc(50%-0.625rem)]"
         >
           <CardHeader class="gap-4 p-0">
-            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-sm">
+            <div
+              class="bg-accent text-accent-foreground flex h-16 w-16 items-center justify-center rounded-full shadow-sm"
+            >
               <img :src="card.icon" :alt="`${card.title} icon`" class="size-8" />
             </div>
-            <CardTitle class="text-2xl font-semibold text-foreground">
+            <CardTitle class="text-foreground text-2xl font-semibold">
               {{ card.title }}
             </CardTitle>
           </CardHeader>

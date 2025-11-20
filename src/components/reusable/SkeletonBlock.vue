@@ -10,13 +10,13 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
   width: '100%',
   height: '1rem',
-  radius: '999px'
+  radius: '999px',
 })
 
 const styleVars = computed(() => ({
   width: props.width,
   height: props.height,
-  borderRadius: props.radius
+  borderRadius: props.radius,
 }))
 </script>
 
