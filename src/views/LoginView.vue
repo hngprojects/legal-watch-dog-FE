@@ -1,44 +1,78 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import AuthBranding from '@/components/authentication/AuthBranding.vue';
-import MainHeader from '@/components/landing-page/MainHeader.vue';
-// 1. Import the Footer Component
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { isAxiosError } from 'axios'
+import AuthBranding from '@/components/authentication/AuthBranding.vue'
+import MainHeader from '@/components/landing-page/MainHeader.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
+import { useAuthStore } from '@/stores/auth-store'
+import type { LoginOtpChallenge } from '@/types/auth'
 
-const email = ref('');
-const password = ref('');
-const rememberMe = ref(false);
-const showPassword = ref(false);
-const errors = ref<string[]>([]);
+const authStore = useAuthStore()
 
-const router = useRouter();
+const email = ref('')
+const password = ref('')
+const rememberMe = ref(false)
+const showPassword = ref(false)
+const errors = ref<string[]>([])
+const serverError = ref('')
+const isSubmitting = ref(false)
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD_LENGTH = 8;
-const sanitize = (value: string) => value.trim();
+const router = useRouter()
 
-const handleLogin = () => {
-  const sanitizedEmail = sanitize(email.value).toLowerCase();
-  const sanitizedPassword = sanitize(password.value);
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MIN_PASSWORD_LENGTH = 8
+const sanitize = (value: string) => value.trim()
 
-  const validationErrors: string[] = [];
+const isOtpChallenge = (payload: unknown): payload is LoginOtpChallenge => {
+  return !!payload && typeof payload === 'object' && 'requires_otp' in payload
+}
+
+const handleLogin = async () => {
+  const sanitizedEmail = sanitize(email.value).toLowerCase()
+  const sanitizedPassword = sanitize(password.value)
+
+  const validationErrors: string[] = []
 
   if (!sanitizedEmail || !emailPattern.test(sanitizedEmail)) {
-    validationErrors.push('Enter a valid company email.');
+    validationErrors.push('Enter a valid company email.')
   }
 
   if (!sanitizedPassword) {
-    validationErrors.push('Password is required.');
+    validationErrors.push('Password is required.')
   } else if (sanitizedPassword.length < MIN_PASSWORD_LENGTH) {
-    validationErrors.push('Password must be at least 8 characters long.');
+    validationErrors.push('Password must be at least 8 characters long.')
   }
 
-  errors.value = validationErrors;
-  if (validationErrors.length > 0) return;
+  errors.value = validationErrors
+  if (validationErrors.length > 0) return
 
-  router.push({ name: 'coming-soon' });
-};
+  isSubmitting.value = true
+  serverError.value = ''
+
+  try {
+    const result = await authStore.login({
+      email: sanitizedEmail,
+      password: sanitizedPassword,
+    })
+
+    if (isOtpChallenge(result) && result.requires_otp) {
+      router.push({ name: 'otp' })
+      return
+    }
+
+    router.push({ name: 'dashboard' })
+  } catch (error) {
+    if (isAxiosError(error)) {
+      serverError.value =
+        (error.response?.data as { message?: string })?.message ?? 'Unable to log in.'
+    } else {
+      serverError.value = 'An unexpected error occurred. Please try again.'
+    }
+  } finally {
+    isSubmitting.value = false
+  }
+}
 </script>
 
 <template>
@@ -62,7 +96,12 @@ const handleLogin = () => {
           </div>
 
           <form @submit.prevent="handleLogin" class="space-y-6">
-
+            <div
+              v-if="serverError"
+              class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
+            >
+              {{ serverError }}
+            </div>
             <div
               v-if="errors.length"
               class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
@@ -154,9 +193,13 @@ const handleLogin = () => {
               >
             </div>
 
-            <button type="submit"
-              class="w-full bg-[#3C2610] text-white py-3.5 rounded-md text-sm font-bold hover:bg-[#2a1b0b] transition-colors shadow-sm cursor-pointer">
-              Login
+            <button
+              type="submit"
+              :disabled="isSubmitting"
+              class="w-full rounded-md bg-[#3C2610] py-3.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <span v-if="!isSubmitting">Login</span>
+              <span v-else>Checking credentials...</span>
             </button>
 
             <div class="relative py-2">

@@ -1,24 +1,63 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { useRouter } from 'vue-router'
+import { isAxiosError } from 'axios'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
+import { useAuthStore } from '@/stores/auth-store'
+
+const authStore = useAuthStore()
+const router = useRouter()
 
 const otpCode = ref('')
-const timer = ref(32)
+const timer = ref(60)
+const errorMessage = ref('')
+const successMessage = ref('')
+const isVerifying = ref(false)
 let interval: ReturnType<typeof setInterval> | null = null
 
-const email = 'd*****@gmail.com'
+const email = computed(() => authStore.email)
+const otpPurpose = computed(() => authStore.otpPurpose)
 
-onMounted(() => {
+const obfuscatedEmail = computed(() => {
+  if (!email.value) return ''
+  const [username, domain] = email.value.split('@')
+  if (!domain) return email.value
+  const firstChar = username && username.length > 0 ? username[0] : ''
+  return `${firstChar}*****@${domain}`
+})
+
+const subtitle = computed(() => {
+  return otpPurpose.value === 'login'
+    ? 'Enter the 6 digit code sent to confirm this login.'
+    : 'Enter the 6 digit code sent to verify your email.'
+})
+
+const startTimer = () => {
+  timer.value = 60
   interval = setInterval(() => {
     if (timer.value > 0) {
       timer.value--
     }
   }, 1000)
+}
+
+onMounted(() => {
+  if (!email.value) {
+    router.replace({ name: 'login' })
+    return
+  }
+  startTimer()
 })
 
 onUnmounted(() => {
   if (interval) {
     clearInterval(interval)
+  }
+})
+
+watchEffect(() => {
+  if (!email.value) {
+    router.replace({ name: 'login' })
   }
 })
 
@@ -28,15 +67,52 @@ const formatTime = (seconds: number) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
-const handleContinue = () => {
-  console.log('OTP Code:', otpCode.value)
+const handleContinue = async () => {
+  if (!email.value) {
+    router.replace({ name: 'login' })
+    return
+  }
+
+  const code = otpCode.value.trim()
+
+  if (!code || code.length < 6) {
+    errorMessage.value = 'Enter the 6 digit OTP sent to your email.'
+    return
+  }
+
+  isVerifying.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  try {
+    const response = await authStore.verifyOTP({ email: email.value, code })
+
+    successMessage.value = response.message
+    if (response.next === 'login') {
+      router.push({ name: 'login' })
+    } else if (response.next === 'dashboard') {
+      router.push({ name: 'dashboard' })
+    }
+  } catch (error) {
+    if (isAxiosError(error)) {
+      errorMessage.value =
+        (error.response?.data as { message?: string })?.message ?? 'OTP verification failed.'
+    } else {
+      errorMessage.value = 'Unable to verify OTP. Please try again.'
+    }
+  } finally {
+    isVerifying.value = false
+  }
 }
 
 const handleResend = () => {
-  if (timer.value === 0) {
-    timer.value = 32
-    otpCode.value = ''
+  if (timer.value > 0) return
+  if (interval) {
+    clearInterval(interval)
   }
+  otpCode.value = ''
+  successMessage.value = 'A new OTP has been sent to your email.'
+  startTimer()
 }
 </script>
 
@@ -60,7 +136,9 @@ const handleResend = () => {
           </div>
 
           <h2 class="mb-2 text-4xl font-medium text-gray-900">Enter OTP Code</h2>
-          <p class="text-gray-400">Enter the 8 digit code sent to {{ email }}</p>
+          <p class="text-gray-400">
+            {{ subtitle }} We've sent it to {{ obfuscatedEmail }}.
+          </p>
         </div>
 
         <!-- OTP Input Section -->
@@ -70,10 +148,24 @@ const handleResend = () => {
             <input
               v-model="otpCode"
               type="text"
-              maxlength="8"
-              placeholder="8"
-              class="h-14 w-20 rounded-lg border border-gray-300 text-center text-2xl font-medium focus:border-transparent focus:ring-2 focus:ring-amber-900 focus:outline-none"
+              maxlength="6"
+              inputmode="numeric"
+              placeholder="••••••"
+              class="h-14 w-40 rounded-lg border border-gray-300 text-center text-2xl font-medium tracking-[0.4em] focus:border-transparent focus:ring-2 focus:ring-amber-900 focus:outline-none"
             />
+          </div>
+
+          <div
+            v-if="errorMessage"
+            class="rounded-md border border-red-200 bg-red-50/70 p-3 text-sm text-red-700"
+          >
+            {{ errorMessage }}
+          </div>
+          <div
+            v-if="successMessage"
+            class="rounded-md border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-700"
+          >
+            {{ successMessage }}
           </div>
 
           <!-- Resend Section -->
@@ -97,9 +189,11 @@ const handleResend = () => {
           <button
             type="button"
             @click="handleContinue"
-            class="w-full rounded-lg bg-[#3C2610] py-3 font-medium text-white transition-colors hover:bg-amber-800"
+            :disabled="isVerifying"
+            class="w-full rounded-lg bg-[#3C2610] py-3 font-medium text-white transition-colors hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Continue
+            <span v-if="!isVerifying">Continue</span>
+            <span v-else>Verifying...</span>
           </button>
         </div>
       </div>
