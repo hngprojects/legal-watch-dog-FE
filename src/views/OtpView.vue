@@ -136,9 +136,7 @@ const handleResend = () => {
           </div>
 
           <h2 class="mb-2 text-4xl font-medium text-gray-900">Enter OTP Code</h2>
-          <p class="text-gray-400">
-            {{ subtitle }} We've sent it to {{ obfuscatedEmail }}.
-          </p>
+          <p class="text-gray-400">{{ subtitle }} We've sent it to {{ obfuscatedEmail }}.</p>
         </div>
 
         <!-- OTP Input Section -->
