@@ -42,7 +42,7 @@ const ensureSeedProjects = () => {
         id: randomId(),
         name: 'AI Compliance Radar',
         description: 'Monitor AI regulatory updates across EU regulators',
-        jurisdiction: 'European Union',
+        prompt: 'Generate AI compliance updates focused on EU AI Act developments.',
         status: 'active',
         created_at: now,
       },
@@ -50,7 +50,7 @@ const ensureSeedProjects = () => {
         id: randomId(),
         name: 'Digital Assets Taskforce',
         description: 'Track SEC + CFTC announcements on digital asset custody',
-        jurisdiction: 'United States',
+        prompt: 'Summarize US digital asset enforcement announcements weekly.',
         status: 'paused',
         created_at: now,
       },
@@ -68,9 +68,16 @@ const updateProjectArray = (projects: Project[], id: string, payload: UpdateProj
     throw new Error('Project not found.')
   }
 
+  const existing = projects[idx] as Project
+
   const updatedProject: Project = {
-    ...projects[idx],
-    ...payload,
+    ...existing,
+    name: payload.name ?? existing.name,
+    description: payload.description ?? existing.description,
+    prompt: payload.prompt ?? existing.prompt,
+    status: payload.status ?? existing.status,
+    id: existing.id,
+    created_at: existing.created_at,
   }
 
   projects[idx] = updatedProject
@@ -86,7 +93,7 @@ export const mockProjectService = {
       id: randomId(),
       name: payload.name,
       description: payload.description,
-      jurisdiction: payload.jurisdiction,
+      prompt: payload.prompt,
       status: payload.status as ProjectStatus,
       created_at: new Date().toISOString(),
     }
