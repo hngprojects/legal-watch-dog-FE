@@ -13,8 +13,7 @@ import type {
 } from '@/types/auth'
 import { mockAuthService } from '@/mocks/mock-auth-service'
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'https://minamoto.emerj.net/api/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://minamoto.emerj.net/api/api/v1'
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
 
 const http = axios.create({

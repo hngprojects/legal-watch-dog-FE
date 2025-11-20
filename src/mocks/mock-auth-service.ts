@@ -65,7 +65,7 @@ const randomId = () => {
   return `id-${Math.random().toString(36).slice(2, 10)}`
 }
 
-const generateOtp = () => (Math.floor(100000 + Math.random() * 900000)).toString()
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString()
 
 const delay = <T>(dataFactory: () => T, ms = 400): ServiceResponse<T> =>
   new Promise((resolve) => {
