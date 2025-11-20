@@ -1,84 +1,112 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import AuthBranding from '@/components/authentication/AuthBranding.vue';
-import MainHeader from '@/components/landing-page/MainHeader.vue';
-import MainFooter from '@/components/landing-page/MainFooter.vue';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { isAxiosError } from 'axios'
+import AuthBranding from '@/components/authentication/AuthBranding.vue'
+import MainHeader from '@/components/landing-page/MainHeader.vue'
+import MainFooter from '@/components/landing-page/MainFooter.vue'
+import { useAuthStore } from '@/stores/auth-store'
 
-const companyName = ref('');
-const email = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const agreeToTerms = ref(false);
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
-const errors = ref<string[]>([]);
+const authStore = useAuthStore()
 
-const router = useRouter();
+const companyName = ref('')
+const email = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const agreeToTerms = ref(false)
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+const errors = ref<string[]>([])
+const serverError = ref('')
+const isSubmitting = ref(false)
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const hasLetter = /[A-Za-z]/;
-const hasNumber = /[0-9]/;
-const hasSpecial = /[^A-Za-z0-9]/;
-const MIN_PASSWORD_LENGTH = 8;
+const router = useRouter()
 
-const sanitize = (value: string) => value.trim();
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const hasLetter = /[A-Za-z]/
+const hasNumber = /[0-9]/
+const hasSpecial = /[^A-Za-z0-9]/
+const MIN_PASSWORD_LENGTH = 8
+
+const sanitize = (value: string) => value.trim()
 
 const resetForm = () => {
-  companyName.value = '';
-  email.value = '';
-  password.value = '';
-  confirmPassword.value = '';
-  agreeToTerms.value = false;
-  showPassword.value = false;
-  showConfirmPassword.value = false;
-  errors.value = [];
-};
+  companyName.value = ''
+  email.value = ''
+  password.value = ''
+  confirmPassword.value = ''
+  agreeToTerms.value = false
+  showPassword.value = false
+  showConfirmPassword.value = false
+  errors.value = []
+}
 
 const validateSignupForm = () => {
-  const sanitizedCompany = sanitize(companyName.value);
-  const sanitizedEmail = sanitize(email.value).toLowerCase();
-  const sanitizedPassword = sanitize(password.value);
-  const sanitizedConfirm = sanitize(confirmPassword.value);
+  const sanitizedCompany = sanitize(companyName.value)
+  const sanitizedEmail = sanitize(email.value).toLowerCase()
+  const sanitizedPassword = sanitize(password.value)
+  const sanitizedConfirm = sanitize(confirmPassword.value)
 
-  const validationErrors: string[] = [];
+  const validationErrors: string[] = []
 
   if (!sanitizedCompany) {
-    validationErrors.push('Company name is required.');
+    validationErrors.push('Company name is required.')
   }
 
   if (!sanitizedEmail || !emailPattern.test(sanitizedEmail)) {
-    validationErrors.push('Enter a valid company email address.');
+    validationErrors.push('Enter a valid company email address.')
   }
 
   if (!sanitizedPassword) {
-    validationErrors.push('Password is required.');
+    validationErrors.push('Password is required.')
   } else {
     if (sanitizedPassword.length < MIN_PASSWORD_LENGTH) {
-      validationErrors.push('Password must be at least 8 characters.');
+      validationErrors.push('Password must be at least 8 characters.')
     }
     if (!hasLetter.test(sanitizedPassword) || !hasNumber.test(sanitizedPassword) || !hasSpecial.test(sanitizedPassword)) {
-      validationErrors.push('Password must include a letter, number, and special character.');
+      validationErrors.push('Password must include a letter, number, and special character.')
     }
   }
 
   if (sanitizedPassword && sanitizedConfirm && sanitizedPassword !== sanitizedConfirm) {
-    validationErrors.push('Passwords do not match.');
+    validationErrors.push('Passwords do not match.')
   }
 
   if (!agreeToTerms.value) {
-    validationErrors.push('You must agree to the terms to continue.');
+    validationErrors.push('You must agree to the terms to continue.')
   }
 
-  errors.value = validationErrors;
-  return validationErrors.length === 0;
-};
+  errors.value = validationErrors
+  return validationErrors.length === 0
+}
 
-const handleCreateAccount = () => {
-  if (!validateSignupForm()) return;
-  router.push({ name: 'success' });
-  resetForm();
-};
+const handleCreateAccount = async () => {
+  if (!validateSignupForm()) return
+  serverError.value = ''
+  isSubmitting.value = true
+
+  try {
+    await authStore.register({
+      name: sanitize(companyName.value),
+      email: sanitize(email.value).toLowerCase(),
+      password: sanitize(password.value),
+      confirm_password: sanitize(confirmPassword.value),
+      industry: 'Legal Services',
+    })
+    resetForm()
+    router.push({ name: 'otp' })
+  } catch (error) {
+    if (isAxiosError(error)) {
+      serverError.value =
+        (error.response?.data as { message?: string })?.message ??
+        'An error occurred while creating your account.'
+    } else {
+      serverError.value = 'An unexpected error occurred. Please try again.'
+    }
+  } finally {
+    isSubmitting.value = false
+  }
+}
 </script>
 
 <template>
@@ -112,7 +140,12 @@ const handleCreateAccount = () => {
           </div>
 
           <form @submit.prevent="handleCreateAccount" class="space-y-5">
-
+            <div
+              v-if="serverError"
+              class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
+            >
+              {{ serverError }}
+            </div>
             <div
               v-if="errors.length"
               class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
@@ -122,7 +155,7 @@ const handleCreateAccount = () => {
                 <li v-for="issue in errors" :key="issue">{{ issue }}</li>
               </ul>
             </div>
-            
+
             <div class="relative">
               <label
                 class="pointer-events-none absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500"
@@ -274,9 +307,13 @@ const handleCreateAccount = () => {
               </div>
             </div>
 
-            <button type="submit"
-              class="w-full bg-[#3C2610] text-white py-3.5 rounded-md text-sm font-bold hover:bg-[#2a1b0b] transition-colors shadow-sm uppercase tracking-wide cursor-pointer">
-              Signup
+            <button
+              type="submit"
+              :disabled="isSubmitting"
+              class="w-full rounded-md bg-[#3C2610] py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+            >
+              <span v-if="!isSubmitting">Signup</span>
+              <span v-else>Creating account...</span>
             </button>
 
             <div class="relative py-2">
