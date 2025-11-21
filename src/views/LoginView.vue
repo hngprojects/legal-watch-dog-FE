@@ -73,7 +73,7 @@ const handleLogin = async () => {
     <main class="relative flex flex-1">
       <AuthBranding />
 
-      <div class="flex w-full items-center justify-center p-8 lg:w-1/2 lg:p-16">
+      <div class="flex w-full items-center justify-center p-8 lg:p-16">
         <div class="w-full max-w-[440px]">
           <div class="mb-8 text-center lg:hidden">
             <h1 class="text-2xl font-bold text-[#3C2610]">Legal WatchDog</h1>
@@ -243,7 +243,10 @@ const handleLogin = async () => {
         </div>
       </div>
     </main>
+<<<<<<< HEAD
 
     <!-- <MainFooter /> -->
+=======
+>>>>>>> 4e3d84258fc1782285e63a7fba60ce664561f8f6
   </div>
 </template>
