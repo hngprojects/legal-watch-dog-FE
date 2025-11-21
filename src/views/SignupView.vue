@@ -24,7 +24,6 @@ const router = useRouter()
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PUBLIC_EMAIL_DENYLIST = new Set([
-  'gmail.com',
   'yahoo.com',
   'hotmail.com',
   'outlook.com',
@@ -114,10 +113,12 @@ const handleCreateAccount = async () => {
   serverError.value = ''
   isSubmitting.value = true
 
+  const sanitizedEmail = sanitize(email.value).toLowerCase()
+
   try {
     await authStore.register({
       name: sanitize(companyName.value),
-      email: sanitize(email.value).toLowerCase(),
+      email: sanitizedEmail,
       password: sanitize(password.value),
       confirm_password: sanitize(confirmPassword.value),
       industry: 'Legal Services',

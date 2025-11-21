@@ -18,7 +18,6 @@ const isVerifying = ref(false)
 let interval: ReturnType<typeof setInterval> | null = null
 
 const email = computed(() => authStore.email)
-const otpPurpose = computed(() => authStore.otpPurpose)
 
 const obfuscatedEmail = computed(() => {
   if (!email.value) return ''
@@ -28,11 +27,7 @@ const obfuscatedEmail = computed(() => {
   return `${firstChar}*****@${domain}`
 })
 
-const subtitle = computed(() => {
-  return otpPurpose.value === 'login'
-    ? 'Enter the 6 digit code sent to confirm this login.'
-    : 'Enter the 6 digit code sent to verify your email.'
-})
+const subtitle = computed(() => 'Enter the 6 digit code sent to verify your email.')
 
 const startTimer = () => {
   timer.value = OTP_TIMER_DURATION
@@ -93,19 +88,13 @@ const handleContinue = async () => {
   isVerifying.value = true
   errorMessage.value = ''
   successMessage.value = ''
-  const currentPurpose = otpPurpose.value
 
   try {
     const response = await authStore.verifyOTP({ email: email.value, code })
 
     successMessage.value = response.message
 
-    const destination =
-      response.otp_purpose === 'signup' || currentPurpose === 'signup'
-        ? { name: 'login' }
-        : response.next === 'dashboard'
-          ? { name: 'dashboard' }
-          : { name: 'login' }
+    const destination = response.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
 
     if (destination.name === 'login') {
       router.replace(destination)

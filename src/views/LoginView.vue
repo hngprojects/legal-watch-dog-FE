@@ -6,7 +6,9 @@ import AuthBranding from '@/components/authentication/AuthBranding.vue'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
 import { useAuthStore } from '@/stores/auth-store'
+
 const authStore = useAuthStore()
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -15,8 +17,6 @@ const showPassword = ref(false)
 const errors = ref<string[]>([])
 const serverError = ref('')
 const isSubmitting = ref(false)
-
-const router = useRouter()
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MIN_PASSWORD_LENGTH = 8
@@ -45,12 +45,12 @@ const handleLogin = async () => {
   serverError.value = ''
 
   try {
-    const result = await authStore.login({
+    const success = await authStore.login({
       email: sanitizedEmail,
       password: sanitizedPassword,
     })
 
-    if (result) {
+    if (success) {
       router.push({ name: 'dashboard' })
     }
   } catch (error) {

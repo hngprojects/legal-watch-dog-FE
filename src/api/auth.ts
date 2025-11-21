@@ -31,7 +31,7 @@ export const authService = {
     http.post<LogoutResponse>('/auth/logout', {}, { headers: bearerHeader(token) }),
 
   verifyOtp: (payload: VerifyOTPPayload) =>
-    http.post<VerifyOtpResponse>('/auth/verify/otp', payload),
+    http.post<VerifyOtpResponse>('/auth/verify-otp', payload),
 
   refreshToken: () => http.post<RefreshTokenResponse>('/auth/refresh', {}),
 }

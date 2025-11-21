@@ -8,6 +8,7 @@
   --color-accent: var(--color-chocolate-brown-main);
   --color-bg-primary: var(--gray-white);
   --color-text-placeholder: #717680;
+  --color-surface: var(--);
 
   --font-sans: var(--font-body);
   --spacing-6: var(--sizes-size-6);
@@ -41,6 +42,9 @@
     color: inherit;
     text-decoration: none;
   }
+}
+@layer {
+
 }
 @utility preset-display-lg {
   @apply font-sans text-[48px] leading-[1.3] font-semibold tracking-normal

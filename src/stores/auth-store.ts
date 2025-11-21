@@ -1,12 +1,6 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
-import type {
-  LoginPayload,
-  LoginResponse,
-  RegisterPayload,
-  VerifyOTPPayload,
-  OtpPurpose,
-} from '@/types/auth'
+import type { LoginPayload, RegisterPayload, VerifyOTPPayload } from '@/types/auth'
 
 interface Organisation {
   id: string
@@ -28,16 +22,37 @@ interface State {
   user: User | null
   email: string | null
   organisation: Organisation | null
-  otpPurpose: OtpPurpose | null
 }
+
+interface ApiTokenData {
+  access_token: string
+  refresh_token?: string
+  token_type?: string
+  expires_in?: number
+  user?: User
+}
+
+interface WrappedApiResponse {
+  status: string
+  status_code: number
+  message: string
+  data: ApiTokenData
+}
+
+interface VerifyOtpApiResponse {
+  login_data?: ApiTokenData
+  message?: string
+}
+
+const TOKEN_KEY = 'lwd_access_token'
+const EMAIL_KEY = 'lwd_user_email'
 
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
-    accessToken: null,
+    accessToken: localStorage.getItem(TOKEN_KEY),
     user: null,
-    email: null,
+    email: localStorage.getItem(EMAIL_KEY),
     organisation: null,
-    otpPurpose: null,
   }),
 
   getters: {
@@ -47,6 +62,21 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     setAccessToken(token: string | null) {
       this.accessToken = token
+
+      if (token) {
+        localStorage.setItem(TOKEN_KEY, token)
+      } else {
+        localStorage.removeItem(TOKEN_KEY)
+      }
+    },
+
+    setUserEmail(email: string | null) {
+      this.email = email
+      if (email) {
+        localStorage.setItem(EMAIL_KEY, email)
+      } else {
+        localStorage.removeItem(EMAIL_KEY)
+      }
     },
 
     clearAuthState() {
@@ -54,47 +84,50 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.organisation = null
       this.accessToken = null
-      this.otpPurpose = null
+      localStorage.removeItem(TOKEN_KEY)
+      localStorage.removeItem(EMAIL_KEY)
     },
 
-    handleLoginSuccess(response: LoginResponse) {
-      this.setAccessToken(response.access_token)
-      this.user = response.user as User
+    handleLoginSuccess(token: string, user?: User) {
+      this.setAccessToken(token)
+      if (user) {
+        this.user = user
+      }
     },
 
     async register(payload: RegisterPayload) {
       const { data } = await authService.registerOrganisation(payload)
-
-      this.email = data.email
-      this.otpPurpose = 'signup'
-
+      this.setUserEmail(data.email)
       return data
     },
 
     async login(payload: LoginPayload) {
-      const { data } = await authService.login(payload)
+      const response = await authService.login(payload)
+      const responseBody = response.data as unknown as WrappedApiResponse
+      const authData = responseBody.data
 
-      this.handleLoginSuccess(data)
-      this.email = (data.user as User | undefined)?.email ?? payload.email
-      this.otpPurpose = null
+      if (!authData?.access_token) {
+        throw new Error('Login response missing access token.')
+      }
 
-      return data
+      this.handleLoginSuccess(authData.access_token)
+      this.setUserEmail(payload.email)
+
+      return true
     },
 
     async verifyOTP(payload: VerifyOTPPayload) {
       const { data } = await authService.verifyOtp(payload)
+      const responseData = data as unknown as VerifyOtpApiResponse
 
-      const isLoginOtp = data?.otp_purpose === 'login' || this.otpPurpose === 'login'
-
-      if (isLoginOtp && data?.login_data) {
-        this.handleLoginSuccess(data.login_data)
+      if (responseData?.login_data?.access_token) {
+        this.handleLoginSuccess(
+          responseData.login_data.access_token,
+          responseData.login_data.user
+        )
       } else {
         this.setAccessToken(null)
         this.user = null
-      }
-
-      if (data?.next === 'login' || data?.next === 'dashboard') {
-        this.otpPurpose = null
       }
 
       return data
@@ -102,7 +135,9 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       try {
-        await authService.logout(this.accessToken)
+        if (this.accessToken) {
+           await authService.logout(this.accessToken)
+        }
       } finally {
         this.clearAuthState()
       }
