@@ -196,7 +196,7 @@ const handleLogin = async () => {
             <button
               type="submit"
               :disabled="isSubmitting"
-              class="w-full rounded-md bg-[#3C2610] py-3.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+              class="w-full cursor-pointer rounded-md bg-[#3C2610] py-3.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span v-if="!isSubmitting">Login</span>
               <span v-else>Checking credentials...</span>

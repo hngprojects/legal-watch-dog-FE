@@ -1,10 +1,6 @@
 import api from '@/lib/api'
 import { mockProjectService } from '@/mocks/mock-project-service'
-import type {
-  CreateProjectPayload,
-  Project,
-  UpdateProjectPayload,
-} from '@/types/project'
+import type { CreateProjectPayload, Project, UpdateProjectPayload } from '@/types/project'
 
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
 
