@@ -3,7 +3,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
-import MainHeader from '@/components/landing-page/MainHeader.vue'
+// import MainHeader from '@/components/landing-page/MainHeader.vue'
+// import MainFooter from '@/components/landing-page/MainFooter.vue'
 import { useAuthStore } from '@/stores/auth-store'
 
 const authStore = useAuthStore()
@@ -67,7 +68,7 @@ const handleLogin = async () => {
 
 <template>
   <div class="flex min-h-screen flex-col bg-white">
-    <MainHeader />
+    <!-- <MainHeader /> -->
 
     <main class="relative flex flex-1">
       <AuthBranding />
@@ -242,5 +243,10 @@ const handleLogin = async () => {
         </div>
       </div>
     </main>
+<<<<<<< HEAD
+
+    <!-- <MainFooter /> -->
+=======
+>>>>>>> 4e3d84258fc1782285e63a7fba60ce664561f8f6
   </div>
 </template>
