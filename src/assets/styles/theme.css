@@ -1,4 +1,4 @@
-/* @import './colors.css';
+@import './colors.css';
 
 :root {
   --color-primary-700: var(--color-chocolate-brown-700);
@@ -69,4 +69,4 @@
   --color-primary-850: var(--color-chocolate-brown-850);
   --color-warning-50: var(--color-orange-50);
   --color-secondary-300: var(--color-peach-amber-300);
-} */
+}
