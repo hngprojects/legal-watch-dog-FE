@@ -93,9 +93,9 @@ const handleContinue = async () => {
   try {
     const response = await authStore.verifyOTP({ email: email.value, code })
 
-    successMessage.value = response.message as string
+    successMessage.value = response?.message as string
 
-    const destination = response.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
+    const destination = response?.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
 
     if (destination.name === 'login') {
       router.replace(destination)

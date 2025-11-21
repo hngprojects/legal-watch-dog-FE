@@ -130,13 +130,11 @@ export const useAuthStore = defineStore('auth', {
     async verifyOTP(payload: VerifyOTPPayload) {
       const response = await authService.verifyOtp(payload)
       const responseBody = response.data as unknown as VerifyOtpApiResponse
-      const tokenData = responseBody.login_data || responseBody.data
+      const userData = responseBody.data;
 
-      if (tokenData?.access_token) {
-        this.handleLoginSuccess(tokenData.access_token, tokenData.user)
-        return { ...responseBody, next: 'dashboard' }
-      } else {
-        this.setAccessToken(null)
+      console.log(userData);
+
+      if (userData) {
         this.user = null
         return { ...responseBody, next: 'login' }
       }
