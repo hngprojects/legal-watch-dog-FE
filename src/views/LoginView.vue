@@ -103,7 +103,7 @@ const handleLogin = async () => {
               </ul>
             </div>
 
-            <div class="relative">
+            <div class="relative mb-4">
               <label
                 class="pointer-events-none absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500"
               >

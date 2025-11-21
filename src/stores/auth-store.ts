@@ -3,7 +3,6 @@ import { authService } from '@/api/auth'
 import type {
   LoginPayload,
   LoginResponse,
-  RefreshTokenResponse,
   RegisterPayload,
   VerifyOTPPayload,
   OtpPurpose,
@@ -63,10 +62,6 @@ export const useAuthStore = defineStore('auth', {
       this.user = response.user as User
     },
 
-    handleTokenRefresh(response: RefreshTokenResponse) {
-      this.setAccessToken(response.access_token)
-    },
-
     async register(payload: RegisterPayload) {
       const { data } = await authService.registerOrganisation(payload)
 
@@ -89,8 +84,13 @@ export const useAuthStore = defineStore('auth', {
     async verifyOTP(payload: VerifyOTPPayload) {
       const { data } = await authService.verifyOtp(payload)
 
-      if (data?.login_data) {
+      const isLoginOtp = data?.otp_purpose === 'login' || this.otpPurpose === 'login'
+
+      if (isLoginOtp && data?.login_data) {
         this.handleLoginSuccess(data.login_data)
+      } else {
+        this.setAccessToken(null)
+        this.user = null
       }
 
       if (data?.next === 'login' || data?.next === 'dashboard') {
@@ -106,13 +106,6 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.clearAuthState()
       }
-    },
-
-    async refreshSession() {
-      const { data } = await authService.refreshToken()
-
-      this.handleTokenRefresh(data)
-      return data
     },
   },
 })

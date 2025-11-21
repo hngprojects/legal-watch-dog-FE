@@ -23,7 +23,7 @@ const bearerHeader = (token?: string | null) =>
 
 export const authService = {
   registerOrganisation: (payload: RegisterPayload) =>
-    http.post<RegisterResponse>('/auth/register', payload),
+    http.post<RegisterResponse>('/auth/register/', payload),
 
   login: (payload: LoginPayload) => http.post<LoginResponse>('/auth/login', payload),
 

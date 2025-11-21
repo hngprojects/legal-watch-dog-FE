@@ -26,52 +26,14 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
-let refreshPromise: Promise<unknown> | null = null
-
-const refreshSession = async () => {
-  const auth = useAuthStore()
-  if (!refreshPromise) {
-    refreshPromise = auth
-      .refreshSession()
-      .catch((refreshError) => {
-        auth.clearAuthState()
-        throw refreshError
-      })
-      .finally(() => {
-        refreshPromise = null
-      })
-  }
-
-  return refreshPromise
-}
-
 api.interceptors.response.use(
   (res) => res,
-  async (error) => {
-    const originalRequest = error.config
+  (error) => {
     const status = error.response?.status
 
-    const isAuthRefreshCall = originalRequest?.url?.includes('/auth/refresh')
-
-    if (status === 401 && originalRequest && !originalRequest._retry && !isAuthRefreshCall) {
-      originalRequest._retry = true
-
-      try {
-        await refreshSession()
-        const auth = useAuthStore()
-        if (!auth.accessToken) {
-          auth.clearAuthState()
-          return Promise.reject(error)
-        }
-
-        originalRequest.headers = originalRequest.headers ?? {}
-        originalRequest.headers.Authorization = `Bearer ${auth.accessToken}`
-        return api(originalRequest)
-      } catch (refreshError) {
-        const auth = useAuthStore()
-        auth.clearAuthState()
-        return Promise.reject(refreshError)
-      }
+    if (status === 401) {
+      const auth = useAuthStore()
+      auth.clearAuthState()
     }
     return Promise.reject(error)
   },

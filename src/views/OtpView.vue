@@ -8,8 +8,10 @@ import { useAuthStore } from '@/stores/auth-store'
 const authStore = useAuthStore()
 const router = useRouter()
 
+const OTP_TIMER_DURATION = 10 * 60
+
 const otpCode = ref('')
-const timer = ref(60)
+const timer = ref(OTP_TIMER_DURATION)
 const errorMessage = ref('')
 const successMessage = ref('')
 const isVerifying = ref(false)
@@ -33,11 +35,19 @@ const subtitle = computed(() => {
 })
 
 const startTimer = () => {
-  timer.value = 60
+  timer.value = OTP_TIMER_DURATION
+  if (interval) {
+    clearInterval(interval)
+  }
   interval = setInterval(() => {
-    if (timer.value > 0) {
-      timer.value--
+    if (timer.value <= 0) {
+      if (interval) {
+        clearInterval(interval)
+        interval = null
+      }
+      return
     }
+    timer.value--
   }, 1000)
 }
 
@@ -83,15 +93,24 @@ const handleContinue = async () => {
   isVerifying.value = true
   errorMessage.value = ''
   successMessage.value = ''
+  const currentPurpose = otpPurpose.value
 
   try {
     const response = await authStore.verifyOTP({ email: email.value, code })
 
     successMessage.value = response.message
-    if (response.next === 'dashboard' || response.next === 'login') {
-      router.push({ name: 'dashboard' })
+
+    const destination =
+      response.otp_purpose === 'signup' || currentPurpose === 'signup'
+        ? { name: 'login' }
+        : response.next === 'dashboard'
+          ? { name: 'dashboard' }
+          : { name: 'login' }
+
+    if (destination.name === 'login') {
+      router.replace(destination)
     } else {
-      router.push({ name: 'dashboard' })
+      router.push(destination)
     }
   } catch (error) {
     if (isAxiosError(error)) {
