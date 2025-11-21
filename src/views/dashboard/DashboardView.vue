@@ -241,6 +241,7 @@ const handleCreateProject = () => {
       </div>
     </teleport>
   </main>
+  <main>dashboard</main>
 </template>
 
 <style scoped>

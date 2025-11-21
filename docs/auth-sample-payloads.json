@@ -1,0 +1,18 @@
+{
+  "register": {
+    "name": "Mark Boss",
+    "email": "marktheboss@hng.com",
+    "password": "marks123.passwork@now",
+    "confirm_password": "marks123.passwork@now",
+    "industry": "Legal Research"
+  },
+  "login": {
+    "email": "marktheboss@hng.com",
+    "password": "marks123.passwork@now"
+  },
+  "verifyOtp": {
+    "email": "marktheboss@hng.com",
+    "code": "123456",
+    "note": "Replace code with the OTP shown in the test alert/localStorage entry."
+  }
+}
