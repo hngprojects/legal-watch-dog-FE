@@ -8,15 +8,16 @@ import { useAuthStore } from '@/stores/auth-store'
 const authStore = useAuthStore()
 const router = useRouter()
 
+const OTP_TIMER_DURATION = 10 * 60
+
 const otpCode = ref('')
-const timer = ref(60)
+const timer = ref(OTP_TIMER_DURATION)
 const errorMessage = ref('')
 const successMessage = ref('')
 const isVerifying = ref(false)
 let interval: ReturnType<typeof setInterval> | null = null
 
 const email = computed(() => authStore.email)
-const otpPurpose = computed(() => authStore.otpPurpose)
 
 const obfuscatedEmail = computed(() => {
   if (!email.value) return ''
@@ -26,18 +27,22 @@ const obfuscatedEmail = computed(() => {
   return `${firstChar}*****@${domain}`
 })
 
-const subtitle = computed(() => {
-  return otpPurpose.value === 'login'
-    ? 'Enter the 6 digit code sent to confirm this login.'
-    : 'Enter the 6 digit code sent to verify your email.'
-})
+const subtitle = computed(() => 'Enter the 6 digit code sent to verify your email.')
 
 const startTimer = () => {
-  timer.value = 60
+  timer.value = OTP_TIMER_DURATION
+  if (interval) {
+    clearInterval(interval)
+  }
   interval = setInterval(() => {
-    if (timer.value > 0) {
-      timer.value--
+    if (timer.value <= 0) {
+      if (interval) {
+        clearInterval(interval)
+        interval = null
+      }
+      return
     }
+    timer.value--
   }, 1000)
 }
 
@@ -88,10 +93,13 @@ const handleContinue = async () => {
     const response = await authStore.verifyOTP({ email: email.value, code })
 
     successMessage.value = response.message
-    if (response.next === 'login') {
-      router.push({ name: 'login' })
-    } else if (response.next === 'dashboard') {
-      router.push({ name: 'dashboard' })
+
+    const destination = response.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
+
+    if (destination.name === 'login') {
+      router.replace(destination)
+    } else {
+      router.push(destination)
     }
   } catch (error) {
     if (isAxiosError(error)) {
