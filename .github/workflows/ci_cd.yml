@@ -71,36 +71,36 @@ jobs:
 
       - name: Set up SSH and Deploy
         env:
-          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SERVER_PASS: ${{ secrets.STAGING_PASS }}
           SERVER_USER: ${{ secrets.STAGING_USER }}
           SERVER_IP: ${{ secrets.STAGING_IP }}
         run: |
-          echo "$SSH_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          echo "access gained"
+          echo "copying files to server"
 
-          scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
 
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+          sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
-              REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE"
-            # Clone if the directory doesn't exist
+              REMOTE_DIR="/home//apps/frontend/legal-watch-dog-FE"
+            # Clone if the directory doesn'ifeanyinwt exist
             if [ ! -d "$REMOTE_DIR" ]; then
-              cd /home/watchdog/apps/frontend/
+              cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
 
-            #cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             # git remote set-url origin git@github.com:hngprojects/legal-watch-dog-FE.git
             git pull origin staging
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
-            chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
-            chmod o+rx /home/watchdog
-            chmod o+rx /home/watchdog/apps
-            chmod o+rx /home/watchdog/apps/frontend
+            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
+            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE
+            chmod o+rx /home/ifeanyinw
+            chmod o+rx /home/ifeanyinw/apps
+            chmod o+rx /home/ifeanyinw/apps/frontend
             sudo nginx -s reload
           EOF
 
@@ -112,7 +112,7 @@ jobs:
     name: CD - Frontend Deploy (Production)
     runs-on: [self-hosted]
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/dev'
     environment: production
 
     steps:
@@ -123,37 +123,37 @@ jobs:
 
       - name: Set up SSH and Deploy
         env:
-          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          SERVER_PASS: ${{ secrets.PROD_PASS }}
           SERVER_USER: ${{ secrets.PROD_USER }}
           SERVER_IP: ${{ secrets.PROD_IP }}
         run: |
-          echo "$SSH_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          echo "access gained"
+          echo "copying files to server"
 
-          scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
 
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+          sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
 
-            REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE"
+            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
-              cd /home/watchdog/apps/frontend/
+              cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
 
-            #cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             
-            git pull origin main
+            git pull origin dev
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
-            chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
-            chmod o+rx /home/watchdog
-            chmod o+rx /home/watchdog/apps
-            chmod o+rx /home/watchdog/apps/frontend
+            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
+            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE
+            chmod o+rx /home/ifeanyinw
+            chmod o+rx /home/ifeanyinw/apps
+            chmod o+rx /home/ifeanyinw/apps/frontend
             sudo nginx -s reload
           EOF
 
