@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watchEffect, nextTick } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
@@ -8,18 +8,16 @@ import { useAuthStore } from '@/stores/auth-store'
 const authStore = useAuthStore()
 const router = useRouter()
 
-const otpDigits = ref<string[]>(['', '', '', '', '', ''])
-const inputRefs = ref<(HTMLInputElement | null)[]>([])
-const timer = ref(60)
+const OTP_TIMER_DURATION = 10 * 60
+
+const otpCode = ref('')
+const timer = ref(OTP_TIMER_DURATION)
 const errorMessage = ref('')
 const successMessage = ref('')
 const isVerifying = ref(false)
 let interval: ReturnType<typeof setInterval> | null = null
 
 const email = computed(() => authStore.email)
-const otpPurpose = computed(() => authStore.otpPurpose)
-
-const otpCode = computed(() => otpDigits.value.join(''))
 
 const obfuscatedEmail = computed(() => {
   if (!email.value) return ''
@@ -29,18 +27,22 @@ const obfuscatedEmail = computed(() => {
   return `${firstChar}*****@${domain}`
 })
 
-const subtitle = computed(() => {
-  return otpPurpose.value === 'login'
-    ? 'Enter the 6 digit code sent to confirm this login.'
-    : 'Enter the 6 digit code sent to verify your email.'
-})
+const subtitle = computed(() => 'Enter the 6 digit code sent to verify your email.')
 
 const startTimer = () => {
-  timer.value = 60
+  timer.value = OTP_TIMER_DURATION
+  if (interval) {
+    clearInterval(interval)
+  }
   interval = setInterval(() => {
-    if (timer.value > 0) {
-      timer.value--
+    if (timer.value <= 0) {
+      if (interval) {
+        clearInterval(interval)
+        interval = null
+      }
+      return
     }
+    timer.value--
   }, 1000)
 }
 
@@ -70,73 +72,13 @@ const formatTime = (seconds: number) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
-const handleInput = (index: number, event: Event) => {
-  const input = event.target as HTMLInputElement
-  const value = input.value
-
-  // Only allow numbers
-  if (value && !/^\d$/.test(value)) {
-    input.value = otpDigits.value[index] || ''
-    return
-  }
-
-  otpDigits.value[index] = value
-
-  // Auto-focus next input
-  if (value && index < 5) {
-    nextTick(() => {
-      inputRefs.value[index + 1]?.focus()
-    })
-  }
-}
-
-const handleKeyDown = (index: number, event: KeyboardEvent) => {
-  // Handle backspace
-  if (event.key === 'Backspace') {
-    if (!otpDigits.value[index] && index > 0) {
-      nextTick(() => {
-        inputRefs.value[index - 1]?.focus()
-      })
-    }
-  }
-  // Handle arrow keys
-  else if (event.key === 'ArrowLeft' && index > 0) {
-    nextTick(() => {
-      inputRefs.value[index - 1]?.focus()
-    })
-  } else if (event.key === 'ArrowRight' && index < 5) {
-    nextTick(() => {
-      inputRefs.value[index + 1]?.focus()
-    })
-  }
-}
-
-const handlePaste = (event: ClipboardEvent) => {
-  event.preventDefault()
-  const pastedData = event.clipboardData?.getData('text') || ''
-  const digits = pastedData.replace(/\D/g, '').slice(0, 6).split('')
-
-  digits.forEach((digit, index) => {
-    if (index < 6) {
-      otpDigits.value[index] = digit
-    }
-  })
-
-  // Focus the next empty input or the last one
-  const nextEmptyIndex = otpDigits.value.findIndex((d) => !d)
-  const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex
-  nextTick(() => {
-    inputRefs.value[focusIndex]?.focus()
-  })
-}
-
 const handleContinue = async () => {
   if (!email.value) {
     router.replace({ name: 'login' })
     return
   }
 
-  const code = otpCode.value
+  const code = otpCode.value.trim()
 
   if (!code || code.length < 6) {
     errorMessage.value = 'Enter the 6 digit OTP sent to your email.'
@@ -151,10 +93,13 @@ const handleContinue = async () => {
     const response = await authStore.verifyOTP({ email: email.value, code })
 
     successMessage.value = response.message
-    if (response.next === 'login') {
-      router.push({ name: 'login' })
-    } else if (response.next === 'dashboard') {
-      router.push({ name: 'dashboard' })
+
+    const destination = response.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
+
+    if (destination.name === 'login') {
+      router.replace(destination)
+    } else {
+      router.push(destination)
     }
   } catch (error) {
     if (isAxiosError(error)) {
@@ -173,12 +118,9 @@ const handleResend = () => {
   if (interval) {
     clearInterval(interval)
   }
-  otpDigits.value = ['', '', '', '', '', '']
+  otpCode.value = ''
   successMessage.value = 'A new OTP has been sent to your email.'
   startTimer()
-  nextTick(() => {
-    inputRefs.value[0]?.focus()
-  })
 }
 </script>
 
@@ -208,19 +150,14 @@ const handleResend = () => {
         <!-- OTP Input Section -->
         <div class="mx-auto max-w-[400px] space-y-6">
           <!-- OTP Input -->
-          <div class="flex justify-center gap-2">
+          <div class="flex justify-center">
             <input
-              v-for="(digit, index) in otpDigits"
-              :key="index"
-              :ref="(el) => (inputRefs[index] = el as HTMLInputElement | null)"
-              v-model="otpDigits[index]"
+              v-model="otpCode"
               type="text"
-              maxlength="1"
+              maxlength="6"
               inputmode="numeric"
-              @input="handleInput(index, $event)"
-              @keydown="handleKeyDown(index, $event)"
-              @paste="handlePaste"
-              class="h-14 w-12 rounded-lg border border-gray-300 text-center text-2xl font-medium focus:border-transparent focus:ring-2 focus:ring-amber-900 focus:outline-none"
+              placeholder="••••••"
+              class="h-14 w-40 rounded-lg border border-gray-300 text-center text-2xl font-medium tracking-[0.4em] focus:border-transparent focus:ring-2 focus:ring-amber-900 focus:outline-none"
             />
           </div>
 

@@ -14,7 +14,7 @@ const Privacys = ['Copyright', 'Terms of Services']
 
 <template>
   <footer class="bg-white text-gray-800">
-    <div class="mx-auto max-w-7xl px-6 py-10">
+    <div class="mx-auto max-w-7xl px-16 py-10">
       <div class="mb-6">
         <div class="flex items-center gap-3">
           <img

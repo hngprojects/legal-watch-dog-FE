@@ -6,9 +6,9 @@ import AuthBranding from '@/components/authentication/AuthBranding.vue'
 // import MainHeader from '@/components/landing-page/MainHeader.vue'
 // import MainFooter from '@/components/landing-page/MainFooter.vue'
 import { useAuthStore } from '@/stores/auth-store'
-import type { LoginOtpChallenge } from '@/types/auth'
 
 const authStore = useAuthStore()
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -18,15 +18,9 @@ const errors = ref<string[]>([])
 const serverError = ref('')
 const isSubmitting = ref(false)
 
-const router = useRouter()
-
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MIN_PASSWORD_LENGTH = 8
 const sanitize = (value: string) => value.trim()
-
-const isOtpChallenge = (payload: unknown): payload is LoginOtpChallenge => {
-  return !!payload && typeof payload === 'object' && 'requires_otp' in payload
-}
 
 const handleLogin = async () => {
   const sanitizedEmail = sanitize(email.value).toLowerCase()
@@ -51,17 +45,14 @@ const handleLogin = async () => {
   serverError.value = ''
 
   try {
-    const result = await authStore.login({
+    const success = await authStore.login({
       email: sanitizedEmail,
       password: sanitizedPassword,
     })
 
-    if (isOtpChallenge(result) && result.requires_otp) {
-      router.push({ name: 'otp' })
-      return
+    if (success) {
+      router.push({ name: 'dashboard' })
     }
-
-    router.push({ name: 'dashboard' })
   } catch (error) {
     if (isAxiosError(error)) {
       serverError.value =
@@ -112,7 +103,7 @@ const handleLogin = async () => {
               </ul>
             </div>
 
-            <div class="relative">
+            <div class="relative mb-4">
               <label
                 class="pointer-events-none absolute -top-2 left-3 bg-white px-1 text-xs text-gray-500"
               >

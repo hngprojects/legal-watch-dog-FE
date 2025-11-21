@@ -3,8 +3,10 @@ import { reactive, ref } from 'vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { submitWaitlist, type WaitlistPayload } from '@/api/waitlist'
+// import FormControl from '../composables/form-control.vue'
+import Input from '../ui/input/Input.vue'
+// import Button from '../ui/button/Button.vue'
 
 const form = reactive<WaitlistPayload>({
   organization_name: '',
@@ -70,31 +72,11 @@ const handleSubmit = async () => {
 
       <CardContent class="flex w-full flex-col items-center gap-6 p-0">
         <form class="flex w-full max-w-[760px] flex-col gap-3" @submit.prevent="handleSubmit">
-          <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-5">
-            <Input
-              v-model="form.organization_name"
-              type="text"
-              name="organization_name"
-              placeholder="Organization Name"
-              required
-              class="border-border bg-card/90 flex-1 text-base"
-            />
-            <Input
-              v-model="form.organization_email"
-              type="email"
-              name="organization_email"
-              placeholder="Organization Email"
-              required
-              class="border-border bg-card/90 flex-1 text-base"
-            />
-            <Button
-              size="lg"
-              type="submit"
-              class="w-full whitespace-nowrap md:w-auto"
-              :disabled="isSubmitting"
-            >
-              {{ isSubmitting ? 'Submitting...' : 'Join the Waitlist' }}
-            </Button>
+          <div class="flex flex-col gap-3 md:flex-row md:items-start md:gap-5 mt-56">
+            <div>
+              <Input placeholder="Organization email"/>
+              <Button>Join the waitlist</Button>
+            </div>
           </div>
           <p class="text-muted-foreground text-center text-xs">
             We respect your privacy. No spam, unsubscribe anytime.

@@ -23,6 +23,25 @@ const isSubmitting = ref(false)
 const router = useRouter()
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const PUBLIC_EMAIL_DENYLIST = new Set([
+  'yahoo.com',
+  'hotmail.com',
+  'outlook.com',
+  'aol.com',
+  'icloud.com',
+  'mail.com',
+  'protonmail.com',
+  'zoho.com',
+  'gmx.com',
+  'yandex.com',
+  'msn.com',
+  'live.com',
+  'ymail.com',
+  'inbox.com',
+  'me.com',
+  'fastmail.com',
+  'hushmail.com',
+])
 const hasLetter = /[A-Za-z]/
 const hasNumber = /[0-9]/
 const hasSpecial = /[^A-Za-z0-9]/
@@ -55,6 +74,11 @@ const validateSignupForm = () => {
 
   if (!sanitizedEmail || !emailPattern.test(sanitizedEmail)) {
     validationErrors.push('Enter a valid company email address.')
+  } else {
+    const domain = sanitizedEmail.split('@')[1] ?? ''
+    if (PUBLIC_EMAIL_DENYLIST.has(domain)) {
+      validationErrors.push('Use your company email address (public email domains are not allowed).')
+    }
   }
 
   if (!sanitizedPassword) {
@@ -89,10 +113,12 @@ const handleCreateAccount = async () => {
   serverError.value = ''
   isSubmitting.value = true
 
+  const sanitizedEmail = sanitize(email.value).toLowerCase()
+
   try {
     await authStore.register({
       name: sanitize(companyName.value),
-      email: sanitize(email.value).toLowerCase(),
+      email: sanitizedEmail,
       password: sanitize(password.value),
       confirm_password: sanitize(confirmPassword.value),
       industry: 'Legal Services',

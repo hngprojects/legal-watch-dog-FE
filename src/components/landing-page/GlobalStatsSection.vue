@@ -1,9 +1,9 @@
 <script setup lang="ts"></script>
 
 <template>
-  <section class="space-y-12 px-4 py-12">
+  <section class="space-y-12 px-16 py-12">
     <!-- Top White Card Section -->
-    <div class="rounded-2xl bg-white p-10 shadow-sm">
+    <div class="rounded-2xl bg-white p-10 shadow-xl">
       <div class="mx-auto max-w-3xl space-y-4 text-center">
         <h2 class="text-3xl font-bold">
           Your Global Legal Pulse,<br />
@@ -42,7 +42,7 @@
 
     <!-- Brown CTA Section -->
     <div
-      class="relative flex min-h-130 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[#3c2610] p-5 text-center text-white md:p-12"
+      class="relative flex min-h-130 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[#3c2610] p-5 text-center text-white md:p-12 shadow-xl"
     >
       <div
         class="absolute top-0 left-0 h-full w-40 bg-bottom bg-no-repeat md:w-60 lg:w-90"
