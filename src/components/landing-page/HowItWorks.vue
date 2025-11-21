@@ -28,7 +28,7 @@ const cards = [
 </script>
 
 <template>
-  <section id="how-it-works" class="relative flex w-full items-center justify-center py-8 sm:py-16 px-16">
+  <section id="how-it-works" class="relative flex items-center justify-center py-8 sm:py-16 px-16">
     <div class="flex w-full flex-col gap-11">
       <div class="mx-auto flex w-full flex-col items-center gap-5 text-center">
         <TypographyHeading level="h2" align="center">
