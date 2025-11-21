@@ -52,7 +52,6 @@ jobs:
           name: frontend-build
           path: build.tar.gz
 
-
   # -------------------------
   # 2. DEPLOY TO STAGING (DEV BRANCH)
   # -------------------------
@@ -84,14 +83,12 @@ jobs:
             set -e
 
             REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
-            # Clone if the directory doesn't exist
+
             if [ ! -d "$REMOTE_DIR" ]; then
               cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
-
-            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             
             git pull origin dev
@@ -140,14 +137,12 @@ jobs:
             set -e
 
             REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
-            # Clone if the directory doesn't exist
+
             if [ ! -d "$REMOTE_DIR" ]; then
               cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
-
-            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             
             git pull origin main
@@ -161,7 +156,6 @@ jobs:
             sudo nginx -s reload
           EOF
 
-
       - name: Mark Deployment Result
         if: failure()
         run: echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
@@ -169,10 +163,10 @@ jobs:
   # -------------------------
   # 4. Slack Notification
   # -------------------------
-    notify_slack:
+  notify_slack:
     name: Notify Slack
     runs-on: [self-hosted]
-    needs: 
+    needs:
       - build
       - deploy_staging
       - deploy_production
@@ -188,14 +182,12 @@ jobs:
         run: |
           echo "Preparing Slack message..."
 
-          # Determine high-level outcome
           if [ "$BUILD_RESULT" == "success" ] && [ "$STAGING_RESULT" == "success" ] && [ "$PROD_RESULT" == "success" ]; then
             STATUS="✅ ALL JOBS SUCCESSFUL"
           else
             STATUS="❌ ONE OR MORE JOBS FAILED"
           fi
 
-          # Build detailed failure list
           DETAIL_MSG=""
 
           if [ "$BUILD_RESULT" != "success" ]; then
@@ -218,7 +210,6 @@ jobs:
 
           LOG_LINK="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-          # Format Slack JSON
           PAYLOAD="{
             \"text\": \"*Frontend CI/CD Pipeline Result*\n$STATUS\n$DETAIL_MSG\n\n🔗 <${LOG_LINK}|View Logs>\",
             \"username\": \"CI/CD Bot\",
