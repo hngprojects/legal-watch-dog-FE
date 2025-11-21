@@ -46,8 +46,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header
-    class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md">
+  <header class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md">
     <div class="mx-auto flex w-full max-w-[1240px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:py-5">
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
         <BrandLogo />
@@ -65,10 +64,12 @@ onUnmounted(() => {
       </nav>
 
       <div class="flex items-center gap-3">
-        <Button :as="RouterLink" :to="{ path: '/waitlist' }" variant="ghost" size="lg" class="hidden lg:inline-flex px-7">
+        <Button :as="RouterLink" :to="{ path: '/waitlist' }" variant="ghost" size="lg"
+          class="hidden lg:inline-flex px-7">
           Join Waitlist
         </Button>
-        <Button :as="RouterLink" :to="{ path: '/login' }" variant="secondary" size="lg" class="hidden lg:inline-flex px-7" >
+        <Button :as="RouterLink" :to="{ path: '/login' }" variant="secondary" size="lg"
+          class="hidden lg:inline-flex px-7">
           Sign In
         </Button>
 
