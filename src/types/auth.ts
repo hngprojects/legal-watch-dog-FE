@@ -45,26 +45,40 @@ export interface VerifyOTPPayload {
   code: string
 }
 
-export type OtpPurpose = 'signup' | 'login'
-
-export interface LoginOtpChallenge {
-  requires_otp: true
+export interface ForgetPasswordPayload {
   email: string
-  otp_purpose: OtpPurpose
+}
+
+export interface ForgetPasswordResponse {
+  status: string
+  status_code: number
+  message: string
+  data: Record<string, unknown>
+}
+
+export interface ResetPasswordPayload {
+  token: string
+  new_password: string
+  confirm_password: string
+}
+
+export interface ResetPasswordResponse {
   message: string
 }
 
-export interface VerifyOtpResponse {
-  message: string
-  otp_purpose: OtpPurpose
-  next: 'login' | 'dashboard'
-  login_data?: LoginResponse
-}
-
+//Validation Error
 export interface AuthError {
   detail: {
     loc: (string | number)[]
     msg: string
     type: string
   }[]
+}
+
+// other errors like 404
+export interface FailureResponse {
+  status: string
+  status_code: number
+  message: string
+  data: Record<string, unknown>
 }
