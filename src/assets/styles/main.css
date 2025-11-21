@@ -5,8 +5,13 @@
 @import './theme.css';
 
 @theme {
-  --font-sans: var(--typeface-fontfamily-title);
-  --color-brand-main: var(--color-chocolate-brown-main);
+  --color-accent: var(--color-chocolate-brown-main);
+  --color-bg-primary: var(--gray-white);
+  --color-text-placeholder: #717680;
+
+  --font-sans: var(--font-title);
+  --spacing-6: var(--sizes-size-6);
+  --spacing-56: var(--sizes-size-56);
 }
 
 @layer base {
@@ -32,8 +37,67 @@
     color: var(--foreground);
   }
 
+
   a {
     color: inherit;
     text-decoration: none;
   }
+}
+@utility preset-display-lg {
+  @apply font-sans text-[48px] leading-[1.3] font-semibold tracking-normal
+}
+
+@utility preset-display-md {
+  @apply font-sans text-[36px] leading-[1.3] font-semibold tracking-normal
+}
+
+@utility preset-display-sm {
+  @apply font-sans text-[24px] leading-[1.3] font-semibold tracking-normal
+}
+@utility preset-heading-lg {
+  @apply font-sans text-[20px] leading-[1.4] font-semibold tracking-normal
+}
+
+@utility preset-heading-md {
+  @apply font-sans text-[18px] leading-[1.4] font-semibold tracking-normal
+}
+
+@utility preset-heading-sm {
+  @apply font-sans text-[16px] leading-[1.4] font-semibold tracking-normal
+}
+
+@utility preset-label-lg {
+  @apply font-sans text-[14px] leading-[1.4] font-medium tracking-tighter
+}
+
+@utility preset-label-md {
+  @apply font-sans text-[12px] leading-[1.4] font-medium tracking-tighter
+}
+
+@utility preset-label-sm {
+  @apply font-sans text-[10px] leading-[1.4] font-medium tracking-tighter
+}
+
+@utility preset-body-lg {
+  @apply font-sans text-[16px] leading-normal font-normal tracking-normal
+}
+
+@utility preset-body-md {
+  @apply font-sans text-[14px] leading-normal font-normal tracking-normal
+}
+
+@utility preset-body-sm {
+  @apply font-sans text-[12px] leading-normal font-normal tracking-normal
+}
+
+@utility preset-link-lg {
+  @apply font-sans text-[14px] leading-normal font-medium tracking-wide
+}
+
+@utility preset-link-md {
+  @apply font-sans text-[12px] leading-normal font-medium tracking-wide
+}
+
+@utility preset-link-sm {
+  @apply font-sans text-[10px] leading-normal font-medium tracking-wide
 }

@@ -1,8 +1,8 @@
 :root {
-  --typeface-fontfamily-title: 'Inter';
-  --typeface-fontfamily-body: 'Inter';
-  --typeface-weight-regular: 'Regular';
-  --typeface-weight-medium: 'Medium';
-  --typeface-weight-semibold: 'Semi-Bold';
-  --typeface-weight-bold: 'Bold';
+  --font-title: 'Inter';
+  --font-body: 'Inter';
+  --font-weight-regular: 'Regular';
+  --font-weight-medium: 'Medium';
+  --font-weight-semibold: 'Semi-Bold';
+  --font-weight-bold: 'Bold';
 }
