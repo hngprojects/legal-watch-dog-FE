@@ -88,9 +88,9 @@ const handleContinue = async () => {
     const response = await authStore.verifyOTP({ email: email.value, code })
 
     successMessage.value = response.message
-    if (response.next === 'login') {
-      router.push({ name: 'login' })
-    } else if (response.next === 'dashboard') {
+    if (response.next === 'dashboard' || response.next === 'login') {
+      router.push({ name: 'dashboard' })
+    } else {
       router.push({ name: 'dashboard' })
     }
   } catch (error) {

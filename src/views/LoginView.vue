@@ -6,8 +6,6 @@ import AuthBranding from '@/components/authentication/AuthBranding.vue'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
 import { useAuthStore } from '@/stores/auth-store'
-import type { LoginOtpChallenge } from '@/types/auth'
-
 const authStore = useAuthStore()
 
 const email = ref('')
@@ -23,10 +21,6 @@ const router = useRouter()
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MIN_PASSWORD_LENGTH = 8
 const sanitize = (value: string) => value.trim()
-
-const isOtpChallenge = (payload: unknown): payload is LoginOtpChallenge => {
-  return !!payload && typeof payload === 'object' && 'requires_otp' in payload
-}
 
 const handleLogin = async () => {
   const sanitizedEmail = sanitize(email.value).toLowerCase()
@@ -56,12 +50,9 @@ const handleLogin = async () => {
       password: sanitizedPassword,
     })
 
-    if (isOtpChallenge(result) && result.requires_otp) {
-      router.push({ name: 'otp' })
-      return
+    if (result) {
+      router.push({ name: 'dashboard' })
     }
-
-    router.push({ name: 'dashboard' })
   } catch (error) {
     if (isAxiosError(error)) {
       serverError.value =

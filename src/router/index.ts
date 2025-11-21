@@ -112,17 +112,7 @@ router.beforeEach(async (to) => {
     return true
   }
 
-  try {
-    await auth.refreshToken()
-  } catch (error) {
-    console.error('Failed to refresh token before navigation', error)
-  }
-
-  if (!auth.isAuthenticated) {
-    return { name: 'login', query: { redirect: to.fullPath } }
-  }
-
-  return true
+  return { name: 'login', query: { redirect: to.fullPath } }
 })
 
 export default router

@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
 import type {
-  LoginOtpChallenge,
   LoginPayload,
   LoginResponse,
+  RefreshTokenResponse,
   RegisterPayload,
   VerifyOTPPayload,
   OtpPurpose,
@@ -32,12 +32,6 @@ interface State {
   otpPurpose: OtpPurpose | null
 }
 
-const isOtpChallenge = (
-  response: LoginResponse | LoginOtpChallenge,
-): response is LoginOtpChallenge => {
-  return 'requires_otp' in response && response.requires_otp
-}
-
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
     accessToken: null,
@@ -52,14 +46,25 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setAccessToken(token: string) {
+    setAccessToken(token: string | null) {
       this.accessToken = token
+    },
+
+    clearAuthState() {
+      this.email = null
+      this.user = null
+      this.organisation = null
+      this.accessToken = null
+      this.otpPurpose = null
     },
 
     handleLoginSuccess(response: LoginResponse) {
       this.setAccessToken(response.access_token)
       this.user = response.user as User
-      localStorage.setItem('refreshToken', response.refresh_token)
+    },
+
+    handleTokenRefresh(response: RefreshTokenResponse) {
+      this.setAccessToken(response.access_token)
     },
 
     async register(payload: RegisterPayload) {
@@ -74,14 +79,9 @@ export const useAuthStore = defineStore('auth', {
     async login(payload: LoginPayload) {
       const { data } = await authService.login(payload)
 
-      if (isOtpChallenge(data)) {
-        this.email = data.email
-        this.otpPurpose = data.otp_purpose
-        return data
-      }
-
       this.handleLoginSuccess(data)
       this.email = (data.user as User | undefined)?.email ?? payload.email
+      this.otpPurpose = null
 
       return data
     },
@@ -101,28 +101,17 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
-      await authService.logout(this.accessToken)
-
-      localStorage.removeItem('refreshToken')
-
-      this.email = null
-      this.user = null
-      this.organisation = null
-      this.accessToken = null
-      this.otpPurpose = null
+      try {
+        await authService.logout(this.accessToken)
+      } finally {
+        this.clearAuthState()
+      }
     },
 
-    async refreshToken() {
-      const refreshToken = localStorage.getItem('refreshToken')
+    async refreshSession() {
+      const { data } = await authService.refreshToken()
 
-      if (!refreshToken) {
-        return
-      }
-
-      const { data } = await authService.refreshToken({ refresh_token: refreshToken })
-
-      this.setAccessToken(data.access_token)
-
+      this.handleTokenRefresh(data)
       return data
     },
   },

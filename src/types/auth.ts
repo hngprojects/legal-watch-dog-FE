@@ -30,7 +30,7 @@ export interface LogoutResponse {
 }
 
 export interface RefreshTokenPayload {
-  refresh_token: string
+  refresh_token?: string
 }
 
 export interface RefreshTokenResponse {

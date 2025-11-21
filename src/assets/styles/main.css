@@ -9,7 +9,7 @@
   --color-bg-primary: var(--gray-white);
   --color-text-placeholder: #717680;
 
-  --font-sans: var(--font-title);
+  --font-sans: var(--font-body);
   --spacing-6: var(--sizes-size-6);
   --spacing-56: var(--sizes-size-56);
 }
@@ -22,8 +22,7 @@
   }
 
   body {
-    @apply font-sans;
-    /* background-color: var(--color-page-bg); */
+    @apply font-sans bg-white;
     color: var(--color-text-main);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

@@ -1,45 +1,37 @@
 import axios from 'axios'
 import type {
-  LoginOtpChallenge,
   LoginPayload,
   LoginResponse,
   LogoutResponse,
-  RefreshTokenPayload,
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
   VerifyOTPPayload,
   VerifyOtpResponse,
 } from '@/types/auth'
-import { mockAuthService } from '@/mocks/mock-auth-service'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://minamoto.emerj.net/api/api/v1'
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
 
 const http = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 20000,
 })
 
-const httpAuthService = {
+const bearerHeader = (token?: string | null) =>
+  token ? { Authorization: `Bearer ${token}` } : undefined
+
+export const authService = {
   registerOrganisation: (payload: RegisterPayload) =>
     http.post<RegisterResponse>('/auth/register', payload),
 
-  login: (payload: LoginPayload) =>
-    http.post<LoginResponse | LoginOtpChallenge>('/auth/login', payload),
+  login: (payload: LoginPayload) => http.post<LoginResponse>('/auth/login', payload),
 
-  logout: (token: string | null) =>
-    http.post<LogoutResponse>(
-      '/auth/logout',
-      {},
-      { headers: { Authorization: `Bearer ${token}` } },
-    ),
+  logout: (token?: string | null) =>
+    http.post<LogoutResponse>('/auth/logout', {}, { headers: bearerHeader(token) }),
 
   verifyOtp: (payload: VerifyOTPPayload) =>
-    http.post<VerifyOtpResponse>('/auth/verify-otp', payload),
+    http.post<VerifyOtpResponse>('/auth/verify/otp', payload),
 
-  refreshToken: (payload: RefreshTokenPayload) =>
-    http.post<RefreshTokenResponse>('/auth/refresh', payload),
+  refreshToken: () => http.post<RefreshTokenResponse>('/auth/refresh', {}),
 }
-
-export const authService = USE_MOCK_API ? mockAuthService : httpAuthService
