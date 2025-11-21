@@ -13,6 +13,4 @@ const app = createApp(App)
 app.use(pinia)
 app.use(router)
 
-useAuthStore().refreshToken()
-
 app.mount('#app')

@@ -1,13 +1,6 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
-import type {
-  LoginOtpChallenge,
-  LoginPayload,
-  LoginResponse,
-  RegisterPayload,
-  VerifyOTPPayload,
-  OtpPurpose,
-} from '@/types/auth'
+import type { LoginPayload, RegisterPayload, VerifyOTPPayload } from '@/types/auth'
 
 interface Organisation {
   id: string
@@ -29,22 +22,37 @@ interface State {
   user: User | null
   email: string | null
   organisation: Organisation | null
-  otpPurpose: OtpPurpose | null
 }
 
-const isOtpChallenge = (
-  response: LoginResponse | LoginOtpChallenge,
-): response is LoginOtpChallenge => {
-  return 'requires_otp' in response && response.requires_otp
+interface ApiTokenData {
+  access_token: string
+  refresh_token?: string
+  token_type?: string
+  expires_in?: number
+  user?: User
 }
+
+interface WrappedApiResponse {
+  status: string
+  status_code: number
+  message: string
+  data: ApiTokenData
+}
+
+interface VerifyOtpApiResponse {
+  login_data?: ApiTokenData
+  message?: string
+}
+
+const TOKEN_KEY = 'lwd_access_token'
+const EMAIL_KEY = 'lwd_user_email'
 
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
-    accessToken: null,
+    accessToken: localStorage.getItem(TOKEN_KEY),
     user: null,
-    email: null,
+    email: localStorage.getItem(EMAIL_KEY),
     organisation: null,
-    otpPurpose: null,
   }),
 
   getters: {
@@ -52,78 +60,105 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setAccessToken(token: string) {
+    setAccessToken(token: string | null) {
       this.accessToken = token
+
+      if (token) {
+        localStorage.setItem(TOKEN_KEY, token)
+      } else {
+        localStorage.removeItem(TOKEN_KEY)
+      }
     },
 
-    handleLoginSuccess(response: LoginResponse) {
-      this.setAccessToken(response.access_token)
-      this.user = response.user as User
-      localStorage.setItem('refreshToken', response.refresh_token)
+    setUserEmail(email: string | null) {
+      this.email = email
+      if (email) {
+        localStorage.setItem(EMAIL_KEY, email)
+      } else {
+        localStorage.removeItem(EMAIL_KEY)
+      }
+    },
+
+    clearAuthState() {
+      this.email = null
+      this.user = null
+      this.organisation = null
+      this.accessToken = null
+      localStorage.removeItem(TOKEN_KEY)
+      localStorage.removeItem(EMAIL_KEY)
+    },
+
+    handleLoginSuccess(token: string, user?: User) {
+      this.setAccessToken(token)
+      if (user) {
+        this.user = user
+      }
     },
 
     async register(payload: RegisterPayload) {
       const data = await authService.registerOrganisation(payload)
 
-      this.email = data.email
-      this.otpPurpose = 'signup'
+      this.setUserEmail(data.email)
+      // this.otpPurpose = 'signup'
 
       return data
     },
 
     async login(payload: LoginPayload) {
-      const data = await authService.login(payload)
+      const response = await authService.login(payload)
 
-      if (isOtpChallenge(data)) {
-        this.email = data.email
-        this.otpPurpose = data.otp_purpose
-        return data
+      const responseBody = response as unknown as WrappedApiResponse
+      console.log('login responseBody', responseBody)
+      const authData = responseBody.data
+
+      if (!authData?.access_token) {
+        throw new Error('Login response missing access token.')
       }
 
-      this.handleLoginSuccess(data)
-      this.email = (data.user as User | undefined)?.email ?? payload.email
+      this.handleLoginSuccess(authData.access_token)
+      this.setUserEmail(payload.email)
 
-      return data
+      return true
     },
 
     async verifyOTP(payload: VerifyOTPPayload) {
       const data = await authService.verifyOtp(payload)
+      const responseData = data as unknown as VerifyOtpApiResponse
 
-      if (data?.login_data) {
-        this.handleLoginSuccess(data.login_data)
-      }
-
-      if (data?.next === 'login' || data?.next === 'dashboard') {
-        this.otpPurpose = null
+      if (responseData?.login_data?.access_token) {
+        this.handleLoginSuccess(
+          responseData.login_data.access_token,
+          responseData.login_data.user
+        )
+      } else {
+        this.setAccessToken(null)
+        this.user = null
       }
 
       return data
     },
 
     async logout() {
-      await authService.logout(this.accessToken)
-
-      localStorage.removeItem('refreshToken')
-
-      this.email = null
-      this.user = null
-      this.organisation = null
-      this.accessToken = null
-      this.otpPurpose = null
-    },
-
-    async refreshToken() {
-      const refreshToken = localStorage.getItem('refreshToken')
-
-      if (!refreshToken) {
-        return
+      try {
+        if (this.accessToken) {
+           await authService.logout(this.accessToken)
+        }
+      } finally {
+        this.clearAuthState()
       }
-
-      const data = await authService.refreshToken({ refresh_token: refreshToken })
-
-      this.setAccessToken(data.access_token)
-
-      return data
     },
+    
+    // async refreshToken() {
+    //   const refreshToken = localStorage.getItem('refreshToken')
+
+    //   if (!refreshToken) {
+    //     return
+    //   }
+
+    //   const data = await authService.refreshToken({ refresh_token: refreshToken })
+
+    //   this.setAccessToken(data.access_token)
+    // },
+    
   },
 })

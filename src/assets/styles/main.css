@@ -8,8 +8,9 @@
   --color-accent: var(--color-chocolate-brown-main);
   --color-bg-primary: var(--gray-white);
   --color-text-placeholder: #717680;
+  --color-surface: var(--);
 
-  --font-sans: var(--font-title);
+  --font-sans: var(--font-body);
   --spacing-6: var(--sizes-size-6);
   --spacing-56: var(--sizes-size-56);
 }
@@ -22,8 +23,7 @@
   }
 
   body {
-    @apply font-sans;
-    /* background-color: var(--color-page-bg); */
+    @apply font-sans bg-white;
     color: var(--color-text-main);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -42,6 +42,9 @@
     color: inherit;
     text-decoration: none;
   }
+}
+@layer {
+
 }
 @utility preset-display-lg {
   @apply font-sans text-[48px] leading-[1.3] font-semibold tracking-normal

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type {
-  AuthError,
+ AuthError,
   FailureResponse,
   ForgetPasswordPayload,
   ForgetPasswordResponse,
@@ -8,7 +8,6 @@ import type {
   LoginPayload,
   LoginResponse,
   LogoutResponse,
-  RefreshTokenPayload,
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
@@ -17,14 +16,13 @@ import type {
   VerifyOTPPayload,
   VerifyOtpResponse,
 } from '@/types/auth'
-import { mockAuthService } from '@/mocks/mock-auth-service'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://minamoto.emerj.net/api/api/v1'
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true'
 
 const http = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 20000,
 })
 
 const isAuthError = (obj: unknown): obj is AuthError => {
@@ -60,8 +58,10 @@ const extractErrorMessage = (err: unknown, fallback = 'Request failed'): string 
 
   return String(err ?? fallback)
 }
+const bearerHeader = (token?: string | null) =>
+  token ? { Authorization: `Bearer ${token}` } : undefined
 
-const httpAuthService = {
+export const authService = {
   registerOrganisation: async (payload: RegisterPayload): Promise<RegisterResponse> => {
     try {
       const res = await http.post<RegisterResponse>('/auth/register', payload)
@@ -73,21 +73,19 @@ const httpAuthService = {
 
   login: async (payload: LoginPayload): Promise<LoginResponse | LoginOtpChallenge> => {
     try {
-      const res = await http.post<LoginResponse | LoginOtpChallenge>('/auth/login', payload, {
-        withCredentials: true,
-      })
+      const res = await http.post<LoginResponse | LoginOtpChallenge>('/auth/login', payload)
       return res.data
     } catch (err: unknown) {
       throw new Error(extractErrorMessage(err, 'Login failed'))
     }
   },
 
-  logout: async (token: string | null): Promise<LogoutResponse> => {
+  logout: async (token?: string | null): Promise<LogoutResponse> => {
     try {
       const res = await http.post<LogoutResponse>(
         '/auth/logout',
         {},
-        { headers: { Authorization: `Bearer ${token}` }, withCredentials: true },
+        { headers: bearerHeader(token) }
       )
       return res.data
     } catch (err: unknown) {
@@ -104,11 +102,9 @@ const httpAuthService = {
     }
   },
 
-  refreshToken: async (payload: RefreshTokenPayload): Promise<RefreshTokenResponse> => {
+  refreshToken: async (): Promise<RefreshTokenResponse> => {
     try {
-      const res = await http.post<RefreshTokenResponse>('/auth/refresh', payload, {
-        withCredentials: true,
-      })
+      const res = await http.post<RefreshTokenResponse>('/auth/refresh', {})
       return res.data
     } catch (err: unknown) {
       throw new Error(extractErrorMessage(err, 'Token refresh failed'))
@@ -149,5 +145,3 @@ const httpAuthService = {
   },
   
 }
-
-export const authService = USE_MOCK_API ? mockAuthService : httpAuthService

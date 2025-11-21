@@ -17,6 +17,7 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
+  [x: string]: unknown
   access_token: string
   refresh_token: string
   token_type: string
@@ -30,7 +31,7 @@ export interface LogoutResponse {
 }
 
 export interface RefreshTokenPayload {
-  refresh_token: string
+  refresh_token?: string
 }
 
 export interface RefreshTokenResponse {
@@ -94,7 +95,7 @@ export interface LoginOtpChallenge {
 
 export interface VerifyOtpResponse {
   message: string
-  otp_purpose: OtpPurpose
+  otp_purpose?: string
   next: 'login' | 'dashboard'
   login_data?: LoginResponse
 }
