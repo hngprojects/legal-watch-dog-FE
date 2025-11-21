@@ -16,13 +16,13 @@ const handleLogout = async () => {
     <div class="flex items-center space-x-4"></div>
     <div class="flex items-center space-x-4">
       <button
-        class="text-gray-600 transition hover:text-gray-800"
+        class="text-gray-600 transition hover:text-gray-800 cursor-pointer"
         type="button"
         @click="handleLogout"
         aria-label="Log out"
         title="Log out"
       >
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -31,8 +31,8 @@ const handleLogout = async () => {
           />
         </svg>
       </button>
-      <button class="text-gray-600 hover:text-gray-800">
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button class="text-gray-600 hover:text-gray-800 cursor-pointer">
+        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -42,7 +42,7 @@ const handleLogout = async () => {
         </svg>
       </button>
       <div
-        class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-600"
+        class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-600 cursor-pointer"
       >
         U
       </div>
