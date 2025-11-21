@@ -20,6 +20,8 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@hugeicons/core-free-icons": "^2.0.0",
+    "@hugeicons/vue": "^1.0.3",
     "@vueuse/core": "^14.0.0",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
