@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
 import { useAuthStore } from '@/stores/auth-store'
+import MainHeader from '@/components/landing-page/MainHeader.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -125,10 +126,11 @@ const handleResend = () => {
 </script>
 
 <template>
+  <MainHeader />
   <main class="flex min-h-screen bg-gray-50">
     <AuthBranding />
 
-    <div class="flex w-full items-center justify-center p-8 lg:w-1/2">
+    <div class="flex w-full items-center justify-center p-8">
       <div class="w-full max-w-md">
         <div class="mb-8 text-center lg:hidden">
           <h1 class="text-3xl font-bold text-amber-900">Legal WatchDog</h1>
