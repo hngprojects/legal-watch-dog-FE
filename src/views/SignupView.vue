@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
 import { useAuthStore } from '@/stores/auth-store'
 
 const authStore = useAuthStore()
@@ -116,15 +115,21 @@ const handleCreateAccount = async () => {
   const sanitizedEmail = sanitize(email.value).toLowerCase()
 
   try {
-    await authStore.register({
+    const response = await authStore.register({
       name: sanitize(companyName.value),
       email: sanitizedEmail,
       password: sanitize(password.value),
       confirm_password: sanitize(confirmPassword.value),
       industry: 'Legal Services',
     })
-    resetForm()
-    router.push({ name: 'otp' })
+
+    if (response && response.status_code === 201) {
+      resetForm()
+      router.push({ name: 'otp' })
+    } else {
+      serverError.value = 'Registration successful but failed to receive OTP instructions.'
+    }
+
   } catch (error) {
     if (isAxiosError(error)) {
       serverError.value =
@@ -146,7 +151,7 @@ const handleCreateAccount = async () => {
     <main class="relative flex flex-1">
       <AuthBranding />
 
-      <div class="flex w-full items-center justify-center p-6 lg:w-1/2 lg:p-12">
+      <div class="flex w-full items-center justify-center p-6 lg:p-12">
         <div class="w-full max-w-[440px]">
           <div class="mb-8 text-center lg:hidden">
             <h1 class="text-2xl font-bold text-[#3C2610]">Legal WatchDog</h1>
@@ -396,7 +401,5 @@ const handleCreateAccount = async () => {
         </div>
       </div>
     </main>
-
-    <MainFooter />
   </div>
 </template>

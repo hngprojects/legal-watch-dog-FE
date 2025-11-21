@@ -71,10 +71,10 @@ const handleSubmit = async () => {
       </CardHeader>
 
       <CardContent class="flex w-full flex-col items-center gap-6 p-0">
-        <form class="flex w-full max-w-[760px] flex-col gap-3" @submit.prevent="handleSubmit">
-          <div class="flex flex-col gap-3 md:flex-row md:items-start md:gap-5 mt-56">
-            <div>
-              <Input placeholder="Organization email"/>
+        <form class="flex w-full max-w-[760px] flex-col gap-3 items-center" @submit.prevent="handleSubmit">
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-5 mt-5 max-w-[600px]">
+            <div class="w-full">
+              <Input placeholder="Organization email" class="mb-3"/>
               <Button>Join the waitlist</Button>
             </div>
           </div>
