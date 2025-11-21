@@ -99,10 +99,3 @@ export interface VerifyOtpResponse {
   login_data?: LoginResponse
 }
 
-export interface AuthError {
-  detail: {
-    loc: (string | number)[]
-    msg: string
-    type: string
-  }[]
-}
