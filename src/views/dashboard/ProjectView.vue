@@ -16,9 +16,7 @@ const formState = reactive({
   status: 'active' as ProjectStatus,
 })
 
-const formHeading = computed(() =>
-  editingId.value ? 'Update Project' : 'Create Project',
-)
+const formHeading = computed(() => (editingId.value ? 'Update Project' : 'Create Project'))
 
 const resetForm = () => {
   editingId.value = null
@@ -84,7 +82,7 @@ onMounted(() => {
     <section class="rounded-3xl border border-amber-100 bg-white p-6 shadow-sm">
       <header class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.3em] text-amber-700">Projects</p>
+          <p class="text-xs font-semibold tracking-[0.3em] text-amber-700 uppercase">Projects</p>
           <h1 class="text-2xl font-semibold text-gray-900">Manage Monitored Projects</h1>
         </div>
         <div class="text-sm text-gray-500">
@@ -93,9 +91,12 @@ onMounted(() => {
       </header>
 
       <div class="grid gap-8 lg:grid-cols-[360px,1fr]">
-        <form class="rounded-2xl border border-gray-100 bg-amber-50/60 p-5" @submit.prevent="handleSubmit">
+        <form
+          class="rounded-2xl border border-gray-100 bg-amber-50/60 p-5"
+          @submit.prevent="handleSubmit"
+        >
           <h2 class="text-lg font-semibold text-gray-900">{{ formHeading }}</h2>
-          <p class="mb-4 mt-1 text-xs text-gray-500">
+          <p class="mt-1 mb-4 text-xs text-gray-500">
             {{
               editingId
                 ? 'Update existing project metadata.'
@@ -109,7 +110,7 @@ onMounted(() => {
               <input
                 v-model="formState.name"
                 type="text"
-                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-700/30"
+                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 focus:outline-none"
                 placeholder="e.g. AI Compliance Radar"
               />
             </div>
@@ -118,7 +119,7 @@ onMounted(() => {
               <textarea
                 v-model="formState.description"
                 rows="3"
-                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-700/30"
+                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 focus:outline-none"
                 placeholder="Short summary of what we are monitoring"
               />
             </div>
@@ -127,7 +128,7 @@ onMounted(() => {
               <textarea
                 v-model="formState.prompt"
                 rows="3"
-                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-700/30"
+                class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-amber-700 focus:ring-1 focus:ring-amber-700/30 focus:outline-none"
                 placeholder="Instructions for AI briefings (e.g. tone, scope, frequency)"
               />
             </div>
@@ -154,10 +155,7 @@ onMounted(() => {
         </form>
 
         <div class="rounded-2xl border border-gray-100 p-4">
-          <div
-            v-if="loading"
-            class="flex h-48 items-center justify-center text-sm text-gray-400"
-          >
+          <div v-if="loading" class="flex h-48 items-center justify-center text-sm text-gray-400">
             Loading projects…
           </div>
           <div
@@ -181,7 +179,7 @@ onMounted(() => {
                   </p>
                 </div>
                 <span
-                  class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold capitalize text-gray-700"
+                  class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 capitalize"
                 >
                   {{ project.status }}
                 </span>
@@ -189,14 +187,9 @@ onMounted(() => {
               <p class="mt-2 text-sm text-gray-600">
                 {{ project.description || 'No description provided.' }}
               </p>
-              <p class="mt-2 text-xs text-amber-900">
-                Prompt: {{ project.prompt }}
-              </p>
+              <p class="mt-2 text-xs text-amber-900">Prompt: {{ project.prompt }}</p>
               <div class="mt-3 flex gap-3 text-sm">
-                <button
-                  class="text-amber-900 underline"
-                  @click="populateForm(project)"
-                >
+                <button class="text-amber-900 underline" @click="populateForm(project)">
                   Edit
                 </button>
                 <button class="text-red-600 underline" @click="handleDelete(project.id)">

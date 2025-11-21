@@ -1,7 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import './tokens.css';
 @import 'tailwindcss';
-@import 'tw-animate-css';
+@import './typography.css';
+@import './sizes.css';
+@import './theme.css';
+
+@theme {
+  --font-sans: var(--typeface-fontfamily-title);
+  --color-brand-main: var(--color-chocolate-brown-main);
+}
 
 @layer base {
   *,
@@ -11,8 +17,8 @@
   }
 
   body {
-    font-family: var(--font-sans);
-    background-color: var(--color-page-bg);
+    @apply font-sans;
+    /* background-color: var(--color-page-bg); */
     color: var(--color-text-main);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
