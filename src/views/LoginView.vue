@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
+// import MainFooter from '@/components/landing-page/MainFooter.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import type { LoginOtpChallenge } from '@/types/auth'
 
@@ -253,6 +253,6 @@ const handleLogin = async () => {
       </div>
     </main>
 
-    <MainFooter />
+    <!-- <MainFooter /> -->
   </div>
 </template>
