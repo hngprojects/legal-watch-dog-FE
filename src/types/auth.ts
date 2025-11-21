@@ -7,6 +7,7 @@ export interface RegisterPayload {
 }
 
 export interface RegisterResponse {
+  status_code: number
   message: string
   email: string
 }

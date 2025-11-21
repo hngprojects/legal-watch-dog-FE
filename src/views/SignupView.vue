@@ -116,15 +116,21 @@ const handleCreateAccount = async () => {
   const sanitizedEmail = sanitize(email.value).toLowerCase()
 
   try {
-    await authStore.register({
+    const response = await authStore.register({
       name: sanitize(companyName.value),
       email: sanitizedEmail,
       password: sanitize(password.value),
       confirm_password: sanitize(confirmPassword.value),
       industry: 'Legal Services',
     })
-    resetForm()
-    router.push({ name: 'otp' })
+
+    if (response && response.status_code === 201) {
+      resetForm()
+      router.push({ name: 'otp' })
+    } else {
+      serverError.value = 'Registration successful but failed to receive OTP instructions.'
+    }
+
   } catch (error) {
     if (isAxiosError(error)) {
       serverError.value =

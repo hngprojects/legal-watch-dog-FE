@@ -48,7 +48,7 @@ const startTimer = () => {
 
 onMounted(() => {
   if (!email.value) {
-    router.replace({ name: 'login' })
+    router.replace({ name: 'signup' })
     return
   }
   startTimer()
@@ -62,7 +62,7 @@ onUnmounted(() => {
 
 watchEffect(() => {
   if (!email.value) {
-    router.replace({ name: 'login' })
+    router.replace({ name: 'signup' })
   }
 })
 
@@ -74,7 +74,7 @@ const formatTime = (seconds: number) => {
 
 const handleContinue = async () => {
   if (!email.value) {
-    router.replace({ name: 'login' })
+    router.replace({ name: 'signup' })
     return
   }
 
@@ -92,7 +92,7 @@ const handleContinue = async () => {
   try {
     const response = await authStore.verifyOTP({ email: email.value, code })
 
-    successMessage.value = response.message
+    successMessage.value = response.message as string
 
     const destination = response.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
 
@@ -126,18 +126,14 @@ const handleResend = () => {
 
 <template>
   <main class="flex min-h-screen bg-gray-50">
-    <!-- Left Section - Branding -->
     <AuthBranding />
 
-    <!-- Right Section - OTP Form -->
     <div class="flex w-full items-center justify-center p-8 lg:w-1/2">
       <div class="w-full max-w-md">
-        <!-- Mobile Logo -->
         <div class="mb-8 text-center lg:hidden">
           <h1 class="text-3xl font-bold text-amber-900">Legal WatchDog</h1>
         </div>
 
-        <!-- OTP Card -->
         <div class="mb-8 text-center">
           <div class="mx-auto mb-6 flex items-center justify-center">
             <img src="/images/logo.png" alt="" class="h-[58px] w-[58px]" />
@@ -147,9 +143,7 @@ const handleResend = () => {
           <p class="text-gray-400">{{ subtitle }} We've sent it to {{ obfuscatedEmail }}.</p>
         </div>
 
-        <!-- OTP Input Section -->
         <div class="mx-auto max-w-[400px] space-y-6">
-          <!-- OTP Input -->
           <div class="flex justify-center">
             <input
               v-model="otpCode"
@@ -174,7 +168,6 @@ const handleResend = () => {
             {{ successMessage }}
           </div>
 
-          <!-- Resend Section -->
           <div class="flex items-center justify-between text-sm">
             <button
               type="button"
@@ -185,17 +178,17 @@ const handleResend = () => {
                   ? 'cursor-pointer underline hover:text-[#3C2610]'
                   : 'cursor-not-allowed',
               ]"
+              :disabled="timer > 0"
             >
               Don't receive code?
             </button>
             <span class="text-gray-500">Resend in {{ formatTime(timer) }}</span>
           </div>
 
-          <!-- Continue Button -->
           <button
             type="button"
             @click="handleContinue"
-            :disabled="isVerifying"
+            :disabled="isVerifying || otpCode.length < 6"
             class="w-full rounded-lg bg-[#3C2610] py-3 font-medium text-white transition-colors hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
             <span v-if="!isVerifying">Continue</span>

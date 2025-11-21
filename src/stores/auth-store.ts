@@ -32,7 +32,16 @@ interface ApiTokenData {
   user?: User
 }
 
-interface WrappedApiResponse {
+interface RegisterApiResponse {
+  status: string
+  status_code: number
+  message: string
+  data: {
+    email: string
+  }
+}
+
+interface LoginApiResponse {
   status: string
   status_code: number
   message: string
@@ -40,8 +49,10 @@ interface WrappedApiResponse {
 }
 
 interface VerifyOtpApiResponse {
-  login_data?: ApiTokenData
+  status?: string
   message?: string
+  login_data?: ApiTokenData
+  data?: ApiTokenData
 }
 
 const TOKEN_KEY = 'lwd_access_token'
@@ -62,7 +73,6 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     setAccessToken(token: string | null) {
       this.accessToken = token
-
       if (token) {
         localStorage.setItem(TOKEN_KEY, token)
       } else {
@@ -96,14 +106,15 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async register(payload: RegisterPayload) {
-      const { data } = await authService.registerOrganisation(payload)
-      this.setUserEmail(data.email)
-      return data
+      const response = await authService.registerOrganisation(payload)
+      const responseBody = response.data as unknown as RegisterApiResponse
+      const registeredEmail = responseBody.data?.email || payload.email
+      this.setUserEmail(registeredEmail)
+      return responseBody
     },
-
     async login(payload: LoginPayload) {
       const response = await authService.login(payload)
-      const responseBody = response.data as unknown as WrappedApiResponse
+      const responseBody = response.data as unknown as LoginApiResponse
       const authData = responseBody.data
 
       if (!authData?.access_token) {
@@ -117,20 +128,18 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async verifyOTP(payload: VerifyOTPPayload) {
-      const { data } = await authService.verifyOtp(payload)
-      const responseData = data as unknown as VerifyOtpApiResponse
+      const response = await authService.verifyOtp(payload)
+      const responseBody = response.data as unknown as VerifyOtpApiResponse
+      const tokenData = responseBody.login_data || responseBody.data
 
-      if (responseData?.login_data?.access_token) {
-        this.handleLoginSuccess(
-          responseData.login_data.access_token,
-          responseData.login_data.user
-        )
+      if (tokenData?.access_token) {
+        this.handleLoginSuccess(tokenData.access_token, tokenData.user)
+        return { ...responseBody, next: 'dashboard' }
       } else {
         this.setAccessToken(null)
         this.user = null
+        return { ...responseBody, next: 'login' }
       }
-
-      return data
     },
 
     async logout() {
