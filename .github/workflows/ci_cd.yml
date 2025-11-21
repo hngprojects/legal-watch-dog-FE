@@ -12,7 +12,6 @@ on:
       - dev
 
 jobs:
-
   # ------------------------
   # 1. BUILD JOB
   # ------------------------
@@ -83,12 +82,13 @@ jobs:
             set -e
 
             REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
-
+            # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
               cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
+            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             
             git pull origin dev
@@ -137,15 +137,16 @@ jobs:
             set -e
 
             REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
-
+            # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
               cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
+            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             
-            git pull origin main
+            git pull origin dev
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
             chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
@@ -182,38 +183,86 @@ jobs:
         run: |
           echo "Preparing Slack message..."
 
-          if [ "$BUILD_RESULT" == "success" ] && [ "$STAGING_RESULT" == "success" ] && [ "$PROD_RESULT" == "success" ]; then
-            STATUS="✅ ALL JOBS SUCCESSFUL"
+          # Get branch name
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          
+          # Determine high-level outcome and set appropriate emoji
+          if [ "$BUILD_RESULT" == "success" ] && ([ "$STAGING_RESULT" == "success" ] || [ "$STAGING_RESULT" == "skipped" ]) && ([ "$PROD_RESULT" == "success" ] || [ "$PROD_RESULT" == "skipped" ]); then
+            MAIN_STATUS="✅ Deployment Successful"
+            STATUS_COLOR="good"
           else
-            STATUS="❌ ONE OR MORE JOBS FAILED"
+            MAIN_STATUS="❌ Deployment Failed"
+            STATUS_COLOR="danger"
           fi
 
+          # Build detailed status for each stage
           DETAIL_MSG=""
 
-          if [ "$BUILD_RESULT" != "success" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n• 🛠 *CI Build:* FAILED"
+          # Build Stage
+          if [ "$BUILD_RESULT" == "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n✅ *Build:* Application built successfully"
           else
-            DETAIL_MSG="${DETAIL_MSG}\n• 🛠 *CI Build:* SUCCESS"
+            DETAIL_MSG="${DETAIL_MSG}\n❌ *Build:* Failed to build application"
           fi
 
-          if [ "$STAGING_RESULT" != "success" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n• 🟡 *Staging Deploy:* FAILED"
+          # Staging Deploy Stage
+          if [ "$STAGING_RESULT" == "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n✅ *Test Environment:* Successfully deployed to staging server"
+          elif [ "$STAGING_RESULT" == "skipped" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Test Environment:* Skipped (not a dev branch)"
           else
-            DETAIL_MSG="${DETAIL_MSG}\n• 🟡 *Staging Deploy:* SUCCESS"
+            DETAIL_MSG="${DETAIL_MSG}\n❌ *Test Environment:* Failed to deploy to staging server"
           fi
 
-          if [ "$PROD_RESULT" != "success" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n• 🔴 *Production Deploy:* FAILED"
+          # Production Deploy Stage
+          if [ "$PROD_RESULT" == "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n✅ *Live Website:* Successfully deployed to production server"
+          elif [ "$PROD_RESULT" == "skipped" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Live Website:* Skipped (not main branch)"
           else
-            DETAIL_MSG="${DETAIL_MSG}\n• 🔴 *Production Deploy:* SUCCESS"
+            DETAIL_MSG="${DETAIL_MSG}\n❌ *Live Website:* Failed to deploy to production server"
           fi
+
+          # Add branch info
+          DETAIL_MSG="${DETAIL_MSG}\n\n📋 *Branch:* \`${BRANCH_NAME}\`"
+          DETAIL_MSG="${DETAIL_MSG}\n👤 *Triggered by:* ${GITHUB_ACTOR}"
 
           LOG_LINK="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
+          # Format Slack JSON with rich formatting
           PAYLOAD="{
-            \"text\": \"*Frontend CI/CD Pipeline Result*\n$STATUS\n$DETAIL_MSG\n\n🔗 <${LOG_LINK}|View Logs>\",
-            \"username\": \"CI/CD Bot\",
-            \"icon_emoji\": \":rocket:\"
+            \"attachments\": [
+              {
+                \"color\": \"${STATUS_COLOR}\",
+                \"blocks\": [
+                  {
+                    \"type\": \"header\",
+                    \"text\": {
+                      \"type\": \"plain_text\",
+                      \"text\": \"🚀 Frontend Deployment Update\",
+                      \"emoji\": true
+                    }
+                  },
+                  {
+                    \"type\": \"section\",
+                    \"text\": {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*${MAIN_STATUS}*${DETAIL_MSG}\"
+                    }
+                  },
+                  {
+                    \"type\": \"divider\"
+                  },
+                  {
+                    \"type\": \"section\",
+                    \"text\": {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"Need help? Check the <${LOG_LINK}|detailed logs> or contact the development team.\"
+                    }
+                  }
+                ]
+              }
+            ]
           }"
 
           curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" $SLACK_WEBHOOK
