@@ -13,7 +13,7 @@ const isMenuOpen = ref(false)
 
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
-  { name: 'How it Works', to: { path: '/coming-soon' } },
+  { name: 'How it Works', to: { path: '/how-it-works' } },
   { name: 'Features', to: { path: '/coming-soon' } },
 ]
 

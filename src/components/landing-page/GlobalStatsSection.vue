@@ -1,4 +1,7 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { Button } from '../ui/button';
+
+</script>
 
 <template>
   <section class="space-y-12 px-16 py-12">
@@ -42,7 +45,7 @@
 
     <!-- Brown CTA Section -->
     <div
-      class="relative flex min-h-130 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[#3c2610] p-5 text-center text-white md:p-12 shadow-xl"
+      class="relative flex min-h-130 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[#401903] p-5 text-center text-white md:p-12 shadow-xl"
     >
       <div
         class="absolute top-0 left-0 h-full w-40 bg-bottom bg-no-repeat md:w-60 lg:w-90"
@@ -61,11 +64,11 @@
           workflow with intelligence and autonomous updates in real time.
         </p>
         <div>
-          <button
-            class="mt-8 rounded-lg bg-white px-6 py-3 font-medium text-[#5A3A1A] transition hover:bg-gray-100"
+          <Button
+            class="bg-accent"
           >
             Get Monitoring For Free
-          </button>
+          </Button>
         </div>
       </div>
     </div>
