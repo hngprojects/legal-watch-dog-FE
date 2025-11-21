@@ -63,7 +63,7 @@ const cards = [
         </Card>
       </div>
 
-      <Button size="lg" variant="secondary" class="self-center px-10">
+      <Button size="lg" variant="default" class="self-center px-10">
         <span class="font-normal!">How it Works</span>
       </Button>
     </div>
