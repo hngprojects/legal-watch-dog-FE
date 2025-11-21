@@ -4,7 +4,7 @@ import type {
   FailureResponse,
   ForgetPasswordPayload,
   ForgetPasswordResponse,
-  // LoginOtpChallenge,
+  LoginOtpChallenge,
   LoginPayload,
   LoginResponse,
   LogoutResponse,
@@ -15,7 +15,7 @@ import type {
   ResetPasswordPayload,
   ResetPasswordResponse,
   VerifyOTPPayload,
-  // VerifyOtpResponse,
+  VerifyOtpResponse,
 } from '@/types/auth'
 import { mockAuthService } from '@/mocks/mock-auth-service'
 
@@ -71,9 +71,9 @@ const httpAuthService = {
     }
   },
 
-  login: async (payload: LoginPayload): Promise<LoginResponse> => {
+  login: async (payload: LoginPayload): Promise<LoginResponse | LoginOtpChallenge> => {
     try {
-      const res = await http.post<LoginResponse>('/auth/login', payload, {
+      const res = await http.post<LoginResponse | LoginOtpChallenge>('/auth/login', payload, {
         withCredentials: true,
       })
       return res.data
@@ -95,9 +95,9 @@ const httpAuthService = {
     }
   },
 
-  verifyOtp: async (payload: VerifyOTPPayload): Promise<unknown> => {
+  verifyOtp: async (payload: VerifyOTPPayload): Promise<VerifyOtpResponse> => {
     try {
-      const res = await http.post('/auth/verify-otp', payload)
+      const res = await http.post<VerifyOtpResponse>('/auth/verify-otp', payload)
       return res.data
     } catch (err: unknown) {
       throw new Error(extractErrorMessage(err, 'OTP verification failed'))

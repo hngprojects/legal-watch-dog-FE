@@ -12,8 +12,6 @@ import type {
   VerifyOtpResponse,
 } from '@/types/auth'
 
-type ServiceResponse<T> = Promise<{ data: T }>
-
 interface StoredUser {
   id: string
   name: string
@@ -67,9 +65,9 @@ const randomId = () => {
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString()
 
-const delay = <T>(dataFactory: () => T, ms = 400): ServiceResponse<T> =>
+const delay = <T>(dataFactory: () => T, ms = 400): Promise<T> =>
   new Promise((resolve) => {
-    setTimeout(() => resolve({ data: dataFactory() }), ms)
+    setTimeout(() => resolve(dataFactory()), ms)
   })
 
 const rejectWithMessage = (message: string, status = 400): Promise<never> =>
@@ -187,7 +185,7 @@ const createLoginResponse = (user: StoredUser, session: Session): LoginResponse 
 }
 
 export const mockAuthService = {
-  registerOrganisation: (payload: RegisterPayload): ServiceResponse<RegisterResponse> => {
+  registerOrganisation: (payload: RegisterPayload): Promise<RegisterResponse> => {
     const users = getUsers()
     const email = payload.email.toLowerCase()
 
@@ -217,7 +215,7 @@ export const mockAuthService = {
     }))
   },
 
-  login: (payload: LoginPayload): ServiceResponse<LoginResponse | LoginOtpChallenge> => {
+  login: (payload: LoginPayload): Promise<LoginResponse | LoginOtpChallenge> => {
     const users = getUsers()
     const email = payload.email.toLowerCase()
     const user = users.find((item) => item.email === email && item.password === payload.password)
@@ -246,7 +244,7 @@ export const mockAuthService = {
     }))
   },
 
-  logout: (token: string | null): ServiceResponse<LogoutResponse> => {
+  logout: (token: string | null): Promise<LogoutResponse> => {
     removeSessionByAccessToken(token)
     return delay(() => ({
       message: 'Logged out successfully.',
@@ -254,7 +252,7 @@ export const mockAuthService = {
     }))
   },
 
-  verifyOtp: (payload: VerifyOTPPayload): ServiceResponse<VerifyOtpResponse> => {
+  verifyOtp: (payload: VerifyOTPPayload): Promise<VerifyOtpResponse> => {
     const otpStore = getOtpStore()
     const email = payload.email.toLowerCase()
     const record = otpStore[email]
@@ -308,7 +306,7 @@ export const mockAuthService = {
     }))
   },
 
-  refreshToken: (payload: RefreshTokenPayload): ServiceResponse<RefreshTokenResponse> => {
+  refreshToken: (payload: RefreshTokenPayload): Promise<RefreshTokenResponse> => {
     const currentSession = findSessionByRefreshToken(payload.refresh_token)
 
     if (!currentSession) {

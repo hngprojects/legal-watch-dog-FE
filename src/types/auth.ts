@@ -82,3 +82,27 @@ export interface FailureResponse {
   message: string
   data: Record<string, unknown>
 }
+
+export type OtpPurpose = 'signup' | 'login'
+
+export interface LoginOtpChallenge {
+  requires_otp: true
+  email: string
+  otp_purpose: OtpPurpose
+  message: string
+}
+
+export interface VerifyOtpResponse {
+  message: string
+  otp_purpose: OtpPurpose
+  next: 'login' | 'dashboard'
+  login_data?: LoginResponse
+}
+
+export interface AuthError {
+  detail: {
+    loc: (string | number)[]
+    msg: string
+    type: string
+  }[]
+}

@@ -63,7 +63,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async register(payload: RegisterPayload) {
-      const { data } = await authService.registerOrganisation(payload)
+      const data = await authService.registerOrganisation(payload)
 
       this.email = data.email
       this.otpPurpose = 'signup'
@@ -72,7 +72,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async login(payload: LoginPayload) {
-      const { data } = await authService.login(payload)
+      const data = await authService.login(payload)
 
       if (isOtpChallenge(data)) {
         this.email = data.email
@@ -87,7 +87,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async verifyOTP(payload: VerifyOTPPayload) {
-      const { data } = await authService.verifyOtp(payload)
+      const data = await authService.verifyOtp(payload)
 
       if (data?.login_data) {
         this.handleLoginSuccess(data.login_data)
@@ -119,7 +119,7 @@ export const useAuthStore = defineStore('auth', {
         return
       }
 
-      const { data } = await authService.refreshToken({ refresh_token: refreshToken })
+      const data = await authService.refreshToken({ refresh_token: refreshToken })
 
       this.setAccessToken(data.access_token)
 
