@@ -132,8 +132,6 @@ export const useAuthStore = defineStore('auth', {
       const responseBody = response.data as unknown as VerifyOtpApiResponse
       const userData = responseBody.data;
 
-      console.log(userData);
-
       if (userData) {
         this.user = null
         return { ...responseBody, next: 'login' }
