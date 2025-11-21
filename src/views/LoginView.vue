@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { isAxiosError } from 'axios'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
-import MainHeader from '@/components/landing-page/MainHeader.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
+import MainHeader from '@/components/landing-page/MainHeader.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import type { LoginOtpChallenge } from '@/types/auth'
+import { isAxiosError } from 'axios'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 
@@ -188,8 +188,8 @@ const handleLogin = async () => {
                   >Remember me</span
                 >
               </label>
-              <a href="#" class="text-xs font-bold text-gray-900 hover:underline"
-                >Forgot password?</a
+              <RouterLink to="/forgot-password" class="text-xs font-bold text-gray-900 hover:underline"
+                >Forgot password?</RouterLink
               >
             </div>
 
