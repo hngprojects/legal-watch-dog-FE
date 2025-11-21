@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watchEffect, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
@@ -8,7 +8,8 @@ import { useAuthStore } from '@/stores/auth-store'
 const authStore = useAuthStore()
 const router = useRouter()
 
-const otpCode = ref('')
+const otpDigits = ref<string[]>(['', '', '', '', '', ''])
+const inputRefs = ref<(HTMLInputElement | null)[]>([])
 const timer = ref(60)
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -17,6 +18,8 @@ let interval: ReturnType<typeof setInterval> | null = null
 
 const email = computed(() => authStore.email)
 const otpPurpose = computed(() => authStore.otpPurpose)
+
+const otpCode = computed(() => otpDigits.value.join(''))
 
 const obfuscatedEmail = computed(() => {
   if (!email.value) return ''
@@ -67,13 +70,73 @@ const formatTime = (seconds: number) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
+const handleInput = (index: number, event: Event) => {
+  const input = event.target as HTMLInputElement
+  const value = input.value
+
+  // Only allow numbers
+  if (value && !/^\d$/.test(value)) {
+    input.value = otpDigits.value[index] || ''
+    return
+  }
+
+  otpDigits.value[index] = value
+
+  // Auto-focus next input
+  if (value && index < 5) {
+    nextTick(() => {
+      inputRefs.value[index + 1]?.focus()
+    })
+  }
+}
+
+const handleKeyDown = (index: number, event: KeyboardEvent) => {
+  // Handle backspace
+  if (event.key === 'Backspace') {
+    if (!otpDigits.value[index] && index > 0) {
+      nextTick(() => {
+        inputRefs.value[index - 1]?.focus()
+      })
+    }
+  }
+  // Handle arrow keys
+  else if (event.key === 'ArrowLeft' && index > 0) {
+    nextTick(() => {
+      inputRefs.value[index - 1]?.focus()
+    })
+  } else if (event.key === 'ArrowRight' && index < 5) {
+    nextTick(() => {
+      inputRefs.value[index + 1]?.focus()
+    })
+  }
+}
+
+const handlePaste = (event: ClipboardEvent) => {
+  event.preventDefault()
+  const pastedData = event.clipboardData?.getData('text') || ''
+  const digits = pastedData.replace(/\D/g, '').slice(0, 6).split('')
+
+  digits.forEach((digit, index) => {
+    if (index < 6) {
+      otpDigits.value[index] = digit
+    }
+  })
+
+  // Focus the next empty input or the last one
+  const nextEmptyIndex = otpDigits.value.findIndex((d) => !d)
+  const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex
+  nextTick(() => {
+    inputRefs.value[focusIndex]?.focus()
+  })
+}
+
 const handleContinue = async () => {
   if (!email.value) {
     router.replace({ name: 'login' })
     return
   }
 
-  const code = otpCode.value.trim()
+  const code = otpCode.value
 
   if (!code || code.length < 6) {
     errorMessage.value = 'Enter the 6 digit OTP sent to your email.'
@@ -110,9 +173,12 @@ const handleResend = () => {
   if (interval) {
     clearInterval(interval)
   }
-  otpCode.value = ''
+  otpDigits.value = ['', '', '', '', '', '']
   successMessage.value = 'A new OTP has been sent to your email.'
   startTimer()
+  nextTick(() => {
+    inputRefs.value[0]?.focus()
+  })
 }
 </script>
 
@@ -142,14 +208,19 @@ const handleResend = () => {
         <!-- OTP Input Section -->
         <div class="mx-auto max-w-[400px] space-y-6">
           <!-- OTP Input -->
-          <div class="flex justify-center">
+          <div class="flex justify-center gap-2">
             <input
-              v-model="otpCode"
+              v-for="(digit, index) in otpDigits"
+              :key="index"
+              :ref="(el) => (inputRefs[index] = el as HTMLInputElement | null)"
+              v-model="otpDigits[index]"
               type="text"
-              maxlength="6"
+              maxlength="1"
               inputmode="numeric"
-              placeholder="••••••"
-              class="h-14 w-40 rounded-lg border border-gray-300 text-center text-2xl font-medium tracking-[0.4em] focus:border-transparent focus:ring-2 focus:ring-amber-900 focus:outline-none"
+              @input="handleInput(index, $event)"
+              @keydown="handleKeyDown(index, $event)"
+              @paste="handlePaste"
+              class="h-14 w-12 rounded-lg border border-gray-300 text-center text-2xl font-medium focus:border-transparent focus:ring-2 focus:ring-amber-900 focus:outline-none"
             />
           </div>
 
