@@ -115,7 +115,7 @@ onUnmounted(() => {
 
         <div class="space-y-4 border-t border-gray-100 p-6">
           <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full" @click="closeMenu">
-            Request Access
+            Join Waitlist
           </Button>
           <Button variant="outline" :as="RouterLink" to="/signup" class="w-full">Sign up</Button>
         </div>
