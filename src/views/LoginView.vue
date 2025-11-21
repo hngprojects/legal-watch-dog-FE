@@ -241,10 +241,5 @@ const handleLogin = async () => {
         </div>
       </div>
     </main>
-<<<<<<< HEAD
-
-    <!-- <MainFooter /> -->
-=======
->>>>>>> 4e3d84258fc1782285e63a7fba60ce664561f8f6
   </div>
 </template>
