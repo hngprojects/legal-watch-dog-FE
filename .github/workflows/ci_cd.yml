@@ -60,7 +60,7 @@ jobs:
     name: CD - Frontend Deploy (Staging)
     runs-on: [self-hosted]
     needs: build
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref == 'refs/heads/dev'
     environment: staging
 
     steps:
@@ -82,8 +82,9 @@ jobs:
 
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
-              REMOTE_DIR="/home//apps/frontend/legal-watch-dog-FE"
-            # Clone if the directory doesn'ifeanyinwt exist
+
+            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
+            # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
               cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
@@ -92,8 +93,8 @@ jobs:
 
             #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
-            # git remote set-url origin git@github.com:hngprojects/legal-watch-dog-FE.git
-            git pull origin staging
+            
+            git pull origin dev
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
             chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
@@ -104,6 +105,9 @@ jobs:
             sudo nginx -s reload
           EOF
 
+      - name: Mark Deployment Result
+        if: failure()
+        run: echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
 
   # ------------------------
   # 3. DEPLOY TO PRODUCTION (MAIN BRANCH)
@@ -112,7 +116,7 @@ jobs:
     name: CD - Frontend Deploy (Production)
     runs-on: [self-hosted]
     needs: build
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/main'
     environment: production
 
     steps:
@@ -146,7 +150,7 @@ jobs:
             #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             
-            git pull origin dev
+            git pull origin main
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
             chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
@@ -158,10 +162,14 @@ jobs:
           EOF
 
 
+      - name: Mark Deployment Result
+        if: failure()
+        run: echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
+
   # -------------------------
   # 4. Slack Notification
   # -------------------------
-  notify_slack:
+    notify_slack:
     name: Notify Slack
     runs-on: [self-hosted]
     needs: 
@@ -169,6 +177,7 @@ jobs:
       - deploy_staging
       - deploy_production
     if: always()
+
     steps:
       - name: Send Slack Notification
         env:
@@ -177,17 +186,41 @@ jobs:
           STAGING_RESULT: ${{ needs.deploy_staging.result }}
           PROD_RESULT: ${{ needs.deploy_production.result }}
         run: |
-          # Determine overall status
-          if [ "$BUILD_RESULT" != "success" ] || [ "$STAGING_RESULT" != "success" ] || [ "$PROD_RESULT" != "success" ]; then
-            STATUS="❌ FAILURE"
+          echo "Preparing Slack message..."
+
+          # Determine high-level outcome
+          if [ "$BUILD_RESULT" == "success" ] && [ "$STAGING_RESULT" == "success" ] && [ "$PROD_RESULT" == "success" ]; then
+            STATUS="✅ ALL JOBS SUCCESSFUL"
           else
-            STATUS="✅ SUCCESS"
+            STATUS="❌ ONE OR MORE JOBS FAILED"
+          fi
+
+          # Build detailed failure list
+          DETAIL_MSG=""
+
+          if [ "$BUILD_RESULT" != "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n• 🛠 *CI Build:* FAILED"
+          else
+            DETAIL_MSG="${DETAIL_MSG}\n• 🛠 *CI Build:* SUCCESS"
+          fi
+
+          if [ "$STAGING_RESULT" != "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n• 🟡 *Staging Deploy:* FAILED"
+          else
+            DETAIL_MSG="${DETAIL_MSG}\n• 🟡 *Staging Deploy:* SUCCESS"
+          fi
+
+          if [ "$PROD_RESULT" != "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n• 🔴 *Production Deploy:* FAILED"
+          else
+            DETAIL_MSG="${DETAIL_MSG}\n• 🔴 *Production Deploy:* SUCCESS"
           fi
 
           LOG_LINK="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
+          # Format Slack JSON
           PAYLOAD="{
-            \"text\": \"Frontend CI/CD Pipeline finished with status: $STATUS\nLogs: $LOG_LINK\",
+            \"text\": \"*Frontend CI/CD Pipeline Result*\n$STATUS\n$DETAIL_MSG\n\n🔗 <${LOG_LINK}|View Logs>\",
             \"username\": \"CI/CD Bot\",
             \"icon_emoji\": \":rocket:\"
           }"
