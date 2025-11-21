@@ -12,7 +12,6 @@ on:
       - dev
 
 jobs:
-
   # ------------------------
   # 1. BUILD JOB
   # ------------------------
@@ -52,7 +51,6 @@ jobs:
           name: frontend-build
           path: build.tar.gz
 
-
   # -------------------------
   # 2. DEPLOY TO STAGING (DEV BRANCH)
   # -------------------------
@@ -60,7 +58,7 @@ jobs:
     name: CD - Frontend Deploy (Staging)
     runs-on: [self-hosted]
     needs: build
-    if: github.ref == 'refs/heads/staging'
+    if: github.ref == 'refs/heads/dev'
     environment: staging
 
     steps:
@@ -71,39 +69,42 @@ jobs:
 
       - name: Set up SSH and Deploy
         env:
-          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          SERVER_PASS: ${{ secrets.STAGING_PASS }}
           SERVER_USER: ${{ secrets.STAGING_USER }}
           SERVER_IP: ${{ secrets.STAGING_IP }}
         run: |
-          echo "$SSH_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          echo "access gained"
+          echo "copying files to server"
 
-          scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
 
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+          sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
-              REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE"
+
+            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
-              cd /home/watchdog/apps/frontend/
+              cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
-
-            #cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
-            # git remote set-url origin git@github.com:hngprojects/legal-watch-dog-FE.git
-            git pull origin staging
+            
+            git pull origin dev
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
-            chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
-            chmod o+rx /home/watchdog
-            chmod o+rx /home/watchdog/apps
-            chmod o+rx /home/watchdog/apps/frontend
+            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
+            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE
+            chmod o+rx /home/ifeanyinw
+            chmod o+rx /home/ifeanyinw/apps
+            chmod o+rx /home/ifeanyinw/apps/frontend
             sudo nginx -s reload
           EOF
 
+      - name: Mark Deployment Result
+        if: failure()
+        run: echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
 
   # ------------------------
   # 3. DEPLOY TO PRODUCTION (MAIN BRANCH)
@@ -123,40 +124,42 @@ jobs:
 
       - name: Set up SSH and Deploy
         env:
-          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          SERVER_PASS: ${{ secrets.PROD_PASS }}
           SERVER_USER: ${{ secrets.PROD_USER }}
           SERVER_IP: ${{ secrets.PROD_IP }}
         run: |
-          echo "$SSH_KEY" > private_key.pem
-          chmod 600 private_key.pem
+          echo "access gained"
+          echo "copying files to server"
 
-          scp -o StrictHostKeyChecking=no -i private_key.pem build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
 
-          ssh -o StrictHostKeyChecking=no -i private_key.pem $SERVER_USER@$SERVER_IP << 'EOF'
+          sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
 
-            REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE"
+            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
-              cd /home/watchdog/apps/frontend/
+              cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
-
-            #cd /home/watchdog/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
+            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             
-            git pull origin main
+            git pull origin dev
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE/dist
-            chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE
-            chmod o+rx /home/watchdog
-            chmod o+rx /home/watchdog/apps
-            chmod o+rx /home/watchdog/apps/frontend
+            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
+            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE
+            chmod o+rx /home/ifeanyinw
+            chmod o+rx /home/ifeanyinw/apps
+            chmod o+rx /home/ifeanyinw/apps/frontend
             sudo nginx -s reload
           EOF
 
+      - name: Mark Deployment Result
+        if: failure()
+        run: echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
 
   # -------------------------
   # 4. Slack Notification
@@ -164,11 +167,12 @@ jobs:
   notify_slack:
     name: Notify Slack
     runs-on: [self-hosted]
-    needs: 
+    needs:
       - build
       - deploy_staging
       - deploy_production
     if: always()
+
     steps:
       - name: Send Slack Notification
         env:
@@ -177,19 +181,88 @@ jobs:
           STAGING_RESULT: ${{ needs.deploy_staging.result }}
           PROD_RESULT: ${{ needs.deploy_production.result }}
         run: |
-          # Determine overall status
-          if [ "$BUILD_RESULT" != "success" ] || [ "$STAGING_RESULT" != "success" ] || [ "$PROD_RESULT" != "success" ]; then
-            STATUS="❌ FAILURE"
+          echo "Preparing Slack message..."
+
+          # Get branch name
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          
+          # Determine high-level outcome and set appropriate emoji
+          if [ "$BUILD_RESULT" == "success" ] && ([ "$STAGING_RESULT" == "success" ] || [ "$STAGING_RESULT" == "skipped" ]) && ([ "$PROD_RESULT" == "success" ] || [ "$PROD_RESULT" == "skipped" ]); then
+            MAIN_STATUS="✅ Deployment Successful"
+            STATUS_COLOR="good"
           else
-            STATUS="✅ SUCCESS"
+            MAIN_STATUS="❌ Deployment Failed"
+            STATUS_COLOR="danger"
           fi
+
+          # Build detailed status for each stage
+          DETAIL_MSG=""
+
+          # Build Stage
+          if [ "$BUILD_RESULT" == "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n✅ *Build:* Application built successfully"
+          else
+            DETAIL_MSG="${DETAIL_MSG}\n❌ *Build:* Failed to build application"
+          fi
+
+          # Staging Deploy Stage
+          if [ "$STAGING_RESULT" == "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n✅ *Test Environment:* Successfully deployed to staging server"
+          elif [ "$STAGING_RESULT" == "skipped" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Test Environment:* Skipped (not a dev branch)"
+          else
+            DETAIL_MSG="${DETAIL_MSG}\n❌ *Test Environment:* Failed to deploy to staging server"
+          fi
+
+          # Production Deploy Stage
+          if [ "$PROD_RESULT" == "success" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n✅ *Live Website:* Successfully deployed to production server"
+          elif [ "$PROD_RESULT" == "skipped" ]; then
+            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Live Website:* Skipped (not main branch)"
+          else
+            DETAIL_MSG="${DETAIL_MSG}\n❌ *Live Website:* Failed to deploy to production server"
+          fi
+
+          # Add branch info
+          DETAIL_MSG="${DETAIL_MSG}\n\n📋 *Branch:* \`${BRANCH_NAME}\`"
+          DETAIL_MSG="${DETAIL_MSG}\n👤 *Triggered by:* ${GITHUB_ACTOR}"
 
           LOG_LINK="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
+          # Format Slack JSON with rich formatting
           PAYLOAD="{
-            \"text\": \"Frontend CI/CD Pipeline finished with status: $STATUS\nLogs: $LOG_LINK\",
-            \"username\": \"CI/CD Bot\",
-            \"icon_emoji\": \":rocket:\"
+            \"attachments\": [
+              {
+                \"color\": \"${STATUS_COLOR}\",
+                \"blocks\": [
+                  {
+                    \"type\": \"header\",
+                    \"text\": {
+                      \"type\": \"plain_text\",
+                      \"text\": \"🚀 Frontend Deployment Update\",
+                      \"emoji\": true
+                    }
+                  },
+                  {
+                    \"type\": \"section\",
+                    \"text\": {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*${MAIN_STATUS}*${DETAIL_MSG}\"
+                    }
+                  },
+                  {
+                    \"type\": \"divider\"
+                  },
+                  {
+                    \"type\": \"section\",
+                    \"text\": {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"Need help? Check the <${LOG_LINK}|detailed logs> or contact the development team.\"
+                    }
+                  }
+                ]
+              }
+            ]
           }"
 
           curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" $SLACK_WEBHOOK

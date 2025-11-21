@@ -96,8 +96,8 @@ Displays AI-generated summaries with key change highlights, confidence levels (H
 
 ## Future Features
 
-- **Timeline View** - Historical timeline of changes with AI impact scoring
-- **Ticketing and Commenting** - Create follow-up tasks and assign to teammates
-- **Bulk Import Sources** - Upload CSV or paste multiple URLs for auto-validation
-- **Collaboration and Roles** - Admin/Editor/Viewer access with project-level permissions
+- **Timeline View** - Historical timeline of changes with AI impact scoring.
+- **Ticketing and Commenting** - Create follow-up tasks and assign to teammates.
+- **Bulk Import Sources** - Upload CSV or paste multiple URLs for auto-validation.
+- **Collaboration and Roles** - Admin/Editor/Viewer access with project-level permissions.
 
