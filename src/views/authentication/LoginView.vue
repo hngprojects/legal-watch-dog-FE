@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import AuthCard from '@/components/authentication/AuthCard.vue'
+import AuthLayout from '@/components/authentication/AuthLayout.vue'
+import SocialLogins from '@/components/authentication/SocialLogins.vue'
+import FormControl from '@/components/composables/FormControl.vue'
+import { useAuthStore } from '@/stores/auth-store'
+import { isAxiosError } from 'axios'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { isAxiosError } from 'axios'
-import AuthLayout from '@/components/authentication/AuthLayout.vue'
-import { useAuthStore } from '@/stores/auth-store'
-import AuthCard from '@/components/authentication/AuthCard.vue'
-import FormControl from '@/components/composables/FormControl.vue'
-import SocialLogins from '@/components/authentication/SocialLogins.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -155,7 +155,7 @@ const handleLogin = async () => {
             </div>
             <span class="ml-2 text-sm text-gray-600 group-hover:text-gray-800">Remember me</span>
           </label>
-          <RouterLink to="/coming-soon" class="btn--link">Forgot password?</RouterLink>
+          <RouterLink to="/forgot-password" class="btn--link">Forgot password?</RouterLink>
         </div>
 
         <button
