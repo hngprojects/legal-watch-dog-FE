@@ -86,6 +86,12 @@ const router = createRouter({
           alias: '/projects',
           meta: { requiresAuth: true },
         },
+         {
+          path: 'projects/:id', 
+          name: 'project-detail',
+          component: () => import('@/views/dashboard/projects/Project.vue'),
+          meta: { requiresAuth: true },
+        },
         {
           path: 'jurisdictions',
           name: 'jurisdictions',
