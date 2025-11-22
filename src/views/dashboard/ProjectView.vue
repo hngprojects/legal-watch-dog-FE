@@ -129,7 +129,7 @@ onMounted(() => {
           </p>
           <button
             @click="openCreateModal"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#592304]"
+            class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#401903] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#592304]"
           >
             <svg
               width="16"
@@ -173,7 +173,7 @@ onMounted(() => {
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Projects</h1>
           <button
             @click="openCreateModal"
-            class="flex items-center gap-3 rounded-full bg-[#401903] px-8 py-4 font-medium text-white shadow-md transition-all hover:bg-[#592304] hover:shadow-lg"
+            class="flex cursor-pointer items-center gap-3 rounded-full bg-[#401903] px-8 py-4 font-medium text-white shadow-md transition-all hover:bg-[#592304] hover:shadow-lg"
           >
             <svg
               width="20"
@@ -342,13 +342,13 @@ onMounted(() => {
                 <button
                   type="button"
                   @click="closeCreateModal"
-                  class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+                  class="cursor-pointer rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
+                  class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
                 >
                   Save Project
                 </button>
