@@ -41,6 +41,13 @@ interface RegisterApiResponse {
   }
 }
 
+interface WrappedApiResponse {
+  status: string
+  status_code: number
+  message: string
+  data: ApiTokenData
+}
+
 interface LoginApiResponse {
   status: string
   status_code: number
@@ -107,7 +114,7 @@ export const useAuthStore = defineStore('auth', {
 
     async register(payload: RegisterPayload) {
       const response = await authService.registerOrganisation(payload)
-      const responseBody = response.data as unknown as RegisterApiResponse
+      const responseBody = response as unknown as RegisterApiResponse
       const registeredEmail = responseBody.data?.email || payload.email
       this.setUserEmail(registeredEmail)
       return responseBody
