@@ -152,6 +152,7 @@ onMounted(() => {
             </button>
           </div>
           <p v-if="error" class="mt-4 text-xs text-red-600">{{ error }}</p>
+          <!-- <p v-if="error" class="mt-4 text-xs text-red-600">{{ error }}</p> -->
         </form>
 
         <div class="rounded-2xl border border-gray-100 p-4">
