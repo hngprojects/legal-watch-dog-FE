@@ -15,9 +15,10 @@ const formData = ref({
   master_prompt: '',
 })
 
-const activeMenuId = ref<number | null>(null)
+// Kebab menu state — now uses string IDs
+const activeMenuId = ref<string | null>(null)
 
-const toggleMenu = (projectId: number, event: Event) => {
+const toggleMenu = (projectId: string, event: Event) => {
   event.stopPropagation()
   activeMenuId.value = activeMenuId.value === projectId ? null : projectId
 }
@@ -38,7 +39,7 @@ const closeCreateModal = () => {
   projectStore.setError(null)
 }
 
-const deleteProject = async (projectId: number) => {
+const deleteProject = async (projectId: string) => {
   await projectStore.deleteProject(projectId)
   closeMenu()
 }
@@ -51,18 +52,20 @@ const handleCreateProject = async () => {
   if (!formData.value.master_prompt.trim()) return projectStore.setError('Master prompt is required')
 
   try {
-    await projectStore.addProject({
+    const newProject = await projectStore.addProject({
       title: formData.value.title.trim(),
       description: formData.value.description.trim(),
       master_prompt: formData.value.master_prompt.trim(),
     })
+
     closeCreateModal()
+    router.push(`/dashboard/projects/${newProject.id}`)
   } catch (err: any) {
     projectStore.setError(err.response?.data?.message || 'Failed to create project')
   }
 }
 
-const goToProject = (id: number) => {
+const goToProject = (id: string) => {
   router.push(`/dashboard/projects/${id}`)
 }
 
@@ -74,6 +77,7 @@ onMounted(() => {
 <template>
   <main class="min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-12 lg:py-14">
     <div class="mx-auto max-w-7xl">
+      <!-- Header -->
       <div class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
         <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Projects</h1>
         <button
@@ -181,7 +185,9 @@ onMounted(() => {
                   />
                   <label
                     for="projName"
-                    class="pointer-events-none absolute left-3 top-2.5 origin-left -translate-y-6 scale-75 transform bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:top-2.5 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#401903]"
+                    class="pointer-events-none absolute left-3 top-2.5 origin-left -translate-y-6 scale-75 transform bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200
+                           peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680]
+                           peer-focus:top-2.5 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#401903]"
                   >
                     Project Name
                   </label>
@@ -199,7 +205,9 @@ onMounted(() => {
                   />
                   <label
                     for="desc"
-                    class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:text-[#401903] peer-focus:scale-75"
+                    class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200
+                           peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680]
+                           peer-focus:-top-2.5 peer-focus:text-[#401903] peer-focus:scale-75"
                   >
                     Description
                   </label>
@@ -216,7 +224,9 @@ onMounted(() => {
                   />
                   <label
                     for="prompt"
-                    class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:text-[#401903] peer-focus:scale-75"
+                    class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200
+                           peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680]
+                           peer-focus:-top-2.5 peer-focus:text-[#401903] peer-focus:scale-75"
                   >
                     Master Prompt
                   </label>

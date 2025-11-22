@@ -1,3 +1,4 @@
+// src/stores/project-store.ts
 import { defineStore } from 'pinia'
 import { projectService } from '@/api/project'
 import type { CreateProjectPayload, Project, UpdateProjectPayload } from '@/types/project'
@@ -37,7 +38,7 @@ export const useProjectStore = defineStore('projects', {
       this.setError(null)
       try {
         const { data } = await projectService.createProject(payload)
-        this.projects.unshift(data) // add to top
+        this.projects.unshift(data)
         return data
       } catch (error: any) {
         const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to create project'
@@ -46,6 +47,15 @@ export const useProjectStore = defineStore('projects', {
       }
     },
 
-
+    async deleteProject(projectId: string) {
+      try {
+        await projectService.deleteProject(projectId)
+        this.projects = this.projects.filter(p => p.id !== projectId)
+      } catch (error: any) {
+        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to delete project'
+        this.setError(msg)
+        throw error
+      }
+    },
   },
 })
