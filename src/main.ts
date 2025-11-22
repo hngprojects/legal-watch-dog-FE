@@ -14,3 +14,12 @@ app.use(pinia)
 app.use(router)
 
 app.mount('#app')
+
+const loadingScreen = document.getElementById('loading-screen')
+if (loadingScreen) {
+  loadingScreen.style.opacity = '0'
+  loadingScreen.style.transition = 'opacity 0.3s ease-out'
+  setTimeout(() => {
+    loadingScreen.remove()
+  }, 300)
+}

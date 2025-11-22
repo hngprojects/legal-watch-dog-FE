@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import AuthBranding from '@/components/authentication/AuthBranding.vue'
-import MainHeader from '@/components/landing-page/MainHeader.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
+// import MainHeader from '@/components/landing-page/MainHeader.vue'
+// import MainFooter from '@/components/landing-page/MainFooter.vue'
 const redirectSeconds = ref(3)
 
 onMounted(() => {
@@ -18,7 +18,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <MainHeader />
+  <!-- <MainHeader /> -->
 
   <main class="flex h-[calc(100vh-88px)] w-full overflow-hidden bg-gray-50">
     <!-- Left Section -->
@@ -65,5 +65,5 @@ onMounted(() => {
       </div>
     </div>
   </main>
-  <MainFooter />
+  <!-- <MainFooter /> -->
 </template>
