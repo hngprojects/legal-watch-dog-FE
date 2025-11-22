@@ -1,66 +1,98 @@
 <script setup lang="ts">
+import PillTag from '@/components/reusable/PillTag.vue'
+import { Button } from '@/components/ui/button'
+import Icon from '@/components/reusable/Icon.vue'
+import { NoteIcon, PlayIcon } from '@hugeicons/core-free-icons'
+
+import projectImg from '@/assets/Images/how-it-works/project.webp'
+import jurisdictionImg from '@/assets/Images/how-it-works/jurisdiction.webp'
+import sourcesImg from '@/assets/Images/how-it-works/sources.webp'
+import monitoringImg from '@/assets/Images/how-it-works/monitoring.webp'
+import alertsImg from '@/assets/Images/how-it-works/alerts.webp'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
+
+const steps = [
+  {
+    title: 'Set Your Project',
+    description: 'Define what you want to monitor or any legal topic across multiple jurisdiction.',
+    image: projectImg,
+  },
+  {
+    title: 'Define Your Jurisdiction',
+    description: 'Choose the country you want to follow and track changes.',
+    image: jurisdictionImg,
+  },
+  {
+    title: 'Add Trusted Sources',
+    description: 'Choose the government sites or regulatory bodies you want to track.',
+    image: sourcesImg,
+  },
+  {
+    title: 'Automated Monitoring',
+    description: 'Our system tracks / checks your sources for changes 24/7.',
+    image: monitoringImg,
+  },
+  {
+    title: 'Automated Alerts',
+    description: 'Receive notification when important changes happen.',
+    image: alertsImg,
+  },
+]
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col bg-[#F5EFE8]">
+  <div class="flex min-h-screen flex-col">
     <MainHeader />
-    <main class="flex flex-1 items-center justify-center px-6 py-16">
-      <section class="w-full max-w-5xl rounded-4xl bg-white p-10 shadow-2xl">
-        <p class="text-xs font-semibold tracking-[0.3em] text-[#C27A3F] uppercase">How it works</p>
-        <h1 class="mt-2 text-3xl font-bold text-[#1D140B]">
-          From sign-up to signals in four steps
-        </h1>
-        <div class="mt-10 grid gap-6 md:grid-cols-2">
-          <article class="rounded-3xl border border-[#F1E4D7] p-6">
-            <p class="text-xs font-semibold text-[#BE8554]">Step 1</p>
-            <h2 class="mt-2 text-xl font-semibold text-[#1D140B]">Tell us about your firm</h2>
-            <p class="mt-2 text-sm text-[#705C4A]">
-              Share your industry, jurisdictions, and primary compliance needs so we can tailor
-              feeds to you.
-            </p>
-          </article>
-          <article class="rounded-3xl border border-[#F1E4D7] p-6">
-            <p class="text-xs font-semibold text-[#BE8554]">Step 2</p>
-            <h2 class="mt-2 text-xl font-semibold text-[#1D140B]">Verify your access</h2>
-            <p class="mt-2 text-sm text-[#705C4A]">
-              Complete OTP verification so we can keep your workspace secure.
-            </p>
-          </article>
-          <article class="rounded-3xl border border-[#F1E4D7] p-6">
-            <p class="text-xs font-semibold text-[#BE8554]">Step 3</p>
-            <h2 class="mt-2 text-xl font-semibold text-[#1D140B]">Onboard in minutes</h2>
-            <p class="mt-2 text-sm text-[#705C4A]">
-              Add your projects and stakeholders, then choose the regulators and watchlists to
-              monitor.
-            </p>
-          </article>
-          <article class="rounded-3xl border border-[#F1E4D7] p-6">
-            <p class="text-xs font-semibold text-[#BE8554]">Step 4</p>
-            <h2 class="mt-2 text-xl font-semibold text-[#1D140B]">Receive AI signals</h2>
-            <p class="mt-2 text-sm text-[#705C4A]">
-              Sit back while Legal Watchdog delivers prioritised insights, summaries, and alerts to
-              your dashboard.
-            </p>
-          </article>
+    <main class="flex flex-1 flex-col items-center justify-center px-6 py-16 md:px-12 lg:px-24">
+      <section class="mb-24 space-y-11 text-center">
+        <PillTag>
+          <span class="font-normal text-gray-600">AI-Powered Regulatory Intelligence</span>
+        </PillTag>
+        <div class="space-y-5">
+          <h1 class="text-preset-display-md text-primary font-bold">How Legal Watch Dog Works</h1>
+          <p class="text-preset-body-xx-lg text-gray-600">
+            Stay ahead of legal changes with AI-powered monitoring.<br />
+            Never miss an important update across any jurisdiction.
+          </p>
         </div>
-        <div class="mt-10 flex flex-wrap gap-4">
-          <router-link
-            :to="{ name: 'signup' }"
-            class="inline-flex items-center justify-center rounded-full bg-[#3C2610] px-8 py-3 text-sm font-semibold text-white shadow-md"
+        <Button><Icon :icon="PlayIcon" /> Watch 2-minute Demo</Button>
+      </section>
+
+      <section class="text-center">
+        <div class="mb-28">
+          <h2 class="text-preset-display-sm font-semibold">
+            5 <span class="text-peach-amber-main">Simple Steps</span> to Stay Informed
+          </h2>
+          <p class="text-preset-body-xx-lg text-gray-600">From setups to alerts in minutes</p>
+        </div>
+
+        <div class="space-y-20 text-center lg:text-start">
+          <article
+            :key="i"
+            v-for="(step, i) in steps"
+            class="flex w-full flex-col justify-center gap-10 *:basis-1/2 lg:flex-row lg:gap-0 lg:[&>div]:first:flex-1"
+            :class="{ 'lg:flex-row-reverse': i % 2 !== 0 }"
           >
-            Get started
-          </router-link>
-          <router-link
-            :to="{ name: 'waitlist' }"
-            class="inline-flex items-center justify-center rounded-full border border-[#3C2610] px-8 py-3 text-sm font-semibold text-[#3C2610]"
-          >
-            Join the waitlist
-          </router-link>
+            <div class="space-y-4 lg:self-center" :class="[i % 2 !== 0 ? 'lg:pl-14' : 'lg:pr-14']">
+              <div class="flex items-center justify-center gap-3 lg:justify-start">
+                <div class="bg-peach-amber-main rounded-full p-4">
+                  <Icon :icon="NoteIcon" :size="24" />
+                </div>
+                <h3 class="text-preset-heading-lg text-peach-amber-main">Step {{ i + 1 }}</h3>
+              </div>
+              <h4 class="text-preset-heading-lg">{{ step.title }}</h4>
+              <p class="pt-1 font-medium text-gray-600">{{ step.description }}</p>
+            </div>
+
+            <div class="w-full self-center md:w-4/5 lg:w-full">
+              <img :src="step.image" class="w-full rounded-3xl" />
+            </div>
+          </article>
         </div>
       </section>
     </main>
+
     <MainFooter />
   </div>
 </template>
