@@ -151,7 +151,7 @@ onMounted(() => {
 
           <div class="p-10">
             <div class="mb-8">
-              <h3 class="mb-2 text-xl font-bold text-[#080808]">Create New Projt</h3>
+              <h3 class="mb-2 text-xl font-bold text-[#080808]">Create New Project</h3>
               <p class="text-sm text-[#6B7280]">Set up a new project to track legal and regulatory changes</p>
             </div>
 

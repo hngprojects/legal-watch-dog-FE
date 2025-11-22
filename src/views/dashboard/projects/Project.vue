@@ -78,7 +78,7 @@ onMounted(async () => {
           <span class="font-medium text-[#C17A3F]">{{ project.title }}</span>
         </nav>
         
-        <button class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
+        <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
           <Settings :size="18" />
         </button>
       </div>
