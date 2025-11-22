@@ -106,11 +106,11 @@
 }
 
 @utility btn {
-  @apply cursor-pointer py-4 px-5 rounded-sm focus:ring-1 ring-focus ;
+  @apply cursor-pointer rounded-sm focus:ring-1 ring-focus ;
 }
 
 @utility btn--primary {
-  @apply btn bg-accent-main hover:bg-accent-subtle text-surface;
+  @apply btn bg-accent-main hover:bg-accent-subtle text-surface py-4 px-5;
 }
 
 @utility btn--link {
