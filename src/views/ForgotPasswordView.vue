@@ -2,7 +2,7 @@
 import forgot1 from '@/assets/images/forgot1.png';
 </script>
 <template>
-    <div class="w-max-[1440px] mx-auto p-3 flex max-h-screen">
+    <div class="max-w-[1440px] mx-auto p-3 flex max-h-screen">
         <div class="basis-0 grow rounded-2xl">
             <img :src="forgot1" alt="" class="h-full w-full object-fill"/>
             
