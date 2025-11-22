@@ -80,6 +80,7 @@ const router = createRouter({
       children: [
         {
           path: '',
+          name: 'dashboard',
           redirect: {
             name: 'projects',
           },
