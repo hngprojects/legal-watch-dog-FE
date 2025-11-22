@@ -103,7 +103,7 @@ const handleFocus = (event: FocusEvent) => emit('focus', event)
       :checked="Boolean(modelValue)"
       :disabled="disabled"
       :required="required"
-      class="h-4 w-4 rounded border bg-white text-[#3C2610] focus:outline-none focus:ring-2 disabled:cursor-not-allowed"
+      class="h-4 w-4 rounded border bg-white text-accent-subtle focus:outline-none focus:ring-2 disabled:cursor-not-allowed"
       :class="checkboxClasses"
       @input="handleInput"
       @blur="handleBlur"
