@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
-import LoginView from '@/views/LoginView.vue'
-import SignupView from '@/views/SignupView.vue'
-import OtpView from '@/views/OtpView.vue'
-import SuccessView from '@/views/SuccessView.vue'
+import LoginView from '@/views/authentication/LoginView.vue'
+import SignupView from '@/views/authentication/SignupView.vue'
+import OtpView from '@/views/authentication/OtpView.vue'
+import SuccessView from '@/views/authentication/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
 import HowItWorksView from '@/views/HowItWorksView.vue'
@@ -100,29 +100,23 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  const auth = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const isAuthRoute = to.name === 'login' || to.name === 'signup'
+
+  if (isAuthRoute && auth.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
 
   if (!requiresAuth) {
     return true
   }
 
-  const auth = useAuthStore()
-
   if (auth.isAuthenticated) {
     return true
   }
 
-  try {
-    await auth.refreshToken()
-  } catch (error) {
-    console.error('Failed to refresh token before navigation', error)
-  }
-
-  if (!auth.isAuthenticated) {
-    return { name: 'login', query: { redirect: to.fullPath } }
-  }
-
-  return true
+  return { name: 'login', query: { redirect: to.fullPath } }
 })
 
 export default router
