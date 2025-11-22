@@ -100,13 +100,17 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  const auth = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const isAuthRoute = to.name === 'login' || to.name === 'signup'
+
+  if (isAuthRoute && auth.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
 
   if (!requiresAuth) {
     return true
   }
-
-  const auth = useAuthStore()
 
   if (auth.isAuthenticated) {
     return true
