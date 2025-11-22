@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
-import { ref, onMounted } from 'vue'
-import { watch } from 'vue'
+import { useJurisdictionStore } from '@/stores/jurisdiction-store'
+import { ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import { ArrowLeftIcon, ChevronRight, Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
@@ -10,13 +10,13 @@ import Swal from 'sweetalert2'
 const route = useRoute()
 const router = useRouter()
 const projectStore = useProjectStore()
+const jurisdictionStore = useJurisdictionStore()
 const projectId = route.params.id as string
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
 const showAddJurisdictionModal = ref(false)
-
-const jurisdictions = ref([])
+const jurisdictionForm = ref({ name: '', description: '' })
 
 const goBack = () => {
   router.push('/dashboard/projects')
@@ -24,11 +24,39 @@ const goBack = () => {
 
 const openAddJurisdictionModal = () => {
   showAddJurisdictionModal.value = true
+  jurisdictionForm.value = { name: '', description: '' }
+  jurisdictionStore.setError(null)
 }
 
-/* const closeAddJurisdictionModal = () => {
+const closeAddJurisdictionModal = () => {
   showAddJurisdictionModal.value = false
-} */
+  jurisdictionForm.value = { name: '', description: '' }
+  jurisdictionStore.setError(null)
+}
+
+const handleCreateJurisdiction = async () => {
+  jurisdictionStore.setError(null)
+
+  if (!jurisdictionForm.value.name.trim()) {
+    return jurisdictionStore.setError('Jurisdiction name is required')
+  }
+  if (!jurisdictionForm.value.description.trim()) {
+    return jurisdictionStore.setError('Description is required')
+  }
+
+  const newJurisdiction = await jurisdictionStore.addJurisdiction(projectId, {
+    name: jurisdictionForm.value.name.trim(),
+    description: jurisdictionForm.value.description.trim(),
+  })
+
+  if (newJurisdiction) {
+    closeAddJurisdictionModal()
+  }
+}
+
+const goToJurisdiction = (jurisdictionId: string) => {
+  router.push(`/dashboard/jurisdictions/${jurisdictionId}`)
+}
 
 onMounted(async () => {
   const existingProject = projectStore.projects.find((p) => p.id === projectId)
@@ -41,6 +69,7 @@ onMounted(async () => {
     project.value = foundProject || null
   }
 
+  await jurisdictionStore.fetchJurisdictions(projectId)
   loading.value = false
 })
 
@@ -61,7 +90,6 @@ const closeSettingsMenu = () => {
   showSettingsMenu.value = false
 }
 
-// handle delete
 const deleteProject = async () => {
   closeSettingsMenu()
 
@@ -202,7 +230,6 @@ watch(
         </div>
       </div>
 
-      <!-- inline editable project card -->
       <div class="mb-8 flex flex-col gap-5 rounded-[10px] bg-white p-5">
         <template v-if="showInlineEdit">
           <form @submit.prevent="saveEdit" class="w-full space-y-4">
@@ -298,14 +325,36 @@ watch(
 
       <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-200/60">
         <div v-if="activeTab === 'jurisdictions'">
+          <div v-if="jurisdictionStore.loading" class="space-y-4 p-6">
+            <div v-for="n in 3" :key="n" class="animate-pulse">
+              <div class="h-24 rounded-lg bg-gray-200"></div>
+            </div>
+          </div>
+
           <div
-            v-if="jurisdictions.length === 0"
+            v-else-if="jurisdictionStore.jurisdictions.length === 0"
             class="flex flex-col items-center justify-center py-20"
           >
             <p class="text-sm text-gray-500">No Jurisdiction found</p>
           </div>
 
-          <div v-else class="p-6"></div>
+          <div v-else class="space-y-3 p-6">
+            <article
+              v-for="jurisdiction in jurisdictionStore.jurisdictions"
+              :key="jurisdiction.id"
+              @click="goToJurisdiction(jurisdiction.id)"
+              class="group cursor-pointer rounded-lg bg-white p-6 ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
+            >
+              <h3
+                class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+              >
+                {{ jurisdiction.name }}
+              </h3>
+              <p class="text-sm leading-relaxed text-gray-600">
+                {{ jurisdiction.description }}
+              </p>
+            </article>
+          </div>
         </div>
 
         <div
@@ -316,5 +365,95 @@ watch(
         </div>
       </div>
     </div>
+
+    <teleport to="body">
+      <div
+        v-if="showAddJurisdictionModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-[2px]"
+        @click.self="closeAddJurisdictionModal"
+      >
+        <div class="relative w-full max-w-[540px] rounded-sm bg-white shadow-xl">
+          <button
+            @click="closeAddJurisdictionModal"
+            class="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1 1L13 13M13 1L1 13"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+
+          <div class="p-8">
+            <div class="mb-6">
+              <h3 class="mb-2 text-xl font-bold text-[#080808]">Add Jurisdiction</h3>
+              <p class="text-sm text-[#6B7280]">Add a new jurisdiction to track legal changes</p>
+            </div>
+
+            <form @submit.prevent="handleCreateJurisdiction" class="space-y-5">
+              <div>
+                <label for="jurisdictionName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+                  Jurisdiction Name
+                </label>
+                <input
+                  v-model="jurisdictionForm.name"
+                  id="jurisdictionName"
+                  placeholder="e.g United Kingdom"
+                  required
+                  class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label for="jurisdictionDesc" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+                  Description
+                </label>
+                <textarea
+                  v-model="jurisdictionForm.description"
+                  id="jurisdictionDesc"
+                  rows="3"
+                  placeholder="Describe the legal area or focus"
+                  required
+                  class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                />
+              </div>
+
+              <div
+                v-if="jurisdictionStore.error"
+                class="rounded-lg bg-red-50 p-4 text-sm text-red-700"
+              >
+                {{ jurisdictionStore.error }}
+              </div>
+
+              <div class="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  @click="closeAddJurisdictionModal"
+                  class="cursor-pointer rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
+                >
+                  Add Jurisdiction
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </main>
 </template>

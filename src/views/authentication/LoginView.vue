@@ -52,7 +52,7 @@ const handleLogin = async () => {
     })
 
     if (success) {
-      router.push({ name: 'dashboard' })
+      router.push({ name: 'projects' })
     }
   } catch (error) {
     if (isAxiosError(error)) {
