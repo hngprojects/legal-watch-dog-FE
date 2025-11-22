@@ -38,7 +38,6 @@ export const useProjectStore = defineStore('projects', {
       this.setError(null)
       try {
         const { data } = await projectService.createProject(payload)
-        console.log('Created projectfffff:', data)
         if (!data.data) {
           return
         }

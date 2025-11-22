@@ -35,21 +35,17 @@ const handleCreateProject = async () => {
   // if (!formData.value.master_prompt.trim()) return projectStore.setError('Master prompt is required')
 
   try {
-    console.log('Creating project with data:', formData.value)
     const newProject = await projectStore.addProject({
       title: formData.value.title.trim(),
       description: formData.value.description.trim(),
       master_prompt: formData.value.master_prompt.trim(),
     })
-    if(!newProject || !newProject) {
+    if(!newProject) {
       throw new Error('No project data returned from API')
     }
-    console.log('Project created:', newProject)
-    console.log('Project created 2:', newProject.id)
     closeCreateModal()
     router.push(`/dashboard/projects/${newProject.data.id}`)
   } catch (err: any) {
-    console.log(err)
     projectStore.setError(err.response?.data?.message || 'Failed to create project')
   }
 }
