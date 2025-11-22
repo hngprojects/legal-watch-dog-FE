@@ -48,7 +48,8 @@ const handleCreateProject = async () => {
   }
 }
 
-const goToProject = (id: number) => {
+// Fixed: id is now string
+const goToProject = (id: string) => {
   router.push(`/dashboard/projects/${id}`)
 }
 
