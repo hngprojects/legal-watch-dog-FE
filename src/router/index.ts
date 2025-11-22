@@ -98,11 +98,18 @@ const router = createRouter({
           component: () => import('@/views/dashboard/projects/Project.vue'),
           meta: { requiresAuth: true },
         },
+
         {
           path: 'jurisdictions',
           name: 'jurisdictions',
           component: JurisdictionView,
           alias: '/jurisdictions',
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'jurisdictions/:id',
+          name: 'jurisdiction-detail',
+          component: () => import('@/views/dashboard/jurisdictions/Jurisdiction.vue'),
           meta: { requiresAuth: true },
         },
       ],
