@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import comingSoonImg from '@/assets/Images/coming-soon.webp'
+import comingSoonImg from '@/assets/images/coming-soon.webp'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
 import Button from '@/components/ui/button/Button.vue'
