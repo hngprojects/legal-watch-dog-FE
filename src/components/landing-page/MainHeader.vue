@@ -187,12 +187,12 @@ onUnmounted(() => {
 
         <div class="space-y-4 border-t border-gray-100 p-6">
           <template v-if="isAuthenticated">
-            <Button :as="RouterLink" :to="{ name: 'dashboard' }" class="w-full" @click="closeMenu">
+            <Button :as="RouterLink" :to="{ name: 'dashboard' }" class="w-full text-white" @click="closeMenu">
               Go to Dashboard
             </Button>
           </template>
           <template v-else>
-            <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full" @click="closeMenu">
+            <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full text-white" @click="closeMenu">
               Join Waitlist
             </Button>
             <Button variant="outline" :as="RouterLink" to="/signup" class="w-full">Sign up</Button>
