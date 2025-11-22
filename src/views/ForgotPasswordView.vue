@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import forgot1 from '@/assets/Images/forgot1.png';
+import forgot1 from '@/assets/images/forgot1.png';
 </script>
 <template>
     <div class="w-max-[1440px] mx-auto p-3 flex max-h-screen">

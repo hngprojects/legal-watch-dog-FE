@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import LogoImage from '@/assets/Images/logo.png' // Import for optimization (Vite handles)
+import LogoImage from '@/assets/images/logo.png'
 
 withDefaults(
   defineProps<{
