@@ -18,9 +18,6 @@ const earlyAccessForm = reactive({
   workEmail: '',
 })
 
-// Newsletter form
-const newsletterEmail = ref('')
-
 const isSubmitting = ref(false)
 const feedback = ref<{ type: 'success' | 'error'; message: string } | null>(null)
 
@@ -55,11 +52,6 @@ const handleEarlyAccessSubmit = () => {
   feedback.value = { type: 'success', message: 'Request submitted!' }
   earlyAccessForm.fullName = ''
   earlyAccessForm.workEmail = ''
-}
-
-const handleNewsletterSubmit = () => {
-  console.log('Newsletter subscription:', newsletterEmail.value)
-  newsletterEmail.value = ''
 }
 
 const features = [
@@ -377,101 +369,5 @@ const getInitials = (name: string) => {
         </div>
       </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="bg-white py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
-      <div class="max-w-6xl mx-auto">
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-8">
-          <div class="col-span-2 md:col-span-1">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-8 h-8 bg-[#3a1f14] rounded-full flex items-center justify-center text-white">
-                🔔
-              </div>
-              <span class="text-xl font-bold text-[#3a1f14]">WatchDog</span>
-            </div>
-            <p class="text-sm text-gray-600">
-              LegalWatchDog helps you track cross-border regulation updates in hours, not weeks.
-            </p>
-          </div>
-
-          <div>
-            <h4 class="font-bold text-gray-900 mb-3">Product</h4>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li><a href="#" class="hover:text-gray-900">Features</a></li>
-              <li><a href="#" class="hover:text-gray-900">Pricing</a></li>
-              <li><a href="#" class="hover:text-gray-900">Case studies</a></li>
-              <li><a href="#" class="hover:text-gray-900">Reviews</a></li>
-              <li><a href="#" class="hover:text-gray-900">Updates</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="font-bold text-gray-900 mb-3">Company</h4>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li><a href="#" class="hover:text-gray-900">About</a></li>
-              <li><a href="#" class="hover:text-gray-900">Contact us</a></li>
-              <li><a href="#" class="hover:text-gray-900">Careers</a></li>
-              <li><a href="#" class="hover:text-gray-900">Culture</a></li>
-              <li><a href="#" class="hover:text-gray-900">Blog</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="font-bold text-gray-900 mb-3">Support</h4>
-            <ul class="space-y-2 text-sm text-gray-600">
-              <li><a href="#" class="hover:text-gray-900">Getting started</a></li>
-              <li><a href="#" class="hover:text-gray-900">Help center</a></li>
-              <li><a href="#" class="hover:text-gray-900">Server status</a></li>
-              <li><a href="#" class="hover:text-gray-900">Report a bug</a></li>
-              <li><a href="#" class="hover:text-gray-900">Chat support</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="font-bold text-gray-900 mb-3">Subscribe to our newsletter</h4>
-            <p class="text-sm text-gray-600 mb-3">
-              Join our newsletter to get regulatory updates, priced notifications, and actionable insights.
-            </p>
-            <div class="flex gap-2">
-              <Input
-                v-model="newsletterEmail"
-                type="email"
-                placeholder="Enter your email"
-                class="flex-1 text-sm"
-              />
-              <Button
-                @click="handleNewsletterSubmit"
-                class="px-4 py-2 bg-[#3a1f14] text-white hover:bg-[#2d1810] text-sm"
-              >
-                Subscribe
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div class="pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p class="text-sm text-gray-600">
-            Copyright © 2025 LegalWatchDog | All Rights Reserved
-          </p>
-          <div class="flex gap-4">
-            <a href="#" class="text-gray-600 hover:text-gray-900">
-              <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
-            </a>
-            <a href="#" class="text-gray-600 hover:text-gray-900">
-              <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
-            </a>
-            <a href="#" class="text-gray-600 hover:text-gray-900">
-              <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
-            </a>
-            <a href="#" class="text-gray-600 hover:text-gray-900">
-              <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
-            </a>
-            <a href="#" class="text-gray-600 hover:text-gray-900">
-              <div class="w-6 h-6 bg-gray-300 rounded-full"></div>
-            </a>
-          </div>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
