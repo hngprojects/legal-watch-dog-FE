@@ -45,7 +45,6 @@ onMounted(async () => {
 })
 
 const showSettingsMenu = ref(false)
-// replaced modal flag with inline edit flag
 const showInlineEdit = ref(false)
 
 const editForm = ref({
@@ -98,12 +97,10 @@ const startEdit = () => {
     master_prompt: project.value?.master_prompt || "",
   }
 
-  // open inline editor instead of modal
   showInlineEdit.value = true
   closeSettingsMenu()
 }
 
-// handle edit
 const saveEdit = async () => {
   try {
     const updated = await projectStore.updateProject(projectId, {
@@ -112,9 +109,10 @@ const saveEdit = async () => {
       master_prompt: editForm.value.master_prompt,
     })
 
-    // update local ref so the UI reflects changes immediately
-    if (updated) {
-      project.value = { ...(project.value || {}), ...updated }
+    if (project.value && updated) {
+      project.value.title = editForm.value.title
+      project.value.description = editForm.value.description  
+      project.value.master_prompt = editForm.value.master_prompt
     }
 
     await Swal.fire({
@@ -125,14 +123,12 @@ const saveEdit = async () => {
       showConfirmButton: false,
     })
 
-    // close inline editor after save
     showInlineEdit.value = false
   } catch (err: any) {
     Swal.fire("Error", projectStore.error || err?.response?.data?.detail?.[0]?.msg || "Failed to update project", "error")
   }
 }
 
-// keep the detail view in sync if the store is updated elsewhere
 watch(
   () => projectStore.projects,
   (newProjects) => {
