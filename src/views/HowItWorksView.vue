@@ -96,3 +96,10 @@ const steps = [
     <MainFooter />
   </div>
 </template>
+
+<style scoped>
+button:hover {
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+</style>

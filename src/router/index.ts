@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
-import LoginView from '@/views/LoginView.vue'
-import SignupView from '@/views/SignupView.vue'
-import OtpView from '@/views/OtpView.vue'
-import SuccessView from '@/views/SuccessView.vue'
+import LoginView from '@/views/authentication/LoginView.vue'
+import SignupView from '@/views/authentication/SignupView.vue'
+import OtpView from '@/views/authentication/OtpView.vue'
+import SuccessView from '@/views/authentication/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
 import HowItWorksView from '@/views/HowItWorksView.vue'
@@ -14,6 +14,7 @@ import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
 import { useAuthStore } from '@/stores/auth-store'
+import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,11 @@ const router = createRouter({
       path: '/signup',
       name: 'signup',
       component: SignupView,
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: ForgotPasswordView
     },
     {
       path: '/otp',
@@ -86,6 +92,12 @@ const router = createRouter({
           alias: '/projects',
           meta: { requiresAuth: true },
         },
+         {
+          path: 'projects/:id', 
+          name: 'project-detail',
+          component: () => import('@/views/dashboard/projects/Project.vue'),
+          meta: { requiresAuth: true },
+        },
         {
           path: 'jurisdictions',
           name: 'jurisdictions',
@@ -100,13 +112,17 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
+  const auth = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const isAuthRoute = to.name === 'login' || to.name === 'signup'
+
+  if (isAuthRoute && auth.isAuthenticated) {
+    return { name: 'dashboard' }
+  }
 
   if (!requiresAuth) {
     return true
   }
-
-  const auth = useAuthStore()
 
   if (auth.isAuthenticated) {
     return true

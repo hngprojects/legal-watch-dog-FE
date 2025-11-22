@@ -1,7 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { TypographyHeading, TypographyText } from '../ui/typography'
+import { useAuthStore } from '@/stores/auth-store'
+
+const authStore = useAuthStore()
+const isAuthenticated = computed(() => authStore.isAuthenticated)
 </script>
 
 <template>
@@ -23,7 +29,15 @@ import { TypographyHeading, TypographyText } from '../ui/typography'
         LegalWatchDog uses AI to track all changes on any website, from Visa portals to employment
         laws and delivers concise actionable summaries.
       </TypographyText>
-      <Button class="cursor-pointer self-center px-8 my-8"  size="lg" variant="secondary" > Get Monitoring For Free </Button>
+      <Button
+        :as="RouterLink"
+        :to="isAuthenticated ? { name: 'dashboard' } : { path: '/signup' }"
+        class="cursor-pointer self-center px-8 my-8"
+        size="lg"
+        variant="secondary"
+      >
+        {{ isAuthenticated ? 'Go to Dashboard' : 'Get Monitoring For Free' }}
+      </Button>
     </div>
   </section>
 </template>

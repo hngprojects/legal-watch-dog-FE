@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onUnmounted, watch } from 'vue'
+import { ref, onUnmounted, watch, computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import BrandLogo from '../BrandLogo.vue'
+import BrandLogo from '../reusable/BrandLogo.vue'
 import { Button } from '../ui/button'
+import { useAuthStore } from '@/stores/auth-store'
 
 type NavLink = {
   name: string
@@ -10,6 +11,8 @@ type NavLink = {
 }
 
 const isMenuOpen = ref(false)
+const authStore = useAuthStore()
+const isAuthenticated = computed(() => authStore.isAuthenticated)
 
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
@@ -56,7 +59,7 @@ onUnmounted(() => {
         <ul class="flex items-center gap-8">
           <li v-for="link in navLinks" :key="link.name">
             <RouterLink :to="link.to"
-              class="hover:text-brand-deep focus-visible:ring-brand-brown text-base font-medium text-gray-500 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none">
+              class="hover:text-accent-main focus-visible:ring-accent-main text-base font-medium text-gray-500 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none">
               {{ link.name }}
             </RouterLink>
           </li>
@@ -64,13 +67,25 @@ onUnmounted(() => {
       </nav>
 
       <div class="flex items-center gap-3">
-        <Button :as="RouterLink" :to="{ path: '/waitlist' }" variant="ghost" size="lg"
-          class="hidden lg:inline-flex px-7">
-          Join Waitlist
-        </Button>
-        <Button :as="RouterLink" :to="{ path: '/login' }" variant="secondary" size="lg"
-          class="hidden lg:inline-flex px-7">
-          Sign In
+        <template v-if="!isAuthenticated">
+          <Button :as="RouterLink" :to="{ path: '/waitlist' }" variant="ghost" size="lg"
+            class="hidden lg:inline-flex px-7">
+            Join Waitlist
+          </Button>
+          <Button :as="RouterLink" :to="{ path: '/login' }" variant="secondary" size="lg"
+            class="hidden lg:inline-flex px-7">
+            Sign In
+          </Button>
+        </template>
+        <Button
+          v-else
+          :as="RouterLink"
+          :to="{ name: 'dashboard' }"
+          variant="secondary"
+          size="lg"
+          class="hidden lg:inline-flex px-7"
+        >
+          Go to Dashboard
         </Button>
 
         <button @click="isMenuOpen = !isMenuOpen"
@@ -114,10 +129,17 @@ onUnmounted(() => {
         </nav>
 
         <div class="space-y-4 border-t border-gray-100 p-6">
-          <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full" @click="closeMenu">
-            Join Waitlist
-          </Button>
-          <Button variant="outline" :as="RouterLink" to="/signup" class="w-full">Sign up</Button>
+          <template v-if="isAuthenticated">
+            <Button :as="RouterLink" :to="{ name: 'dashboard' }" class="w-full" @click="closeMenu">
+              Go to Dashboard
+            </Button>
+          </template>
+          <template v-else>
+            <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full" @click="closeMenu">
+              Join Waitlist
+            </Button>
+            <Button variant="outline" :as="RouterLink" to="/signup" class="w-full">Sign up</Button>
+          </template>
         </div>
       </div>
     </Transition>

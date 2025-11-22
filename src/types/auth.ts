@@ -54,6 +54,16 @@ export interface VerifyOtpResponse {
   login_data?: LoginResponse
 }
 
+export interface ResendOtpPayload {
+  email: string
+}
+
+export interface ResendOtpResponse {
+  message: string
+  status?: string
+  status_code?: number
+}
+
 export interface AuthError {
   detail: {
     loc: (string | number)[]

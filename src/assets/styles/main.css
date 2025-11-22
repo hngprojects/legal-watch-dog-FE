@@ -1,7 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import './tokens.css';
 @import 'tailwindcss';
+/* @import './tokens.css'; */
+@import './colors.css';
+@import './typography.css';
 @import 'tw-animate-css';
+
+@theme {
+  --color-surface: var(--color-gray-white);
+  --color-foreground: var(--color-gray-700);
+  --color-accent-main: var(--color-chocolate-brown-main);
+  --color-accent-subtle: #3c2610;
+  --color-destructive: var(--color-red-600);
+  --color-destructive-fg: var(--color-gray-white);
+  --color-focus: #fff2db;
+
+  --font-sans: var(--font-default);
+}
 
 @layer base {
   *,
@@ -11,7 +25,7 @@
   }
 
   body {
-    font-family: var(--font-sans);
+    @apply font-sans;
     background-color: var(--color-page-bg);
     color: var(--color-text-main);
     text-rendering: optimizeLegibility;
@@ -90,4 +104,24 @@
 
 @utility text-preset-link-sm {
   @apply font-sans text-[10px] leading-normal font-medium tracking-wide;
+}
+
+@utility btn {
+  @apply ring-focus cursor-pointer rounded-sm focus:ring-1;
+}
+
+@utility btn--primary {
+  @apply btn bg-accent-main hover:bg-accent-subtle text-surface px-5 py-4;
+}
+
+@utility btn--link {
+  @apply btn text-accent-main underline hover:no-underline;
+}
+
+@utility btn--disabled {
+  @apply disabled:text-foreground disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-70;
+}
+
+@utility link--disabled {
+  @apply disabled:cursor-not-allowed;
 }

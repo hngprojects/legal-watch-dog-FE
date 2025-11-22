@@ -21,53 +21,40 @@ export const useProjectStore = defineStore('projects', {
     },
 
     async fetchProjects() {
+      this.projects = [] 
       this.loading = true
       this.setError(null)
       try {
         const { data } = await projectService.listProjects()
-        this.projects = data
-      } catch (error) {
-        this.setError('Unable to load projects.')
-        console.error(error)
+        this.projects = data.data.projects
+      } catch (error: any) {
+        this.setError(error.response?.data?.detail?.[0]?.msg || 'Failed to load projects')
       } finally {
         this.loading = false
       }
     },
 
-    async addProject(payload: CreateProjectPayload) {
-      this.setError(null)
-      try {
-        const { data } = await projectService.createProject(payload)
-        this.projects = [data, ...this.projects]
-        return data
-      } catch (error) {
-        this.setError('Could not create project.')
-        console.error(error)
-        throw error
-      }
-    },
+   async addProject(payload: CreateProjectPayload) {
+  this.setError(null)
+  try {
+    const { data } = await projectService.createProject(payload)
+    const newProject = data.data 
+    this.projects.unshift(newProject)
+    return newProject 
+  } catch (error: any) {
+    const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to create project'
+    this.setError(msg)
+    throw error
+  }
+},
 
-    async updateProject(id: string, payload: UpdateProjectPayload) {
-      this.setError(null)
+    async deleteProject(projectId: string) {
       try {
-        const { data } = await projectService.updateProject(id, payload)
-        this.projects = this.projects.map((project) => (project.id === id ? data : project))
-        return data
-      } catch (error) {
-        this.setError('Could not update project.')
-        console.error(error)
-        throw error
-      }
-    },
-
-    async deleteProject(id: string) {
-      this.setError(null)
-      try {
-        await projectService.deleteProject(id)
-        this.projects = this.projects.filter((project) => project.id !== id)
-      } catch (error) {
-        this.setError('Could not delete project.')
-        console.error(error)
+        await projectService.deleteProject(projectId)
+        this.projects = this.projects.filter(p => p.id !== projectId)
+      } catch (error: any) {
+        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to delete project'
+        this.setError(msg)
         throw error
       }
     },

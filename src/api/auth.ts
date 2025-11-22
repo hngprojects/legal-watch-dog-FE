@@ -6,6 +6,8 @@ import type {
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
+  ResendOtpPayload,
+  ResendOtpResponse,
   VerifyOTPPayload,
   VerifyOtpResponse,
 } from '@/types/auth'
@@ -32,6 +34,9 @@ export const authService = {
 
   verifyOtp: (payload: VerifyOTPPayload) =>
     http.post<VerifyOtpResponse>('/auth/verify-otp', payload),
+
+  resendOtp: (payload: ResendOtpPayload) =>
+    http.post<ResendOtpResponse>('/auth/resend-otp', payload),
 
   refreshToken: () => http.post<RefreshTokenResponse>('/auth/refresh', {}),
 }
