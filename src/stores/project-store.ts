@@ -1,4 +1,3 @@
-// src/stores/project-store.ts
 import { defineStore } from 'pinia'
 import { projectService } from '@/api/project'
 import type { CreateProjectPayload, Project, UpdateProjectPayload } from '@/types/project'
@@ -22,11 +21,12 @@ export const useProjectStore = defineStore('projects', {
     },
 
     async fetchProjects() {
+      this.projects = [] 
       this.loading = true
       this.setError(null)
       try {
         const { data } = await projectService.listProjects()
-        this.projects = data
+        this.projects = data.data.projects
       } catch (error: any) {
         this.setError(error.response?.data?.detail?.[0]?.msg || 'Failed to load projects')
       } finally {
@@ -34,18 +34,19 @@ export const useProjectStore = defineStore('projects', {
       }
     },
 
-    async addProject(payload: CreateProjectPayload) {
-      this.setError(null)
-      try {
-        const { data } = await projectService.createProject(payload)
-        this.projects.unshift(data)
-        return data
-      } catch (error: any) {
-        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to create project'
-        this.setError(msg)
-        throw error
-      }
-    },
+   async addProject(payload: CreateProjectPayload) {
+  this.setError(null)
+  try {
+    const { data } = await projectService.createProject(payload)
+    const newProject = data.data 
+    this.projects.unshift(newProject)
+    return newProject 
+  } catch (error: any) {
+    const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to create project'
+    this.setError(msg)
+    throw error
+  }
+},
 
     async deleteProject(projectId: string) {
       try {
