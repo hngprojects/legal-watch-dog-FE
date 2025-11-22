@@ -10,7 +10,6 @@ import ComingSoonView from '@/views/ComingSoonView.vue'
 import HowItWorksView from '@/views/HowItWorksView.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
-import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
 import { useAuthStore } from '@/stores/auth-store'
@@ -82,8 +81,9 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          component: DashboardView,
-          meta: { requiresAuth: true },
+          redirect: {
+            name: 'projects',
+          },
         },
         {
           path: 'projects',
