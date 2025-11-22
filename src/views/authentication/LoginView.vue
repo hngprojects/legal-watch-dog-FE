@@ -150,18 +150,18 @@ const handleLogin = async () => {
               <input
                 v-model="rememberMe"
                 type="checkbox"
-                class="h-4 w-4 cursor-pointer rounded border-gray-300 text-[#3C2610] transition duration-150 ease-in-out focus:ring-[#3C2610]"
+                class="h-4 w-4 cursor-pointer rounded border-gray-300 text-accent-subtle transition duration-150 ease-in-out focus:ring-accent-subtle"
               />
             </div>
             <span class="ml-2 text-sm text-gray-600 group-hover:text-gray-800">Remember me</span>
           </label>
-          <RouterLink to="/forgot-password" class="btn--link">Forgot password?</RouterLink>
+          <RouterLink to="/coming-soon" class="btn--link">Forgot password?</RouterLink>
         </div>
 
         <button
           type="submit"
           :disabled="isSubmitting"
-          class="w-full cursor-pointer rounded-md bg-[#3C2610] py-4 px-5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70 mt-3"
+          class="w-full cursor-pointer rounded-md bg-accent-subtle py-4 px-5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70 mt-3"
         >
           <span v-if="!isSubmitting">Login</span>
           <span v-else>Checking credentials...</span>
