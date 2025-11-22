@@ -16,8 +16,8 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
       class="mx-auto flex w-full max-w-[900px] flex-col items-center px-6 pt-20 text-center"
     >
       <Badge
-        variant="secondary"
-        class="text-gray-600 border border-white/80 bg-white px-10 py-2 text-sm font-semibold shadow-[0_15px_35px_rgba(15,17,20,0.12)]"
+        variant="default"
+        class="text-brand-brown border border-white/80 bg-white px-6 py-1.5 text-sm font-semibold shadow-[0_15px_35px_rgba(15,17,20,0.12)]"
       >
         AI-Powered Regulatory Intelligence
       </Badge>

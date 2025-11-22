@@ -26,7 +26,7 @@ export const useProjectStore = defineStore('projects', {
       this.setError(null)
       try {
         const { data } = await projectService.listProjects()
-        this.projects = data
+        this.projects = data.data?.projects || []
       } catch (error: any) {
         this.setError(error.response?.data?.detail?.[0]?.msg || 'Failed to load projects')
       } finally {
@@ -38,8 +38,12 @@ export const useProjectStore = defineStore('projects', {
       this.setError(null)
       try {
         const { data } = await projectService.createProject(payload)
-        this.projects.unshift(data)
-        return data
+        console.log('Created projectfffff:', data)
+        if (!data.data) {
+          return
+        }
+        this.projects.unshift(data.data)
+        return data.data
       } catch (error: any) {
         const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to create project'
         this.setError(msg)
@@ -50,7 +54,7 @@ export const useProjectStore = defineStore('projects', {
     async deleteProject(projectId: string) {
       try {
         await projectService.deleteProject(projectId)
-        this.projects = this.projects.filter(p => p.id !== projectId)
+        this.projects = this.projects.filter((p) => p.id !== projectId)
       } catch (error: any) {
         const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to delete project'
         this.setError(msg)

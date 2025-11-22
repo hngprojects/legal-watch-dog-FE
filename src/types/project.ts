@@ -10,6 +10,13 @@ export interface Project {
   updated_at: string
   assigned_users: any[]
 }
+export interface ProjectListResponse {
+  projects: Project[]
+  total: number
+  page: number
+  limit: number
+  total_pages: number
+}
 
 export interface CreateProjectPayload {
   title: string
