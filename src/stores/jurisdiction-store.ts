@@ -15,7 +15,8 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchJurisdictions = async (projectId: string) => {
+  // ✅ Make projectId optional
+  const fetchJurisdictions = async (projectId?: string) => {
     loading.value = true
     error.value = null
     try {
@@ -24,6 +25,32 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     } catch (err) {
       const apiError = err as ApiError
       error.value = apiError.response?.data?.detail || 'Failed to load jurisdictions'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // ✅ Add fetchOne method
+  const fetchOne = async (jurisdictionId: string) => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await jurisdictionApi.getOne(jurisdictionId)
+      const jurisdiction = response.data.data.jurisdiction
+
+      // Update in store if exists, otherwise add
+      const index = jurisdictions.value.findIndex((j) => j.id === jurisdictionId)
+      if (index !== -1) {
+        jurisdictions.value[index] = jurisdiction
+      } else {
+        jurisdictions.value.push(jurisdiction)
+      }
+
+      return jurisdiction
+    } catch (err) {
+      const apiError = err as ApiError
+      error.value = apiError.response?.data?.detail || 'Failed to load jurisdiction'
+      return null
     } finally {
       loading.value = false
     }
@@ -45,6 +72,28 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     }
   }
 
+  // ✅ Fix update method
+  const updateJurisdiction = async (
+    jurisdictionId: string,
+    data: { name?: string; description?: string },
+  ) => {
+    try {
+      const response = await jurisdictionApi.update(jurisdictionId, data)
+      const updatedJurisdiction = response.data.data.jurisdiction
+
+      const index = jurisdictions.value.findIndex((j) => j.id === jurisdictionId)
+      if (index !== -1) {
+        jurisdictions.value[index] = updatedJurisdiction
+      }
+
+      return updatedJurisdiction
+    } catch (err) {
+      const apiError = err as ApiError
+      error.value = apiError.response?.data?.detail || 'Failed to update jurisdiction'
+      throw err
+    }
+  }
+
   const deleteJurisdiction = async (jurisdictionId: string) => {
     try {
       await jurisdictionApi.delete(jurisdictionId)
@@ -52,6 +101,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     } catch (err) {
       const apiError = err as ApiError
       error.value = apiError.response?.data?.detail || 'Failed to delete jurisdiction'
+      throw err
     }
   }
 
@@ -64,7 +114,9 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     loading,
     error,
     fetchJurisdictions,
+    fetchOne,
     addJurisdiction,
+    updateJurisdiction,
     deleteJurisdiction,
     setError,
   }
