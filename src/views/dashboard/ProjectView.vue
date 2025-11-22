@@ -60,7 +60,7 @@ const handleCreateProject = async () => {
 
   if (newProject) {
     closeCreateModal()
-    router.push(`/dashboard/projects/${newProject.id}`)
+    router.push(`/dashboard/projects/`)
   }
 }
 

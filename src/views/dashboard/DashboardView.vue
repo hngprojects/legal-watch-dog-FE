@@ -43,11 +43,10 @@ const handleCreateProject = async () => {
 
   if (newProject) {
     closeCreateModal()
-    router.push(`/dashboard/projects/${newProject.id}`)
+    router.push(`/dashboard/projects/`)
   }
 }
 
-// Fixed: id is now string
 const goToProject = (id: string) => {
   router.push(`/dashboard/projects/${id}`)
 }
