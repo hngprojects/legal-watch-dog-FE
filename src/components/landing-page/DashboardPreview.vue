@@ -7,9 +7,7 @@
     id="features"
     class="relative flex w-full flex-1 items-center justify-center py-8 sm:py-16"
   >
-    <div
-      class="mx-auto flex w-full flex-col items-center gap-7 px-6 text-center sm:px-8"
-    >
+    <div class="mx-auto flex w-full flex-col items-center gap-7 px-6 text-center sm:px-8">
       <!-- <img :src="previewImage" alt="Dashboard preview" class="h-auto w-full shadow-2xl" /> -->
 
       <div class="aspect-video w-full max-w-4xl shadow-2xl">

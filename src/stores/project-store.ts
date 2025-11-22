@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { projectService } from '@/api/project'
-import type { CreateProjectPayload, Project, UpdateProjectPayload } from '@/types/project'
+import type {
+  CreateProjectPayload,
+  Project,
+  ProjectErrorResponse,
+  UpdateProjectPayload,
+} from '@/types/project'
 
 interface State {
   projects: Project[]
@@ -27,8 +32,10 @@ export const useProjectStore = defineStore('projects', {
       try {
         const { data } = await projectService.listProjects()
         this.projects = data.data.projects
-      } catch (error: any) {
-        this.setError(error.response?.data?.detail?.[0]?.msg || 'Failed to load projects')
+      } catch (error) {
+        this.setError(
+          (error as ProjectErrorResponse).response.data.detail[0]?.msg || 'Failed to load projects',
+        )
       } finally {
         this.loading = false
       }
@@ -41,10 +48,10 @@ export const useProjectStore = defineStore('projects', {
         const newProject = data.data
         this.projects.unshift(newProject)
         return newProject
-      } catch (error: any) {
-        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to create project'
+      } catch (error) {
+        const msg =
+          (error as ProjectErrorResponse).response.data.detail[0]?.msg || 'Failed to create project'
         this.setError(msg)
-        throw error
       }
     },
 
@@ -52,8 +59,9 @@ export const useProjectStore = defineStore('projects', {
       try {
         await projectService.deleteProject(projectId)
         this.projects = this.projects.filter((p) => p.id !== projectId)
-      } catch (error: any) {
-        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to delete project'
+      } catch (error) {
+        const msg =
+          (error as ProjectErrorResponse).response.data.detail[0]?.msg || 'Failed to delete project'
         this.setError(msg)
         throw error
       }
@@ -74,8 +82,9 @@ export const useProjectStore = defineStore('projects', {
         }
 
         return updatedProject
-      } catch (error: any) {
-        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to update project'
+      } catch (error) {
+        const msg =
+          (error as ProjectErrorResponse).response.data.detail[0]?.msg || 'Failed to update project'
         this.setError(msg)
         throw error
       }

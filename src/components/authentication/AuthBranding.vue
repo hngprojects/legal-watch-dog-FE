@@ -1,8 +1,6 @@
 <template>
   <div class="hidden flex-col items-center justify-center bg-white p-4 lg:flex lg:w-full">
-    <div
-      class="relative w-full overflow-hidden rounded-3xl bg-neutral-300 min-h-[820px]"
-    >
+    <div class="relative min-h-[820px] w-full overflow-hidden rounded-3xl bg-neutral-300">
       <transition name="fade" mode="out-in">
         <img
           :key="currentImage"
@@ -14,7 +12,7 @@
 
       <div class="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/45" />
       <div class="absolute inset-x-0 bottom-0 flex flex-col items-center gap-4 p-8 text-white">
-        <div class="flex flex-col gap-2 text-center text-xl font-semibold leading-tight">
+        <div class="flex flex-col gap-2 text-center text-xl leading-tight font-semibold">
           <p>Stay informed,</p>
           <p>Stay Confident</p>
         </div>
@@ -23,7 +21,7 @@
             v-for="(slide, index) in slides"
             :key="slide"
             class="block h-1 w-10 rounded-full transition-all"
-            :class="index === currentIndex ? 'bg-accent-main' : 'bg-white/40 w-6'"
+            :class="index === currentIndex ? 'bg-accent-main' : 'w-6 bg-white/40'"
           />
         </div>
       </div>

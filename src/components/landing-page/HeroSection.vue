@@ -12,12 +12,10 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
 
 <template>
   <section id="hero" class="relative flex w-full flex-1 items-center justify-center">
-    <div
-      class="mx-auto flex w-full max-w-[900px] flex-col items-center px-6 pt-20 text-center"
-    >
+    <div class="mx-auto flex w-full max-w-[900px] flex-col items-center px-6 pt-20 text-center">
       <Badge
         variant="secondary"
-        class="text-gray-600 border border-white/80 bg-white px-10 py-2 text-sm font-semibold shadow-[0_15px_35px_rgba(15,17,20,0.12)]"
+        class="border border-white/80 bg-white px-10 py-2 text-sm font-semibold text-gray-600 shadow-[0_15px_35px_rgba(15,17,20,0.12)]"
       >
         AI-Powered Regulatory Intelligence
       </Badge>
@@ -25,14 +23,18 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
         Automate Legal Monitoring,<br />
         Never Miss A Critical Update
       </TypographyHeading>
-      <TypographyText class="mx-auto max-w-[900px] font-semibold text-gray-600 leading-7" align="center" tone="muted">
+      <TypographyText
+        class="mx-auto max-w-[900px] leading-7 font-semibold text-gray-600"
+        align="center"
+        tone="muted"
+      >
         LegalWatchDog uses AI to track all changes on any website, from Visa portals to employment
         laws and delivers concise actionable summaries.
       </TypographyText>
       <Button
         :as="RouterLink"
         :to="isAuthenticated ? { name: 'dashboard' } : { path: '/signup' }"
-        class="cursor-pointer self-center px-8 my-8"
+        class="my-8 cursor-pointer self-center px-8"
         size="lg"
         variant="secondary"
       >

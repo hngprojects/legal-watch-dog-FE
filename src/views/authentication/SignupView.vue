@@ -79,7 +79,9 @@ const validateSignupForm = () => {
   } else {
     const domain = sanitizedEmail.split('@')[1] ?? ''
     if (PUBLIC_EMAIL_DENYLIST.has(domain)) {
-      validationErrors.push('Use your company email address (public email domains are not allowed).')
+      validationErrors.push(
+        'Use your company email address (public email domains are not allowed).',
+      )
     }
   }
 
@@ -132,7 +134,6 @@ const handleCreateAccount = async () => {
     } else {
       serverError.value = 'Registration successful but failed to receive OTP instructions.'
     }
-
   } catch (error) {
     if (isAxiosError(error)) {
       serverError.value =
@@ -151,7 +152,9 @@ const handleCreateAccount = async () => {
   <AuthLayout container-class="p-6 lg:p-12">
     <AuthCard header-text="Create an account">
       <template v-slot:desc>
-        <p>Already have an account? <RouterLink to="/login" class="btn--link">Sign in</RouterLink></p>
+        <p>
+          Already have an account? <RouterLink to="/login" class="btn--link">Sign in</RouterLink>
+        </p>
       </template>
       <form @submit.prevent="handleCreateAccount" class="space-y-5">
         <div
@@ -200,7 +203,7 @@ const handleCreateAccount = async () => {
             >
               <svg
                 v-if="!showPassword"
-                class="h-5 w-5 me-3"
+                class="me-3 h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -212,7 +215,13 @@ const handleCreateAccount = async () => {
                   d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
                 />
               </svg>
-              <svg v-else class="h-5 w-5 me-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                v-else
+                class="me-3 h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -245,7 +254,7 @@ const handleCreateAccount = async () => {
             >
               <svg
                 v-if="!showConfirmPassword"
-                class="h-5 w-5 me-3"
+                class="me-3 h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -257,7 +266,13 @@ const handleCreateAccount = async () => {
                   d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
                 />
               </svg>
-              <svg v-else class="h-5 w-5 me-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                v-else
+                class="me-3 h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -299,13 +314,13 @@ const handleCreateAccount = async () => {
         <button
           type="submit"
           :disabled="isSubmitting"
-          class="w-full cursor-pointer rounded-md bg-accent-main p-4 text-sm font-bold tracking-wide text-white uppercase shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70 mt-3 text-md"
+          class="bg-accent-main text-md mt-3 w-full cursor-pointer rounded-md p-4 text-sm font-bold tracking-wide text-white uppercase shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span v-if="!isSubmitting">Signup</span>
           <span v-else>Creating account...</span>
         </button>
 
-        <div class="relative py-2 mt-9">
+        <div class="relative mt-9 py-2">
           <div class="absolute inset-0 flex items-center">
             <div class="w-full border-t border-gray-200"></div>
           </div>

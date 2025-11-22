@@ -71,8 +71,9 @@ const handleLogin = async () => {
   <AuthLayout>
     <AuthCard header-text="Welcome Back">
       <template v-slot:desc>
-        <p>Don't have an account?
-          <RouterLink to="/signup" class="btn--link">Sign up</RouterLink></p>
+        <p>
+          Don't have an account? <RouterLink to="/signup" class="btn--link">Sign up</RouterLink>
+        </p>
       </template>
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div
@@ -114,7 +115,7 @@ const handleLogin = async () => {
             >
               <svg
                 v-if="!showPassword"
-                class="h-5 w-5 me-4"
+                class="me-4 h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -126,7 +127,13 @@ const handleLogin = async () => {
                   d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
                 />
               </svg>
-              <svg v-else class="h-5 w-5 me-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                v-else
+                class="me-4 h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -150,7 +157,7 @@ const handleLogin = async () => {
               <input
                 v-model="rememberMe"
                 type="checkbox"
-                class="h-4 w-4 cursor-pointer rounded border-gray-300 text-accent-subtle transition duration-150 ease-in-out focus:ring-accent-subtle"
+                class="text-accent-subtle focus:ring-accent-subtle h-4 w-4 cursor-pointer rounded border-gray-300 transition duration-150 ease-in-out"
               />
             </div>
             <span class="ml-2 text-sm text-gray-600 group-hover:text-gray-800">Remember me</span>
@@ -161,7 +168,7 @@ const handleLogin = async () => {
         <button
           type="submit"
           :disabled="isSubmitting"
-          class="w-full cursor-pointer rounded-md bg-accent-subtle py-4 px-5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70 mt-3"
+          class="bg-accent-subtle mt-3 w-full cursor-pointer rounded-md px-5 py-4 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70"
         >
           <span v-if="!isSubmitting">Login</span>
           <span v-else>Checking credentials...</span>
