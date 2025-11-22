@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import BrandLogo from '../BrandLogo.vue'
+import BrandLogo from '../reusable/BrandLogo.vue'
 
 const route = useRoute()
 
