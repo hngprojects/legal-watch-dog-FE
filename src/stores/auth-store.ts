@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
-import type { LoginPayload, RegisterPayload, VerifyOTPPayload } from '@/types/auth'
+import type { LoginPayload, RegisterPayload, ResendOtpPayload, VerifyOTPPayload } from '@/types/auth'
 
 interface Organisation {
   id: string
@@ -53,6 +53,12 @@ interface VerifyOtpApiResponse {
   message?: string
   login_data?: ApiTokenData
   data?: ApiTokenData
+}
+
+interface ResendOtpApiResponse {
+  status?: string
+  message?: string
+  status_code?: number
 }
 
 const TOKEN_KEY = 'lwd_access_token'
@@ -136,6 +142,14 @@ export const useAuthStore = defineStore('auth', {
         this.user = null
         return { ...responseBody, next: 'login' }
       }
+    },
+
+    async resendOTP(email: string) {
+      const payload: ResendOtpPayload = { email }
+      const response = await authService.resendOtp(payload)
+      const responseBody = response.data as unknown as ResendOtpApiResponse
+      this.setUserEmail(email)
+      return responseBody
     },
 
     async logout() {
