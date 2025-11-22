@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
-import type { LoginPayload, RegisterPayload, ResendOtpPayload, VerifyOTPPayload } from '@/types/auth'
+import type {
+  LoginPayload,
+  RegisterPayload,
+  ResendOtpPayload,
+  VerifyOTPPayload,
+} from '@/types/auth'
 
 interface Organisation {
   id: string
@@ -136,7 +141,7 @@ export const useAuthStore = defineStore('auth', {
     async verifyOTP(payload: VerifyOTPPayload) {
       const response = await authService.verifyOtp(payload)
       const responseBody = response.data as unknown as VerifyOtpApiResponse
-      const userData = responseBody.data;
+      const userData = responseBody.data
 
       if (userData) {
         this.user = null
@@ -155,7 +160,7 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       try {
         if (this.accessToken) {
-           await authService.logout(this.accessToken)
+          await authService.logout(this.accessToken)
         }
       } finally {
         this.clearAuthState()

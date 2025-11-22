@@ -18,10 +18,10 @@ const formData = ref({
 // Kebab menu state — now uses string IDs
 const activeMenuId = ref<string | null>(null)
 
-const toggleMenu = (projectId: string, event: Event) => {
+/* const toggleMenu = (projectId: string, event: Event) => {
   event.stopPropagation()
   activeMenuId.value = activeMenuId.value === projectId ? null : projectId
-}
+} */
 
 const closeMenu = () => {
   activeMenuId.value = null
@@ -39,10 +39,10 @@ const closeCreateModal = () => {
   projectStore.setError(null)
 }
 
-const deleteProject = async (projectId: string) => {
+/* const deleteProject = async (projectId: string) => {
   await projectStore.deleteProject(projectId)
   closeMenu()
-}
+} */
 
 const handleCreateProject = async () => {
   projectStore.setError(null)

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { Button } from '../ui/button';
-
+import { Button } from '../ui/button'
 </script>
 
 <template>
@@ -45,7 +44,7 @@ import { Button } from '../ui/button';
 
     <!-- Brown CTA Section -->
     <div
-      class="relative flex min-h-130 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[#401903] p-5 text-center text-white md:p-12 shadow-xl"
+      class="relative flex min-h-130 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[#401903] p-5 text-center text-white shadow-xl md:p-12"
     >
       <div
         class="absolute top-0 left-0 h-full w-40 bg-bottom bg-no-repeat md:w-60 lg:w-90"
@@ -64,11 +63,7 @@ import { Button } from '../ui/button';
           workflow with intelligence and autonomous updates in real time.
         </p>
         <div>
-          <Button
-            class="bg-accent"
-          >
-            Get Monitoring For Free
-          </Button>
+          <Button class="bg-accent"> Get Monitoring For Free </Button>
         </div>
       </div>
     </div>

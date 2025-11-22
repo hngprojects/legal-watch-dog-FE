@@ -47,7 +47,7 @@ const router = createRouter({
     {
       path: '/forgot-password',
       name: 'forgot-password',
-      component: ForgotPasswordView
+      component: ForgotPasswordView,
     },
     {
       path: '/otp',
@@ -92,8 +92,8 @@ const router = createRouter({
           alias: '/projects',
           meta: { requiresAuth: true },
         },
-         {
-          path: 'projects/:id', 
+        {
+          path: 'projects/:id',
           name: 'project-detail',
           component: () => import('@/views/dashboard/projects/Project.vue'),
           meta: { requiresAuth: true },

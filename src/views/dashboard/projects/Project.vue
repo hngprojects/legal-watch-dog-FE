@@ -3,8 +3,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { ref, onMounted } from 'vue'
 import { watch } from 'vue'
-import type { Project } from '@/types/project'
-import { ArrowLeftIcon, ChevronRight, Plus, Settings, X } from 'lucide-vue-next'
+import type { Project, ProjectErrorResponse } from '@/types/project'
+import { ArrowLeftIcon, ChevronRight, Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 
 const route = useRoute()
@@ -26,9 +26,9 @@ const openAddJurisdictionModal = () => {
   showAddJurisdictionModal.value = true
 }
 
-const closeAddJurisdictionModal = () => {
+/* const closeAddJurisdictionModal = () => {
   showAddJurisdictionModal.value = false
-}
+} */
 
 onMounted(async () => {
   const existingProject = projectStore.projects.find((p) => p.id === projectId)
@@ -124,10 +124,12 @@ const saveEdit = async () => {
     })
 
     showInlineEdit.value = false
-  } catch (err: any) {
+  } catch (err) {
     Swal.fire(
       'Error',
-      projectStore.error || err?.response?.data?.detail?.[0]?.msg || 'Failed to update project',
+      projectStore.error ||
+        (err as ProjectErrorResponse).response?.data?.detail?.[0]?.msg ||
+        'Failed to update project',
       'error',
     )
   }

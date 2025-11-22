@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { projectService } from '@/api/project'
-import type { CreateProjectPayload, Project, ProjectErrorResponse } from '@/types/project'
+import type {
+  CreateProjectPayload,
+  Project,
+  ProjectErrorResponse,
+  UpdateProjectPayload,
+} from '@/types/project'
 
 interface State {
   projects: Project[]
