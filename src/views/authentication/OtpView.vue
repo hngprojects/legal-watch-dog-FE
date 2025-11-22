@@ -10,7 +10,7 @@ import { ArrowLeftIcon } from 'lucide-vue-next'
 const authStore = useAuthStore()
 const router = useRouter()
 
-const OTP_TIMER_DURATION = 10 * 1
+const OTP_TIMER_DURATION = 10 * 60
 const DIGIT_COUNT = 6
 
 const otpDigits = ref<string[]>(Array(DIGIT_COUNT).fill(''))
@@ -19,6 +19,7 @@ const timer = ref(OTP_TIMER_DURATION)
 const errorMessage = ref('')
 const successMessage = ref('')
 const isVerifying = ref(false)
+const isResending = ref(false)
 let interval: ReturnType<typeof setInterval> | null = null
 
 const email = computed(() => authStore.email)
@@ -167,17 +168,37 @@ const handleContinue = async () => {
   }
 }
 
-const handleResend = () => {
+const handleResend = async () => {
   if (timer.value > 0) return
-  if (interval) {
-    clearInterval(interval)
+  if (!email.value) {
+    router.replace({ name: 'signup' })
+    return
   }
-  otpDigits.value = Array(DIGIT_COUNT).fill('')
-  digitInputs.value.forEach((input) => {
-    if (input) input.value = ''
-  })
-  successMessage.value = 'A new OTP has been sent to your email.'
-  startTimer()
+
+  isResending.value = true
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  try {
+    const response = await authStore.resendOTP(email.value)
+
+    otpDigits.value = Array(DIGIT_COUNT).fill('')
+    digitInputs.value.forEach((input) => {
+      if (input) input.value = ''
+    })
+
+    successMessage.value = response?.message ?? 'A new OTP has been sent to your email.'
+    startTimer()
+  } catch (error) {
+    if (isAxiosError(error)) {
+      errorMessage.value =
+        (error.response?.data as { message?: string })?.message ?? 'Unable to resend OTP.'
+    } else {
+      errorMessage.value = 'Unable to resend OTP. Please try again.'
+    }
+  } finally {
+    isResending.value = false
+  }
 }
 </script>
 
@@ -215,7 +236,7 @@ const handleResend = () => {
               type="button"
               @click="handleContinue"
               :disabled="isVerifying || !isComplete"
-              class="w-full btn--primary disabled:cursor-not-allowed disabled:opacity-70"
+              class="w-full btn--primary disabled:btn--disabled"
             >
               <span v-if="!isVerifying">Continue</span>
               <span v-else>Verifying...</span>
@@ -226,10 +247,11 @@ const handleResend = () => {
               <button
                 type="button"
                 @click="handleResend"
-                :disabled="timer > 0"
-                class="btn--link"
+                :disabled="timer > 0 || isResending"
+                class="btn--link disabled:link--disabled"
               >
-                Resend Code {{ timer > 0 ? `(${formatTime(timer)})` : '' }}
+                <span v-if="isResending">Sending...</span>
+                <span v-else>Resend Code {{ timer > 0 ? `(${formatTime(timer)})` : '' }}</span>
               </button>
             </div>
 
@@ -239,7 +261,7 @@ const handleResend = () => {
             </RouterLink>
           </div>
 
-          <div v-if="errorMessage" class="rounded-md border border-red-200 bg-destructive/70 p-3 text-sm text-destructive">
+          <div v-if="errorMessage" class="rounded-md border border-red-200 bg-destructive/70 p-3 text-sm text-surface">
             {{ errorMessage }}
           </div>
           <div v-if="successMessage" class="rounded-md border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-700">

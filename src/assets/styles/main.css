@@ -106,7 +106,7 @@
 }
 
 @utility btn {
-  @apply cursor-pointer py-4 px-5 rounded-sm focus:ring-1 ring-focus;
+  @apply cursor-pointer py-4 px-5 rounded-sm focus:ring-1 ring-focus ;
 }
 
 @utility btn--primary {
@@ -115,4 +115,12 @@
 
 @utility btn--link {
   @apply btn underline hover:no-underline text-accent-main;
+}
+
+@utility btn--disabled {
+  @apply disabled:cursor-not-allowed disabled:opacity-70 disabled:bg-gray-400 disabled:text-foreground;
+}
+
+@utility link--disabled {
+  @apply disabled:cursor-not-allowed;
 }
