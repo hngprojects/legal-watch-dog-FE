@@ -230,7 +230,7 @@ watch(
       <div class="mb-8 flex items-end justify-between border-b border-gray-200 md:mt-[88px]">
         <div class="flex gap-8">
           <button @click="activeTab = 'jurisdictions'" :class="[
-            'pb-4 text-sm font-medium transition-colors relative',
+            'pb-4 text-sm font-medium transition-colors relative cursor-pointer',
             activeTab === 'jurisdictions'
               ? 'text-gray-900'
               : 'text-gray-500 hover:text-gray-700'
@@ -239,7 +239,7 @@ watch(
             <div v-if="activeTab === 'jurisdictions'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-[#401903]"></div>
           </button>
           <button @click="activeTab = 'activity'" :class="[
-            'pb-4 text-sm font-medium transition-colors relative',
+            'pb-4 text-sm font-medium transition-colors relative cursor-pointer',
             activeTab === 'activity'
               ? 'text-gray-900'
               : 'text-gray-500 hover:text-gray-700'
@@ -250,7 +250,7 @@ watch(
         </div>
 
         <button v-if="activeTab === 'jurisdictions'" @click="openAddJurisdictionModal"
-          class="mb-3 flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#592304]">
+          class="mb-3 cursor-pointer flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#592304]">
           <Plus :size="18" />
           Add Jurisdiction
         </button>

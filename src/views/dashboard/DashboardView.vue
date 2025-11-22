@@ -42,7 +42,7 @@ const handleCreateProject = async () => {
     })
 
     closeCreateModal()
-    router.push(`/dashboard/projects/${newProject.id}`)
+    router.push(`/dashboard/projects/}`)
   } catch (err: any) {
     projectStore.setError(err.response?.data?.message || 'Failed to create project')
   }

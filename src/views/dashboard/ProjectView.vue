@@ -59,7 +59,7 @@ const handleCreateProject = async () => {
     })
 
     closeCreateModal()
-    router.push(`/dashboard/projects/${newProject.id}`)
+    router.push(`/dashboard/projects/`)
   } catch (err: any) {
     projectStore.setError(err.response?.data?.message || 'Failed to create project')
   }
@@ -102,7 +102,7 @@ onMounted(() => {
           <p class="mb-8 text-sm text-gray-600">Our AI will monitor the sites and send you summarized updates automatically.</p>
           <button
             @click="openCreateModal"
-            class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#592304]"
+            class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#401903] px-6 py-3 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#592304]"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M8 3V13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -126,7 +126,7 @@ onMounted(() => {
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Projects</h1>
           <button
             @click="openCreateModal"
-            class="flex items-center gap-3 rounded-full bg-[#401903] px-8 py-4 font-medium text-white shadow-md transition-all hover:bg-[#592304] hover:shadow-lg"
+            class="flex items-center cursor-pointer gap-3 rounded-full bg-[#401903] px-8 py-4 font-medium text-white shadow-md transition-all hover:bg-[#592304] hover:shadow-lg"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 4V16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -253,13 +253,13 @@ onMounted(() => {
                 <button
                   type="button"
                   @click="closeCreateModal"
-                  class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+                  class="rounded-lg cursor-pointer border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
+                  class="rounded-lg bg-[#401903] cursor-pointer px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
                 >
                   Save Project
                 </button>
