@@ -24,6 +24,6 @@ export const projectService = {
   listProjects: () => api.get<ProjectsResponse>('/projects'),
   createProject: (payload: CreateProjectPayload) => api.post<CreateProjectResponse>('/projects', payload),
   updateProject: (id: string, payload: UpdateProjectPayload) =>
-    api.put<Project>(`/projects/${id}`, payload),
+    api.patch<Project>(`/projects/${id}`, payload),
   deleteProject: (id: string) => api.delete<{ success: boolean }>(`/projects/${id}`),
 }

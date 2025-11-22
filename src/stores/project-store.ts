@@ -61,5 +61,27 @@ export const useProjectStore = defineStore('projects', {
         throw error
       }
     },
+    async updateProject(projectId: string, payload: UpdateProjectPayload) {
+      this.setError(null)
+
+      try {
+        const { data } = await projectService.updateProject(projectId, payload)
+
+        // The backend returns the updated project directly
+        const updatedProject: Project = data
+
+        // Replace in store
+        const index = this.projects.findIndex((p) => p.id === projectId)
+        if (index !== -1) {
+          this.projects[index] = updatedProject
+        }
+
+        return updatedProject
+      } catch (error: any) {
+        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to update project'
+        this.setError(msg)
+        throw error
+      }
+    },
   },
 })

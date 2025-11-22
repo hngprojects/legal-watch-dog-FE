@@ -209,7 +209,7 @@ onMounted(() => {
             @click="goToProject(project.id)"
             class="group relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10"
           >
-            <button
+            <!-- <button
               @click.stop="toggleMenu(project.id, $event)"
               class="absolute top-4 right-4 z-10 rounded-full p-2 text-gray-400 transition-all group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-700"
               :class="{
@@ -222,9 +222,9 @@ onMounted(() => {
                   d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"
                 />
               </svg>
-            </button>
+            </button> -->
 
-            <div
+            <!-- <div
               v-if="activeMenuId === project.id"
               @click.stop
               class="absolute top-12 right-4 z-20 w-48 rounded-lg bg-white py-2 shadow-lg ring-1 ring-black/5"
@@ -235,7 +235,7 @@ onMounted(() => {
               >
                 Delete Project
               </button>
-            </div>
+            </div> -->
 
             <div class="p-8">
               <h3

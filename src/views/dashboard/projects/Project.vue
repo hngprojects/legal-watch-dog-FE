@@ -2,8 +2,10 @@
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { ref, onMounted } from 'vue'
+import { watch } from 'vue'
 import type { Project } from '@/types/project'
 import { ArrowLeftIcon, ChevronRight, Plus, Settings, X } from 'lucide-vue-next'
+import Swal from 'sweetalert2'
 
 const route = useRoute()
 const router = useRouter()
@@ -41,6 +43,104 @@ onMounted(async () => {
 
   loading.value = false
 })
+
+const showSettingsMenu = ref(false)
+const showInlineEdit = ref(false)
+
+const editForm = ref({
+  title: '',
+  description: '',
+  master_prompt: '',
+})
+
+const toggleSettingsMenu = () => {
+  showSettingsMenu.value = !showSettingsMenu.value
+}
+
+const closeSettingsMenu = () => {
+  showSettingsMenu.value = false
+}
+
+// handle delete
+const deleteProject = async () => {
+  closeSettingsMenu()
+
+  const confirm = await Swal.fire({
+    title: 'Delete Project?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d33',
+  })
+
+  if (!confirm.isConfirmed) return
+
+  await projectStore.deleteProject(projectId)
+
+  await Swal.fire({
+    title: 'Deleted!',
+    text: 'Project successfully deleted.',
+    icon: 'success',
+    timer: 1500,
+    showConfirmButton: false,
+  })
+
+  router.push('/dashboard/projects')
+}
+
+const startEdit = () => {
+  editForm.value = {
+    title: project.value?.title || '',
+    description: project.value?.description || '',
+    master_prompt: project.value?.master_prompt || '',
+  }
+
+  showInlineEdit.value = true
+  closeSettingsMenu()
+}
+
+const saveEdit = async () => {
+  try {
+    const updated = await projectStore.updateProject(projectId, {
+      title: editForm.value.title,
+      description: editForm.value.description,
+      master_prompt: editForm.value.master_prompt,
+    })
+
+    if (project.value && updated) {
+      project.value.title = editForm.value.title
+      project.value.description = editForm.value.description
+      project.value.master_prompt = editForm.value.master_prompt
+    }
+
+    await Swal.fire({
+      title: 'Updated!',
+      text: 'Project updated successfully.',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false,
+    })
+
+    showInlineEdit.value = false
+  } catch (err: any) {
+    Swal.fire(
+      'Error',
+      projectStore.error || err?.response?.data?.detail?.[0]?.msg || 'Failed to update project',
+      'error',
+    )
+  }
+}
+
+watch(
+  () => projectStore.projects,
+  (newProjects) => {
+    const found = newProjects.find((p) => p.id === projectId)
+    if (found) project.value = found
+  },
+  { deep: true },
+)
 </script>
 
 <template>
@@ -74,16 +174,84 @@ onMounted(async () => {
           <span class="font-medium text-[#C17A3F]">{{ project.title }}</span>
         </nav>
 
-        <button
-          class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
-        >
-          <Settings :size="18" />
-        </button>
+        <div class="relative">
+          <button
+            @click.stop="toggleSettingsMenu"
+            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+          >
+            <Settings :size="18" />
+          </button>
+
+          <div
+            v-if="showSettingsMenu"
+            @click.stop
+            class="absolute right-0 z-50 mt-2 w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5"
+          >
+            <button @click="startEdit" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50">
+              Edit Project
+            </button>
+            <button
+              @click="deleteProject"
+              class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+            >
+              Delete Project
+            </button>
+          </div>
+        </div>
       </div>
 
+      <!-- inline editable project card -->
       <div class="mb-8 flex flex-col gap-5 rounded-[10px] bg-white p-5">
-        <h1 class="text-2xl leading-[30px] font-bold text-gray-900">{{ project.title }}</h1>
-        <p class="text-sm leading-5 text-gray-600">{{ project.description }}</p>
+        <template v-if="showInlineEdit">
+          <form @submit.prevent="saveEdit" class="w-full space-y-4">
+            <div>
+              <label class="text-sm font-medium text-[#1F1F1F]">Project Name</label>
+              <input
+                v-model="editForm.title"
+                class="h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+              />
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-[#1F1F1F]">Description</label>
+              <textarea
+                v-model="editForm.description"
+                rows="3"
+                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium text-[#1F1F1F]">Master Prompt</label>
+              <textarea
+                v-model="editForm.master_prompt"
+                rows="3"
+                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+              ></textarea>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                @click="showInlineEdit = false"
+                class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </template>
+
+        <template v-else>
+          <h1 class="text-2xl leading-[30px] font-bold text-gray-900">{{ project.title }}</h1>
+          <p class="text-sm leading-5 text-gray-600">{{ project.description }}</p>
+        </template>
       </div>
 
       <div class="mb-8 flex items-end justify-between border-b border-gray-200 md:mt-[88px]">
@@ -146,64 +314,5 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-
-    <teleport to="body">
-      <div
-        v-if="showAddJurisdictionModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]"
-        @click.self="closeAddJurisdictionModal"
-      >
-        <div class="relative w-full max-w-[640px] rounded-2xl bg-white shadow-xl">
-          <button
-            @click="closeAddJurisdictionModal"
-            class="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-          >
-            <X :size="18" />
-          </button>
-
-          <div class="p-10">
-            <div class="mb-8">
-              <h3 class="mb-2 text-xl font-bold text-[#080808]">Add Jurisdiction</h3>
-              <p class="text-sm text-[#6B7280]">
-                Add a new jurisdiction to monitor for this project
-              </p>
-            </div>
-
-            <form @submit.prevent="() => {}" class="space-y-6">
-              <div class="relative">
-                <input
-                  id="jurisdictionName"
-                  placeholder="e.g. United Kingdom"
-                  required
-                  class="peer h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                />
-                <label
-                  for="jurisdictionName"
-                  class="pointer-events-none absolute top-2.5 left-3 origin-left -translate-y-6 scale-75 transform bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:top-2.5 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#401903]"
-                >
-                  Jurisdiction Name
-                </label>
-              </div>
-
-              <div class="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  @click="closeAddJurisdictionModal"
-                  class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
-                >
-                  Add Jurisdiction
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </teleport>
   </main>
 </template>
