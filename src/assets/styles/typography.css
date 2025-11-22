@@ -1,8 +1,9 @@
 :root {
-  --font-title: 'Inter';
-  --font-body: 'Inter';
-  --font-weight-regular: 'Regular';
-  --font-weight-medium: 'Medium';
-  --font-weight-semibold: 'Semi-Bold';
-  --font-weight-bold: 'Bold';
+  --font-default: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-title: var(--font-default);
+  --font-body: var(--font-default);
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 }

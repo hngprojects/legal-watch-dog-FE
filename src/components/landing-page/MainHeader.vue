@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onUnmounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import BrandLogo from '../BrandLogo.vue'
+import BrandLogo from '../reusable/BrandLogo.vue'
 import { Button } from '../ui/button'
 
 type NavLink = {
