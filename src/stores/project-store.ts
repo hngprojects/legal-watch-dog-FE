@@ -21,7 +21,7 @@ export const useProjectStore = defineStore('projects', {
     },
 
     async fetchProjects() {
-      this.projects = [] 
+      this.projects = []
       this.loading = true
       this.setError(null)
       try {
@@ -34,26 +34,48 @@ export const useProjectStore = defineStore('projects', {
       }
     },
 
-   async addProject(payload: CreateProjectPayload) {
-  this.setError(null)
-  try {
-    const { data } = await projectService.createProject(payload)
-    const newProject = data.data 
-    this.projects.unshift(newProject)
-    return newProject 
-  } catch (error: any) {
-    const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to create project'
-    this.setError(msg)
-    throw error
-  }
-},
+    async addProject(payload: CreateProjectPayload) {
+      this.setError(null)
+      try {
+        const { data } = await projectService.createProject(payload)
+        const newProject = data.data
+        this.projects.unshift(newProject)
+        return newProject
+      } catch (error: any) {
+        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to create project'
+        this.setError(msg)
+        throw error
+      }
+    },
 
     async deleteProject(projectId: string) {
       try {
         await projectService.deleteProject(projectId)
-        this.projects = this.projects.filter(p => p.id !== projectId)
+        this.projects = this.projects.filter((p) => p.id !== projectId)
       } catch (error: any) {
         const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to delete project'
+        this.setError(msg)
+        throw error
+      }
+    },
+    async updateProject(projectId: string, payload: UpdateProjectPayload) {
+      this.setError(null)
+
+      try {
+        const { data } = await projectService.updateProject(projectId, payload)
+
+        // The backend returns the updated project directly
+        const updatedProject: Project = data
+
+        // Replace in store
+        const index = this.projects.findIndex((p) => p.id === projectId)
+        if (index !== -1) {
+          this.projects[index] = updatedProject
+        }
+
+        return updatedProject
+      } catch (error: any) {
+        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to update project'
         this.setError(msg)
         throw error
       }
