@@ -14,6 +14,7 @@ import DashboardView from '@/views/dashboard/DashboardView.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
 import { useAuthStore } from '@/stores/auth-store'
+import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,11 @@ const router = createRouter({
       path: '/signup',
       name: 'signup',
       component: SignupView,
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: ForgotPasswordView
     },
     {
       path: '/otp',
@@ -84,6 +90,12 @@ const router = createRouter({
           name: 'projects',
           component: ProjectView,
           alias: '/projects',
+          meta: { requiresAuth: true },
+        },
+         {
+          path: 'projects/:id', 
+          name: 'project-detail',
+          component: () => import('@/views/dashboard/projects/Project.vue'),
           meta: { requiresAuth: true },
         },
         {
