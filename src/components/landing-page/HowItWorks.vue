@@ -5,6 +5,7 @@ import { TypographyHeading, TypographyText } from '../ui/typography'
 import monitorIcon from '@/assets/icons/monitor.svg'
 import analyzeIcon from '@/assets/icons/translation.svg'
 import bellIcon from '@/assets/icons/bell.svg'
+import HomeFrame from "@/assets/HomeFrame.png"
 
 const cards = [
   {
@@ -61,6 +62,13 @@ const cards = [
           </CardDescription>
         </Card>
       </div>
+  <div class="w-full flex justify-center mt-10">
+  <img
+    :src="HomeFrame"
+    alt="Home Frame"
+    class="w-full max-w-[1247px] object-contain"
+  />
+</div>
     </div>
   </section>
 </template>
