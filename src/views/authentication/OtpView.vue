@@ -112,7 +112,10 @@ const handleKeydown = (event: KeyboardEvent, index: number) => {
 const handlePaste = (event: ClipboardEvent, index: number) => {
   event.preventDefault()
   const paste = event.clipboardData?.getData('text') ?? ''
-  const digits = paste.replace(/\D/g, '').slice(0, DIGIT_COUNT - index).split('')
+  const digits = paste
+    .replace(/\D/g, '')
+    .slice(0, DIGIT_COUNT - index)
+    .split('')
 
   digits.forEach((digit, offset) => {
     const targetIndex = index + offset
@@ -211,10 +214,11 @@ const handleResend = async () => {
           <span class="font-semibold text-gray-800">{{ obfuscatedEmail }}</span>
         </p>
       </template>
-      <div class="flex w-full max-w-5xl flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+      <div
+        class="flex w-full max-w-5xl flex-col gap-10 lg:flex-row lg:items-center lg:justify-between"
+      >
         <div class="w-full max-w-xl space-y-8">
-
-          <div class="flex gap-3 justify-between">
+          <div class="flex justify-between gap-3">
             <input
               v-for="(_, index) in otpDigits"
               :key="index"
@@ -223,7 +227,7 @@ const handleResend = async () => {
               inputmode="numeric"
               autocomplete="one-time-code"
               maxlength="1"
-              class="h-14 w-14 rounded-md border border-gray-300 text-center text-lg font-medium text-gray-900 focus:border-accent-main focus:ring-2 focus:ring-[#F4E4D4]"
+              class="focus:border-accent-main h-14 w-14 rounded-md border border-gray-300 text-center text-lg font-medium text-gray-900 focus:ring-2 focus:ring-[#F4E4D4]"
               :value="otpDigits[index]"
               @input="handleDigitInput($event, index)"
               @keydown="handleKeydown($event, index)"
@@ -236,7 +240,7 @@ const handleResend = async () => {
               type="button"
               @click="handleContinue"
               :disabled="isVerifying || !isComplete"
-              class="w-full btn--primary disabled:btn--disabled"
+              class="btn--primary disabled:btn--disabled w-full"
             >
               <span v-if="!isVerifying">Continue</span>
               <span v-else>Verifying...</span>
@@ -255,16 +259,25 @@ const handleResend = async () => {
               </button>
             </div>
 
-            <RouterLink to="/signup" class="flex items-center justify-center gap-2 btn--link text-sm">
-              <ArrowLeftIcon :size=18 />
+            <RouterLink
+              to="/signup"
+              class="btn--link flex items-center justify-center gap-2 text-sm"
+            >
+              <ArrowLeftIcon :size="18" />
               <span>Back to sign up</span>
             </RouterLink>
           </div>
 
-          <div v-if="errorMessage" class="rounded-md border border-red-200 bg-destructive/70 p-3 text-sm text-surface">
+          <div
+            v-if="errorMessage"
+            class="bg-destructive/70 text-surface rounded-md border border-red-200 p-3 text-sm"
+          >
             {{ errorMessage }}
           </div>
-          <div v-if="successMessage" class="rounded-md border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-700">
+          <div
+            v-if="successMessage"
+            class="rounded-md border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-700"
+          >
             {{ successMessage }}
           </div>
         </div>

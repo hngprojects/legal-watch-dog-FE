@@ -93,7 +93,7 @@ const handleFocus = (event: FocusEvent) => emit('focus', event)
 <template>
   <label
     v-if="isCheckbox"
-    class="flex gap-3 text-sm font-medium text-gray-800 items-center"
+    class="flex items-center gap-3 text-sm font-medium text-gray-800"
     :for="inputId"
   >
     <input
@@ -103,7 +103,7 @@ const handleFocus = (event: FocusEvent) => emit('focus', event)
       :checked="Boolean(modelValue)"
       :disabled="disabled"
       :required="required"
-      class="h-4 w-4 rounded border bg-white text-accent-subtle focus:outline-none focus:ring-2 disabled:cursor-not-allowed"
+      class="text-accent-subtle h-4 w-4 rounded border bg-white focus:ring-2 focus:outline-none disabled:cursor-not-allowed"
       :class="checkboxClasses"
       @input="handleInput"
       @blur="handleBlur"
@@ -114,9 +114,9 @@ const handleFocus = (event: FocusEvent) => emit('focus', event)
         <slot name="label">
           <span>{{ label }}</span>
         </slot>
-        <span v-if="required" class="text-xs font-semibold text-destructive">*</span>
+        <span v-if="required" class="text-destructive text-xs font-semibold">*</span>
       </div>
-      <p v-if="error" class="text-xs font-medium text-destructive">{{ error }}</p>
+      <p v-if="error" class="text-destructive text-xs font-medium">{{ error }}</p>
       <p v-else-if="hint" class="text-xs text-gray-500">
         <slot name="hint">{{ hint }}</slot>
       </p>
@@ -128,11 +128,11 @@ const handleFocus = (event: FocusEvent) => emit('focus', event)
       <slot name="label">
         <span>{{ label }}</span>
       </slot>
-      <span v-if="required" class="text-xs font-semibold text-destructive">*</span>
+      <span v-if="required" class="text-destructive text-xs font-semibold">*</span>
     </div>
 
     <div
-      class="flex items-center gap-3 rounded-sm outline text-sm transition hover:outline-2 outline-accent-main"
+      class="outline-accent-main flex items-center gap-3 rounded-sm text-sm outline transition hover:outline-2"
       :class="stateClasses"
     >
       <slot name="leading" />
@@ -145,7 +145,7 @@ const handleFocus = (event: FocusEvent) => emit('focus', event)
         :disabled="disabled"
         :required="required"
         :autocomplete="autocomplete"
-        class="w-full bg-transparent text-gray-900 placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed px-4 py-3"
+        class="w-full bg-transparent px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed"
         @input="handleInput"
         @blur="handleBlur"
         @focus="handleFocus"

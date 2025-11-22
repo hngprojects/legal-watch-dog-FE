@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
-/* @import './tokens.css'; */
+@import './tokens.css';
 @import './colors.css';
 @import './typography.css';
 @import 'tw-animate-css';
@@ -9,10 +9,10 @@
   --color-surface: var(--color-gray-white);
   --color-foreground: var(--color-gray-700);
   --color-accent-main: var(--color-chocolate-brown-main);
-  --color-accent-subtle: #3C2610;
+  --color-accent-subtle: #3c2610;
   --color-destructive: var(--color-red-600);
   --color-destructive-fg: var(--color-gray-white);
-  --color-focus: #FFF2DB;
+  --color-focus: #fff2db;
 
   --font-sans: var(--font-default);
 }
@@ -36,8 +36,6 @@
 
   #app {
     min-height: 100vh;
-    background-color: var(--background);
-    color: var(--foreground);
   }
 
   a {
@@ -45,80 +43,83 @@
     text-decoration: none;
   }
 }
-
 @utility text-preset-display-lg {
-  @apply font-sans text-[48px] leading-[1.3] font-semibold tracking-normal
+  @apply font-sans text-[48px] leading-[1.3] font-semibold tracking-normal;
 }
 
 @utility text-preset-display-md {
-  @apply font-sans text-[36px] leading-[1.3] font-semibold tracking-normal
+  @apply font-sans text-[60px] leading-[100%] font-bold tracking-[-4%];
 }
 
 @utility text-preset-display-sm {
-  @apply font-sans text-[24px] leading-[1.3] font-semibold tracking-normal
+  @apply font-sans text-[48px] leading-14 font-semibold tracking-[-2%];
 }
 @utility text-preset-heading-lg {
-  @apply font-sans text-[20px] leading-[1.4] font-semibold tracking-normal
+  @apply font-sans text-[36px] leading-[100%] font-semibold tracking-[0%];
 }
 
 @utility text-preset-heading-md {
-  @apply font-sans text-[18px] leading-[1.4] font-semibold tracking-normal
+  @apply font-sans text-[18px] leading-[1.4] font-semibold tracking-normal;
 }
 
 @utility text-preset-heading-sm {
-  @apply font-sans text-[16px] leading-[1.4] font-semibold tracking-normal
+  @apply font-sans text-[16px] leading-[1.4] font-semibold tracking-normal;
 }
 
 @utility text-preset-label-lg {
-  @apply font-sans text-[14px] leading-[1.4] font-medium tracking-tighter
+  @apply font-sans text-[14px] leading-[1.4] font-medium tracking-tighter;
 }
 
 @utility text-preset-label-md {
-  @apply font-sans text-[12px] leading-[1.4] font-medium tracking-tighter
+  @apply font-sans text-[12px] leading-[1.4] font-medium tracking-tighter;
 }
 
 @utility text-preset-label-sm {
-  @apply font-sans text-[10px] leading-[1.4] font-medium tracking-tighter
+  @apply font-sans text-[10px] leading-[1.4] font-medium tracking-tighter;
+}
+
+@utility text-preset-body-xx-lg {
+  @apply font-sans text-[24px] leading-9 font-medium tracking-[0%];
 }
 
 @utility text-preset-body-lg {
-  @apply font-sans text-[16px] leading-normal font-normal tracking-normal
+  @apply font-sans text-[16px] leading-normal font-normal tracking-normal;
 }
 
 @utility text-preset-body-md {
-  @apply font-sans text-[14px] leading-normal font-normal tracking-normal
+  @apply font-sans text-[14px] leading-normal font-normal tracking-normal;
 }
 
 @utility text-preset-body-sm {
-  @apply font-sans text-[12px] leading-normal font-normal tracking-normal
+  @apply font-sans text-[12px] leading-normal font-normal tracking-normal;
 }
 
 @utility text-preset-link-lg {
-  @apply font-sans text-[14px] leading-normal font-medium tracking-wide
+  @apply font-sans text-[14px] leading-normal font-medium tracking-wide;
 }
 
 @utility text-preset-link-md {
-  @apply font-sans text-[12px] leading-normal font-medium tracking-wide
+  @apply font-sans text-[12px] leading-normal font-medium tracking-wide;
 }
 
 @utility text-preset-link-sm {
-  @apply font-sans text-[10px] leading-normal font-medium tracking-wide
+  @apply font-sans text-[10px] leading-normal font-medium tracking-wide;
 }
 
 @utility btn {
-  @apply cursor-pointer rounded-sm focus:ring-1 ring-focus ;
+  @apply ring-focus cursor-pointer rounded-sm focus:ring-1;
 }
 
 @utility btn--primary {
-  @apply btn bg-accent-main hover:bg-accent-subtle text-surface py-4 px-5;
+  @apply btn bg-accent-main hover:bg-accent-subtle text-surface px-5 py-4;
 }
 
 @utility btn--link {
-  @apply btn underline hover:no-underline text-accent-main;
+  @apply btn text-accent-main underline hover:no-underline;
 }
 
 @utility btn--disabled {
-  @apply disabled:cursor-not-allowed disabled:opacity-70 disabled:bg-gray-400 disabled:text-foreground;
+  @apply disabled:text-foreground disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-70;
 }
 
 @utility link--disabled {
