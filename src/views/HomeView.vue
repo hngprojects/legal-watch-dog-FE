@@ -11,10 +11,20 @@ import MainHeader from '@/components/landing-page/MainHeader.vue'
 <template>
   <div class="flex min-h-screen flex-col">
     <MainHeader />
-    <main class="relative mx-auto flex w-full flex-1 flex-col bg-[#F7F7F7] overflow-hidden">
+    <main class="relative mx-auto flex w-full flex-1 flex-col overflow-hidden bg-[#F7F7F7]">
+      <div
+        class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+        style="
+          background: radial-gradient(
+            ellipse,
+            #f8d9c5 0%,
+            rgba(248, 217, 197, 0.5) 40%,
+            rgba(247, 247, 247, 0.8) 70%,
+            #f7f7f7 100%
+          );
+        "
+      ></div>
 
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-[60%] w-[1600px] h-[800px] rounded-[50%] pointer-events-none z-0" style="background: radial-gradient(ellipse, #F8D9C5 0%, rgba(248, 217, 197, 0.5) 40%, rgba(247, 247, 247, 0.8) 70%, #F7F7F7 100%);"></div>
-      
       <HeroSection />
       <DashboardPreview />
       <HowItWorks />

@@ -29,7 +29,9 @@ onMounted(() => {
           </div>
 
           <div class="mb-6 flex justify-center">
-            <div class="flex h-[79px] w-[79px] items-center justify-center rounded-full bg-green-500">
+            <div
+              class="flex h-[79px] w-[79px] items-center justify-center rounded-full bg-green-500"
+            >
               <svg width="28" height="21" viewBox="0 0 28 21" fill="none">
                 <path
                   d="M2.17 10.88L9.79 18.5L25.03 2.17"
