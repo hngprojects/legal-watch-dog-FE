@@ -77,8 +77,9 @@ export const useProjectStore = defineStore('projects', {
         }
 
         return updatedProject
-      } catch (error: any) {
-        const msg = error.response?.data?.detail?.[0]?.msg || 'Failed to update project'
+      } catch (error) {
+        const msg =
+          (error as ProjectErrorResponse).response.data.detail[0]?.msg || 'Failed to update project'
         this.setError(msg)
         throw error
       }
