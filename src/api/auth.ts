@@ -12,7 +12,7 @@ import type {
   VerifyOtpResponse,
 } from '@/types/auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://minamoto.emerj.net/api/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.minamoto.emerj.net/api/v1'
 
 const http = axios.create({
   baseURL: API_BASE_URL,
