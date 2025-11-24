@@ -14,6 +14,7 @@ import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -72,6 +73,11 @@ const router = createRouter({
       path: '/coming-soon',
       name: 'coming-soon',
       component: ComingSoonView,
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: NotFoundView,
     },
     {
       path: '/dashboard',
