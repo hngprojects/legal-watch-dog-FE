@@ -17,7 +17,7 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
   { name: 'How it Works', to: { path: '/how-it-works' } },
-  { name: 'Features', to: { path: '/coming-soon' } },
+  // { name: 'Features', to: { path: '/coming-soon' } },
 ]
 
 // Handle body scroll lock for mobile menu

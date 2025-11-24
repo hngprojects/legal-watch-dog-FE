@@ -56,7 +56,9 @@ const steps = [
             Never miss an important update across any jurisdiction.
           </p>
         </div>
-        <Button><Icon :icon="PlayIcon" /> Watch 2-minute Demo</Button>
+        <Button variant="secondary" class="my-8 cursor-pointer self-center px-8" size="lg">
+          <Icon :icon="PlayIcon" /> Watch 2-minute Demo
+        </Button>
       </section>
 
       <section class="text-center">

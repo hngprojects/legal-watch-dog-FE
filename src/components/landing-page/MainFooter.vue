@@ -6,10 +6,10 @@ import Instagram from '@/assets/images/Instagram.png'
 import Twitter from '@/assets//images/Twitter.png'
 import YouTube from '@/assets/images/YouTube.png'
 
-const Products = ['Features', 'Pricing', 'Case studies', 'Reviews', 'Updates']
-const Companys = ['About', 'Contact Us', 'Careers', 'Blog']
-const Supports = ['Getting started', 'Help center', 'Server status', 'Report a bug', 'Chat support']
-const Privacys = ['Copyright', 'Terms of Services']
+// const Products = ['Features', 'Pricing', 'Case studies', 'Reviews', 'Updates']
+// const Companys = ['About', 'Contact Us', 'Careers', 'Blog']
+// const Supports = ['Getting started', 'Help center', 'Server status', 'Report a bug', 'Chat support']
+// const Privacys = ['Copyright', 'Terms of Services']
 </script>
 
 <template>
@@ -33,7 +33,7 @@ const Privacys = ['Copyright', 'Terms of Services']
       </div>
 
       <!-- Links  -->
-      <nav aria-label="Footer navigation" class="mt-8">
+      <!-- <nav aria-label="Footer navigation" class="mt-8">
         <div class="grid grid-cols-1 gap-8 py-6 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <h3 class="mb-3 font-semibold text-[#3C2610]">Product</h3>
@@ -71,7 +71,7 @@ const Privacys = ['Copyright', 'Terms of Services']
             </ul>
           </div>
         </div>
-      </nav>
+      </nav> -->
 
       <Separator class="mt-6 bg-gray-200" />
       <div class="flex flex-col-reverse gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
