@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthLayout from '@/components/authentication/AuthLayout.vue'
 import { useAuthStore } from '@/stores/auth-store'
@@ -9,6 +9,7 @@ import { ArrowLeftIcon } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 
 const OTP_TIMER_DURATION = 10 * 60
 const DIGIT_COUNT = 6
@@ -23,6 +24,10 @@ const isResending = ref(false)
 let interval: ReturnType<typeof setInterval> | null = null
 
 const email = computed(() => authStore.email)
+const otpPurpose = computed(
+  () =>
+    authStore.otpPurpose ?? (route.query.flow === 'password-reset' ? 'password-reset' : 'signup'),
+)
 
 const obfuscatedEmail = computed(() => {
   if (!email.value) return ''
@@ -32,7 +37,19 @@ const obfuscatedEmail = computed(() => {
   return `${firstChar}*****@${domain}`
 })
 
-const subtitle = computed(() => 'We have sent an email with password reset information to')
+const subtitle = computed(() =>
+  otpPurpose.value === 'password-reset'
+    ? 'We have sent an email with password reset information to'
+    : 'We sent a verification code to',
+)
+const headingText = computed(() =>
+  otpPurpose.value === 'password-reset' ? 'Check your email' : 'Verify your email',
+)
+const backRoute = computed(() =>
+  otpPurpose.value === 'password-reset' ? { name: 'forgot-password' } : { name: 'signup' },
+)
+const isPasswordResetFlow = computed(() => otpPurpose.value === 'password-reset')
+const backText = computed(() => (isPasswordResetFlow.value ? 'Back to login' : 'Back to sign up'))
 const isComplete = computed(() => otpDigits.value.join('').length === DIGIT_COUNT)
 
 const startTimer = () => {
@@ -53,8 +70,11 @@ const startTimer = () => {
 }
 
 onMounted(() => {
+  if (!authStore.otpPurpose) {
+    authStore.setOtpPurpose(otpPurpose.value)
+  }
   if (!email.value) {
-    router.replace({ name: 'signup' })
+    router.replace(backRoute.value)
     return
   }
   startTimer()
@@ -68,7 +88,7 @@ onUnmounted(() => {
 
 watchEffect(() => {
   if (!email.value) {
-    router.replace({ name: 'signup' })
+    router.replace(backRoute.value)
   }
 })
 
@@ -132,7 +152,7 @@ const handlePaste = (event: ClipboardEvent, index: number) => {
 
 const handleContinue = async () => {
   if (!email.value) {
-    router.replace({ name: 'signup' })
+    router.replace(backRoute.value)
     return
   }
 
@@ -148,16 +168,28 @@ const handleContinue = async () => {
   successMessage.value = ''
 
   try {
-    const response = await authStore.verifyOTP({ email: email.value, code })
-
-    successMessage.value = response?.message as string
-
-    const destination = response?.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
-
-    if (destination.name === 'login') {
-      router.replace(destination)
+    if (isPasswordResetFlow.value) {
+      const response = await authStore.verifyPasswordReset({ email: email.value, code })
+      const resetToken =
+        response?.reset_token ?? response?.data?.reset_token ?? authStore.resetToken
+      if (!resetToken) {
+        throw new Error('Missing reset token from server response.')
+      }
+      successMessage.value =
+        response?.message ?? 'Code verified. You can now create a new password.'
+      router.replace({ name: 'reset-password' })
     } else {
-      router.push(destination)
+      const response = await authStore.verifyOTP({ email: email.value, code })
+
+      successMessage.value = response?.message as string
+
+      const destination = response?.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
+
+      if (destination.name === 'login') {
+        router.replace(destination)
+      } else {
+        router.push(destination)
+      }
     }
   } catch (error) {
     if (isAxiosError(error)) {
@@ -174,7 +206,7 @@ const handleContinue = async () => {
 const handleResend = async () => {
   if (timer.value > 0) return
   if (!email.value) {
-    router.replace({ name: 'signup' })
+    router.replace(backRoute.value)
     return
   }
 
@@ -183,7 +215,9 @@ const handleResend = async () => {
   successMessage.value = ''
 
   try {
-    const response = await authStore.resendOTP(email.value)
+    const response = isPasswordResetFlow.value
+      ? await authStore.requestPasswordReset(email.value)
+      : await authStore.resendOTP(email.value)
 
     otpDigits.value = Array(DIGIT_COUNT).fill('')
     digitInputs.value.forEach((input) => {
@@ -207,7 +241,7 @@ const handleResend = async () => {
 
 <template>
   <AuthLayout wrapper-class="bg-white" main-class="bg-white" container-class="p-4 lg:p-10">
-    <AuthCard header-text="Have you checked you mail">
+    <AuthCard :header-text="headingText">
       <template v-slot:desc>
         <p class="text-base text-gray-500">
           {{ subtitle }}
@@ -260,11 +294,11 @@ const handleResend = async () => {
             </div>
 
             <RouterLink
-              to="/signup"
+              :to="backRoute"
               class="btn--link flex items-center justify-center gap-2 text-sm"
             >
               <ArrowLeftIcon :size="18" />
-              <span>Back to sign up</span>
+              <span>{{ backText }}</span>
             </RouterLink>
           </div>
 
