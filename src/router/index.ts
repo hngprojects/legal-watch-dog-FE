@@ -13,7 +13,8 @@ import DashboardLayout from '@/layout/DashboardLayout.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
 import { useAuthStore } from '@/stores/auth-store'
-import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
+import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
+import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,6 +48,11 @@ const router = createRouter({
       path: '/forgot-password',
       name: 'forgot-password',
       component: ForgotPasswordView,
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: ResetPasswordView,
     },
     {
       path: '/otp',

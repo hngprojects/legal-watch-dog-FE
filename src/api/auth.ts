@@ -3,6 +3,12 @@ import type {
   LoginPayload,
   LoginResponse,
   LogoutResponse,
+  PasswordResetConfirmPayload,
+  PasswordResetConfirmResponse,
+  PasswordResetRequestPayload,
+  PasswordResetRequestResponse,
+  PasswordResetVerifyPayload,
+  PasswordResetVerifyResponse,
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
@@ -37,6 +43,15 @@ export const authService = {
 
   resendOtp: (payload: ResendOtpPayload) =>
     http.post<ResendOtpResponse>('/auth/resend-otp', payload),
+
+  requestPasswordReset: (payload: PasswordResetRequestPayload) =>
+    http.post<PasswordResetRequestResponse>('/auth/password-reset/request', payload),
+
+  verifyPasswordReset: (payload: PasswordResetVerifyPayload) =>
+    http.post<PasswordResetVerifyResponse>('/auth/password-reset/verify', payload),
+
+  confirmPasswordReset: (payload: PasswordResetConfirmPayload) =>
+    http.post<PasswordResetConfirmResponse>('/auth/password-reset/confirm', payload),
 
   refreshToken: () => http.post<RefreshTokenResponse>('/auth/refresh', {}),
 }

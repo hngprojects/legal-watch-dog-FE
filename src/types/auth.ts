@@ -64,6 +64,43 @@ export interface ResendOtpResponse {
   status_code?: number
 }
 
+export interface PasswordResetRequestPayload {
+  email: string
+}
+
+export interface PasswordResetRequestResponse {
+  message?: string
+  status?: string
+  status_code?: number
+}
+
+export interface PasswordResetVerifyPayload {
+  email: string
+  code: string
+}
+
+export interface PasswordResetVerifyResponse {
+  message?: string
+  reset_token?: string
+  status?: string
+  status_code?: number
+  data?: {
+    reset_token?: string
+  }
+}
+
+export interface PasswordResetConfirmPayload {
+  reset_token: string
+  new_password: string
+  confirm_password: string
+}
+
+export interface PasswordResetConfirmResponse {
+  message?: string
+  status?: string
+  status_code?: number
+}
+
 export interface AuthError {
   detail: {
     loc: (string | number)[]

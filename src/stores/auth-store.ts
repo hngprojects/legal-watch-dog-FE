@@ -5,6 +5,11 @@ import type {
   RegisterPayload,
   ResendOtpPayload,
   VerifyOTPPayload,
+  PasswordResetRequestPayload,
+  PasswordResetVerifyPayload,
+  PasswordResetConfirmPayload,
+  PasswordResetVerifyResponse,
+  PasswordResetConfirmResponse,
 } from '@/types/auth'
 
 interface Organisation {
@@ -27,6 +32,8 @@ interface State {
   user: User | null
   email: string | null
   organisation: Organisation | null
+  otpPurpose: 'signup' | 'password-reset' | null
+  resetToken: string | null
 }
 
 interface ApiTokenData {
@@ -75,6 +82,8 @@ export const useAuthStore = defineStore('auth', {
     user: null,
     email: localStorage.getItem(EMAIL_KEY),
     organisation: null,
+    otpPurpose: null,
+    resetToken: null,
   }),
 
   getters: {
@@ -100,11 +109,21 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    setOtpPurpose(purpose: 'signup' | 'password-reset' | null) {
+      this.otpPurpose = purpose
+    },
+
+    setResetToken(token: string | null) {
+      this.resetToken = token
+    },
+
     clearAuthState() {
       this.email = null
       this.user = null
       this.organisation = null
       this.accessToken = null
+      this.otpPurpose = null
+      this.resetToken = null
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(EMAIL_KEY)
     },
@@ -121,6 +140,8 @@ export const useAuthStore = defineStore('auth', {
       const responseBody = response.data as unknown as RegisterApiResponse
       const registeredEmail = responseBody.data?.email || payload.email
       this.setUserEmail(registeredEmail)
+      this.setOtpPurpose('signup')
+      this.setResetToken(null)
       return responseBody
     },
     async login(payload: LoginPayload) {
@@ -145,6 +166,7 @@ export const useAuthStore = defineStore('auth', {
 
       if (userData) {
         this.user = null
+        this.setOtpPurpose(null)
         return { ...responseBody, next: 'login' }
       }
     },
@@ -154,6 +176,31 @@ export const useAuthStore = defineStore('auth', {
       const response = await authService.resendOtp(payload)
       const responseBody = response.data as unknown as ResendOtpApiResponse
       this.setUserEmail(email)
+      return responseBody
+    },
+
+    async requestPasswordReset(email: string) {
+      const payload: PasswordResetRequestPayload = { email }
+      const response = await authService.requestPasswordReset(payload)
+      this.setUserEmail(email)
+      this.setOtpPurpose('password-reset')
+      this.setResetToken(null)
+      return response.data
+    },
+
+    async verifyPasswordReset(payload: PasswordResetVerifyPayload) {
+      const response = await authService.verifyPasswordReset(payload)
+      const responseBody = response.data as PasswordResetVerifyResponse
+      this.setOtpPurpose('password-reset')
+      const token = responseBody?.reset_token ?? responseBody?.data?.reset_token
+      if (token) this.setResetToken(token)
+      return responseBody
+    },
+
+    async confirmPasswordReset(payload: PasswordResetConfirmPayload) {
+      const response = await authService.confirmPasswordReset(payload)
+      const responseBody = response.data as PasswordResetConfirmResponse
+      this.clearAuthState()
       return responseBody
     },
 
