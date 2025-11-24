@@ -44,7 +44,8 @@ const PUBLIC_EMAIL_DENYLIST = new Set([
   'fastmail.com',
   'hushmail.com',
 ])
-const hasLetter = /[A-Za-z]/
+const hasUppercase = /[A-Z]/
+const hasLowercase = /[a-z]/
 const hasNumber = /[0-9]/
 const hasSpecial = /[^A-Za-z0-9]/
 const MIN_PASSWORD_LENGTH = 8
@@ -92,11 +93,14 @@ const validateSignupForm = () => {
       validationErrors.push('Password must be at least 8 characters.')
     }
     if (
-      !hasLetter.test(sanitizedPassword) ||
+      !hasUppercase.test(sanitizedPassword) ||
+      !hasLowercase.test(sanitizedPassword) ||
       !hasNumber.test(sanitizedPassword) ||
       !hasSpecial.test(sanitizedPassword)
     ) {
-      validationErrors.push('Password must include a letter, number, and special character.')
+      validationErrors.push(
+        'Password must include an uppercase letter, a lowercase letter, a number, and a special character.',
+      )
     }
   }
 
