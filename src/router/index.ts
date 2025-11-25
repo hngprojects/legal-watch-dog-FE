@@ -9,6 +9,7 @@ import SkeletonView from '@/views/SkeletonView.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
 import HowItWorksView from '@/views/HowItWorksView.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
+import PrivacyPolicyView from '@/views/PrivacyPolicyView.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
@@ -79,6 +80,11 @@ const router = createRouter({
       path: '/coming-soon',
       name: 'coming-soon',
       component: ComingSoonView,
+    },
+    {
+      path: '/privacy-policy',
+      name: 'privacy-policy',
+      component: PrivacyPolicyView,
     },
     {
       path: '/:pathMatch(.*)*',
