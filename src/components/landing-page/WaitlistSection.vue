@@ -11,6 +11,7 @@ import BrainIcon from '@/assets/icons/brain.svg'
 import CheckedIcon from '@/assets/icons/checked.svg'
 import GlobeIcon from '@/assets/icons/globe.svg'
 import GlobeIcon2 from '@/assets/icons/globe2.svg'
+import earlyAccessBg from '@/assets/Images/earlyAccess-bg.png'
 
 // Top Waitlist Form
 const form = reactive<WaitlistPayload>({
@@ -158,47 +159,47 @@ const getPriorityClasses = (priority: string) => {
 const activeProjects = [
   {
     projects: 'Uk students Visa',
-    priority: 'High'
+    priority: 'High',
   },
   {
     projects: 'EU Privacy Laws',
-    priority: 'Medium'
+    priority: 'Medium',
   },
   {
     projects: 'Us Employment',
-    priority: 'Low'
+    priority: 'Low',
   },
   {
     projects: 'Nigeria Custom',
-    priority: 'Low'
+    priority: 'Low',
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High'
+    priority: 'High',
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High'
+    priority: 'High',
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High'
+    priority: 'High',
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High'
+    priority: 'High',
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High'
+    priority: 'High',
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High'
+    priority: 'High',
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High'
+    priority: 'High',
   },
 ]
 
@@ -206,69 +207,72 @@ const recentUpdates = [
   {
     update: 'Skilled Worker threshold updated',
     time: '2h ago',
-    value: '98%'
+    value: '98%',
   },
   {
     update: 'Policy revisions detected',
     time: '5h ago',
-    value: '85%'
+    value: '85%',
   },
   {
     update: 'Processing times changed',
     time: '8h ago',
-    value: '92%'
-  }
+    value: '92%',
+  },
 ]
 
 const jurisdictions = [
   {
     name: 'United Kingdom',
-    sources: '5 sources'
+    sources: '5 sources',
   },
   {
     name: 'European Union',
-    sources: '12 sources'
+    sources: '12 sources',
   },
   {
     name: 'United States',
-    sources: '8 sources'
+    sources: '8 sources',
   },
   {
     name: 'Australia',
-    sources: '4 sources'
-  }
+    sources: '4 sources',
+  },
 ]
 
 const testimonials = [
   {
-    quote: 'LegalWatch Dog has transformed how we stay on top of regulatory changes. The AI summaries save us hours every week.',
+    quote:
+      'LegalWatch Dog has transformed how we stay on top of regulatory changes. The AI summaries save us hours every week.',
     name: 'Sarah Chen',
     title: 'Compliance Director',
-    initials: 'SC'
+    initials: 'SC',
   },
   {
-    quote: 'The confidence scoring helps us prioritize what matters. We’ve never missed a critical update since switching.',
+    quote:
+      'The confidence scoring helps us prioritize what matters. We’ve never missed a critical update since switching.',
     name: 'Michael Torres',
     title: 'Legal Operations Manager',
-    initials: 'MT'
+    initials: 'MT',
   },
   {
-    quote:'Multi-jurisdiction tracking in one place is a game-changer. Clean interface, powerful features.',
+    quote:
+      'Multi-jurisdiction tracking in one place is a game-changer. Clean interface, powerful features.',
     name: 'Emma Watson',
     title: 'Head of Regulatory Affairs',
-    initials: 'EW'
-  }
+    initials: 'EW',
+  },
 ]
 </script>
 
 <template>
-  <div class="min-h-screen bg-linear-to-b from-[#FAF7F4] to-[#F5F1EC]">
+  <div class="flex min-h-screen flex-col gap-35 bg-linear-to-b from-[#FAF7F4] to-[#F5F1EC]">
     <!-- HERO SECTION -->
-    <section class="px-4 pt-12 pb-16 sm:px-6 lg:px-8">
+    <section class="px-4 pt-12 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-5xl text-center">
         <Badge
           variant="secondary"
-          class="mb-8 border border-gray-200 bg-white px-6 py-1.5 text-sm font-semibold text-[#3a1f14] shadow-sm"
+          class="mb-8 border-0 bg-white! px-6 py-3 text-sm font-semibold text-gray-600! shadow-sm"
         >
           Join the Waitlist
         </Badge>
@@ -278,14 +282,14 @@ const testimonials = [
           Without the Weekly Stress
         </h1>
 
-        <p class="mx-auto mb-8 max-w-3xl text-lg text-gray-600">
+        <p class="mx-auto mb-12 max-w-3xl text-lg text-gray-600">
           LegalWatchDog tracks government updates, policy shifts, and regulatory changes for you.
           Get clear summaries, real-time alerts, and complete visibility across all your
           jurisdictions.
         </p>
 
         <!-- TOP FORM -->
-        <div class="mx-auto mb-2 flex h-12 max-w-[496px] flex-col sm:flex-row">
+        <div class="mx-auto mb-2 flex h-12 max-w-[496px] flex-col justify-center sm:flex-row">
           <!-- Email Input -->
           <div class="relative h-full">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -295,7 +299,7 @@ const testimonials = [
               v-model="form.organization_email"
               type="email"
               placeholder="Enter Email"
-              class="h-full w-full rounded-l-md px-4 py-3 pl-10"
+              class="h-full w-full rounded-l-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
             />
             <p v-if="formErrors.organization_email" class="mt-1 text-xs text-red-600">
               {{ formErrors.organization_email }}
@@ -346,12 +350,12 @@ const testimonials = [
     </section>
 
     <!-- FEATURES -->
-    <section class="px-4 py-16 sm:px-6 lg:px-8">
+    <section class="px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-6xl text-center">
-        <h2 class="mb-4 text-3xl font-bold sm:text-4xl">
-          Intelligent <span class="text-[#F59E0B]">Legal</span> Monitoring
+        <h2 class="mb-5 text-3xl font-bold sm:text-4xl lg:text-5xl">
+          Intelligent <span class="text-[#F2AB6D]">Legal</span> Monitoring
         </h2>
-        <p class="mb-12 text-gray-600">
+        <p class="mx-auto mb-12 max-w-2xl text-gray-600 lg:text-xl">
           Automated tracking, AI-powered analysis, and actionable insights for compliance
           professionals
         </p>
@@ -360,10 +364,10 @@ const testimonials = [
           <Card
             v-for="(feature, idx) in features"
             :key="idx"
-            class="border-0 bg-white p-6 text-center shadow-sm transition hover:shadow-md"
+            class="gap-6 border-0 bg-white px-6 pt-8 pb-11.5 text-center transition hover:shadow-md"
           >
             <div
-              class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#FCEBD8] text-2xl text-white"
+              class="flex h-14 w-14 items-center justify-center rounded-full bg-[#FCEBD8] text-2xl text-white"
             >
               <img :src="feature.icon" alt="" />
             </div>
@@ -377,18 +381,18 @@ const testimonials = [
     </section>
 
     <!-- PROJECTS, RECENT UPDATES AND JURISDICTION  -->
-    <section class="px-4 py-16 sm:px-6 lg:px-8">
+    <section class="px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-6xl text-center">
         <h2 class="mb-4 text-3xl font-bold sm:text-4xl">
-          Powerful <span class="text-[#F59E0B]">Dashboard,</span> Simple
-          <span class="text-[#F59E0B]">Interface</span>
+          Powerful <span class="text-[#F2AB6D]">Dashboard,</span> Simple
+          <span class="text-[#F2AB6D]">Interface</span>
         </h2>
         <p class="mb-12 text-gray-600">
           Everything you need to stay compliant in one clean, intuitive platform
         </p>
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-9 sm:grid-cols-2 lg:grid-cols-3">
           <div class="rounded-md bg-white p-6 text-left shadow-sm transition hover:shadow-md">
-            <div class="mb-4 flex items-center justify-between">
+            <div class="mb-6 flex items-center justify-between">
               <h4 class="text-lg font-bold">Active Projects</h4>
               <p class="text-sm text-[#6a7282]">{{ activeProjects.length }} total</p>
             </div>
@@ -396,12 +400,12 @@ const testimonials = [
               <Card
                 v-for="(project, idx) in activeProjects.slice(0, 4)"
                 :key="idx"
-                class="flex flex-row items-center justify-between rounded-md border-0 bg-[#F9FAFB] p-3 transition"
+                class="flex flex-row items-center justify-between rounded-md border-0 bg-[#F9FAFB] p-4 transition"
               >
-                <h3 class="text-xs font-medium text-[#364153]">{{ project.projects }}</h3>
+                <h3 class="text-sm font-medium text-[#364153]">{{ project.projects }}</h3>
                 <p
                   :class="getPriorityClasses(project.priority)"
-                  class="rounded-md px-2 py-1 text-xs font-medium"
+                  class="rounded-[4px] px-2 py-1 text-xs font-medium"
                 >
                   {{ project.priority }}
                 </p>
@@ -409,7 +413,7 @@ const testimonials = [
             </div>
           </div>
           <div class="rounded-md bg-white p-6 text-left shadow-sm transition hover:shadow-md">
-            <div class="mb-4 flex items-center justify-between">
+            <div class="mb-6 flex items-center justify-between">
               <h4 class="text-lg font-bold">Recent Updates</h4>
               <p class="text-sm text-[#6a7282]">Today</p>
             </div>
@@ -417,24 +421,24 @@ const testimonials = [
               <Card
                 v-for="(update, idx) in recentUpdates.slice(0, 3)"
                 :key="idx"
-                class="flex flex-row items-center justify-between rounded-md border-0 border-b border-gray-100 bg-white p-3 shadow-none transition"
+                class="flex flex-row items-start justify-between rounded-none border-b border-[#F3F4F6] bg-white p-3 shadow-none transition last-of-type:border-none"
               >
                 <div class="flex flex-col gap-3">
                   <h3 class="text-sm font-medium text-[#364153]">{{ update.update }}</h3>
                   <p class="text-xs text-gray-500">{{ update.time }}</p>
                 </div>
-                <p class="text-sm font-bold text-yellow-500">
+                <p class="text-sm font-bold text-[#D4AF37]">
                   {{ update.value }}
                 </p>
               </Card>
             </div>
           </div>
           <div class="rounded-md bg-white p-6 text-left shadow-sm transition hover:shadow-md">
-            <div class="mb-4 flex items-center justify-between">
+            <div class="mb-6 flex items-center justify-between">
               <h4 class="text-lg font-bold">Jurisdictions</h4>
               <p class="text-sm text-[#6a7282]">{{ jurisdictions.length }} tracked</p>
             </div>
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-3">
               <Card
                 v-for="(jurisdiction, idx) in jurisdictions.slice(0, 4)"
                 :key="idx"
@@ -456,105 +460,115 @@ const testimonials = [
       </div>
     </section>
 
-    <!-- FOOTER EARLY ACCESS -->
-    <section class="relative mt-20 overflow-hidden bg-[#3a1f14] px-4 py-16 sm:px-6 lg:px-8">
-      <div class="absolute inset-0 opacity-10">
-        <div class="absolute top-10 left-10 h-64 w-64 rounded-full border-4 border-white"></div>
-        <div class="absolute right-10 bottom-10 h-96 w-96 rounded-full border-4 border-white"></div>
-      </div>
+    <section>
+      <!-- FOOTER EARLY ACCESS -->
+      <section
+        class="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8"
+        :style="{
+          backgroundImage: `url(${earlyAccessBg})`,
+          backgroundSize: 'cover',
+        }"
+      >
+        <div class="absolute inset-0 opacity-10">
+          <div class="absolute top-10 left-10 h-64 w-64 rounded-full border-4 border-white"></div>
+          <div
+            class="absolute right-10 bottom-10 h-96 w-96 rounded-full border-4 border-white"
+          ></div>
+        </div>
 
-      <div class="relative z-10 mx-auto max-w-xl text-center">
-        <h2 class="mb-4 text-3xl font-bold text-white sm:text-4xl">Get Early Access</h2>
-        <p class="mb-8 text-white/80">
-          Join legal and compliance professionals who are transforming how they monitor regulatory
-          changes
-        </p>
-
-        <Card class="rounded-xl bg-white p-6 shadow-xl">
-          <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <!-- Footer Name Input -->
-            <div>
-              <label class="mb-1 block text-left text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <Input
-                v-model="earlyAccessForm.organization_name"
-                type="text"
-                placeholder="Company / Organization"
-                class="w-full"
-              />
-              <!-- <p v-if="earlyAccessErrors.organization_name" class="mt-1 text-xs text-red-600">
-                {{ earlyAccessErrors.organization_name }}
-              </p> -->
-            </div>
-
-            <!-- Footer Email Input -->
-            <div>
-              <label class="mb-1 block text-left text-sm font-medium text-gray-700">
-                Work Email
-              </label>
-              <Input
-                v-model="earlyAccessForm.organization_email"
-                type="email"
-                placeholder="name@company.com"
-                class="w-full"
-              />
-              <p v-if="earlyAccessErrors.organization_email" class="mt-1 text-xs text-red-600">
-                {{ earlyAccessErrors.organization_email }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Footer Button -->
-          <Button
-            @click="handleEarlyAccessSubmit"
-            :disabled="isSubmitting"
-            class="flex w-full items-center justify-center gap-2 bg-[#3a1f14] px-6 py-3 text-white hover:bg-[#2d1810]"
-          >
-            <span v-if="!isSubmitting">Get Early Access →</span>
-            <span v-else>Submitting...</span>
-          </Button>
-          <p
-            v-if="feedback"
-            class="mb-4 text-sm"
-            :class="feedback.type === 'success' ? 'text-green-600' : 'text-red-600'"
-          >
-            {{ feedback.message }}
+        <div class="relative z-10 mx-auto max-w-xl text-center">
+          <h2 class="mb-4 text-3xl font-bold text-white sm:text-4xl">Get Early Access</h2>
+          <p class="mb-8 text-white/80">
+            Join legal and compliance professionals who are transforming how they monitor regulatory
+            changes
           </p>
 
-          <p class="mt-4 text-xs text-gray-500">
-            We respect your privacy. No spam, unsubscribe anytime.
-          </p>
-        </Card>
-      </div>
-    </section>
-
-    <!-- TESTIMONIALS -->
-    <section class="bg-[#FFFBEB] px-4 py-32 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-6xl text-center">
-        <h2 class="mb-12 text-3xl font-bold sm:text-4xl">Trusted by Compliance Professionals</h2>
-        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <Card
-            v-for="(testimonial, idx) in testimonials"
-            :key="idx"
-            class="flex-col justify-between gap-2 rounded-xl border-0 bg-white p-6 text-left shadow-sm transition hover:shadow-md"
-          >
-            <div class="mb-2 flex items-center">⭐ ⭐ ⭐ ⭐ ⭐</div>
-            <p class="mb-4 text-gray-600">"{{ testimonial.quote }}"</p>
-            <div class="flex items-center gap-4">
-              <div
-                class="flex h-12 w-12 items-center justify-center rounded-full bg-[#3a1f14] text-white"
-              >
-                <span class="font-bold">{{ testimonial.initials }}</span>
-              </div>
+          <Card class="rounded-xl bg-white p-6 shadow-xl">
+            <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <!-- Footer Name Input -->
               <div>
-                <h4 class="font-bold text-gray-900">{{ testimonial.name }}</h4>
-                <p class="text-sm text-gray-500">{{ testimonial.title }}</p>
+                <label class="mb-1 block text-left text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
+                <Input
+                  v-model="earlyAccessForm.organization_name"
+                  type="text"
+                  placeholder="John Doe"
+                  class="w-full rounded-md bg-transparent!"
+                />
+                <p v-if="earlyAccessErrors.organization_name" class="mt-1 text-xs text-red-600">
+                  {{ earlyAccessErrors.organization_name }}
+                </p>
+              </div>
+
+              <!-- Footer Email Input -->
+              <div>
+                <label class="mb-1 block text-left text-sm font-medium text-gray-700">
+                  Work Email
+                </label>
+                <Input
+                  v-model="earlyAccessForm.organization_email"
+                  type="email"
+                  placeholder="olivia@untitledui.com"
+                  class="w-full rounded-md bg-transparent!"
+                />
+                <p v-if="earlyAccessErrors.organization_email" class="mt-1 text-xs text-red-600">
+                  {{ earlyAccessErrors.organization_email }}
+                </p>
               </div>
             </div>
+
+            <!-- Footer Button -->
+            <Button
+              @click="handleEarlyAccessSubmit"
+              :disabled="isSubmitting"
+              class="flex w-full items-center justify-center gap-2 bg-[#3a1f14] px-6 py-3 text-white hover:bg-[#2d1810]"
+            >
+              <span v-if="!isSubmitting">Get Early Access →</span>
+              <span v-else>Submitting...</span>
+            </Button>
+            <p
+              v-if="feedback"
+              class="mb-4 text-sm"
+              :class="feedback.type === 'success' ? 'text-green-600' : 'text-red-600'"
+            >
+              {{ feedback.message }}
+            </p>
+
+            <p class="mt-4 text-xs text-gray-500">
+              We respect your privacy. No spam, unsubscribe anytime.
+            </p>
           </Card>
         </div>
-      </div>
+      </section>
+
+      <!-- TESTIMONIALS -->
+      <section class="bg-[#FFFBEB] px-4 py-32 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-6xl text-center">
+          <h2 class="mb-12 text-3xl font-bold sm:text-4xl">Trusted by Compliance Professionals</h2>
+          <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <Card
+              v-for="(testimonial, idx) in testimonials"
+              :key="idx"
+              class="flex-col justify-between gap-2 rounded-xl border-0 bg-white p-6 text-left shadow-sm transition hover:shadow-md"
+            >
+              <div class="mb-2 flex items-center">⭐ ⭐ ⭐ ⭐ ⭐</div>
+              <p class="mb-4 text-gray-600">"{{ testimonial.quote }}"</p>
+              <div class="flex items-center gap-4">
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-full bg-[#3a1f14] text-white"
+                >
+                  <span class="font-bold">{{ testimonial.initials }}</span>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-900">{{ testimonial.name }}</h4>
+                  <p class="text-sm text-gray-500">{{ testimonial.title }}</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
     </section>
   </div>
 </template>
