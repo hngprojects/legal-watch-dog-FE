@@ -143,7 +143,6 @@ jobs:
             git fetch origin "$BRANCH"
             git reset --hard origin/"$BRANCH"
 
-
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
             chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-staging/dist
@@ -223,6 +222,7 @@ jobs:
 
             REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE-production"
             BRANCH="main"
+            
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
               cd /home/ifeanyinw/apps/frontend/
@@ -242,6 +242,7 @@ jobs:
             chmod o+rx /home/ifeanyinw
             chmod o+rx /home/ifeanyinw/apps
             chmod o+rx /home/ifeanyinw/apps/frontend
+            
             sudo nginx -s reload
           EOF
             # Determine high-level outcome and set appropriate emoji
