@@ -1,11 +1,12 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth-store'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://minamoto.emerj.net/api/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.minamoto.emerj.net/api/v1'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -17,6 +18,7 @@ api.interceptors.request.use(
     const token = auth.accessToken
 
     if (token) {
+      config.headers = config.headers ?? {}
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
@@ -26,34 +28,12 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (res) => res,
-  async (error) => {
-    const originalRequest = error.config
+  (error) => {
+    const status = error.response?.status
 
-    if (
-      (error.response?.status === 401 || error.response?.status === 403) &&
-      !originalRequest._retry
-    ) {
-      originalRequest._retry = true
-
-      try {
-        const auth = useAuthStore()
-
-        if (!auth.isAuthenticated || !auth.accessToken) {
-          return Promise.reject(error)
-        }
-
-        const res = await auth.refreshToken()
-
-        if (res) {
-          originalRequest.headers.Authorization = `Bearer ${res.access_token}`
-          localStorage.setItem('refreshToken', res.refresh_token)
-          return api(originalRequest)
-        } else {
-          return Promise.reject(error)
-        }
-      } catch (error) {
-        return Promise.reject(error)
-      }
+    if (status === 401) {
+      const auth = useAuthStore()
+      auth.clearAuthState()
     }
     return Promise.reject(error)
   },

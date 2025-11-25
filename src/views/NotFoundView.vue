@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import comingSoonImg from '@/assets/Images/coming-soon.webp'
+import { RouterLink } from 'vue-router'
 import Button from '@/components/ui/button/Button.vue'
 </script>
 
 <template>
-  <main class="flex h-screen w-screen flex-col items-center justify-center gap-8 text-center">
-    <img :src="comingSoonImg" alt="Coming Soon Illustration" class="w-11/12 md:w-3/5 lg:w-2/5" />
-
-    <div>
-      <h1 class="text-primary mb-2 text-7xl font-bold">Coming Soon</h1>
-      <p class="text-muted-foreground text-center text-xl">
-        We're working hard to bring you this feature. Stay tuned!
+  <main
+    class="flex h-screen w-screen flex-col items-center justify-center gap-6 bg-gray-50 p-4 text-center"
+  >
+    <div class="flex flex-col items-center justify-center gap-4">
+      <h1 class="text-8xl font-bold tracking-tighter text-gray-800">404</h1>
+      <p class="text-2xl font-semibold text-gray-600">Page Not Found</p>
+      <p class="max-w-md text-gray-500">
+        Sorry, we couldn't find the page you're looking for. It might have been moved, deleted, or
+        maybe you just mistyped the URL.
       </p>
     </div>
-    <Button>Join the Waitlist</Button>
+    <Button as-child class="text-white">
+      <RouterLink to="/">Go Back Home</RouterLink>
+    </Button>
   </main>
 </template>

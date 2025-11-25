@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Button } from '../ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { TypographyHeading, TypographyText } from '../ui/typography'
 
@@ -29,13 +28,17 @@ const cards = [
 </script>
 
 <template>
-  <section id="how-it-works" class="relative flex w-full items-center justify-center py-8 sm:py-16">
+  <section id="how-it-works" class="relative flex items-center justify-center px-16 py-8 sm:py-16">
     <div class="flex w-full flex-col gap-11">
       <div class="mx-auto flex w-full flex-col items-center gap-5 text-center">
         <TypographyHeading level="h2" align="center">
-          How <span class="text-accent">Legal WatchDog</span> Works
+          How <span class="text-[#F2AB6D]">Legal WatchDog</span> Works
         </TypographyHeading>
-        <TypographyText align="center" tone="muted" class="max-w-lg">
+        <TypographyText
+          align="center"
+          tone="muted"
+          class="max-w-2xl text-lg font-semibold text-gray-600"
+        >
           Discover how LegalWatchDog continuously monitors legal sources, detects changes, and
           delivers reliable, AI-summarized updates — all in just a few steps.
         </TypographyText>
@@ -45,11 +48,11 @@ const cards = [
         <Card
           v-for="(card, i) in cards"
           :key="i"
-          class="bg-card basis-full space-y-4 rounded-2xl px-8 py-10 text-left md:max-w-[400px] md:basis-[calc(50%-0.625rem)]"
+          class="basis-full space-y-4 rounded-2xl bg-white px-8 py-10 text-left md:max-w-[400px] md:basis-[calc(50%-0.625rem)]"
         >
           <CardHeader class="gap-4 p-0">
             <div
-              class="bg-accent text-accent-foreground flex h-16 w-16 items-center justify-center rounded-full shadow-sm"
+              class="text-accent-foreground flex h-16 w-16 items-center justify-center rounded-full bg-[#F2AB6D] shadow-sm"
             >
               <img :src="card.icon" :alt="`${card.title} icon`" class="size-8" />
             </div>
@@ -62,10 +65,6 @@ const cards = [
           </CardDescription>
         </Card>
       </div>
-
-      <Button size="lg" variant="secondary" class="self-center px-10">
-        <span class="font-normal!">How it Works</span>
-      </Button>
     </div>
   </section>
 </template>

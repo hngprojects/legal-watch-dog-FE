@@ -1,5 +1,18 @@
 #!/usr/bin/env sh
 
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+if command -v nvm >/dev/null 2>&1; then
+    if nvm ls 20 >/dev/null 2>&1; then
+        nvm use 20 >/dev/null 2>&1 || echo "nvm: failed to use Node 20; continuing with $(node -v 2>/dev/null)"
+    else
+        echo "nvm: Node 20 not installed; running with $(node -v 2>/dev/null || echo 'no node found')"
+    fi
+fi
+
+echo "node path: $(which node)"
+node -v
+
 echo '🏗️👷 Running checks on your code before committing' 🔍🧐
 
 echo "styling your work" 🎨✨

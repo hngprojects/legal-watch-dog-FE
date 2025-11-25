@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { projectService } from '@/api/project'
-import type { CreateProjectPayload, Project, UpdateProjectPayload } from '@/types/project'
+import type {
+  CreateProjectPayload,
+  Project,
+  ProjectErrorResponse,
+  UpdateProjectPayload,
+} from '@/types/project'
 
 interface State {
   projects: Project[]
@@ -21,14 +26,19 @@ export const useProjectStore = defineStore('projects', {
     },
 
     async fetchProjects() {
+      this.projects = []
       this.loading = true
       this.setError(null)
       try {
         const { data } = await projectService.listProjects()
-        this.projects = data
+        this.projects = data.data.projects
       } catch (error) {
-        this.setError('Unable to load projects.')
-        console.error(error)
+        const err = error as ProjectErrorResponse
+        if (!err.response) {
+          this.setError('Network error: Unable to reach server')
+        } else {
+          this.setError(err.response.data.detail[0]?.msg || 'Failed to load projects')
+        }
       } finally {
         this.loading = false
       }
@@ -38,36 +48,55 @@ export const useProjectStore = defineStore('projects', {
       this.setError(null)
       try {
         const { data } = await projectService.createProject(payload)
-        this.projects = [data, ...this.projects]
-        return data
+        const newProject = data.data
+        this.projects.unshift(newProject)
+        return newProject
       } catch (error) {
-        this.setError('Could not create project.')
-        console.error(error)
+        const err = error as ProjectErrorResponse
+        if (!err.response) {
+          this.setError('Network error: Unable to reach server')
+        } else {
+          this.setError(err.response.data.detail[0]?.msg || 'Failed to create project')
+        }
+        return null
+      }
+    },
+
+    async deleteProject(projectId: string) {
+      try {
+        await projectService.deleteProject(projectId)
+        this.projects = this.projects.filter((p) => p.id !== projectId)
+      } catch (error) {
+        const err = error as ProjectErrorResponse
+        if (!err.response) {
+          this.setError('Network error: Unable to reach server')
+        } else {
+          this.setError(err.response.data.detail[0]?.msg || 'Failed to delete project')
+        }
         throw error
       }
     },
 
-    async updateProject(id: string, payload: UpdateProjectPayload) {
+    async updateProject(projectId: string, payload: UpdateProjectPayload) {
       this.setError(null)
-      try {
-        const { data } = await projectService.updateProject(id, payload)
-        this.projects = this.projects.map((project) => (project.id === id ? data : project))
-        return data
-      } catch (error) {
-        this.setError('Could not update project.')
-        console.error(error)
-        throw error
-      }
-    },
 
-    async deleteProject(id: string) {
-      this.setError(null)
       try {
-        await projectService.deleteProject(id)
-        this.projects = this.projects.filter((project) => project.id !== id)
+        const { data } = await projectService.updateProject(projectId, payload)
+        const updatedProject: Project = data
+
+        const index = this.projects.findIndex((p) => p.id === projectId)
+        if (index !== -1) {
+          this.projects[index] = updatedProject
+        }
+
+        return updatedProject
       } catch (error) {
-        this.setError('Could not delete project.')
-        console.error(error)
+        const err = error as ProjectErrorResponse
+        if (!err.response) {
+          this.setError('Network error: Unable to reach server')
+        } else {
+          this.setError(err.response.data.detail[0]?.msg || 'Failed to update project')
+        }
         throw error
       }
     },
