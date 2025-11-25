@@ -158,47 +158,47 @@ const getPriorityClasses = (priority: string) => {
 const activeProjects = [
   {
     projects: 'Uk students Visa',
-    priority: 'High',
+    priority: 'High'
   },
   {
     projects: 'EU Privacy Laws',
-    priority: 'Medium',
+    priority: 'Medium'
   },
   {
     projects: 'Us Employment',
-    priority: 'Low',
+    priority: 'Low'
   },
   {
     projects: 'Nigeria Custom',
-    priority: 'Low',
+    priority: 'Low'
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High',
+    priority: 'High'
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High',
+    priority: 'High'
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High',
+    priority: 'High'
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High',
+    priority: 'High'
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High',
+    priority: 'High'
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High',
+    priority: 'High'
   },
   {
     projects: 'Uk students Visa',
-    priority: 'High',
+    priority: 'High'
   },
 ]
 
@@ -206,61 +206,58 @@ const recentUpdates = [
   {
     update: 'Skilled Worker threshold updated',
     time: '2h ago',
-    value: '98%',
+    value: '98%'
   },
   {
     update: 'Policy revisions detected',
     time: '5h ago',
-    value: '85%',
+    value: '85%'
   },
   {
     update: 'Processing times changed',
     time: '8h ago',
-    value: '92%',
-  },
+    value: '92%'
+  }
 ]
 
 const jurisdictions = [
   {
     name: 'United Kingdom',
-    sources: '5 sources',
+    sources: '5 sources'
   },
   {
     name: 'European Union',
-    sources: '12 sources',
+    sources: '12 sources'
   },
   {
     name: 'United States',
-    sources: '8 sources',
+    sources: '8 sources'
   },
   {
     name: 'Australia',
-    sources: '4 sources',
-  },
+    sources: '4 sources'
+  }
 ]
 
 const testimonials = [
   {
-    quote:
-      'LegalWatch Dog has transformed how we stay on top of regulatory changes. The AI summaries save us hours every week.',
+    quote: 'LegalWatch Dog has transformed how we stay on top of regulatory changes. The AI summaries save us hours every week.',
     name: 'Sarah Chen',
     title: 'Compliance Director',
-    initials: 'SC',
+    initials: 'SC'
   },
   {
-    quote:
-      'The confidence scoring helps us prioritize what matters. We’ve never missed a critical update since switching.',
+    quote: 'The confidence scoring helps us prioritize what matters. We’ve never missed a critical update since switching.',
     name: 'Michael Torres',
     title: 'Legal Operations Manager',
-    initials: 'MT',
+    initials: 'MT'
   },
   {
-    quote:
-      'Multi-jurisdiction tracking in one place is a game-changer. Clean interface, powerful features.',
+    quote:'Multi-jurisdiction tracking in one place is a game-changer. Clean interface, powerful features.',
     name: 'Emma Watson',
     title: 'Head of Regulatory Affairs',
-    initials: 'EW',
-  },
+    initials: 'EW'
+  }
 ]
 </script>
 
@@ -379,7 +376,7 @@ const testimonials = [
       </div>
     </section>
 
-    <!-- PROJECTS, RECENT UPDATES and JUR  -->
+    <!-- PROJECTS, RECENT UPDATES AND JURISDICTION  -->
     <section class="px-4 py-16 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-6xl text-center">
         <h2 class="mb-4 text-3xl font-bold sm:text-4xl">
