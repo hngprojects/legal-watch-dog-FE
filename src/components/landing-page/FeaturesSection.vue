@@ -3,9 +3,9 @@ import HeadingText from '@/components/reusable/HeadingText.vue'
 import BodyText from '@/components/reusable/BodyText.vue'
 
 // Import images
-import Rectangle from '@/assets/images/Rectangle.png'
-import SearchSource from '@/assets/images/SearchSource.png'
-import Timeline from '@/assets/images/Timeline.png'
+import Rectangle from '@/assets/Images/Rectangle.png'
+import SearchSource from '@/assets/Images/SearchSource.png'
+import Timeline from '@/assets/Images/Timeline.png'
 </script>
 
 <template>
