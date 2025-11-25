@@ -5,10 +5,12 @@ on:
   push:
     branches:
       - main
+      - staging
       - dev
   pull_request:
     branches:
       - main
+      - staging
       - dev
 
 jobs:
@@ -58,7 +60,7 @@ jobs:
     name: CD - Frontend Deploy (Staging)
     runs-on: [self-hosted]
     needs: build
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/staging'
     environment: staging
 
     steps:
@@ -81,24 +83,31 @@ jobs:
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
 
-            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
+            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE-staging"
+            BRANCH="staging"
+            REPO_URL="https://github.com/hngprojects/legal-watch-dog-FE.git"
+
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
               cd /home/ifeanyinw/apps/frontend/
-              git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
+              git clone -b "$BRANCH" "$REPO_URL" "$REMOTE_DIR"
             fi
 
-            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
-            
-            git pull origin dev
+
+            git checkout "$BRANCH"
+            git fetch origin "$BRANCH"
+            git reset --hard origin/"$BRANCH"
+
+
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
-            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE
+            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-staging/dist
+            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-staging
             chmod o+rx /home/ifeanyinw
             chmod o+rx /home/ifeanyinw/apps
             chmod o+rx /home/ifeanyinw/apps/frontend
+
             sudo nginx -s reload
           EOF
 
@@ -113,7 +122,12 @@ jobs:
     name: CD - Frontend Deploy (Production)
     runs-on: [self-hosted]
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.ref == 'staging'
     environment: production
 
     steps:
@@ -136,21 +150,24 @@ jobs:
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
 
-            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
+            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE-production"
+            BRANCH="main"
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
               cd /home/ifeanyinw/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
-            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
             cd "$REMOTE_DIR"
             
-            git pull origin dev
+            git checkout "$BRANCH"
+            git fetch origin "$BRANCH"
+            git reset --hard origin/"$BRANCH"
+
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
-            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE
+            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-production/dist
+            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-production
             chmod o+rx /home/ifeanyinw
             chmod o+rx /home/ifeanyinw/apps
             chmod o+rx /home/ifeanyinw/apps/frontend
