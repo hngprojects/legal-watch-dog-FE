@@ -64,11 +64,11 @@ const pricings = [
   <div class="flex min-h-screen flex-col">
     <MainHeader />
     <main class="flex flex-1 flex-col items-center px-6 py-20 text-center md:px-12 lg:px-24">
-      <section class="mb-10">
+      <section class="mb-10 max-w-3xl">
         <h1 class="text-preset-display-md text-primary mb-5 capitalize">
           Choose the plan that fits your team.
         </h1>
-        <p class="text-preset-body-xx-lg text-gray-600">
+        <p class="text-lg text-gray-600">
           Upgrade to unlock continuous monitoring, AI summaries, and team-wide compliance insights.
         </p>
       </section>
@@ -92,12 +92,12 @@ const pricings = [
         </div>
 
         <div
-          class="flex flex-col justify-start gap-8 text-start md:flex-row md:flex-wrap md:justify-center xl:items-center"
+          class="flex flex-col justify-start gap-x-6 gap-y-12 text-start md:flex-row md:flex-wrap md:justify-center xl:items-center"
         >
           <article
             :key="i"
             v-for="(plan, i) in pricings"
-            class="card-gradient relative w-sm space-y-8 overflow-hidden rounded-4xl bg-white px-6 pt-10 pb-4"
+            class="card-gradient relative w-sm space-y-8 overflow-hidden rounded-4xl bg-white px-6 pt-10 pb-4 shadow-md"
             :class="[i === 1 && 'card-gradient--popular lg:py-12']"
           >
             <div class="text flex items-center justify-between">
