@@ -5,6 +5,7 @@ import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import { ArrowLeftIcon, ChevronRight, Plus, Settings } from 'lucide-vue-next'
+import vector from '@/assets/icons/Vector.png'
 import Swal from 'sweetalert2'
 
 const route = useRoute()
@@ -197,7 +198,7 @@ watch(
             @click="goBack"
             class="flex cursor-pointer items-center gap-2 text-gray-500 transition-colors hover:text-gray-700"
           >
-            <ArrowLeftIcon :size="18" />
+            <img :src="vector" alt="Arrow-icon" class="h-3" />
             <span>Project</span>
           </button>
           <ChevronRight :size="18" />
@@ -207,7 +208,7 @@ watch(
         <div class="relative">
           <button
             @click.stop="toggleSettingsMenu"
-            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
           >
             <Settings :size="18" />
           </button>
@@ -279,12 +280,12 @@ watch(
 
         <template v-else>
           <h1 class="text-2xl leading-[30px] font-bold text-gray-900">{{ project.title }}</h1>
-          <p class="text-sm leading-5 text-gray-600">{{ project.description }}</p>
+          <p class="text-sm leading-5 font-normal text-[#4B5563]">{{ project.description }}</p>
         </template>
       </div>
 
-      <div class="mb-8 flex items-end justify-between border-b border-gray-200 md:mt-[88px]">
-        <div class="flex gap-8">
+      <div class="mb-8 flex items-end justify-between md:mt-[88px]">
+        <div class="flex w-auto gap-8 border-b border-gray-200">
           <button
             @click="activeTab = 'jurisdictions'"
             :class="[
@@ -323,7 +324,7 @@ watch(
         </button>
       </div>
 
-      <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-200/60">
+      <div class=" ">
         <div v-if="activeTab === 'jurisdictions'">
           <div v-if="jurisdictionStore.loading" class="space-y-4 p-6">
             <div v-for="n in 3" :key="n" class="animate-pulse">
@@ -333,7 +334,7 @@ watch(
 
           <div
             v-else-if="jurisdictionStore.jurisdictions.length === 0"
-            class="flex flex-col items-center justify-center py-20"
+            class="flex flex-col items-center justify-center bg-white py-20"
           >
             <p class="text-sm text-gray-500">No Jurisdiction found</p>
           </div>
@@ -343,7 +344,7 @@ watch(
               v-for="jurisdiction in jurisdictionStore.jurisdictions"
               :key="jurisdiction.id"
               @click="goToJurisdiction(jurisdiction.id)"
-              class="group cursor-pointer rounded-lg bg-white p-6 ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
+              class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
             >
               <h3
                 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
@@ -353,13 +354,17 @@ watch(
               <p class="text-sm leading-relaxed text-gray-600">
                 {{ jurisdiction.description }}
               </p>
+              <!-- Creation time -->
+              <p class="mt-2 text-xs text-gray-400">
+                {{ new Date(jurisdiction.created_at).toLocaleString() }}
+              </p>
             </article>
           </div>
         </div>
 
         <div
           v-else-if="activeTab === 'activity'"
-          class="flex flex-col items-center justify-center py-20"
+          class="flex flex-col items-center justify-center bg-white py-20"
         >
           <p class="text-sm text-gray-500">No activity yet</p>
         </div>
@@ -396,8 +401,10 @@ watch(
 
           <div class="p-8">
             <div class="mb-6">
-              <h3 class="mb-2 text-xl font-bold text-[#080808]">Add Jurisdiction</h3>
-              <p class="text-sm text-[#6B7280]">Add a new jurisdiction to track legal changes</p>
+              <h3 class="mb-2 text-xl font-bold text-[#080808]">Define your Jurisdiction</h3>
+              <p class="text-sm text-[#6B7280]">
+                Define a specific legal domain or region to monitor
+              </p>
             </div>
 
             <form @submit.prevent="handleCreateJurisdiction" class="space-y-5">
@@ -422,9 +429,9 @@ watch(
                   v-model="jurisdictionForm.description"
                   id="jurisdictionDesc"
                   rows="3"
-                  placeholder="Describe the legal area or focus"
+                  placeholder="What legal areas will you monitor?"
                   required
-                  class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                  class="h-[130px] w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
                 />
               </div>
 
@@ -435,11 +442,11 @@ watch(
                 {{ jurisdictionStore.error }}
               </div>
 
-              <div class="flex justify-end gap-3 pt-2">
+              <div class="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   @click="closeAddJurisdictionModal"
-                  class="cursor-pointer rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+                  class="cursor-pointer rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] hover:bg-orange-50"
                 >
                   Cancel
                 </button>
@@ -447,7 +454,7 @@ watch(
                   type="submit"
                   class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
                 >
-                  Add Jurisdiction
+                  Create Jurisdiction
                 </button>
               </div>
             </form>
