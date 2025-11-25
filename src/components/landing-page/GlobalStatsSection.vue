@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from '../ui/button'
-import stratBgLeft from '@/assets/Images/strategic_advantage_bg_left.png'
-import stratBgRight from '@/assets/Images/strategic_advantage_bg_right.png'
+import backleft from '@/assets/Images/backleft.png'
+import backright from '@/assets/Images/backright.png'
 </script>
 
 <template>
@@ -49,12 +49,12 @@ import stratBgRight from '@/assets/Images/strategic_advantage_bg_right.png'
       class="relative container mx-auto mt-12 mb-12 w-full overflow-hidden rounded-3xl bg-[#3C2610] px-6 py-24"
     >
       <img
-        :src="stratBgLeft"
+        :src="backleft"
         alt=""
         class="pointer-events-none absolute bottom-0 left-0 w-48 opacity-50 md:w-64"
       />
       <img
-        :src="stratBgRight"
+        :src="backright"
         alt=""
         class="pointer-events-none absolute right-0 bottom-0 w-48 opacity-50 md:w-64"
       />
