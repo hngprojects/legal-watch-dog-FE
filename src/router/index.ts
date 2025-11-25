@@ -18,6 +18,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import PricingView from '@/views/PricingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -91,6 +92,11 @@ const router = createRouter({
       path: '/privacy-policy',
       name: 'privacy-policy',
       component: PrivacyPolicyView,
+    },
+    {
+      path: '/pricing',
+      name: 'pricing',
+      component: PricingView,
     },
     {
       path: '/:pathMatch(.*)*',
