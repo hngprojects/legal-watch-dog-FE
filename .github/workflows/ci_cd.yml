@@ -102,9 +102,10 @@ jobs:
           echo "Copying entire codebase to staging server..."
           
           # Create tarball of repo (excluding node_modules, .git, dist)
-          tar --exclude='node_modules' --exclude='.git' --exclude='dist' -czf repo.tar.gz .
+          tar --exclude='node_modules' --exclude='.git' --exclude='dist' -czf /tmp/repo.tar.gz .
           
-          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no repo.tar.gz $SERVER_USER@$SERVER_IP:/tmp/repo-${{ github.sha }}.tar.gz
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no /tmp/repo.tar.gz $SERVER_USER@$SERVER_IP:/tmp/repo-${{ github.sha }}.tar.gz
+          rm /tmp/repo.tar.gz # Clean up the temporary tarball
 
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
