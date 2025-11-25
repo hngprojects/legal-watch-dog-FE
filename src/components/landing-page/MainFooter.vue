@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Frame from '@/assets/images/Frame.png'
-import Facebook from '@/assets/images/Facebook.png'
-import LinkedIn from '@/assets/images/LinkedIn.png'
-import Instagram from '@/assets/images/Instagram.png'
-import Twitter from '@/assets//images/Twitter.png'
-import YouTube from '@/assets/images/YouTube.png'
+// import Facebook from '@/assets/images/Facebook.png'
+// import LinkedIn from '@/assets/images/LinkedIn.png'
+// import Instagram from '@/assets/images/Instagram.png'
+// import Twitter from '@/assets//images/Twitter.png'
+// import YouTube from '@/assets/images/YouTube.png'
 
 // const Products = ['Features', 'Pricing', 'Case studies', 'Reviews', 'Updates']
 // const Companys = ['About', 'Contact Us', 'Careers', 'Blog']
