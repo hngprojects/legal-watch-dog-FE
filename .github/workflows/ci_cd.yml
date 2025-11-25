@@ -5,23 +5,23 @@ on:
   push:
     branches:
       - main
-      - dev
+      - staging
   pull_request:
     branches:
       - main
-      - dev
+      - staging
 
 jobs:
-  # ------------------------
-  # 1. BUILD JOB
-  # ------------------------
-  build:
-    name: Build Frontend
+  deploy:
+    name: Build and Deploy Frontend
     runs-on: [self-hosted]
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+        - name: Set BUILD_RESULT
+          run: echo "BUILD_RESULT=success" >> $GITHUB_ENV
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -36,233 +36,195 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build application
-        run: npm run build
-
-      - name: Archive build output
-        run: tar -czf build.tar.gz dist
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: build.tar.gz
-
-  # -------------------------
-  # 2. DEPLOY TO STAGING (DEV BRANCH)
-  # -------------------------
-  deploy_staging:
-    name: CD - Frontend Deploy (Staging)
-    runs-on: [self-hosted]
-    needs: build
-    if: github.ref == 'refs/heads/dev'
-    environment: staging
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-
-      - name: Set up SSH and Deploy
-        env:
-          SERVER_PASS: ${{ secrets.STAGING_PASS }}
-          SERVER_USER: ${{ secrets.STAGING_USER }}
-          SERVER_IP: ${{ secrets.STAGING_IP }}
+      - name: Create .env file
         run: |
-          echo "access gained"
-          echo "copying files to server"
+          cat > .env << 'ENV_EOF'
+          VITE_API_URL=${{ secrets.VITE_API_URL }}
+          ENV_EOF
+          echo ".env file created successfully"
 
-          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
-
-          sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
-            set -e
-
-            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
-            # Clone if the directory doesn't exist
-            if [ ! -d "$REMOTE_DIR" ]; then
-              cd /home/ifeanyinw/apps/frontend/
-              git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
-            fi
-
-            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
-            cd "$REMOTE_DIR"
-            
-            git pull origin dev
-            rm -rf dist
-            tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
-            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE
-            chmod o+rx /home/ifeanyinw
-            chmod o+rx /home/ifeanyinw/apps
-            chmod o+rx /home/ifeanyinw/apps/frontend
-            sudo nginx -s reload
-          EOF
-
-      - name: Mark Deployment Result
-        if: failure()
-        run: echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
-
-  # ------------------------
-  # 3. DEPLOY TO PRODUCTION (MAIN BRANCH)
-  # ------------------------
-  deploy_production:
-    name: CD - Frontend Deploy (Production)
-    runs-on: [self-hosted]
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    environment: production
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-
-      - name: Set up SSH and Deploy
+      - name: Deploy to Production (Static Nginx)
+        if: >
+          github.event_name == 'pull_request' &&
+          github.event.action == 'closed' &&
+          github.event.pull_request.merged == true &&
+          github.event.pull_request.base.ref == 'main' &&
+          github.event.pull_request.head.ref == 'staging'
         env:
           SERVER_PASS: ${{ secrets.PROD_PASS }}
           SERVER_USER: ${{ secrets.PROD_USER }}
           SERVER_IP: ${{ secrets.PROD_IP }}
         run: |
-          echo "access gained"
-          echo "copying files to server"
+          echo "Building for production..."
+          npm ci
+          npm run build
 
-          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+            echo "PROD_RESULT=success" >> $GITHUB_ENV
+
+          echo "Copying dist folder to production server..."
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no -r dist $SERVER_USER@$SERVER_IP:/tmp/dist-${{ github.sha }}
 
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
-
             REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE"
-            # Clone if the directory doesn't exist
-            if [ ! -d "$REMOTE_DIR" ]; then
-              cd /home/ifeanyinw/apps/frontend/
-              git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
-            fi
+            NEW_DIST="/tmp/dist-${{ github.sha }}"
 
-            #cd /home/ifeanyinw/apps/frontend/legal-watch-dog-FE || git clone git@github.com:hngprojects/legal-watch-dog-FE.git
-            cd "$REMOTE_DIR"
-            
-            git pull origin dev
-            rm -rf dist
-            tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE/dist
-            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE
-            chmod o+rx /home/ifeanyinw
-            chmod o+rx /home/ifeanyinw/apps
-            chmod o+rx /home/ifeanyinw/apps/frontend
+            # Ensure parent directory exists
+            mkdir -p "$REMOTE_DIR"
+
+            # Atomic swap: move old dist, move new dist into place
+            if [ -d "$REMOTE_DIR/dist" ]; then
+              mv "$REMOTE_DIR/dist" "$REMOTE_DIR/dist.old.$(date +%s)"
+            fi
+            mv "$NEW_DIST" "$REMOTE_DIR/dist"
+
+            # Clean up old dist directories (keep last 2)
+            cd "$REMOTE_DIR" && ls -dt dist.old.* 2>/dev/null | tail -n +3 | xargs rm -rf
+
+            # Set permissions
+            chmod -R o+rx "$REMOTE_DIR/dist"
+            chmod o+rx "$REMOTE_DIR"
+            chmod o+rx /home/ifeanyinw || true
+            chmod o+rx /home/ifeanyinw/apps || true
+            chmod o+rx /home/ifeanyinw/apps/frontend || true
+
+            # Reload nginx
             sudo nginx -s reload
+            echo "Production deployment complete (static files)"
           EOF
 
-      - name: Mark Deployment Result
-        if: failure()
-        run: echo "DEPLOY_FAILED=true" >> $GITHUB_ENV
-
-  # -------------------------
-  # 4. Slack Notification
-  # -------------------------
-  notify_slack:
-    name: Notify Slack
-    runs-on: [self-hosted]
-    needs:
-      - build
-      - deploy_staging
-      - deploy_production
-    if: always()
-
-    steps:
-      - name: Send Slack Notification
+      - name: Deploy to Staging (PM2 Dev Server)
+        if: github.ref == 'refs/heads/staging'
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          BUILD_RESULT: ${{ needs.build.result }}
-          STAGING_RESULT: ${{ needs.deploy_staging.result }}
-          PROD_RESULT: ${{ needs.deploy_production.result }}
+          SERVER_PASS: ${{ secrets.STAGING_PASS }}
+          SERVER_USER: ${{ secrets.STAGING_USER }}
+          SERVER_IP: ${{ secrets.STAGING_IP }}
         run: |
-          echo "Preparing Slack message..."
-
-          # Get branch name
-          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "Copying entire codebase to staging server..."
           
-          # Determine high-level outcome and set appropriate emoji
-          if [ "$BUILD_RESULT" == "success" ] && ([ "$STAGING_RESULT" == "success" ] || [ "$STAGING_RESULT" == "skipped" ]) && ([ "$PROD_RESULT" == "success" ] || [ "$PROD_RESULT" == "skipped" ]); then
-            MAIN_STATUS="✅ Deployment Successful"
-            STATUS_COLOR="good"
-          else
-            MAIN_STATUS="❌ Deployment Failed"
-            STATUS_COLOR="danger"
-          fi
+          # Create tarball of repo (excluding node_modules, .git, dist)
+          tar --exclude='node_modules' --exclude='.git' --exclude='dist' -czf repo.tar.gz .
+          
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no repo.tar.gz $SERVER_USER@$SERVER_IP:/tmp/repo-${{ github.sha }}.tar.gz
 
-          # Build detailed status for each stage
-          DETAIL_MSG=""
+          sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
+            set -e
+            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE-staging"
+            
+            # Ensure directory exists and extract
+            mkdir -p "$REMOTE_DIR"
+            cd "$REMOTE_DIR"
+            tar -xzf /tmp/repo-${{ github.sha }}.tar.gz
+            rm -f /tmp/repo-${{ github.sha }}.tar.gz
 
-          # Build Stage
-          if [ "$BUILD_RESULT" == "success" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n✅ *Build:* Application built successfully"
-          else
-            DETAIL_MSG="${DETAIL_MSG}\n❌ *Build:* Failed to build application"
-          fi
+            # Install dependencies and build on server
+            npm ci
+            npm run build
 
-          # Staging Deploy Stage
-          if [ "$STAGING_RESULT" == "success" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n✅ *Test Environment:* Successfully deployed to staging server"
-          elif [ "$STAGING_RESULT" == "skipped" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Test Environment:* Skipped (not a dev branch)"
-          else
-            DETAIL_MSG="${DETAIL_MSG}\n❌ *Test Environment:* Failed to deploy to staging server"
-          fi
+            # Start or restart PM2 process
+            if pm2 describe fe-staging > /dev/null 2>&1; then
+              echo "Restarting existing PM2 process..."
+              pm2 restart fe-staging
+            else
+              echo "Starting new PM2 process..."
+              pm2 start npm --name "fe-staging" -- start
+              pm2 save
+            fi
 
-          # Production Deploy Stage
-          if [ "$PROD_RESULT" == "success" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n✅ *Live Website:* Successfully deployed to production server"
-          elif [ "$PROD_RESULT" == "skipped" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Live Website:* Skipped (not main branch)"
-          else
-            DETAIL_MSG="${DETAIL_MSG}\n❌ *Live Website:* Failed to deploy to production server"
-          fi
+            echo "Staging deployment complete (PM2 dev server)"
+          EOF
 
-          # Add branch info
-          DETAIL_MSG="${DETAIL_MSG}\n\n📋 *Branch:* \`${BRANCH_NAME}\`"
-          DETAIL_MSG="${DETAIL_MSG}\n👤 *Triggered by:* ${GITHUB_ACTOR}"
+            echo "STAGING_RESULT=success" >> $GITHUB_ENV
 
-          LOG_LINK="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+      - name: Send Slack Notification
+        if: always()
+        env:
+            SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+            BUILD_RESULT: ${{ env.BUILD_RESULT }}
+            STAGING_RESULT: ${{ env.STAGING_RESULT }}
+            PROD_RESULT: ${{ env.PROD_RESULT }}
+          run: |
+            echo "Preparing Slack message..."
 
-          # Format Slack JSON with rich formatting
-          PAYLOAD="{
-            \"attachments\": [
-              {
-                \"color\": \"${STATUS_COLOR}\",
-                \"blocks\": [
-                  {
-                    \"type\": \"header\",
-                    \"text\": {
-                      \"type\": \"plain_text\",
-                      \"text\": \"🚀 Frontend Deployment Update\",
-                      \"emoji\": true
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+
+            # Determine high-level outcome and set appropriate emoji
+            if [ "$BUILD_RESULT" == "success" ] && ([ "$STAGING_RESULT" == "success" ] || [ "$STAGING_RESULT" == "skipped" ]) && ([ "$PROD_RESULT" == "success" ] || [ "$PROD_RESULT" == "skipped" ]); then
+              MAIN_STATUS="✅ Deployment Successful"
+              STATUS_COLOR="good"
+            else
+              MAIN_STATUS="❌ Deployment Failed"
+              STATUS_COLOR="danger"
+            fi
+
+            # Build detailed status for each stage
+            DETAIL_MSG=""
+
+            # Build Stage
+            if [ "$BUILD_RESULT" == "success" ]; then
+              DETAIL_MSG="${DETAIL_MSG}\n✅ *Build:* Application built successfully"
+            else
+              DETAIL_MSG="${DETAIL_MSG}\n❌ *Build:* Failed to build application"
+            fi
+
+            # Staging Deploy Stage
+            if [ "$STAGING_RESULT" == "success" ]; then
+              DETAIL_MSG="${DETAIL_MSG}\n✅ *Test Environment:* Successfully deployed to staging server"
+            elif [ "$STAGING_RESULT" == "skipped" ]; then
+              DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Test Environment:* Skipped (not a dev branch)"
+            else
+              DETAIL_MSG="${DETAIL_MSG}\n❌ *Test Environment:* Failed to deploy to staging server"
+            fi
+
+            # Production Deploy Stage
+            if [ "$PROD_RESULT" == "success" ]; then
+              DETAIL_MSG="${DETAIL_MSG}\n✅ *Live Website:* Successfully deployed to production server"
+            elif [ "$PROD_RESULT" == "skipped" ]; then
+              DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Live Website:* Skipped (not main branch)"
+            else
+              DETAIL_MSG="${DETAIL_MSG}\n❌ *Live Website:* Failed to deploy to production server"
+            fi
+
+            # Add branch info
+            DETAIL_MSG="${DETAIL_MSG}\n\n📋 *Branch:* \`${BRANCH_NAME}\`"
+            DETAIL_MSG="${DETAIL_MSG}\n👤 *Triggered by:* ${GITHUB_ACTOR}"
+
+            LOG_LINK="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+            # Format Slack JSON with rich formatting
+            PAYLOAD="{
+              \"attachments\": [
+                {
+                  \"color\": \"${STATUS_COLOR}\",
+                  \"blocks\": [
+                    {
+                      \"type\": \"header\",
+                      \"text\": {
+                        \"type\": \"plain_text\",
+                        \"text\": \"🚀 Frontend Deployment Update\",
+                        \"emoji\": true
+                      }
+                    },
+                    {
+                      \"type\": \"section\",
+                      \"text\": {
+                        \"type\": \"mrkdwn\",
+                        \"text\": \"*${MAIN_STATUS}*${DETAIL_MSG}\"
+                      }
+                    },
+                    {
+                      \"type\": \"divider\"
+                    },
+                    {
+                      \"type\": \"section\",
+                      \"text\": {
+                        \"type\": \"mrkdwn\",
+                        \"text\": \"Need help? Check the <${LOG_LINK}|detailed logs> or contact the development team.\"
+                      }
                     }
-                  },
-                  {
-                    \"type\": \"section\",
-                    \"text\": {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"*${MAIN_STATUS}*${DETAIL_MSG}\"
-                    }
-                  },
-                  {
-                    \"type\": \"divider\"
-                  },
-                  {
-                    \"type\": \"section\",
-                    \"text\": {
-                      \"type\": \"mrkdwn\",
-                      \"text\": \"Need help? Check the <${LOG_LINK}|detailed logs> or contact the development team.\"
-                    }
-                  }
-                ]
-              }
-            ]
-          }"
+                  ]
+                }
+              ]
+            }"
 
-          curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" $SLACK_WEBHOOK
+            curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" $SLACK_WEBHOOK
