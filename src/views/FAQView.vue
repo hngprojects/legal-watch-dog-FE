@@ -107,7 +107,7 @@ function copyEmail() {
 
       <div class="z-10">
         <section class="mb-16">
-          <div class="mx-auto max-w-lg lg:max-w-4xl">
+          <div class="mx-auto max-w-lg lg:max-w-2xl xl:max-w-4xl">
             <h1 class="text-preset-display-md text-primary mb-5">Frequently Asked Questions</h1>
             <p class="mb-16 text-lg text-gray-600">
               LegalWatchDog uses AI to track all changes on any website, from Visa portals to
@@ -115,7 +115,7 @@ function copyEmail() {
             </p>
           </div>
 
-          <div class="rounded-lg bg-white px-12 py-10 xl:w-5xl">
+          <div class="mx-auto w-full rounded-lg bg-white px-12 py-10 md:w-2xl xl:w-5xl">
             <template :key="i" v-for="(faq, i) in faqs">
               <Accordion type="single" collapsible>
                 <AccordionItem :value="faq.question">
