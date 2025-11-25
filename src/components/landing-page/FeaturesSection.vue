@@ -3,9 +3,9 @@ import HeadingText from '@/components/reusable/HeadingText.vue'
 import BodyText from '@/components/reusable/BodyText.vue'
 
 // Import images
-import aiBrainImage from '@/assets/images/ai-brain.png'
-import timelineHandsImage from '@/assets/images/timeline-hands.png'
-import verificationDashboardImage from '@/assets/images/verification-dashboard.png'
+import Rectangle from '@/assets/images/Rectangle.png'
+import SearchSource from '@/assets/images/SearchSource.png'
+import Timeline from '@/assets/images/Timeline.png'
 </script>
 
 <template>
@@ -27,10 +27,10 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
       <div class="flex flex-col gap-8">
         <!-- Card 1: AI Powered Summaries -->
         <div
-          class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
+          class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#FFEBDA] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
         >
           <!-- Text Section -->
-          <div class="relative z-10 flex flex-col justify-center sm:max-w-[46%]">
+          <div class="relative z-10 flex flex-col justify-center sm:mt-20 sm:max-w-[46%] lg:mt-28">
             <h3 class="mb-4 text-[2rem] leading-tight font-bold text-[#000000] sm:text-[2.5rem]">
               AI Powered Summaries
             </h3>
@@ -40,27 +40,23 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
               Turn Complex legal jargon into plain English summaries you can act on immediately
             </p>
           </div>
+
           <!-- Image Section (White Card Anchored to Bottom-Right) -->
           <div
             class="relative overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:top-16 sm:right-0 sm:bottom-0 sm:w-[50%] sm:rounded-r-none sm:rounded-b-none sm:px-6 sm:pt-6 sm:pb-0"
           >
-            <img :src="aiBrainImage" alt="AI Brain illustration" class="w-full object-contain" />
+            <img :src="Rectangle" alt="AI Brain illustration" class="w-full object-contain" />
           </div>
         </div>
-
         <!-- Card 2: Change Timeline -->
         <div
-          class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
+          class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#FFEBDA] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
         >
           <!-- Image Section (White Card Anchored to Bottom-Left) -->
           <div
             class="relative order-2 overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:top-16 sm:bottom-0 sm:left-0 sm:w-[50%] sm:rounded-l-none sm:rounded-b-none sm:px-6 sm:pt-6 sm:pb-0"
           >
-            <img
-              :src="timelineHandsImage"
-              alt="Timeline illustration"
-              class="w-full object-contain"
-            />
+            <img :src="SearchSource" alt="SearchSource" class="w-full object-contain" />
           </div>
           <!-- Text Section -->
           <div class="relative z-10 order-1 flex flex-col justify-center sm:ml-auto sm:max-w-[46%]">
@@ -78,10 +74,10 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
 
         <!-- Card 3: Source Verification -->
         <div
-          class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#EB9654] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
+          class="relative flex min-h-[280px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#FFEBDA] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
         >
           <!-- Text Section -->
-          <div class="relative z-10 flex flex-col justify-center sm:max-w-[46%]">
+          <div class="relative z-10 flex flex-col justify-center sm:mt-20 sm:max-w-[46%] lg:mt-28">
             <h3 class="mb-4 text-[2rem] leading-tight font-bold text-[#000000] sm:text-[2.5rem]">
               Source Verification
             </h3>
@@ -92,15 +88,12 @@ import verificationDashboardImage from '@/assets/images/verification-dashboard.p
               transparency.
             </p>
           </div>
-          <!-- Image Section (White Card Anchored to Bottom-Right) -->
+
+          <!-- Image Section -->
           <div
             class="relative overflow-hidden rounded-[20px] bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.1)] sm:absolute sm:top-16 sm:right-0 sm:bottom-0 sm:w-[50%] sm:rounded-r-none sm:rounded-b-none sm:px-6 sm:pt-6 sm:pb-0"
           >
-            <img
-              :src="verificationDashboardImage"
-              alt="Verification dashboard"
-              class="w-full object-contain"
-            />
+            <img :src="Timeline" alt="Timeline" class="w-full object-contain" />
           </div>
         </div>
       </div>

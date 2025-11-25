@@ -6,6 +6,9 @@ import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
 import type { Jurisdiction } from '@/api/jurisdiction'
 import Swal from 'sweetalert2'
+import OldIcon from '@/assets/icons/OldIcon.png'
+import NewIcon from '@/assets/icons/NewIcon.png'
+import vector from '@/assets/icons/Vector.png'
 
 const route = useRoute()
 const router = useRouter()
@@ -161,7 +164,7 @@ watch(
             @click="goBack"
             class="flex cursor-pointer items-center gap-2 text-gray-500 transition-colors hover:text-gray-700"
           >
-            <ArrowLeftIcon :size="18" />
+            <img :src="vector" alt="arrow-icon" class="h-3" />
             <span>{{ getProjectName() }}</span>
           </button>
           <ChevronRight :size="18" class="text-gray-400" />
@@ -195,63 +198,9 @@ watch(
         </div>
       </div>
 
-      <!-- Header Card with Edit Mode -->
-      <div class="mb-8 rounded-[10px] bg-white p-6">
-        <template v-if="showInlineEdit">
-          <form @submit.prevent="saveEdit" class="space-y-4">
-            <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                Jurisdiction Name
-              </label>
-              <input
-                v-model="editForm.name"
-                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
-              <textarea
-                v-model="editForm.description"
-                rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              ></textarea>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                @click="showInlineEdit = false"
-                class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </template>
-
-        <template v-else>
-          <div class="mb-4 flex items-start justify-between">
-            <div class="flex-1">
-              <h1 class="mb-2 text-3xl font-bold text-gray-900">{{ jurisdiction.name }}</h1>
-              <p class="text-base leading-relaxed text-gray-600">{{ jurisdiction.description }}</p>
-            </div>
-            <span class="ml-4 rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600">
-              Changes detected
-            </span>
-          </div>
-        </template>
-      </div>
-
       <!-- Tabs -->
-      <div class="mb-6 border-b border-gray-200">
-        <div class="flex gap-8">
+      <div class="mb-6">
+        <div class="flex w-[130px] gap-8 border-b border-gray-200">
           <button
             @click="activeTab = 'output'"
             :class="[
@@ -281,134 +230,163 @@ watch(
         </div>
       </div>
 
-      <!-- Content Area -->
-      <div v-if="activeTab === 'output'" class="space-y-6">
-        <!-- Old Requirements and What Changed Grid -->
-        <div class="grid gap-6 lg:grid-cols-2">
-          <!-- Old Requirements Card -->
-          <div class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200/60">
-            <div class="mb-6 flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M10 4V10L14 12"
-                    stroke="#F59E0B"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <circle cx="10" cy="10" r="8" stroke="#F59E0B" stroke-width="2" />
-                </svg>
-              </div>
-              <h2 class="text-xl font-bold text-gray-900">Old Requirements</h2>
-            </div>
-
-            <div class="space-y-4 text-sm text-gray-700">
+      <div class="bg-white px-4 pb-4">
+        <!-- Header Card with Edit Mode -->
+        <div class="rounded-[10px] bg-white p-6">
+          <template v-if="showInlineEdit">
+            <form @submit.prevent="saveEdit" class="space-y-4">
               <div>
-                <p class="mb-2 font-semibold text-gray-900">
-                  A. Short-Stay (Schengen) Visa — Type C (up to 90 days)
-                </p>
-                <ol class="ml-4 space-y-1">
-                  <li>1. Tourist Visa</li>
-                  <li>2. Business Visa</li>
-                  <li>3. Visitor Visa (Visiting Friends/Family)</li>
-                  <li>4. Medical Treatment Visa</li>
-                  <li>5. Short-Term Study / Training / Internship Visa</li>
-                  <li>6. Cultural, Sports, Film Crew Visa</li>
-                  <li>7. Airport Transit Visa (Type A)</li>
-                </ol>
-              </div>
-
-              <hr class="border-gray-200" />
-
-              <div>
-                <p class="mb-2 font-semibold text-gray-900">
-                  B. Long-Stay (National) Visa — Type D (over 90 days)
-                </p>
-                <p class="mb-2">1. Work & Employment Visas</p>
-                <ul class="ml-4 space-y-1">
-                  <li>• General Employment Visa</li>
-                  <li>• EU Blue Card</li>
-                  <li>• Skilled Worker Visa (Skilled Immigration Act)</li>
-                  <li>• Job Seeker Visa</li>
-                  <li>• Freelancer / Self-Employment Visa</li>
-                  <li>• Researcher / Scientist Visa</li>
-                  <li>• IT Specialist Visa (without formal degree)</li>
-                  <li>• Vocational Training (Ausbildung) Visa...</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- What Changed Card -->
-          <div class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200/60">
-            <div class="mb-6 flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M15 7L8 14L4 10"
-                    stroke="#10B981"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </div>
-              <h2 class="text-xl font-bold text-gray-900">What Changed</h2>
-            </div>
-
-            <div class="space-y-6 text-sm text-gray-700">
-              <div>
-                <p class="mb-2 font-medium text-gray-900">
-                  Original Requirement (for Germany Work Visa):
-                </p>
-                <p class="leading-relaxed">
-                  • You must provide a signed employment contract from your German employer.
-                </p>
+                <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+                  Jurisdiction Name
+                </label>
+                <input
+                  v-model="editForm.name"
+                  class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                />
               </div>
 
               <div>
-                <p class="mb-2 font-medium text-gray-900">Modified Version:</p>
-                <p class="leading-relaxed">
-                  • You must provide a signed employment contract from your German employer that
-                  includes a confirmed start date.
-                </p>
+                <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
+                <textarea
+                  v-model="editForm.description"
+                  rows="3"
+                  class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                ></textarea>
               </div>
 
-              <div class="mt-6 flex gap-3">
+              <div class="flex justify-end gap-3 pt-2">
                 <button
-                  class="rounded-lg bg-[#401903] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+                  type="button"
+                  @click="showInlineEdit = false"
+                  class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
                 >
-                  Accept Change
+                  Cancel
                 </button>
                 <button
-                  class="rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  type="submit"
+                  class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
                 >
-                  Ignore
+                  Save Changes
                 </button>
+              </div>
+            </form>
+          </template>
+
+          <template v-else>
+            <div class="flex items-start justify-between border-b">
+              <div class="flex-1">
+                <h1 class="mb-2 text-3xl font-bold text-gray-900">{{ jurisdiction.name }}</h1>
+                <p class="mb-3 text-base leading-relaxed text-gray-600">
+                  {{ jurisdiction.description }}
+                </p>
+              </div>
+              <span class="ml-4 rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600">
+                Changes detected
+              </span>
+            </div>
+          </template>
+        </div>
+
+        <!-- Content Area -->
+        <div v-if="activeTab === 'output'" class="space-y-6">
+          <!-- Old Requirements and What Changed Grid -->
+          <div class="grid gap-6 lg:grid-cols-2">
+            <!-- Old Requirements Card -->
+            <div class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200/60">
+              <div class="mb-6 flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg">
+                  <img :src="OldIcon" alt="old-requirement-icon" />
+                </div>
+                <h2 class="text-xl font-bold text-gray-900">Old Requirements</h2>
+              </div>
+
+              <div class="space-y-4 text-sm text-gray-700">
+                <div>
+                  <p class="mb-2 font-semibold text-gray-900">
+                    A. Short-Stay (Schengen) Visa — Type C (up to 90 days)
+                  </p>
+                  <ol class="ml-4 space-y-1">
+                    <li>1. Tourist Visa</li>
+                    <li>2. Business Visa</li>
+                    <li>3. Visitor Visa (Visiting Friends/Family)</li>
+                    <li>4. Medical Treatment Visa</li>
+                    <li>5. Short-Term Study / Training / Internship Visa</li>
+                    <li>6. Cultural, Sports, Film Crew Visa</li>
+                    <li>7. Airport Transit Visa (Type A)</li>
+                  </ol>
+                </div>
+
+                <hr class="border-gray-200" />
+
+                <div>
+                  <p class="mb-2 font-semibold text-gray-900">
+                    B. Long-Stay (National) Visa — Type D (over 90 days)
+                  </p>
+                  <p class="mb-2">1. Work & Employment Visas</p>
+                  <ul class="ml-4 space-y-1">
+                    <li>• General Employment Visa</li>
+                    <li>• EU Blue Card</li>
+                    <li>• Skilled Worker Visa (Skilled Immigration Act)</li>
+                    <li>• Job Seeker Visa</li>
+                    <li>• Freelancer / Self-Employment Visa</li>
+                    <li>• Researcher / Scientist Visa</li>
+                    <li>• IT Specialist Visa (without formal degree)</li>
+                    <li>• Vocational Training (Ausbildung) Visa...</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- What Changed Card -->
+            <div class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200/60">
+              <div class="mb-6 flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg">
+                  <img :src="NewIcon" alt="New-requirement-icon" />
+                </div>
+                <h2 class="text-xl font-bold text-gray-900">What Changed</h2>
+              </div>
+
+              <div class="space-y-6 text-sm text-gray-700">
+                <div>
+                  <p class="mb-2 font-medium text-gray-900">
+                    Original Requirement (for Germany Work Visa):
+                  </p>
+                  <p class="leading-relaxed">
+                    • You must provide a signed employment contract from your German employer.
+                  </p>
+                </div>
+
+                <div>
+                  <p class="mb-2 font-medium text-gray-900">Modified Version:</p>
+                  <p class="leading-relaxed">
+                    • You must provide a signed employment contract from your German employer that
+                    includes a confirmed start date.
+                  </p>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                  <button
+                    class="rounded-lg bg-[#401903] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+                  >
+                    Accept Change
+                  </button>
+                  <button
+                    class="rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                  >
+                    Ignore
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div
-        v-else-if="activeTab === 'sources'"
-        class="rounded-xl bg-white p-20 text-center shadow-sm ring-1 ring-gray-200/60"
-      >
-        <p class="text-sm text-gray-500">No sources configured yet</p>
+        <div
+          v-else-if="activeTab === 'sources'"
+          class="rounded-xl bg-white p-20 text-center shadow-sm ring-1 ring-gray-200/60"
+        >
+          <p class="text-sm text-gray-500">No sources configured yet</p>
+        </div>
       </div>
     </div>
   </main>
