@@ -15,7 +15,7 @@
   --peach-amber-main: #f2ab6d;
   --peach-amber-50: #fef6ee;
   --peach-amber-100: #fcebd8;
-  --peach-amber-200: #f8d4b0;
+  --peach-amber-200: #f1a75f;
   --peach-amber-300: #ee8c49;
   --peach-amber-400: #e96d26;
   --peach-amber-500: #db541b;
@@ -205,6 +205,8 @@
   --color-gray-850: var(--gray-850);
   --color-gray-950: var(--gray-950);
   --color-gray-black: var(--gray-black);
+
+  --color-chocolate-brown-main: var(--chocolate-brown-main);
 
   --color-yellow-main: var(--yellow-main);
   --color-yellow-50: var(--yellow-50);
