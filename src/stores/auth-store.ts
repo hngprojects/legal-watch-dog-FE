@@ -34,6 +34,8 @@ interface State {
   organisation: Organisation | null
   otpPurpose: 'signup' | 'password-reset' | null
   resetToken: string | null
+  signupDraft: SignupDraft | null
+  resetPasswordDraft: ResetPasswordDraft | null
 }
 
 interface ApiTokenData {
@@ -73,6 +75,18 @@ interface ResendOtpApiResponse {
   status_code?: number
 }
 
+interface SignupDraft {
+  companyName: string
+  email: string
+  password: string
+  confirmPassword: string
+}
+
+interface ResetPasswordDraft {
+  newPassword: string
+  confirmPassword: string
+}
+
 const TOKEN_KEY = 'lwd_access_token'
 const EMAIL_KEY = 'lwd_user_email'
 
@@ -96,6 +110,8 @@ export const useAuthStore = defineStore('auth', {
     organisation: null,
     otpPurpose: null,
     resetToken: null,
+    signupDraft: null,
+    resetPasswordDraft: null,
   }),
 
   getters: {
@@ -129,6 +145,22 @@ export const useAuthStore = defineStore('auth', {
       this.resetToken = token
     },
 
+    setSignupDraft(draft: SignupDraft | null) {
+      this.signupDraft = draft
+    },
+
+    clearSignupDraft() {
+      this.signupDraft = null
+    },
+
+    setResetPasswordDraft(draft: ResetPasswordDraft | null) {
+      this.resetPasswordDraft = draft
+    },
+
+    clearResetPasswordDraft() {
+      this.resetPasswordDraft = null
+    },
+
     clearAuthState() {
       this.email = null
       this.user = null
@@ -136,6 +168,8 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null
       this.otpPurpose = null
       this.resetToken = null
+      this.signupDraft = null
+      this.resetPasswordDraft = null
       clearStoredValue(TOKEN_KEY)
       clearStoredValue(EMAIL_KEY)
     },

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthLayout from '@/components/authentication/AuthLayout.vue'
@@ -33,6 +33,15 @@ const strengthScore = computed(
 )
 
 const sanitize = (value: string) => value.trim()
+
+const hydrateFromDraft = () => {
+  if (authStore.resetPasswordDraft) {
+    newPassword.value = authStore.resetPasswordDraft.newPassword
+    confirmPassword.value = authStore.resetPasswordDraft.confirmPassword
+  }
+}
+
+onMounted(hydrateFromDraft)
 
 watchEffect(() => {
   if (!resetToken.value && !successMessage.value) {
@@ -70,6 +79,10 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   serverError.value = ''
   successMessage.value = ''
+  authStore.setResetPasswordDraft({
+    newPassword: newPassword.value,
+    confirmPassword: confirmPassword.value,
+  })
 
   try {
     const payload = {
@@ -79,7 +92,17 @@ const handleSubmit = async () => {
     }
     const response = await authStore.confirmPasswordReset(payload)
     successMessage.value = response?.message ?? 'Password updated successfully.'
-    router.replace({ name: 'login' })
+    newPassword.value = ''
+    confirmPassword.value = ''
+    authStore.clearResetPasswordDraft()
+    router.replace({
+      name: 'auth-status',
+      query: {
+        status: 'success',
+        context: 'reset-password',
+        message: successMessage.value,
+      },
+    })
   } catch (error) {
     if (isAxiosError(error)) {
       serverError.value =
@@ -88,6 +111,15 @@ const handleSubmit = async () => {
     } else {
       serverError.value = 'An unexpected error occurred. Please try again.'
     }
+
+    router.push({
+      name: 'auth-status',
+      query: {
+        status: 'error',
+        context: 'reset-password',
+        message: serverError.value,
+      },
+    })
   } finally {
     isSubmitting.value = false
   }

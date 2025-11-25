@@ -181,15 +181,15 @@ const handleContinue = async () => {
     } else {
       const response = await authStore.verifyOTP({ email: email.value, code })
 
-      successMessage.value = response?.message as string
-
-      const destination = response?.next === 'dashboard' ? { name: 'dashboard' } : { name: 'login' }
-
-      if (destination.name === 'login') {
-        router.replace(destination)
-      } else {
-        router.push(destination)
-      }
+      successMessage.value = (response?.message as string) ?? 'Your account is verified.'
+      router.replace({
+        name: 'auth-status',
+        query: {
+          status: 'success',
+          context: 'signup',
+          message: successMessage.value,
+        },
+      })
     }
   } catch (error) {
     if (isAxiosError(error)) {
@@ -197,6 +197,17 @@ const handleContinue = async () => {
         (error.response?.data as { message?: string })?.message ?? 'OTP verification failed.'
     } else {
       errorMessage.value = 'Unable to verify OTP. Please try again.'
+    }
+
+    if (!isPasswordResetFlow.value) {
+      router.push({
+        name: 'auth-status',
+        query: {
+          status: 'error',
+          context: 'signup',
+          message: errorMessage.value,
+        },
+      })
     }
   } finally {
     isVerifying.value = false
