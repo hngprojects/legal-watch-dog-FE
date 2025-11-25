@@ -3,6 +3,20 @@ import MainFooter from '@/components/landing-page/MainFooter.vue'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
 import Icon from '@/components/reusable/Icon.vue'
 import { Copy01Icon } from '@hugeicons/core-free-icons'
+import { ref } from 'vue'
+
+const emailRef = ref('Contact@LegalWatchDog.com')
+const copyRef = ref('Copy')
+
+function copyEmail() {
+  copyRef.value = 'Copied!'
+
+  setTimeout(() => {
+    copyRef.value = 'Copy'
+  }, 2000)
+
+  navigator.clipboard.writeText(emailRef.value)
+}
 </script>
 
 <template>
@@ -46,9 +60,12 @@ import { Copy01Icon } from '@hugeicons/core-free-icons'
             <div
               class="mx-auto flex w-fit items-center justify-center gap-2 rounded-md bg-white px-2.5 py-3 md:w-full md:justify-between"
             >
-              <p class="text-lg font-medium">Contact@LegalWatchDog.com</p>
-              <button class="bg-peach-amber-50 flex items-center gap-2 rounded-md px-2.5 py-1.5">
-                Copy
+              <p class="text-lg font-medium">{{ emailRef }}</p>
+              <button
+                class="bg-peach-amber-50 flex items-center gap-2 rounded-md px-2.5 py-1.5"
+                @click="copyEmail"
+              >
+                <span>{{ copyRef }}</span>
                 <Icon :icon="Copy01Icon" color="black" :size="20" />
               </button>
             </div>
