@@ -76,23 +76,6 @@ import YouTube from '@/assets/images/YouTube.png'
       <Separator class="mt-6 bg-gray-200" />
       <div class="flex flex-col-reverse gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-sm text-[#3C2610]">&copy; 2025 LegalWatchDog | All Rights Reserved</p>
-        <div class="flex items-center gap-4">
-          <a href="https://www.facebook.com/profile.php?id=61583796936625" target="_blank">
-            <img :src="Facebook" alt="Facebook" class="w-[7px]"
-          /></a>
-          <a href="https://www.linkedin.com/in/minamoto-team-12b287399/" target="_blank">
-            <img :src="LinkedIn" alt="LinkedIn" class="w-3.5" />
-          </a>
-          <a href="https://www.instagram.com/teamminamoto1/" target="_blank">
-            <img :src="Instagram" alt="Instagram" class="w-3.5" />
-          </a>
-          <a href="https://x.com/home" target="_blank">
-            <img :src="Twitter" alt="Twitter" class="w-3.5" />
-          </a>
-          <RouterLink to="/">
-            <img :src="YouTube" alt="YouTube" class="w-3.5" />
-          </RouterLink>
-        </div>
       </div>
     </div>
   </footer>
