@@ -19,9 +19,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-        - name: Set BUILD_RESULT
-          run: echo "BUILD_RESULT=success" >> $GITHUB_ENV
+      - name: Set BUILD_RESULT
+        run: echo "BUILD_RESULT=success" >> $GITHUB_ENV
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -143,7 +142,7 @@ jobs:
             BUILD_RESULT: ${{ env.BUILD_RESULT }}
             STAGING_RESULT: ${{ env.STAGING_RESULT }}
             PROD_RESULT: ${{ env.PROD_RESULT }}
-          run: |
+        run: |
             echo "Preparing Slack message..."
 
             BRANCH_NAME="${GITHUB_REF#refs/heads/}"
