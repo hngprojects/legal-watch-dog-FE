@@ -76,11 +76,23 @@ interface ResendOtpApiResponse {
 const TOKEN_KEY = 'lwd_access_token'
 const EMAIL_KEY = 'lwd_user_email'
 
+const getStoredValue = (key: string) => localStorage.getItem(key) ?? sessionStorage.getItem(key)
+
+const clearStoredValue = (key: string) => {
+  localStorage.removeItem(key)
+  sessionStorage.removeItem(key)
+}
+
+const setStoredValue = (key: string, value: string, persist: boolean) => {
+  clearStoredValue(key)
+  ;(persist ? localStorage : sessionStorage).setItem(key, value)
+}
+
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
-    accessToken: localStorage.getItem(TOKEN_KEY),
+    accessToken: getStoredValue(TOKEN_KEY),
     user: null,
-    email: localStorage.getItem(EMAIL_KEY),
+    email: getStoredValue(EMAIL_KEY),
     organisation: null,
     otpPurpose: null,
     resetToken: null,
@@ -91,21 +103,21 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setAccessToken(token: string | null) {
+    setAccessToken(token: string | null, rememberMe = true) {
       this.accessToken = token
       if (token) {
-        localStorage.setItem(TOKEN_KEY, token)
+        setStoredValue(TOKEN_KEY, token, rememberMe)
       } else {
-        localStorage.removeItem(TOKEN_KEY)
+        clearStoredValue(TOKEN_KEY)
       }
     },
 
-    setUserEmail(email: string | null) {
+    setUserEmail(email: string | null, rememberMe = true) {
       this.email = email
       if (email) {
-        localStorage.setItem(EMAIL_KEY, email)
+        setStoredValue(EMAIL_KEY, email, rememberMe)
       } else {
-        localStorage.removeItem(EMAIL_KEY)
+        clearStoredValue(EMAIL_KEY)
       }
     },
 
@@ -124,12 +136,12 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null
       this.otpPurpose = null
       this.resetToken = null
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(EMAIL_KEY)
+      clearStoredValue(TOKEN_KEY)
+      clearStoredValue(EMAIL_KEY)
     },
 
-    handleLoginSuccess(token: string, user?: User) {
-      this.setAccessToken(token)
+    handleLoginSuccess(token: string, rememberMe: boolean, user?: User) {
+      this.setAccessToken(token, rememberMe)
       if (user) {
         this.user = user
       }
@@ -144,7 +156,7 @@ export const useAuthStore = defineStore('auth', {
       this.setResetToken(null)
       return responseBody
     },
-    async login(payload: LoginPayload) {
+    async login(payload: LoginPayload, rememberMe = false) {
       const response = await authService.login(payload)
       const responseBody = response.data as unknown as LoginApiResponse
       const authData = responseBody.data
@@ -153,8 +165,8 @@ export const useAuthStore = defineStore('auth', {
         throw new Error('Login response missing access token.')
       }
 
-      this.handleLoginSuccess(authData.access_token)
-      this.setUserEmail(payload.email)
+      this.handleLoginSuccess(authData.access_token, rememberMe, authData.user)
+      this.setUserEmail(payload.email, rememberMe)
 
       return true
     },
