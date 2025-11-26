@@ -72,16 +72,8 @@ jobs:
       - name: Generate staging enviornment file
         run: |
           cat <<'EOF' > .env
-          /// <reference types="vite/client" />
-          /// <reference types="lucide-vue-next" />
-          interface ImportMetaEnv {
-            readonly VITE_USE_MOCK_API?: string
-            readonly VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}"
-          }
-          interface ImportMeta {
-            readonly env: ImportMetaEnv
-          }
-          
+          VITE_USE_MOCK_API=false
+          VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL_STAGING }}"
           EOF
           echo ".env file created successfully."
 
@@ -158,18 +150,11 @@ jobs:
 
       - name: Generate production environment file
         run: |
-          cat <<'EOF' > .env
-          /// <reference types="vite/client" />
-          /// <reference types="lucide-vue-next" />
-          interface ImportMetaEnv {
-            readonly VITE_USE_MOCK_API?: string
-            readonly VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}"
-          }
-          interface ImportMeta {
-            readonly env: ImportMetaEnv
-          }
-          
+          cat <<'EOF' > .env.prod
+          VITE_USE_MOCK_API=false
+          VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL_STAGING }}"
           EOF
+          echo ".env file created successfully."
 
       - name: Set up SSH and Deploy
         env:
@@ -202,7 +187,7 @@ jobs:
             git fetch origin "$BRANCH"
             git reset --hard origin/"$BRANCH"
 
-            mv /tmp/frontend_env .env || true
+            mv /tmp/frontend_env .env.prod || true
 
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
