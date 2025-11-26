@@ -5,6 +5,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 
 const projectStore = useProjectStore()
 const organizationStore = useOrganizationStore()
@@ -23,6 +31,11 @@ const formData = ref({
 const organizationId = computed(() => {
   const id = route.params.organizationId
   return typeof id === 'string' ? id : ''
+})
+const organizationName = computed(() => {
+  const currentId = organizationId.value
+  if (!currentId) return ''
+  return organizations.value.find((org) => org.id === currentId)?.name || 'Organization'
 })
 const selectedOrganizationId = ref<string | ''>(organizationId.value)
 
@@ -144,7 +157,32 @@ watch(
         </RouterLink>
       </div>
     </div>
-    <div v-else class="mx-auto max-w-7xl">
+    <div v-else class="mx-auto max-w-7xl space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbPage>{{ organizationName || 'Projects' }}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <RouterLink
+          :to="{ name: 'organizations' }"
+          class="text-sm font-medium text-[#401903] hover:underline"
+        >
+          Back to organizations
+        </RouterLink>
+      </div>
+
       <div v-if="loading" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <div v-for="n in 6" :key="n" class="animate-pulse rounded-2xl bg-white p-8 shadow-sm">
           <div class="mb-4 h-6 w-3/4 rounded bg-gray-200"></div>

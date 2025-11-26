@@ -588,6 +588,14 @@ watch(
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
+                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
                 <RouterLink
                   :to="{
                     name: 'organization-projects',
