@@ -58,7 +58,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
 
   const addJurisdiction = async (
     projectId: string,
-    data: { name: string; description: string },
+    data: { name: string; description: string; parent_id?: string | null; prompt?: string | null },
   ) => {
     try {
       const response = await jurisdictionApi.create({ project_id: projectId, ...data })
@@ -75,7 +75,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
   // ✅ Fix update method
   const updateJurisdiction = async (
     jurisdictionId: string,
-    data: { name?: string; description?: string },
+    data: { name?: string; description?: string; prompt?: string | null },
   ) => {
     try {
       const response = await jurisdictionApi.update(jurisdictionId, data)

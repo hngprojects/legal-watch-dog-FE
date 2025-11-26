@@ -46,10 +46,13 @@ const handleLogin = async () => {
   serverError.value = ''
 
   try {
-    const success = await authStore.login({
-      email: sanitizedEmail,
-      password: sanitizedPassword,
-    })
+    const success = await authStore.login(
+      {
+        email: sanitizedEmail,
+        password: sanitizedPassword,
+      },
+      rememberMe.value,
+    )
 
     if (success) {
       router.push({ name: 'projects' })
