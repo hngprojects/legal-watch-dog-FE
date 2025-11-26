@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import AboutUsView from '@/views/AboutUsView.vue'
+import Contact from '@/views/Contact.vue'
+import Career from '@/views/Career.vue'
+import Features from '@/views/Features.vue'
+import Blogs from '@/views/Blogs.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
 import LoginView from '@/views/authentication/LoginView.vue'
 import SignupView from '@/views/authentication/SignupView.vue'
@@ -26,9 +30,29 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/about-us', // New Route
+      path: '/about-us',
       name: 'about-us',
       component: AboutUsView,
+    },
+    {
+      path: '/contact',
+      name: 'contact',
+      component: Contact,
+    },
+    {
+      path: '/career',
+      name: 'career',
+      component: Career,
+    },
+    {
+      path: '/blogs',
+      name: 'blogs',
+      component: Blogs,
+    },
+    {
+      path: '/features',
+      name: 'features',
+      component: Features,
     },
     {
       path: '/waitlist',
@@ -66,7 +90,7 @@ const router = createRouter({
       component: OtpView,
     },
     {
-      path: '/onboarding',
+      path: '/onboarding', // Onboarding page
       name: 'onboarding',
       component: OnboardingView,
     },
@@ -82,17 +106,17 @@ const router = createRouter({
       component: SkeletonView,
     },
     {
-      path: '/coming-soon',
+      path: '/coming-soon', // Coming Soon page
       name: 'coming-soon',
       component: () => import('@/views/ComingSoonView.vue'),
     },
     {
-      path: '/privacy-policy',
+      path: '/privacy-policy', // Privacy Policy page
       name: 'privacy-policy',
       component: PrivacyPolicyView,
     },
     {
-      path: '/faq',
+      path: '/faq', // FAQ page
       name: 'faq',
       component: () => import('@/views/FAQView.vue'),
     },
