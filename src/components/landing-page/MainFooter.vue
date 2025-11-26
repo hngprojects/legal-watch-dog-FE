@@ -2,14 +2,21 @@
 import Frame from '@/assets/images/Frame.png'
 import { RouterLink } from 'vue-router'
 
-// Only uncomment / add items that have existing routes in your router
+// Only include items that have existing routes in src/router/index.ts
 const Products = [
   { label: 'How it Works', path: '/how-it-works' },
+  { label: 'Features', path: '/features' },
+  { label: 'Pricing', path: '/pricing' },
   { label: 'Onboarding', path: '/onboarding' },
   { label: 'Waitlist', path: '/waitlist' },
 ]
 
-const Companys = [{ label: 'About', path: '/about-us' }]
+const Companys = [
+  { label: 'About', path: '/about-us' },
+  { label: 'Contact', path: '/contact' },
+  { label: 'Career', path: '/career' },
+  { label: 'Blogs', path: '/blogs' },
+]
 
 const Supports = [{ label: 'FAQ', path: '/faq' }]
 
