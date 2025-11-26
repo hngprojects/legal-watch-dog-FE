@@ -5,7 +5,7 @@ import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings } from 'lucide-vue-next'
+import { ArrowLeftIcon, Plus, Settings, FileQuestion } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 import {
   Breadcrumb,
@@ -27,9 +27,13 @@ const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
 const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
 
-const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
-  jurisdictionStore.jurisdictions.filter((item) => !item.parent_id),
-)
+const topLevelJurisdictions = computed<Jurisdiction[]>(() => {
+  if (!project.value?.id) return []
+
+  return jurisdictionStore.jurisdictions.filter(
+    (j) => j.project_id === project.value!.id && !j.parent_id,
+  )
+})
 
 const goBack = () => {
   router.push('/dashboard/projects')
@@ -92,7 +96,6 @@ const showInlineEdit = ref(false)
 const editForm = ref({
   title: '',
   description: '',
-  master_prompt: '',
 })
 
 const toggleSettingsMenu = () => {
@@ -135,7 +138,6 @@ const startEdit = () => {
   editForm.value = {
     title: project.value?.title || '',
     description: project.value?.description || '',
-    master_prompt: project.value?.master_prompt || '',
   }
 
   showInlineEdit.value = true
@@ -147,13 +149,11 @@ const saveEdit = async () => {
     const updated = await projectStore.updateProject(projectId, {
       title: editForm.value.title,
       description: editForm.value.description,
-      master_prompt: editForm.value.master_prompt,
     })
 
     if (project.value && updated) {
       project.value.title = editForm.value.title
       project.value.description = editForm.value.description
-      project.value.master_prompt = editForm.value.master_prompt
     }
 
     await Swal.fire({
@@ -205,21 +205,34 @@ watch(
 
     <div v-else class="mx-auto max-w-7xl">
       <div class="mb-8 flex items-center justify-between">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink to="/dashboard/projects">Projects</RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+        <div class="flex items-center gap-3">
+          <RouterLink
+            to="/dashboard/projects"
+            class="text-[#926233] transition-colors hover:text-[#7a4e26]"
+          >
+            <ArrowLeftIcon :size="20" />
+          </RouterLink>
 
-            <BreadcrumbSeparator />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink as-child>
+                  <RouterLink to="/dashboard/projects" class="text-gray-500 hover:text-gray-900">
+                    Projects
+                  </RouterLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
 
-            <BreadcrumbItem>
-              <BreadcrumbPage>{{ project.title }}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbPage class="font-medium text-[#926233]">
+                  {{ project.title }}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
         <div class="relative">
           <button
@@ -267,15 +280,6 @@ watch(
               ></textarea>
             </div>
 
-            <div>
-              <label class="text-sm font-medium text-[#1F1F1F]">Master Prompt</label>
-              <textarea
-                v-model="editForm.master_prompt"
-                rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-              ></textarea>
-            </div>
-
             <div class="flex justify-end gap-3 pt-2">
               <button
                 type="button"
@@ -300,7 +304,7 @@ watch(
         </template>
       </div>
 
-      <div class="mb-8 flex items-end justify-between md:mt-[88px]">
+      <div class="mb-8 flex items-end justify-between md:mt-[48px]">
         <div class="flex w-auto gap-8 border-b border-gray-200">
           <button
             @click="activeTab = 'jurisdictions'"
@@ -350,9 +354,15 @@ watch(
 
           <div
             v-else-if="jurisdictionStore.jurisdictions.length === 0"
-            class="flex flex-col items-center justify-center bg-white py-20"
+            class="flex flex-col items-center justify-center rounded-[10px] bg-white py-24 text-center shadow-sm"
           >
-            <p class="text-sm text-gray-500">No Jurisdiction found</p>
+            <div
+              class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white ring-1 ring-gray-200"
+            >
+              <FileQuestion class="text-gray-400" :size="24" />
+            </div>
+            <h3 class="mb-1 text-base font-medium text-gray-900">No Jurisdictions added</h3>
+            <p class="text-sm text-gray-500">Search source or Click add sources to get started.</p>
           </div>
 
           <div v-else class="space-y-3 p-6">
