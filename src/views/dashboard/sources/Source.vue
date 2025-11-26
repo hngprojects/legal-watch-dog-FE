@@ -121,7 +121,7 @@ const saveSources = async () => {
 
     // Navigate back to jurisdiction detail page
     router.push(`/dashboard/jurisdictions/${jurisdictionId.value}`)
-  } catch (error) {
+  } catch {
     Swal.fire('Error', 'Failed to add source. Please try again.', 'error')
   }
 }
