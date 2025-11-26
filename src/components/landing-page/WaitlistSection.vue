@@ -467,20 +467,19 @@ const testimonials = [
         :style="{
           backgroundImage: `url(${earlyAccessBg})`,
           backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
         }"
       >
-        <div class="absolute inset-0 opacity-10">
-          <div class="absolute top-10 left-10 h-64 w-64 rounded-full border-4 border-white"></div>
-          <div
-            class="absolute right-10 bottom-10 h-96 w-96 rounded-full border-4 border-white"
-          ></div>
-        </div>
+        <!-- <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-10 left-10 h-64 w-64 rounded-full border-4 border-white"></div>
+        <div class="absolute right-10 bottom-10 h-96 w-96 rounded-full border-4 border-white"></div>
+      </div> -->
 
         <div class="relative z-10 mx-auto max-w-xl text-center">
           <h2 class="mb-4 text-3xl font-bold text-white sm:text-4xl">Get Early Access</h2>
           <p class="mb-8 text-white/80">
-            Join legal and compliance professionals who are transforming how they monitor regulatory
-            changes
+            Join legalg and compliance professionals who are transforming how they monitor
+            regulatory changes
           </p>
 
           <Card class="rounded-xl bg-white p-6 shadow-xl">

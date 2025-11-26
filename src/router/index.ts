@@ -1,14 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
+import AboutUsView from '@/views/AboutUsView.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
 import LoginView from '@/views/authentication/LoginView.vue'
 import SignupView from '@/views/authentication/SignupView.vue'
 import OtpView from '@/views/authentication/OtpView.vue'
-import SuccessView from '@/views/authentication/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
 import HowItWorksView from '@/views/HowItWorksView.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
+import PrivacyPolicyView from '@/views/PrivacyPolicyView.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
@@ -16,6 +17,8 @@ import { useAuthStore } from '@/stores/auth-store'
 import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import FAQView from '@/views/FAQView.vue'
+import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +27,11 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+    },
+    {
+      path: '/about-us', // New Route
+      name: 'about-us',
+      component: AboutUsView,
     },
     {
       path: '/waitlist',
@@ -66,9 +74,10 @@ const router = createRouter({
       component: OnboardingView,
     },
     {
-      path: '/success',
-      name: 'success',
-      component: SuccessView,
+      path: '/auth-status',
+      name: 'auth-status',
+      component: AuthStatusView,
+      alias: '/success',
     },
     {
       path: '/skeleton',
@@ -79,6 +88,16 @@ const router = createRouter({
       path: '/coming-soon',
       name: 'coming-soon',
       component: ComingSoonView,
+    },
+    {
+      path: '/privacy-policy',
+      name: 'privacy-policy',
+      component: PrivacyPolicyView,
+    },
+    {
+      path: '/faq',
+      name: 'faq',
+      component: FAQView,
     },
     {
       path: '/:pathMatch(.*)*',
@@ -122,6 +141,12 @@ const router = createRouter({
           path: 'jurisdictions/:id',
           name: 'jurisdiction-detail',
           component: () => import('@/views/dashboard/jurisdictions/Jurisdiction.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'jurisdictions/:id/sources',
+          name: 'jurisdiction-sources',
+          component: () => import('@/views/dashboard/sources/Source.vue'),
           meta: { requiresAuth: true },
         },
       ],

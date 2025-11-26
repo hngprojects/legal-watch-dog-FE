@@ -2,12 +2,13 @@
 import PillTag from '@/components/reusable/PillTag.vue'
 import { Button } from '@/components/ui/button'
 import Icon from '@/components/reusable/Icon.vue'
-import { NoteIcon, PlayIcon } from '@hugeicons/core-free-icons'
+import { PlayIcon } from '@hugeicons/core-free-icons'
 
 import projectImg from '@/assets/Images/how-it-works/project.webp'
 import jurisdictionImg from '@/assets/Images/how-it-works/jurisdiction.webp'
 import sourcesImg from '@/assets/Images/how-it-works/sources.webp'
 import monitoringImg from '@/assets/Images/how-it-works/monitoring.webp'
+import workIcon from '@/assets/icons/workIcon.png'
 import alertsImg from '@/assets/Images/how-it-works/alerts.webp'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
@@ -44,8 +45,23 @@ const steps = [
 <template>
   <div class="flex min-h-screen flex-col">
     <MainHeader />
-    <main class="flex flex-1 flex-col items-center justify-center px-6 py-16 md:px-12 lg:px-24">
-      <section class="mb-24 space-y-11 text-center">
+    <main
+      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] px-6 py-16 md:px-12 lg:px-24"
+    >
+      <div
+        class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+        style="
+          background: radial-gradient(
+            ellipse,
+            #f8d9c5 0%,
+            rgba(248, 217, 197, 0.5) 40%,
+            rgba(247, 247, 247, 0.8) 70%,
+            #f7f7f7 100%
+          );
+        "
+      ></div>
+
+      <section class="relative z-10 mb-24 space-y-11 text-center">
         <PillTag>
           <span class="font-normal text-gray-600">AI-Powered Regulatory Intelligence</span>
         </PillTag>
@@ -61,7 +77,7 @@ const steps = [
         </Button>
       </section>
 
-      <section class="text-center">
+      <section class="relative z-10 text-center">
         <div class="mb-28">
           <h2 class="text-preset-display-sm font-semibold">
             5 <span class="text-peach-amber-main">Simple Steps</span> to Stay Informed
@@ -78,8 +94,8 @@ const steps = [
           >
             <div class="space-y-4 lg:self-center" :class="[i % 2 !== 0 ? 'lg:pl-14' : 'lg:pr-14']">
               <div class="flex items-center justify-center gap-3 lg:justify-start">
-                <div class="bg-peach-amber-main rounded-full p-4">
-                  <Icon :icon="NoteIcon" :size="24" />
+                <div class="p-4">
+                  <img :src="workIcon" alt="icon" />
                 </div>
                 <h3 class="text-preset-heading-lg text-peach-amber-main">Step {{ i + 1 }}</h3>
               </div>
