@@ -4,7 +4,7 @@ export interface Project {
   id: string
   title: string
   description: string
-  master_prompt: string
+  master_prompt?: string | null
   org_id: string
   created_at: string
   updated_at: string
@@ -14,7 +14,7 @@ export interface Project {
 export interface CreateProjectPayload {
   title: string
   description: string
-  master_prompt: string
+  master_prompt?: string | null
   organization_id: string
 }
 

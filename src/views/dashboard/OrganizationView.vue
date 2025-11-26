@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
+import { Input } from '@/components/ui/input'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
 
@@ -224,36 +225,30 @@ onMounted(async () => {
             </div>
 
             <form @submit.prevent="handleCreateOrganization" class="space-y-5">
-              <div class="relative">
-                <input
+              <div class="space-y-2">
+                <label for="orgName" class="block text-sm font-medium text-[#1F1F1F]">
+                  Organization Name
+                </label>
+                <Input
                   v-model="formData.name"
                   id="orgName"
                   placeholder="e.g. Acme Corporation"
                   required
-                  class="peer h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                  class="h-[52px] border-[#D5D7DA] text-sm focus:border-[#401903]"
                 />
-                <label
-                  for="orgName"
-                  class="pointer-events-none absolute top-2.5 left-3 origin-left -translate-y-6 scale-75 transform bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:top-2.5 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#401903]"
-                >
-                  Organization Name
-                </label>
               </div>
 
-              <div class="relative">
-                <input
+              <div class="space-y-2">
+                <label for="orgIndustry" class="block text-sm font-medium text-[#1F1F1F]">
+                  Industry
+                </label>
+                <Input
                   v-model="formData.industry"
                   id="orgIndustry"
                   placeholder="e.g. Technology"
                   required
-                  class="peer h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                  class="h-[52px] border-[#D5D7DA] text-sm focus:border-[#401903]"
                 />
-                <label
-                  for="orgIndustry"
-                  class="pointer-events-none absolute top-2.5 left-3 origin-left -translate-y-6 scale-75 transform bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:top-2.5 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#401903]"
-                >
-                  Industry
-                </label>
               </div>
 
               <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">

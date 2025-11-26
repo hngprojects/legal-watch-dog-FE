@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useProjectStore } from '@/stores/project-store'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
+import { useProjectStore } from '@/stores/project-store'
+import { useOrganizationStore } from '@/stores/organization-store'
+import { useAuthStore } from '@/stores/auth-store'
 
 const projectStore = useProjectStore()
+const organizationStore = useOrganizationStore()
+const authStore = useAuthStore()
 const { projects, loading, error } = storeToRefs(projectStore)
+const { organizations, loading: orgLoading } = storeToRefs(organizationStore)
 const router = useRouter()
 const route = useRoute()
 
@@ -13,13 +18,13 @@ const showCreateModal = ref(false)
 const formData = ref({
   title: '',
   description: '',
-  master_prompt: '',
 })
 
 const organizationId = computed(() => {
   const id = route.params.organizationId
   return typeof id === 'string' ? id : ''
 })
+const selectedOrganizationId = ref<string | ''>(organizationId.value)
 
 // Kebab menu state — now uses string IDs
 const activeMenuId = ref<string | null>(null)
@@ -33,20 +38,36 @@ const closeMenu = () => {
   activeMenuId.value = null
 }
 
-const openCreateModal = () => {
-  if (!organizationId.value) {
-    projectStore.setError('Select an organization before creating a project.')
+const ensureOrganizations = async () => {
+  if (organizations.value.length || orgLoading.value) return
+  let userId = authStore.user?.id
+  if (!userId) {
+    const loaded = await authStore.loadCurrentUser?.()
+    userId = loaded?.id
+  }
+  if (userId) {
+    await organizationStore.fetchOrganizations(userId)
+  }
+}
+
+const openCreateModal = async () => {
+  await ensureOrganizations()
+
+  if (!organizationId.value && !organizations.value.length) {
+    projectStore.setError('Add an organization before creating a project.')
     router.push({ name: 'organizations' })
     return
   }
+
   showCreateModal.value = true
-  formData.value = { title: '', description: '', master_prompt: '' }
+  formData.value = { title: '', description: '' }
+  selectedOrganizationId.value = organizationId.value || organizations.value[0]?.id || ''
   projectStore.setError(null)
 }
 
 const closeCreateModal = () => {
   showCreateModal.value = false
-  formData.value = { title: '', description: '', master_prompt: '' }
+  formData.value = { title: '', description: '' }
   projectStore.setError(null)
 }
 
@@ -58,28 +79,27 @@ const closeCreateModal = () => {
 const handleCreateProject = async () => {
   projectStore.setError(null)
 
-  if (!organizationId.value) {
+  const orgIdToUse = selectedOrganizationId.value || organizationId.value
+
+  if (!orgIdToUse) {
     projectStore.setError('Select an organization before creating a project.')
     return
   }
 
   if (!formData.value.title.trim()) return projectStore.setError('Project name is required')
   if (!formData.value.description.trim()) return projectStore.setError('Description is required')
-  if (!formData.value.master_prompt.trim())
-    return projectStore.setError('Master prompt is required')
 
   const newProject = await projectStore.addProject({
     title: formData.value.title.trim(),
     description: formData.value.description.trim(),
-    master_prompt: formData.value.master_prompt.trim(),
-    organization_id: organizationId.value,
+    organization_id: orgIdToUse,
   })
 
   if (newProject) {
     closeCreateModal()
     router.push({
       name: 'organization-projects',
-      params: { organizationId: organizationId.value },
+      params: { organizationId: orgIdToUse },
     })
   }
 }
@@ -97,12 +117,14 @@ onMounted(() => {
   } else {
     projectStore.setError('Select an organization to view projects.')
   }
+  void ensureOrganizations()
 })
 
 watch(
   () => route.params.organizationId,
   (newVal) => {
     const id = typeof newVal === 'string' ? newVal : ''
+    selectedOrganizationId.value = id
     if (id) {
       projectStore.fetchProjects(id)
     } else {
@@ -354,6 +376,25 @@ watch(
 
             <form @submit.prevent="handleCreateProject" class="space-y-5">
               <div>
+                <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+                  Organization
+                </label>
+                <select
+                  v-model="selectedOrganizationId"
+                  required
+                  class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                >
+                  <option value="" disabled>Select organization</option>
+                  <option v-for="org in organizations" :key="org.id" :value="org.id">
+                    {{ org.name }}
+                  </option>
+                </select>
+                <p class="mt-1.5 text-xs text-[#717680]">
+                  Choose which organization this project belongs to.
+                </p>
+              </div>
+
+              <div>
                 <label for="projName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
                   Project Name
                 </label>
@@ -376,20 +417,6 @@ watch(
                   id="desc"
                   rows="3"
                   placeholder="What legal areas will you monitor?"
-                  required
-                  class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label for="prompt" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                  Master Prompt
-                </label>
-                <textarea
-                  v-model="formData.master_prompt"
-                  id="prompt"
-                  rows="3"
-                  placeholder="e.g. Summarize any changes to visa policy in the UK, EU, USA, Canada..."
                   required
                   class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
                 />
