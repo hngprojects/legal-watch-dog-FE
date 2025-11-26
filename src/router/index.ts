@@ -5,7 +5,6 @@ import WaitlistView from '@/views/WaitlistView.vue'
 import LoginView from '@/views/authentication/LoginView.vue'
 import SignupView from '@/views/authentication/SignupView.vue'
 import OtpView from '@/views/authentication/OtpView.vue'
-import SuccessView from '@/views/authentication/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import ComingSoonView from '@/views/ComingSoonView.vue'
 import HowItWorksView from '@/views/HowItWorksView.vue'
@@ -19,6 +18,7 @@ import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import FAQView from '@/views/FAQView.vue'
+import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -74,9 +74,10 @@ const router = createRouter({
       component: OnboardingView,
     },
     {
-      path: '/success',
-      name: 'success',
-      component: SuccessView,
+      path: '/auth-status',
+      name: 'auth-status',
+      component: AuthStatusView,
+      alias: '/success',
     },
     {
       path: '/skeleton',
