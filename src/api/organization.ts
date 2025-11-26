@@ -1,24 +1,27 @@
 import api from '@/lib/api'
-import type { CreateOrganizationPayload, Organization } from '@/types/organization'
+import type { CreateOrganizationPayload, RawOrganization } from '@/types/organization'
 
 interface OrganizationsResponse {
   status: string
   status_code: number
   message: string
-  data: {
-    organisations: Organization[]
-    total?: number
-    page?: number
-    limit?: number
-    total_pages?: number
-  }
+  data:
+    | RawOrganization[]
+    | {
+        organisations?: RawOrganization[]
+        organizations?: RawOrganization[]
+        total?: number
+        page?: number
+        limit?: number
+        total_pages?: number
+      }
 }
 
 interface OrganizationResponse {
   status: string
   status_code: number
   message: string
-  data: Organization
+  data: RawOrganization
 }
 
 export const organizationService = {

@@ -47,7 +47,7 @@ const handleCreateOrganization = async () => {
 }
 
 const goToProjects = (organizationId: string) => {
-  router.push({ name: 'projects', query: { organizationId } })
+  router.push({ name: 'organization-projects', params: { organizationId } })
 }
 
 onMounted(async () => {

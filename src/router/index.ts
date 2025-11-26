@@ -30,7 +30,7 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/about-us', // New Route
+      path: '/about-us',
       name: 'about-us',
       component: AboutUsView,
     },
@@ -125,14 +125,13 @@ const router = createRouter({
           meta: { requiresAuth: true },
         },
         {
-          path: 'projects',
-          name: 'projects',
+          path: 'organizations/:organizationId/projects',
+          name: 'organization-projects',
           component: ProjectView,
-          alias: '/projects',
           meta: { requiresAuth: true },
         },
         {
-          path: 'projects/:id',
+          path: 'organizations/:organizationId/projects/:id',
           name: 'project-detail',
           component: () => import('@/views/dashboard/projects/Project.vue'),
           meta: { requiresAuth: true },

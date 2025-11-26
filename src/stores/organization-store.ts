@@ -4,7 +4,38 @@ import type {
   CreateOrganizationPayload,
   Organization,
   OrganizationErrorResponse,
+  RawOrganization,
 } from '@/types/organization'
+
+const mapRawOrganization = (org: RawOrganization): Organization => ({
+  id: org.organization_id || org.id || '',
+  name: org.name,
+  industry: org.industry,
+  is_active: org.is_active,
+  user_role: org.user_role,
+  created_at: org.created_at,
+  updated_at: org.updated_at,
+})
+
+const isRawOrganization = (value: unknown): value is RawOrganization =>
+  !!value && typeof value === 'object' && 'name' in (value as Record<string, unknown>)
+
+const parseRawOrganizations = (payload: unknown): RawOrganization[] => {
+  if (Array.isArray(payload)) {
+    return payload.filter(isRawOrganization)
+  }
+
+  if (payload && typeof payload === 'object') {
+    const maybePayload = payload as { organisations?: unknown; organizations?: unknown }
+    const list =
+      (Array.isArray(maybePayload.organisations) && maybePayload.organisations) ||
+      (Array.isArray(maybePayload.organizations) && maybePayload.organizations) ||
+      []
+    return list.filter(isRawOrganization)
+  }
+
+  return []
+}
 
 interface State {
   organizations: Organization[]
@@ -35,13 +66,8 @@ export const useOrganizationStore = defineStore('organizations', {
       this.setError(null)
       try {
         const response = await organizationService.listOrganizations(userId)
-        const payload = response?.data
-        const items =
-          (Array.isArray(payload?.data?.organisations) && payload.data.organisations) ||
-          (Array.isArray(payload?.data?.organizations) && payload.data.organizations) ||
-          (Array.isArray(payload?.data) && payload.data) ||
-          []
-        this.organizations = items
+        const rawList = parseRawOrganizations(response?.data?.data)
+        this.organizations = rawList.map((org) => mapRawOrganization(org))
       } catch (error) {
         const err = error as OrganizationErrorResponse
         if (!err.response) {
@@ -62,7 +88,7 @@ export const useOrganizationStore = defineStore('organizations', {
       this.setError(null)
       try {
         const { data } = await organizationService.createOrganization(payload)
-        const newOrg = data.data
+        const newOrg = mapRawOrganization(data.data as RawOrganization)
         this.organizations.unshift(newOrg)
         return newOrg
       } catch (error) {

@@ -21,10 +21,9 @@ const router = useRouter()
 const projectStore = useProjectStore()
 const jurisdictionStore = useJurisdictionStore()
 const projectId = route.params.id as string
-const organizationId = computed(() => {
-  const id = route.query.organizationId
-  return typeof id === 'string' ? id : ''
-})
+const organizationId = computed(
+  () => (route.params.organizationId as string) || project.value?.org_id || '',
+)
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
@@ -32,14 +31,20 @@ const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
 
 const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
-  jurisdictionStore.jurisdictions.filter((item) => !item.parent_id),
+  jurisdictionStore.jurisdictions.filter(
+    (item) => item.project_id === projectId && !item.parent_id,
+  ),
 )
 
 const goBack = () => {
-  router.push({
-    path: '/dashboard/projects',
-    query: organizationId.value ? { organizationId: organizationId.value } : undefined,
-  })
+  if (organizationId.value) {
+    router.push({
+      name: 'organization-projects',
+      params: { organizationId: organizationId.value },
+    })
+  } else {
+    router.push({ name: 'organizations' })
+  }
 }
 
 const openAddJurisdictionModal = () => {
@@ -75,7 +80,10 @@ const handleCreateJurisdiction = async () => {
 }
 
 const goToJurisdiction = (jurisdictionId: string) => {
-  router.push(`/dashboard/jurisdictions/${jurisdictionId}`)
+  router.push({
+    path: `/dashboard/jurisdictions/${jurisdictionId}`,
+    query: organizationId.value ? { organizationId: organizationId.value } : undefined,
+  })
 }
 
 onMounted(async () => {
@@ -84,7 +92,11 @@ onMounted(async () => {
   if (existingProject) {
     project.value = existingProject
   } else {
-    await projectStore.fetchProjects(organizationId.value || undefined)
+    if (organizationId.value) {
+      await projectStore.fetchProjects(organizationId.value)
+    } else {
+      projectStore.setError('Organization context missing. Please navigate from Organizations.')
+    }
     const foundProject = projectStore.projects.find((p) => p.id === projectId)
     project.value = foundProject || null
   }
@@ -125,7 +137,12 @@ const deleteProject = async () => {
 
   if (!confirm.isConfirmed) return
 
-  await projectStore.deleteProject(projectId)
+  if (!organizationId.value) {
+    projectStore.setError('Organization context missing. Please navigate from Organizations.')
+    return
+  }
+
+  await projectStore.deleteProject(projectId, organizationId.value)
 
   await Swal.fire({
     title: 'Deleted!',
@@ -135,7 +152,11 @@ const deleteProject = async () => {
     showConfirmButton: false,
   })
 
-  router.push('/dashboard/projects')
+  if (organizationId.value) {
+    router.push({ name: 'organization-projects', params: { organizationId: organizationId.value } })
+  } else {
+    router.push({ name: 'organizations' })
+  }
 }
 
 const startEdit = () => {
@@ -151,7 +172,12 @@ const startEdit = () => {
 
 const saveEdit = async () => {
   try {
-    const updated = await projectStore.updateProject(projectId, {
+    if (!organizationId.value) {
+      projectStore.setError('Organization context missing. Please navigate from Organizations.')
+      return
+    }
+
+    const updated = await projectStore.updateProject(organizationId.value, projectId, {
       title: editForm.value.title,
       description: editForm.value.description,
       master_prompt: editForm.value.master_prompt,
@@ -216,7 +242,14 @@ watch(
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink to="/dashboard/projects">Projects</RouterLink>
+                <RouterLink
+                  :to="{
+                    name: 'organization-projects',
+                    params: { organizationId: organizationId },
+                  }"
+                >
+                  Projects
+                </RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
 

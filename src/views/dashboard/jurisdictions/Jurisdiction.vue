@@ -37,6 +37,10 @@ const activeTab = ref<'analysis' | 'sources' | 'output'>('analysis')
 const showSettingsMenu = ref(false)
 const showInlineEdit = ref(false)
 const subJurisdictionModalOpen = ref(false)
+const organizationId = computed(() => {
+  const id = route.query.organizationId
+  return typeof id === 'string' ? id : ''
+})
 
 const editForm = ref({
   name: '',
@@ -156,6 +160,13 @@ const projectName = computed(() => {
   return project?.title || 'Project'
 })
 
+const projectOrganizationId = computed(() => {
+  if (!jurisdiction.value?.project_id) return ''
+  const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
+  return project?.org_id || ''
+})
+const activeOrganizationId = computed(() => organizationId.value || projectOrganizationId.value)
+
 const parentJurisdiction = computed(() => {
   if (!jurisdiction.value?.parent_id) return null
   return (
@@ -170,8 +181,8 @@ const loadJurisdiction = async (id: string) => {
   const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id) || null
   jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
 
-  if (!projectStore.projects.length) {
-    await projectStore.fetchProjects()
+  if (!projectStore.projects.length && activeOrganizationId.value) {
+    await projectStore.fetchProjects(activeOrganizationId.value)
   }
 
   if (jurisdiction.value?.project_id) {
@@ -182,11 +193,22 @@ const loadJurisdiction = async (id: string) => {
 }
 
 const goBack = () => {
-  if (jurisdiction.value?.project_id) {
-    router.push(`/dashboard/projects/${jurisdiction.value.project_id}`)
-  } else {
-    router.push('/dashboard/projects')
+  const targetOrgId = organizationId.value || projectOrganizationId.value
+
+  if (jurisdiction.value?.project_id && targetOrgId) {
+    router.push({
+      name: 'project-detail',
+      params: { organizationId: targetOrgId, id: jurisdiction.value.project_id },
+    })
+    return
   }
+
+  if (targetOrgId) {
+    router.push({ name: 'organization-projects', params: { organizationId: targetOrgId } })
+    return
+  }
+
+  router.push({ name: 'organizations' })
 }
 
 const toggleSettingsMenu = () => {
@@ -261,11 +283,22 @@ const deleteJurisdiction = async () => {
     showConfirmButton: false,
   })
 
-  if (projectId) {
-    router.push(`/dashboard/projects/${projectId}`)
-  } else {
-    router.push('/dashboard/projects')
+  const targetOrgId = organizationId.value || projectOrganizationId.value
+
+  if (projectId && targetOrgId) {
+    router.push({
+      name: 'project-detail',
+      params: { organizationId: targetOrgId, id: projectId },
+    })
+    return
   }
+
+  if (targetOrgId) {
+    router.push({ name: 'organization-projects', params: { organizationId: targetOrgId } })
+    return
+  }
+
+  router.push({ name: 'organizations' })
 }
 
 const openSubJurisdictionModal = () => {
@@ -315,7 +348,12 @@ const createSubJurisdiction = async () => {
 }
 
 const goToJurisdiction = (id: string) => {
-  router.push(`/dashboard/jurisdictions/${id}`)
+  const targetOrgId = organizationId.value || projectOrganizationId.value
+
+  router.push({
+    path: `/dashboard/jurisdictions/${id}`,
+    query: targetOrgId ? { organizationId: targetOrgId } : undefined,
+  })
 }
 
 onMounted(() => loadJurisdiction(jurisdictionId.value))
@@ -368,7 +406,14 @@ watch(
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink to="/dashboard/projects">Projects</RouterLink>
+                <RouterLink
+                  :to="{
+                    name: 'organization-projects',
+                    params: { organizationId: organizationId || projectOrganizationId },
+                  }"
+                >
+                  Projects
+                </RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
 
@@ -376,7 +421,15 @@ watch(
 
             <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
-                <RouterLink :to="`/dashboard/projects/${jurisdiction.project_id}`">
+                <RouterLink
+                  :to="{
+                    name: 'project-detail',
+                    params: {
+                      organizationId: organizationId || projectOrganizationId,
+                      id: jurisdiction.project_id,
+                    },
+                  }"
+                >
                   {{ projectName }}
                 </RouterLink>
               </BreadcrumbLink>

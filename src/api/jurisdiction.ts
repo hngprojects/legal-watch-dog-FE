@@ -33,10 +33,7 @@ interface SingleJurisdictionResponse {
 }
 
 export const jurisdictionApi = {
-  getAll: (projectId?: string) =>
-    api.get<JurisdictionResponse>('/jurisdictions/', {
-      params: projectId ? { project_id: projectId } : undefined,
-    }),
+  getAll: (projectId: string) => api.get<JurisdictionResponse>(`/jurisdictions/project/${projectId}`),
 
   getOne: (jurisdictionId: string) =>
     api.get<SingleJurisdictionResponse>(`/jurisdictions/${jurisdictionId}`),

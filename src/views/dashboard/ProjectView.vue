@@ -17,7 +17,7 @@ const formData = ref({
 })
 
 const organizationId = computed(() => {
-  const id = route.query.organizationId
+  const id = route.params.organizationId
   return typeof id === 'string' ? id : ''
 })
 
@@ -77,12 +77,18 @@ const handleCreateProject = async () => {
 
   if (newProject) {
     closeCreateModal()
-    router.push(`/dashboard/projects/`)
+    router.push({
+      name: 'organization-projects',
+      params: { organizationId: organizationId.value },
+    })
   }
 }
 
 const goToProject = (id: string) => {
-  router.push({ path: `/dashboard/projects/${id}`, query: { organizationId: organizationId.value } })
+  router.push({
+    name: 'project-detail',
+    params: { organizationId: organizationId.value, id },
+  })
 }
 
 onMounted(() => {
@@ -94,7 +100,7 @@ onMounted(() => {
 })
 
 watch(
-  () => route.query.organizationId,
+  () => route.params.organizationId,
   (newVal) => {
     const id = typeof newVal === 'string' ? newVal : ''
     if (id) {
@@ -140,7 +146,11 @@ watch(
       <div v-else-if="error" class="flex min-h-[600px] items-center justify-center">
         <div class="text-center">
           <p class="mb-4 text-red-600">{{ error }}</p>
-          <button @click="projectStore.fetchProjects(organizationId)" class="text-[#401903] underline">
+          <button
+            @click="organizationId && projectStore.fetchProjects(organizationId)"
+            :disabled="!organizationId"
+            class="text-[#401903] underline disabled:cursor-not-allowed disabled:text-gray-400"
+          >
             Retry
           </button>
         </div>
