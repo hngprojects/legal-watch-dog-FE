@@ -1,15 +1,26 @@
 <script setup lang="ts">
 import Frame from '@/assets/images/Frame.png'
-// import Facebook from '@/assets/images/Facebook.png'
-// import LinkedIn from '@/assets/images/LinkedIn.png'
-// import Instagram from '@/assets/images/Instagram.png'
-// import Twitter from '@/assets//images/Twitter.png'
-// import YouTube from '@/assets/images/YouTube.png'
+import { RouterLink } from 'vue-router'
 
-// const Products = ['Features', 'Pricing', 'Case studies', 'Reviews', 'Updates']
-// const Companys = ['About', 'Contact Us', 'Careers', 'Blog']
-// const Supports = ['Getting started', 'Help center', 'Server status', 'Report a bug', 'Chat support']
-// const Privacys = ['Copyright', 'Terms of Services']
+// Only include items that have existing routes in src/router/index.ts
+const Products = [
+  { label: 'How it Works', path: '/how-it-works' },
+  { label: 'Features', path: '/features' },
+  { label: 'Pricing', path: '/pricing' },
+  { label: 'Onboarding', path: '/onboarding' },
+  { label: 'Waitlist', path: '/waitlist' },
+]
+
+const Companys = [
+  { label: 'About', path: '/about-us' },
+  { label: 'Contact', path: '/contact' },
+  { label: 'Career', path: '/career' },
+  { label: 'Blogs', path: '/blogs' },
+]
+
+const Supports = [{ label: 'FAQ', path: '/faq' }]
+
+const Privacys = [{ label: 'Privacy Policy', path: '/privacy-policy' }]
 </script>
 
 <template>
@@ -33,13 +44,15 @@ import Frame from '@/assets/images/Frame.png'
       </div>
 
       <!-- Links  -->
-      <!-- <nav aria-label="Footer navigation" class="mt-8">
+      <nav aria-label="Footer navigation" class="mt-8">
         <div class="grid grid-cols-1 gap-8 py-6 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <h3 class="mb-3 font-semibold text-[#3C2610]">Product</h3>
             <ul class="space-y-2 text-sm font-light text-gray-600 opacity-100">
               <li v-for="(product, i) in Products" :key="i">
-                {{ product }}
+                <RouterLink :to="product.path" class="hover:underline">
+                  {{ product.label }}
+                </RouterLink>
               </li>
             </ul>
           </div>
@@ -48,7 +61,9 @@ import Frame from '@/assets/images/Frame.png'
             <h3 class="mb-3 font-semibold text-[#3C2610]">Company</h3>
             <ul class="space-y-2 text-sm font-light text-gray-600 opacity-100">
               <li v-for="(company, i) in Companys" :key="i">
-                {{ company }}
+                <RouterLink :to="company.path" class="hover:underline">
+                  {{ company.label }}
+                </RouterLink>
               </li>
             </ul>
           </div>
@@ -57,7 +72,9 @@ import Frame from '@/assets/images/Frame.png'
             <h3 class="mb-3 font-semibold text-[#3C2610]">Support</h3>
             <ul class="space-y-2 text-sm font-light text-gray-600 opacity-100">
               <li v-for="(support, i) in Supports" :key="i">
-                {{ support }}
+                <RouterLink :to="support.path" class="hover:underline">
+                  {{ support.label }}
+                </RouterLink>
               </li>
             </ul>
           </div>
@@ -66,12 +83,14 @@ import Frame from '@/assets/images/Frame.png'
             <h3 class="mb-3 font-semibold text-[#3C2610]">Privacy</h3>
             <ul class="space-y-2 text-sm font-light text-gray-600 opacity-100">
               <li v-for="(privacy, i) in Privacys" :key="i">
-                {{ privacy }}
+                <RouterLink :to="privacy.path" class="hover:underline">
+                  {{ privacy.label }}
+                </RouterLink>
               </li>
             </ul>
           </div>
         </div>
-      </nav> -->
+      </nav>
 
       <Separator class="mt-6 bg-gray-200" />
       <div class="flex flex-col-reverse gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">

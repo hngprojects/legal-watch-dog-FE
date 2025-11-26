@@ -7,6 +7,7 @@ export interface Jurisdiction {
   name: string
   description: string
   prompt?: string | null
+  sources?: string[]
   scrape_output?: Record<string, unknown> | null
   created_at: string
   updated_at: string | null
