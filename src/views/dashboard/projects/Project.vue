@@ -30,10 +30,12 @@ const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
 const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
 
+const projectJurisdictions = computed<Jurisdiction[]>(() =>
+  jurisdictionStore.jurisdictions.filter((item) => item.project_id === projectId),
+)
+
 const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
-  jurisdictionStore.jurisdictions.filter(
-    (item) => item.project_id === projectId && !item.parent_id,
-  ),
+  projectJurisdictions.value.filter((item) => !item.parent_id),
 )
 
 const goBack = () => {
@@ -172,11 +174,6 @@ const startEdit = () => {
 
 const saveEdit = async () => {
   try {
-    if (!organizationId.value) {
-      projectStore.setError('Organization context missing. Please navigate from Organizations.')
-      return
-    }
-
     const updated = await projectStore.updateProject(organizationId.value, projectId, {
       title: editForm.value.title,
       description: editForm.value.description,
@@ -389,10 +386,11 @@ watch(
           </div>
 
           <div
-            v-else-if="jurisdictionStore.jurisdictions.length === 0"
+            v-else-if="projectJurisdictions.length === 0"
             class="flex flex-col items-center justify-center bg-white py-20"
           >
-            <p class="text-sm text-gray-500">No Jurisdiction found</p>
+            <p class="text-sm text-gray-500">No jurisdictions yet for this project.</p>
+            <p class="mt-2 text-xs text-gray-400">Add one to start monitoring changes.</p>
           </div>
 
           <div v-else class="space-y-3 p-6">

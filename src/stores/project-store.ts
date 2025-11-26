@@ -99,11 +99,19 @@ export const useProjectStore = defineStore('projects', {
       }
     },
 
-    async updateProject(organizationId: string, projectId: string, payload: UpdateProjectPayload) {
+    async updateProject(organizationId: string | null, projectId: string, payload: UpdateProjectPayload) {
       this.setError(null)
 
       try {
-        const { data } = await projectService.updateProject(organizationId, projectId, payload)
+        const resolvedOrgId =
+          organizationId || this.projects.find((p) => p.id === projectId)?.org_id || ''
+
+        if (!resolvedOrgId) {
+          this.setError('Organization context missing. Please reopen this project from Organizations.')
+          return null
+        }
+
+        const { data } = await projectService.updateProject(resolvedOrgId, projectId, payload)
         const updatedProject: Project =
           (data as any)?.data?.project || (data as any)?.data || (data as any)?.project
 

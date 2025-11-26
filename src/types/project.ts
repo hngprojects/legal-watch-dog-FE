@@ -26,8 +26,14 @@ export interface ProjectErrorResponse {
         msg: string
         type: string
       }[]
+      message?: string
     }
   }
 }
 
-export type UpdateProjectPayload = Partial<CreateProjectPayload>
+export interface UpdateProjectPayload {
+  title?: string
+  description?: string | null
+  master_prompt?: string | null
+  is_deleted?: boolean
+}
