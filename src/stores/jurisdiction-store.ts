@@ -16,7 +16,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
   const error = ref<string | null>(null)
 
   // ✅ Make projectId optional
-  const fetchJurisdictions = async (projectId: string) => {
+  const fetchJurisdictions = async (projectId?: string) => {
     loading.value = true
     error.value = null
     try {
