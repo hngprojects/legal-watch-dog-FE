@@ -41,6 +41,24 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create .env file for staging
+        if: github.ref == 'refs/heads/staging'
+        run: |
+          cat <<EOF > .env
+          VITE_USE_MOCK_API=false
+          VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL_STAGING }}"
+          EOF
+          echo ".env file created for staging"
+
+      - name: Create .env file for production
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cat <<EOF > .env
+          VITE_USE_MOCK_API=false
+          VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL_PRODUCTION }}"
+          EOF
+          echo ".env file created for production"
+
       - name: Build application
         run: npm run build
 
@@ -68,15 +86,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-
-      - name: Generate staging enviornment file
-        run: |
-          cat <<EOF > .env
-          VITE_USE_MOCK_API=false
-          VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL_STAGING }}"
-          EOF
-          echo ".env file created successfully."
-
 
       - name: Set up SSH and Deploy
         env:
@@ -147,14 +156,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-
-      - name: Generate production environment file
-        run: |
-          cat <<EOF > .env.prod
-          VITE_USE_MOCK_API=false
-          VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL_PRODUCTION }}"
-          EOF
-          echo ".env file created successfully."
 
       - name: Set up SSH and Deploy
         env:
