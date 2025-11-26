@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AddPaymentModal from '@/components/pricing/AddPaymentModal.vue'
 import Icon from '@/components/reusable/Icon.vue'
 import Button from '@/components/ui/button/Button.vue'
 import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
@@ -38,7 +39,9 @@ const hasHistory = ref(false)
         trial.
       </p>
 
-      <Button variant="outline"> Add Payment Method </Button>
+      <AddPaymentModal>
+        <Button variant="outline"> Add Payment Method </Button>
+      </AddPaymentModal>
     </article>
   </section>
 
