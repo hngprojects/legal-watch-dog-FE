@@ -33,7 +33,7 @@ const jurisdictionId = computed(() => route.params.id as string)
 
 const jurisdiction = ref<Jurisdiction | null>(null)
 const loading = ref(true)
-const activeTab = ref<'output' | 'sources'>('output')
+const activeTab = ref<'analysis' | 'sources' | 'output'>('analysis')
 const showSettingsMenu = ref(false)
 const showInlineEdit = ref(false)
 const subJurisdictionModalOpen = ref(false)
@@ -129,10 +129,6 @@ const extractSources = (raw: unknown): string[] => {
 
 const outputItems = computed<OutputItem[]>(() => normalizeOutput(jurisdiction.value?.scrape_output))
 const sourceItems = computed<string[]>(() => extractSources(jurisdiction.value?.scrape_output))
-
-const monitoringInstructions = computed(
-  () => jurisdiction.value?.prompt || jurisdiction.value?.description || '',
-)
 
 const lastUpdatedText = computed(() => {
   if (!jurisdiction.value) return ''
@@ -318,6 +314,13 @@ const goToJurisdiction = (id: string) => {
   router.push(`/dashboard/jurisdictions/${id}`)
 }
 
+const navigateToAddSources = () => {
+  router.push({
+    name: 'jurisdiction-sources',
+    params: { id: jurisdictionId.value },
+  })
+}
+
 onMounted(() => loadJurisdiction(jurisdictionId.value))
 
 watch(
@@ -454,9 +457,7 @@ watch(
             </div>
 
             <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                Monitoring Instructions
-              </label>
+              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Instructions </label>
               <textarea
                 v-model="editForm.prompt"
                 rows="3"
@@ -498,20 +499,23 @@ watch(
         </template>
       </section>
 
-      <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-        <div class="flex items-center justify-between gap-3">
-          <h3 class="text-lg font-semibold text-[#1F1F1F]">Your Monitoring Instructions</h3>
-        </div>
-        <p
-          class="mt-4 rounded-xl bg-[#F8F1EA] p-4 text-sm leading-6 whitespace-pre-line text-[#3D2E1F]"
-        >
-          {{ monitoringInstructions || 'No monitoring instructions have been added yet.' }}
-        </p>
-      </section>
-
       <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
-        <div class="border-b border-gray-100 px-6">
+        <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
+            <button
+              @click="activeTab = 'analysis'"
+              :class="[
+                'relative pb-4 text-sm font-semibold transition-colors',
+                activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
+              ]"
+            >
+              Analysis
+              <span
+                v-if="activeTab === 'analysis'"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
+              ></span>
+            </button>
+
             <button
               @click="activeTab = 'output'"
               :class="[
@@ -525,6 +529,7 @@ watch(
                 class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
               ></span>
             </button>
+
             <button
               @click="activeTab = 'sources'"
               :class="[
@@ -541,8 +546,44 @@ watch(
           </div>
         </div>
 
-        <div v-if="activeTab === 'output'" class="p-6">
+        <!-- Analysis Panel -->
+        <div v-if="activeTab === 'analysis'" class="p-6">
+          <!-- Empty State for Analysis -->
+          <div class="flex flex-col items-center justify-center px-8 py-16 text-center">
+            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-8 w-8 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <h3 class="mb-2 text-lg font-semibold text-gray-900">No Analysis found</h3>
+            <p class="mb-6 max-w-md text-sm text-gray-500">
+              Add sources to generate your first document.
+            </p>
+            <button
+              @click="navigateToAddSources"
+              class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+            >
+              <span>+</span>
+              <span>Add Sources</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Output Panel (uses outputItems / normalizeOutput) -->
+        <div v-else-if="activeTab === 'output'" class="p-6">
           <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">What Changed</h3>
+
           <div v-if="outputItems.length" class="space-y-3">
             <article
               v-for="(item, index) in outputItems"
@@ -558,6 +599,7 @@ watch(
               </p>
             </article>
           </div>
+
           <div
             v-else
             class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
@@ -569,8 +611,10 @@ watch(
           </div>
         </div>
 
+        <!-- Sources Panel (uses sourceItems / extractSources) -->
         <div v-else class="p-6">
           <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Sources</h3>
+
           <ul v-if="sourceItems.length" class="space-y-2">
             <li
               v-for="(source, index) in sourceItems"
@@ -607,15 +651,24 @@ watch(
           v-if="subJurisdictions.length === 0"
           class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center"
         >
-          <div
-            class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white text-gray-300 ring-1 ring-gray-200"
-          >
-            ?
+          <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-7 w-7 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+              />
+            </svg>
           </div>
-          <p class="text-sm font-medium text-gray-600">No jurisdictions added</p>
-          <p class="mt-1 text-xs text-gray-400">
-            Add a sub-jurisdiction to start tracking nested areas.
-          </p>
+          <p class="mb-1 text-base font-medium text-gray-900">No Jurisdictions added</p>
+          <p class="text-sm text-gray-500">Search source or Click add sources to get started.</p>
         </div>
 
         <div v-else class="space-y-3">
@@ -645,51 +698,37 @@ watch(
     <teleport to="body">
       <div
         v-if="subJurisdictionModalOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-[2px]"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
         @click.self="closeSubJurisdictionModal"
       >
-        <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-6 shadow-2xl">
-          <button
-            @click="closeSubJurisdictionModal"
-            class="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-          >
-            <span class="-mt-px text-lg">&times;</span>
-          </button>
+        <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
+          <h3 class="mb-2 text-2xl font-bold text-gray-900">Define your Sub-Jurisdiction</h3>
+          <p class="mb-6 text-sm text-gray-600">
+            Define a specific legal domain or region to monitor
+          </p>
 
-          <div class="mb-4">
-            <h3 class="text-xl font-semibold text-[#1F1F1F]">Add Sub-jurisdiction</h3>
-            <p class="text-sm text-gray-500">Nest this under {{ jurisdiction?.name }}</p>
-          </div>
-
-          <form @submit.prevent="createSubJurisdiction" class="space-y-4">
+          <form @submit.prevent="createSubJurisdiction" class="space-y-5">
             <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Name</label>
+              <label class="mb-2 block text-sm font-medium text-gray-900">
+                Sub-Jurisdiction Name
+              </label>
               <input
                 v-model="subJurisdictionForm.name"
-                class="h-11 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="e.g. EU Visa Updates"
+                type="text"
+                placeholder="e.g Global Visa Monitoring"
+                required
+                class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               />
             </div>
 
             <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
+              <label class="mb-2 block text-sm font-medium text-gray-900"> Description </label>
               <textarea
                 v-model="subJurisdictionForm.description"
-                rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="What does this sub-jurisdiction cover?"
-              ></textarea>
-            </div>
-
-            <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                Monitoring Instructions (optional)
-              </label>
-              <textarea
-                v-model="subJurisdictionForm.prompt"
-                rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="Add any specific monitoring notes"
+                rows="4"
+                placeholder="What legal areas will you monitor?"
+                required
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               ></textarea>
             </div>
 
@@ -700,19 +739,19 @@ watch(
               {{ jurisdictionStore.error }}
             </div>
 
-            <div class="flex justify-end gap-3 pt-2">
+            <div class="flex justify-end gap-3 pt-4">
               <button
                 type="button"
                 @click="closeSubJurisdictionModal"
-                class="rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] hover:bg-orange-50"
+                class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
+                class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
               >
-                Create Sub-jurisdiction
+                Create Sub-Jurisdiction
               </button>
             </div>
           </form>

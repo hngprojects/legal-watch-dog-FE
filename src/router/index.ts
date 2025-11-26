@@ -146,6 +146,12 @@ const router = createRouter({
           meta: { requiresAuth: true },
         },
         {
+          path: 'jurisdictions/:id/sources',
+          name: 'jurisdiction-sources',
+          component: () => import('@/views/dashboard/sources/Source.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
           path: 'settings/billing',
           name: 'billing',
           component: () => import('@/views/dashboard/settings/BillingView.vue'),

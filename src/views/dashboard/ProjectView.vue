@@ -12,16 +12,11 @@ const showCreateModal = ref(false)
 const formData = ref({
   title: '',
   description: '',
-  master_prompt: '',
+  // Remove master_prompt from initial form data
 })
 
 // Kebab menu state — now uses string IDs
 const activeMenuId = ref<string | null>(null)
-
-/* const toggleMenu = (projectId: string, event: Event) => {
-  event.stopPropagation()
-  activeMenuId.value = activeMenuId.value === projectId ? null : projectId
-} */
 
 const closeMenu = () => {
   activeMenuId.value = null
@@ -29,33 +24,27 @@ const closeMenu = () => {
 
 const openCreateModal = () => {
   showCreateModal.value = true
-  formData.value = { title: '', description: '', master_prompt: '' }
+  formData.value = { title: '', description: '' } // Remove master_prompt
   projectStore.setError(null)
 }
 
 const closeCreateModal = () => {
   showCreateModal.value = false
-  formData.value = { title: '', description: '', master_prompt: '' }
+  formData.value = { title: '', description: '' } // Remove master_prompt
   projectStore.setError(null)
 }
-
-/* const deleteProject = async (projectId: string) => {
-  await projectStore.deleteProject(projectId)
-  closeMenu()
-} */
 
 const handleCreateProject = async () => {
   projectStore.setError(null)
 
   if (!formData.value.title.trim()) return projectStore.setError('Project name is required')
   if (!formData.value.description.trim()) return projectStore.setError('Description is required')
-  if (!formData.value.master_prompt.trim())
-    return projectStore.setError('Master prompt is required')
+  // Remove master_prompt validation
 
   const newProject = await projectStore.addProject({
     title: formData.value.title.trim(),
     description: formData.value.description.trim(),
-    master_prompt: formData.value.master_prompt.trim(),
+    master_prompt: '', // You can set a default value or empty string
   })
 
   if (newProject) {
@@ -209,34 +198,6 @@ onMounted(() => {
             @click="goToProject(project.id)"
             class="group relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10"
           >
-            <!-- <button
-              @click.stop="toggleMenu(project.id, $event)"
-              class="absolute top-4 right-4 z-10 rounded-full p-2 text-gray-400 transition-all group-hover:opacity-100 hover:bg-gray-100 hover:text-gray-700"
-              :class="{
-                'opacity-100': activeMenuId === project.id,
-                'opacity-0': activeMenuId !== project.id,
-              }"
-            >
-              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"
-                />
-              </svg>
-            </button> -->
-
-            <!-- <div
-              v-if="activeMenuId === project.id"
-              @click.stop
-              class="absolute top-12 right-4 z-20 w-48 rounded-lg bg-white py-2 shadow-lg ring-1 ring-black/5"
-            >
-              <button
-                @click="deleteProject(project.id)"
-                class="w-full px-4 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50"
-              >
-                Delete Project
-              </button>
-            </div> -->
-
             <div class="p-8">
               <h3
                 class="mb-3 text-xl font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
@@ -320,19 +281,7 @@ onMounted(() => {
                 />
               </div>
 
-              <div>
-                <label for="prompt" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                  Master Prompt
-                </label>
-                <textarea
-                  v-model="formData.master_prompt"
-                  id="prompt"
-                  rows="3"
-                  placeholder="e.g. Summarize any changes to visa policy in the UK, EU, USA, Canada..."
-                  required
-                  class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                />
-              </div>
+              <!-- REMOVED Master Prompt field from create modal -->
 
               <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
                 {{ error }}
