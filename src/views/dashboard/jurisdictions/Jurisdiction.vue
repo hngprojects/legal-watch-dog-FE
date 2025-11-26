@@ -70,6 +70,9 @@ const sources = ref<Source[]>([])
 const sourcesLoading = ref(false)
 const sourcesError = ref<string | null>(null)
 const editingSourceId = ref<string | null>(null)
+const scrapingState = ref<Record<string, boolean>>({})
+const scrapeResults = ref<Record<string, unknown>>({})
+const scrapeErrors = ref<Record<string, string>>({})
 
 const formatKey = (key: string) =>
   key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
@@ -462,6 +465,31 @@ const createSource = async () => {
   }
 }
 
+const startScrape = async (source: Source) => {
+  scrapeErrors.value = { ...scrapeErrors.value, [source.id]: '' }
+  scrapingState.value = { ...scrapingState.value, [source.id]: true }
+  try {
+    const { data } = await sourceApi.scrape(source.id)
+    scrapeResults.value = { ...scrapeResults.value, [source.id]: (data as any)?.data || data }
+    await Swal.fire({
+      title: 'Scrape started',
+      text: 'Awaiting scrape result. Showing response if available.',
+      icon: 'success',
+      timer: 1400,
+      showConfirmButton: false,
+    })
+  } catch (err) {
+    const message =
+      (err as any)?.response?.data?.message ||
+      (err as any)?.response?.data?.detail ||
+      'Scrape API not available yet.'
+    scrapeErrors.value = { ...scrapeErrors.value, [source.id]: message }
+    await Swal.fire('Error', message, 'error')
+  } finally {
+    scrapingState.value = { ...scrapingState.value, [source.id]: false }
+  }
+}
+
 const startEditSource = (source: Source) => {
   editingSourceId.value = source.id
   sourceForm.value = {
@@ -758,36 +786,92 @@ watch(
         </div>
 
         <!-- Analysis Panel -->
-        <div v-if="activeTab === 'analysis'" class="p-6">
-          <!-- Empty State for Analysis -->
-          <div class="flex flex-col items-center justify-center px-8 py-16 text-center">
-            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-8 w-8 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
+        <div v-if="activeTab === 'analysis'" class="p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
+              <p class="text-xs text-gray-500">Trigger scraping per source and view results.</p>
             </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900">No Analysis found</h3>
-            <p class="mb-6 max-w-md text-sm text-gray-500">
-              Add sources to generate your first document.
-            </p>
             <button
-              class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
               @click="openAddSourceModal"
             >
-              <span>+</span>
-              <span>Add Sources</span>
+              <Plus :size="16" />
+              Add Source
             </button>
+          </div>
+
+          <div v-if="sourcesLoading" class="space-y-2">
+            <div v-for="n in 3" :key="n" class="h-12 w-full rounded-lg bg-gray-100 animate-pulse" />
+          </div>
+
+          <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {{ sourcesError }}
+          </div>
+
+          <div
+            v-else-if="sources.length === 0"
+            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+          >
+            <p class="text-sm text-gray-500">No sources have been added yet.</p>
+            <p class="text-xs text-gray-400">Add a source to start scraping content.</p>
+            <button
+              class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+              @click="openAddSourceModal"
+            >
+              <Plus :size="16" />
+              Add Source
+            </button>
+          </div>
+
+          <div v-else class="space-y-3">
+            <div
+              v-for="source in sources"
+              :key="source.id"
+              class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm"
+            >
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
+                  <p class="text-xs text-gray-500">{{ source.url }}</p>
+                  <p class="text-[11px] uppercase tracking-wide text-gray-400">
+                    {{ source.source_type }} • {{ source.scrape_frequency }}
+                  </p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    @click="startEditSource(source)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    :disabled="scrapingState[source.id]"
+                    @click="startScrape(source)"
+                  >
+                    {{ scrapingState[source.id] ? 'Scraping...' : 'Start Scrape' }}
+                  </button>
+                  <button
+                    class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                    @click="deleteSource(source)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="scrapeErrors[source.id]" class="mt-2 text-xs text-red-600">
+                {{ scrapeErrors[source.id] }}
+              </div>
+
+              <div v-if="scrapeResults[source.id]" class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800">
+                <div class="mb-1 text-[11px] font-semibold uppercase text-gray-500">Result</div>
+                <pre class="whitespace-pre-wrap break-words text-[11px] leading-5">
+{{ typeof scrapeResults[source.id] === 'string' ? scrapeResults[source.id] : JSON.stringify(scrapeResults[source.id], null, 2) }}
+                </pre>
+              </div>
+            </div>
           </div>
         </div>
 

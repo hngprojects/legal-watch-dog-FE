@@ -31,4 +31,7 @@ export const sourceApi = {
     api.patch<ApiResponse<Source>>(`/sources/${sourceId}`, payload),
 
   delete: (sourceId: string) => api.delete<ApiResponse<{ success?: boolean }>>(`/sources/${sourceId}`),
+
+  // Placeholder for future scraping endpoint; call will fail safely until backend is ready.
+  scrape: (sourceId: string) => api.post<ApiResponse<unknown>>(`/sources/${sourceId}/scrape`),
 }
