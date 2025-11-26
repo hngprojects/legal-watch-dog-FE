@@ -11,12 +11,11 @@ const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-const OTP_TIMER_DURATION = 10 * 60
 const DIGIT_COUNT = 6
 
 const otpDigits = ref<string[]>(Array(DIGIT_COUNT).fill(''))
 const digitInputs = ref<Array<HTMLInputElement | null>>([])
-const timer = ref(OTP_TIMER_DURATION)
+const timer = ref(0)
 const errorMessage = ref('')
 const successMessage = ref('')
 const isVerifying = ref(false)
@@ -51,9 +50,10 @@ const backRoute = computed(() =>
 const isPasswordResetFlow = computed(() => otpPurpose.value === 'password-reset')
 const backText = computed(() => (isPasswordResetFlow.value ? 'Back to login' : 'Back to sign up'))
 const isComplete = computed(() => otpDigits.value.join('').length === DIGIT_COUNT)
+const timerDuration = computed(() => (isPasswordResetFlow.value ? 0.3 * 60 : 0.2 * 60))
 
-const startTimer = () => {
-  timer.value = OTP_TIMER_DURATION
+const startTimer = (seconds?: number) => {
+  timer.value = typeof seconds === 'number' ? seconds : timerDuration.value
   if (interval) {
     clearInterval(interval)
   }
@@ -159,7 +159,7 @@ const handleContinue = async () => {
   const code = otpDigits.value.join('').trim()
 
   if (!code || code.length < DIGIT_COUNT) {
-    errorMessage.value = 'Enter the 6 digit OTP sent to your email.'
+    errorMessage.value = 'Enter the 6-digit OTP sent to your email.'
     return
   }
 
@@ -236,7 +236,7 @@ const handleResend = async () => {
     })
 
     successMessage.value = response?.message ?? 'A new OTP has been sent to your email.'
-    startTimer()
+    startTimer(5 * 60)
   } catch (error) {
     if (isAxiosError(error)) {
       errorMessage.value =
@@ -293,15 +293,16 @@ const handleResend = async () => {
 
             <div class="flex items-center justify-center gap-2 text-sm text-gray-700">
               <span>Didn't receive the link?</span>
-              <button
-                type="button"
-                @click="handleResend"
-                :disabled="timer > 0 || isResending"
-                class="btn--link disabled:link--disabled"
-              >
-                <span v-if="isResending">Sending...</span>
-                <span v-else>Resend Code {{ timer > 0 ? `(${formatTime(timer)})` : '' }}</span>
-              </button>
+            <button
+              type="button"
+              @click="handleResend"
+              :disabled="timer > 0 || isResending"
+              class="btn--link disabled:link--disabled"
+            >
+              <span v-if="isResending">Sending...</span>
+              <span v-else-if="timer > 0">{{ formatTime(timer) }}</span>
+              <span v-else>Resend Code</span>
+            </button>
             </div>
 
             <RouterLink

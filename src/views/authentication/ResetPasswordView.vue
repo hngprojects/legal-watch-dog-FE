@@ -6,7 +6,7 @@ import AuthLayout from '@/components/authentication/AuthLayout.vue'
 import AuthCard from '@/components/authentication/AuthCard.vue'
 import FormControl from '@/components/composables/FormControl.vue'
 import { useAuthStore } from '@/stores/auth-store'
-import { ArrowLeftIcon } from 'lucide-vue-next'
+import { ArrowLeftIcon, EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -167,15 +167,16 @@ const handleSubmit = async () => {
           >
             <template #trailing>
               <button
-                type="button"
-                @click="showPassword = !showPassword"
-                class="px-3 text-gray-500 hover:text-gray-700 focus:outline-none"
-              >
-                <span v-if="showPassword">Hide</span>
-                <span v-else>Show</span>
-              </button>
-            </template>
-          </FormControl>
+            type="button"
+            @click="showPassword = !showPassword"
+            class="px-3 text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
+          >
+            <EyeOffIcon v-if="showPassword" :size="18" aria-hidden="true" />
+            <EyeIcon v-else :size="18" aria-hidden="true" />
+            <span class="sr-only">{{ showPassword ? 'Hide password' : 'Show password' }}</span>
+          </button>
+        </template>
+      </FormControl>
 
           <div class="flex items-center gap-2">
             <div
@@ -200,15 +201,18 @@ const handleSubmit = async () => {
           >
             <template #trailing>
               <button
-                type="button"
-                @click="showConfirmPassword = !showConfirmPassword"
-                class="px-3 text-gray-500 hover:text-gray-700 focus:outline-none"
-              >
-                <span v-if="showConfirmPassword">Hide</span>
-                <span v-else>Show</span>
-              </button>
-            </template>
-          </FormControl>
+            type="button"
+            @click="showConfirmPassword = !showConfirmPassword"
+            class="px-3 text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer"
+          >
+            <EyeOffIcon v-if="showConfirmPassword" :size="18" aria-hidden="true" />
+            <EyeIcon v-else :size="18" aria-hidden="true" />
+            <span class="sr-only">
+              {{ showConfirmPassword ? 'Hide password' : 'Show password' }}
+            </span>
+          </button>
+        </template>
+      </FormControl>
 
           <button
             type="submit"
