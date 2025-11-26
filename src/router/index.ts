@@ -7,8 +7,6 @@ import SignupView from '@/views/authentication/SignupView.vue'
 import OtpView from '@/views/authentication/OtpView.vue'
 import SuccessView from '@/views/authentication/SuccessView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
-import ComingSoonView from '@/views/ComingSoonView.vue'
-import HowItWorksView from '@/views/HowItWorksView.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
 import PrivacyPolicyView from '@/views/PrivacyPolicyView.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
@@ -18,7 +16,6 @@ import { useAuthStore } from '@/stores/auth-store'
 import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
-import PricingView from '@/views/PricingView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -41,7 +38,7 @@ const router = createRouter({
     {
       path: '/how-it-works',
       name: 'how-it-works',
-      component: HowItWorksView,
+      component: () => import('@/views/HowItWorksView.vue'),
     },
     {
       path: '/login',
@@ -86,7 +83,7 @@ const router = createRouter({
     {
       path: '/coming-soon',
       name: 'coming-soon',
-      component: ComingSoonView,
+      component: () => import('@/views/ComingSoonView.vue'),
     },
     {
       path: '/privacy-policy',
@@ -96,7 +93,7 @@ const router = createRouter({
     {
       path: '/pricing',
       name: 'pricing',
-      component: PricingView,
+      component: () => import('@/views/PricingView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
@@ -140,6 +137,12 @@ const router = createRouter({
           path: 'jurisdictions/:id',
           name: 'jurisdiction-detail',
           component: () => import('@/views/dashboard/jurisdictions/Jurisdiction.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'settings/billing',
+          name: 'billing',
+          component: () => import('@/views/dashboard/settings/BillingView.vue'),
           meta: { requiresAuth: true },
         },
       ],
