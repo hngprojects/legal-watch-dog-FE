@@ -473,6 +473,25 @@ watch(
                 class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
               />
             </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
+              <textarea
+                v-model="editForm.description"
+                rows="3"
+                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Instructions </label>
+              <textarea
+                v-model="editForm.prompt"
+                rows="3"
+                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              ></textarea>
+            </div>
+
             <div class="flex justify-end gap-3 pt-2">
               <button
                 type="button"
