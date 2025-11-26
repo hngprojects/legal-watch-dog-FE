@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
-import { ArrowLeftIcon, ChevronRight, Plus, Settings } from 'lucide-vue-next'
-import vector from '@/assets/icons/Vector.png'
+import { ArrowLeftIcon, Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 
 const route = useRoute()
 const router = useRouter()
@@ -193,17 +200,21 @@ watch(
 
     <div v-else class="mx-auto max-w-7xl">
       <div class="mb-8 flex items-center justify-between">
-        <nav class="flex items-center gap-2 text-sm">
-          <button
-            @click="goBack"
-            class="flex cursor-pointer items-center gap-2 text-gray-500 transition-colors hover:text-gray-700"
-          >
-            <img :src="vector" alt="Arrow-icon" class="h-3" />
-            <span>Project</span>
-          </button>
-          <ChevronRight :size="18" />
-          <span class="font-medium text-[#C17A3F]">{{ project.title }}</span>
-        </nav>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink to="/dashboard/projects">Projects</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbPage>{{ project.title }}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <div class="relative">
           <button
