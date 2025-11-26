@@ -5,6 +5,8 @@ import { Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 
 import type { Jurisdiction } from '@/api/jurisdiction'
+import { sourceApi } from '@/api/source'
+import type { Source } from '@/types/source'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,6 +39,7 @@ const activeTab = ref<'analysis' | 'sources' | 'output'>('analysis')
 const showSettingsMenu = ref(false)
 const showInlineEdit = ref(false)
 const subJurisdictionModalOpen = ref(false)
+const addSourceModalOpen = ref(false)
 const organizationId = computed(() => {
   const id = route.query.organizationId
   return typeof id === 'string' ? id : ''
@@ -53,6 +56,20 @@ const subJurisdictionForm = ref({
   description: '',
   prompt: '',
 })
+
+const sourceError = ref<string | null>(null)
+const sourceLoading = ref(false)
+const sourceForm = ref({
+  name: '',
+  url: '',
+  source_type: 'web',
+  scrape_frequency: 'DAILY',
+  scraping_rules: '',
+})
+const sources = ref<Source[]>([])
+const sourcesLoading = ref(false)
+const sourcesError = ref<string | null>(null)
+const editingSourceId = ref<string | null>(null)
 
 const formatKey = (key: string) =>
   key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
@@ -187,6 +204,7 @@ const loadJurisdiction = async (id: string) => {
 
   if (jurisdiction.value?.project_id) {
     await jurisdictionStore.fetchJurisdictions(jurisdiction.value.project_id)
+    await fetchSources(jurisdiction.value.id)
   }
 
   loading.value = false
@@ -344,6 +362,147 @@ const createSubJurisdiction = async () => {
 
   if (created) {
     closeSubJurisdictionModal()
+  }
+}
+
+const fetchSources = async (jurisdictionId: string) => {
+  sourcesLoading.value = true
+  sourcesError.value = null
+  try {
+    const { data } = await sourceApi.list({ jurisdiction_id: jurisdictionId })
+    sources.value = (data as any)?.data?.sources || (data as any)?.sources || []
+  } catch (err) {
+    const message =
+      (err as any)?.response?.data?.message ||
+      (err as any)?.response?.data?.detail ||
+      'Failed to load sources'
+    sourcesError.value = message
+  } finally {
+    sourcesLoading.value = false
+  }
+}
+
+const openAddSourceModal = () => {
+  addSourceModalOpen.value = true
+  sourceError.value = null
+  editingSourceId.value = null
+  sourceForm.value = {
+    name: '',
+    url: '',
+    source_type: 'web',
+    scrape_frequency: 'DAILY',
+    scraping_rules: '',
+  }
+}
+
+const closeAddSourceModal = () => {
+  addSourceModalOpen.value = false
+  sourceError.value = null
+  editingSourceId.value = null
+}
+
+const createSource = async () => {
+  if (!jurisdiction.value) return
+  sourceError.value = null
+  sourceLoading.value = true
+
+  let rules: Record<string, unknown> | null = null
+  if (sourceForm.value.scraping_rules.trim()) {
+    try {
+      rules = JSON.parse(sourceForm.value.scraping_rules)
+    } catch (e) {
+      sourceError.value = 'Scraping rules must be valid JSON'
+      sourceLoading.value = false
+      return
+    }
+  }
+
+  try {
+    if (editingSourceId.value) {
+      await sourceApi.patch(editingSourceId.value, {
+        jurisdiction_id: jurisdiction.value.id,
+        name: sourceForm.value.name.trim(),
+        url: sourceForm.value.url.trim(),
+        source_type: sourceForm.value.source_type as 'web' | 'pdf' | 'api',
+        scrape_frequency: sourceForm.value.scrape_frequency,
+        scraping_rules: rules,
+      })
+    } else {
+      await sourceApi.create({
+        jurisdiction_id: jurisdiction.value.id,
+        name: sourceForm.value.name.trim(),
+        url: sourceForm.value.url.trim(),
+        source_type: sourceForm.value.source_type as 'web' | 'pdf' | 'api',
+        scrape_frequency: sourceForm.value.scrape_frequency,
+        scraping_rules: rules,
+      })
+    }
+
+    // Refresh sources list and close
+    await fetchSources(jurisdiction.value.id)
+    await Swal.fire({
+      title: editingSourceId.value ? 'Source updated' : 'Source added',
+      text: editingSourceId.value
+        ? 'The source has been updated successfully.'
+        : 'The source has been created successfully.',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false,
+    })
+
+    closeAddSourceModal()
+  } catch (err) {
+    const message =
+      (err as any)?.response?.data?.message ||
+      (err as any)?.response?.data?.detail ||
+      'Failed to create source'
+    sourceError.value = message
+  } finally {
+    sourceLoading.value = false
+  }
+}
+
+const startEditSource = (source: Source) => {
+  editingSourceId.value = source.id
+  sourceForm.value = {
+    name: source.name,
+    url: source.url,
+    source_type: source.source_type || 'web',
+    scrape_frequency: source.scrape_frequency || 'DAILY',
+    scraping_rules: source.scraping_rules ? JSON.stringify(source.scraping_rules, null, 2) : '',
+  }
+  addSourceModalOpen.value = true
+}
+
+const deleteSource = async (source: Source) => {
+  const confirm = await Swal.fire({
+    title: 'Delete source?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d33',
+  })
+
+  if (!confirm.isConfirmed || !jurisdiction.value) return
+
+  try {
+    await sourceApi.delete(source.id)
+    sources.value = sources.value.filter((s) => s.id !== source.id)
+    await Swal.fire({
+      title: 'Deleted',
+      text: 'Source removed.',
+      icon: 'success',
+      timer: 1200,
+      showConfirmButton: false,
+    })
+  } catch (err) {
+    const message =
+      (err as any)?.response?.data?.message ||
+      (err as any)?.response?.data?.detail ||
+      'Failed to delete source'
+    await Swal.fire('Error', message, 'error')
   }
 }
 
@@ -624,6 +783,7 @@ watch(
             </p>
             <button
               class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+              @click="openAddSourceModal"
             >
               <span>+</span>
               <span>Add Sources</span>
@@ -662,26 +822,58 @@ watch(
           </div>
         </div>
 
-        <!-- Sources Panel (uses sourceItems / extractSources) -->
+        <!-- Sources Panel -->
         <div v-else class="p-6">
           <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Sources</h3>
 
-          <ul v-if="sourceItems.length" class="space-y-2">
+          <div v-if="sourcesLoading" class="space-y-2">
+            <div v-for="n in 3" :key="n" class="h-12 w-full rounded-lg bg-gray-100 animate-pulse" />
+          </div>
+
+          <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {{ sourcesError }}
+          </div>
+
+          <ul v-else-if="sources.length" class="space-y-2">
             <li
-              v-for="(source, index) in sourceItems"
-              :key="index"
-              class="rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
+              v-for="source in sources"
+              :key="source.id"
+              class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
             >
-              {{ source }}
+              <div>
+                <p class="font-semibold text-gray-900">{{ source.name }}</p>
+                <p class="text-xs text-gray-500">{{ source.url }}</p>
+                <p class="text-[11px] uppercase tracking-wide text-gray-400">
+                  {{ source.source_type }} • {{ source.scrape_frequency }}
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                  @click="startEditSource(source)"
+                >
+                  Edit
+                </button>
+                <button
+                  class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                  @click="deleteSource(source)"
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           </ul>
 
-          <div
-            v-else
-            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-          >
+          <div v-else class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
             <p class="text-sm text-gray-500">No sources have been added yet.</p>
             <p class="text-xs text-gray-400">Attach links or files to start tracking sources.</p>
+            <button
+              class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+              @click="openAddSourceModal"
+            >
+              <Plus :size="16" />
+              Add Source
+            </button>
           </div>
         </div>
       </section>
@@ -803,6 +995,104 @@ watch(
                 class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
               >
                 Create Sub-Jurisdiction
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div
+        v-if="addSourceModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
+        @click.self="closeAddSourceModal"
+      >
+        <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
+          <h3 class="mb-2 text-2xl font-bold text-gray-900">
+            {{ editingSourceId ? 'Edit Source' : 'Add Source' }}
+          </h3>
+          <p class="mb-6 text-sm text-gray-600">
+            Attach a source to monitor for this jurisdiction.
+          </p>
+
+          <form @submit.prevent="createSource" class="space-y-4">
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-800">Name</label>
+              <input
+                v-model="sourceForm.name"
+                required
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                placeholder="e.g. Supreme Court Opinions"
+              />
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-800">URL</label>
+              <input
+                v-model="sourceForm.url"
+                type="url"
+                required
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                placeholder="https://example.com"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-800">Source Type</label>
+                <select
+                  v-model="sourceForm.source_type"
+                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                >
+                  <option value="web">Web</option>
+                  <option value="pdf">PDF</option>
+                  <option value="api">API</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-800">Scrape Frequency</label>
+                <input
+                  v-model="sourceForm.scrape_frequency"
+                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                  placeholder="DAILY"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-sm font-medium text-gray-800">
+                Scraping Rules (JSON)
+              </label>
+              <textarea
+                v-model="sourceForm.scraping_rules"
+                rows="4"
+                class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                placeholder='{"content_selector": ".opinion-content"}'
+              ></textarea>
+              <p class="mt-1 text-xs text-gray-500">
+                Leave blank to use defaults. Must be valid JSON if provided.
+              </p>
+            </div>
+
+            <div v-if="sourceError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {{ sourceError }}
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                @click="closeAddSourceModal"
+                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                :disabled="sourceLoading"
+                class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#2a1102] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <span v-if="sourceLoading">Saving...</span>
+                <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
               </button>
             </div>
           </form>
