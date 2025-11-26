@@ -13,8 +13,8 @@ import trustIcon from '@/assets/icons/trust.png'
 import team1 from '@/assets/Images/meet_team_1.png'
 import team2 from '@/assets/Images/meet_team_2.png'
 import team3 from '@/assets/Images/meet_team_3.png'
-import stratBgLeft from '@/assets/Images/strategic_advantage_bg_left.png'
-import stratBgRight from '@/assets/Images/strategic_advantage_bg_right.png'
+import stratBgLeft from '@/assets/Images/backleft.png'
+import stratBgRight from '@/assets/Images/backright.png'
 
 const coreValues = [
   {

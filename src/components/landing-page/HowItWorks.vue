@@ -2,26 +2,26 @@
 import { Card, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { TypographyHeading, TypographyText } from '../ui/typography'
 
-import monitorIcon from '@/assets/icons/monitor.svg'
-import analyzeIcon from '@/assets/icons/translation.svg'
-import bellIcon from '@/assets/icons/bell.svg'
+import IconContainer from '@/assets/icons/IconContainer.png'
+import IconBackground from '@/assets/icons/IconBackground.png'
+import IconRing from '@/assets/icons/IconRing.png'
 
 const cards = [
   {
     title: 'Monitor',
-    icon: monitorIcon,
+    icon: IconContainer,
     description:
       'Tell us which websites to track. From government portals to internal policy pages',
   },
   {
     title: 'Analyze',
-    icon: analyzeIcon,
+    icon: IconBackground,
     description:
       'Our AI detects changes, analyzes the content and generates clear concise summaries',
   },
   {
     title: 'Notify',
-    icon: bellIcon,
+    icon: IconRing,
     description: 'Receive instant alerts via email or slack the moment a critical change occur.',
   },
 ]
@@ -51,10 +51,8 @@ const cards = [
           class="basis-full space-y-4 rounded-2xl bg-white px-8 py-10 text-left md:max-w-[400px] md:basis-[calc(50%-0.625rem)]"
         >
           <CardHeader class="gap-4 p-0">
-            <div
-              class="text-accent-foreground flex h-16 w-16 items-center justify-center rounded-full bg-[#F2AB6D] shadow-sm"
-            >
-              <img :src="card.icon" :alt="`${card.title} icon`" class="size-8" />
+            <div class="text-accent-foreground flex h-16 w-16 items-center justify-center">
+              <img :src="card.icon" :alt="`${card.title} icon`" class="size-12" />
             </div>
             <CardTitle class="text-foreground text-2xl font-semibold">
               {{ card.title }}
