@@ -171,9 +171,9 @@ jobs:
           
           EOF
 
-PROD_PASS      - name: Set up SSH and Deploy
+      - name: Set up SSH and Deploy
         env:
-          SERVER_PASS: ${{ secrets. }}
+          SERVER_PASS: ${{ secrets.PROD_PASS }}
           SERVER_USER: ${{ secrets.PROD_USER }}
           SERVER_IP: ${{ secrets.PROD_IP }}
         run: |
