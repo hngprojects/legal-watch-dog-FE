@@ -17,6 +17,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import FAQView from '@/views/FAQView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 
 const router = createRouter({
@@ -92,6 +93,11 @@ const router = createRouter({
       path: '/privacy-policy',
       name: 'privacy-policy',
       component: PrivacyPolicyView,
+    },
+    {
+      path: '/faq',
+      name: 'faq',
+      component: FAQView,
     },
     {
       path: '/:pathMatch(.*)*',
