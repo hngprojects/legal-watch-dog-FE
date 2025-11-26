@@ -7,6 +7,7 @@ const Products = [
   { label: 'How it Works', path: '/how-it-works' },
   { label: 'Onboarding', path: '/onboarding' },
   { label: 'Waitlist', path: '/waitlist' },
+  { label: 'Pricing', path: '/pricing' },
 ]
 
 const Companys = [{ label: 'About', path: '/about-us' }]
