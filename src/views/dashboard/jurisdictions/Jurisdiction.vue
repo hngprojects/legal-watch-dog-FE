@@ -152,10 +152,18 @@ const subJurisdictions = computed<NestedJurisdiction[]>(() => {
   return walk(jurisdiction.value.id, 0)
 })
 
-const getProjectName = computed(() => {
+const projectName = computed(() => {
   if (!jurisdiction.value?.project_id) return ''
   const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
   return project?.title || 'Project'
+})
+
+const parentJurisdiction = computed(() => {
+  if (!jurisdiction.value?.parent_id) return null
+  return (
+    jurisdictionStore.jurisdictions.find((item) => item.id === jurisdiction.value?.parent_id) ||
+    null
+  )
 })
 
 const loadJurisdiction = async (id: string) => {
@@ -223,6 +231,7 @@ const saveEdit = async () => {
 
     showInlineEdit.value = false
   } catch (err) {
+    void err
     Swal.fire('Error', jurisdictionStore.error || 'Failed to update jurisdiction', 'error')
   }
 }
@@ -367,15 +376,27 @@ watch(
 
             <BreadcrumbSeparator />
 
-            <BreadcrumbItem v-if="jurisdiction.project_id && getProjectName">
+            <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
                 <RouterLink :to="`/dashboard/projects/${jurisdiction.project_id}`">
-                  {{ getProjectName }}
+                  {{ projectName }}
                 </RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
 
             <BreadcrumbSeparator />
+
+            <template v-if="parentJurisdiction">
+              <BreadcrumbItem>
+                <BreadcrumbLink as-child>
+                  <RouterLink :to="`/dashboard/jurisdictions/${parentJurisdiction.id}`">
+                    {{ parentJurisdiction.name }}
+                  </RouterLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+            </template>
 
             <BreadcrumbItem>
               <BreadcrumbPage>{{ jurisdiction.name }}</BreadcrumbPage>
