@@ -29,7 +29,7 @@ const route = useRoute()
 const router = useRouter()
 const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
-const jurisdictionId = route.params.id as string
+const jurisdictionId = computed(() => route.params.id as string)
 
 const jurisdiction = ref<Jurisdiction | null>(null)
 const loading = ref(true)
@@ -158,11 +158,11 @@ const getProjectName = computed(() => {
   return project?.title || 'Project'
 })
 
-const loadJurisdiction = async () => {
+const loadJurisdiction = async (id: string) => {
   loading.value = true
   jurisdictionStore.setError(null)
-  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === jurisdictionId) || null
-  jurisdiction.value = existing || (await jurisdictionStore.fetchOne(jurisdictionId))
+  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id) || null
+  jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
 
   if (!projectStore.projects.length) {
     await projectStore.fetchProjects()
@@ -203,7 +203,7 @@ const startEdit = () => {
 
 const saveEdit = async () => {
   try {
-    const response = await jurisdictionStore.updateJurisdiction(jurisdictionId, {
+    const response = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, {
       name: editForm.value.name,
       description: editForm.value.description,
       prompt: editForm.value.prompt,
@@ -244,7 +244,7 @@ const deleteJurisdiction = async () => {
 
   const projectId = jurisdiction.value?.project_id
 
-  await jurisdictionStore.deleteJurisdiction(jurisdictionId)
+  await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
 
   await Swal.fire({
     title: 'Deleted!',
@@ -311,12 +311,21 @@ const goToJurisdiction = (id: string) => {
   router.push(`/dashboard/jurisdictions/${id}`)
 }
 
-onMounted(loadJurisdiction)
+onMounted(() => loadJurisdiction(jurisdictionId.value))
+
+watch(
+  () => jurisdictionId.value,
+  (newId) => {
+    if (newId) {
+      loadJurisdiction(newId)
+    }
+  },
+)
 
 watch(
   () => jurisdictionStore.jurisdictions,
   (newJurisdictions) => {
-    const found = newJurisdictions.find((j) => j.id === jurisdictionId)
+    const found = newJurisdictions.find((j) => j.id === jurisdictionId.value)
     if (found) jurisdiction.value = found
   },
   { deep: true },
@@ -494,7 +503,7 @@ watch(
               Output
               <span
                 v-if="activeTab === 'output'"
-                class="absolute inset-x-0 -bottom-[1px] h-0.5 bg-[#401903]"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
               ></span>
             </button>
             <button
@@ -509,7 +518,7 @@ watch(
               Sources
               <span
                 v-if="activeTab === 'sources'"
-                class="absolute inset-x-0 -bottom-[1px] h-0.5 bg-[#401903]"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
               ></span>
             </button>
           </div>
@@ -596,21 +605,19 @@ watch(
           <article
             v-for="node in subJurisdictions"
             :key="node.id"
-            class="rounded-xl border border-gray-100 bg-[#FAF9F7] p-4 shadow-sm"
+            @click="goToJurisdiction(node.id)"
+            class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
             :style="{ paddingLeft: `${node.depth * 16 + 16}px` }"
           >
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <p class="text-sm font-semibold text-[#1F1F1F]">{{ node.name }}</p>
-                <p class="mt-1 text-sm text-[#4B5563]">{{ node.description }}</p>
-              </div>
-              <button
-                class="text-xs font-medium text-[#401903] underline"
-                @click="goToJurisdiction(node.id)"
-              >
-                Open
-              </button>
-            </div>
+            <h4 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]">
+              {{ node.name }}
+            </h4>
+            <p class="text-sm leading-relaxed text-gray-600">
+              {{ node.description }}
+            </p>
+            <p class="mt-2 text-xs text-gray-400">
+              {{ new Date(node.created_at).toLocaleString() }}
+            </p>
           </article>
         </div>
       </section>
@@ -627,7 +634,7 @@ watch(
             @click="closeSubJurisdictionModal"
             class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
           >
-            <span class="-mt-[1px] text-lg">&times;</span>
+            <span class="-mt-px text-lg">&times;</span>
           </button>
 
           <div class="mb-4">
