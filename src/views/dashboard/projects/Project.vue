@@ -174,7 +174,8 @@ const startEdit = () => {
 
 const saveEdit = async () => {
   try {
-    const updated = await projectStore.updateProject(organizationId.value, projectId, {
+    const orgIdForUpdate = organizationId.value || project.value?.org_id || ''
+    const updated = await projectStore.updateProject(orgIdForUpdate, projectId, {
       title: editForm.value.title,
       description: editForm.value.description,
       master_prompt: editForm.value.master_prompt,

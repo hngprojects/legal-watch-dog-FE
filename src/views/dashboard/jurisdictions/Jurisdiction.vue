@@ -253,9 +253,9 @@ const startEdit = () => {
 const saveEdit = async () => {
   try {
     const response = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, {
-      name: editForm.value.name,
-      description: editForm.value.description,
-      prompt: editForm.value.prompt,
+      name: editForm.value.name || undefined,
+      description: editForm.value.description || undefined,
+      prompt: editForm.value.prompt || undefined,
     })
 
     if (response) {
@@ -421,24 +421,19 @@ const createSource = async () => {
   }
 
   try {
+    const payload = {
+      jurisdiction_id: jurisdiction.value.id,
+      name: sourceForm.value.name.trim(),
+      url: sourceForm.value.url.trim(),
+      source_type: sourceForm.value.source_type as 'web' | 'pdf' | 'api',
+      scrape_frequency: sourceForm.value.scrape_frequency,
+      scraping_rules: rules,
+    }
+
     if (editingSourceId.value) {
-      await sourceApi.patch(editingSourceId.value, {
-        jurisdiction_id: jurisdiction.value.id,
-        name: sourceForm.value.name.trim(),
-        url: sourceForm.value.url.trim(),
-        source_type: sourceForm.value.source_type as 'web' | 'pdf' | 'api',
-        scrape_frequency: sourceForm.value.scrape_frequency,
-        scraping_rules: rules,
-      })
+      await sourceApi.update(editingSourceId.value, payload)
     } else {
-      await sourceApi.create({
-        jurisdiction_id: jurisdiction.value.id,
-        name: sourceForm.value.name.trim(),
-        url: sourceForm.value.url.trim(),
-        source_type: sourceForm.value.source_type as 'web' | 'pdf' | 'api',
-        scrape_frequency: sourceForm.value.scrape_frequency,
-        scraping_rules: rules,
-      })
+      await sourceApi.create(payload)
     }
 
     // Refresh sources list and close
