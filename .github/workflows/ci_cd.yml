@@ -71,7 +71,7 @@ jobs:
 
       - name: Generate staging enviornment file
         run: |
-          cat <<EOT > .env
+          cat <<'EOF' > .env
           /// <reference types="vite/client" />
           /// <reference types="lucide-vue-next" />
           interface ImportMetaEnv {
@@ -158,7 +158,7 @@ jobs:
 
       - name: Generate production environment file
         run: |
-          cat <<EOT > .env
+          cat <<'EOF' > .env
           /// <reference types="vite/client" />
           /// <reference types="lucide-vue-next" />
           interface ImportMetaEnv {
