@@ -5,7 +5,7 @@ import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings, FileQuestion } from 'lucide-vue-next'
+import { ArrowLeftIcon, Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 import {
   Breadcrumb,
@@ -113,7 +113,7 @@ const showInlineEdit = ref(false)
 const editForm = ref({
   title: '',
   description: '',
-  master_prompt: '', // Added master_prompt for edit form
+  master_prompt: '',
 })
 
 const toggleSettingsMenu = () => {
@@ -165,7 +165,7 @@ const startEdit = () => {
   editForm.value = {
     title: project.value?.title || '',
     description: project.value?.description || '',
-    master_prompt: project.value?.master_prompt || '', // Initialize with current value
+    master_prompt: project.value?.master_prompt || '',
   }
 
   showInlineEdit.value = true
@@ -178,7 +178,7 @@ const saveEdit = async () => {
     const updated = await projectStore.updateProject(orgIdForUpdate, projectId, {
       title: editForm.value.title,
       description: editForm.value.description,
-      master_prompt: editForm.value.master_prompt, // Include master_prompt in update
+      master_prompt: editForm.value.master_prompt,
     })
 
     if (project.value && updated) {
@@ -251,26 +251,13 @@ watch(
               </BreadcrumbLink>
             </BreadcrumbItem>
 
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink as-child>
-                  <RouterLink to="/dashboard/projects" class="text-gray-500 hover:text-gray-900">
-                    Projects
-                  </RouterLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
+            <BreadcrumbSeparator />
 
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbPage class="font-medium text-[#926233]">
-                  {{ project.title }}
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+            <BreadcrumbItem>
+              <BreadcrumbPage>{{ project.title }}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <div class="relative">
           <button
@@ -318,18 +305,13 @@ watch(
               ></textarea>
             </div>
 
-            <!-- Added Master Prompt field for editing -->
             <div>
-              <label class="text-sm font-medium text-[#1F1F1F]">Instructions</label>
+              <label class="text-sm font-medium text-[#1F1F1F]">Master Prompt</label>
               <textarea
                 v-model="editForm.master_prompt"
                 rows="3"
-                placeholder="e.g. Summarize any changes to visa policy in the UK, EU, USA, Canada..."
                 class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
               ></textarea>
-              <p class="mt-1.5 text-xs text-[#717680]">
-                Define the AI prompt that will be used to analyze changes
-              </p>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
@@ -356,7 +338,7 @@ watch(
         </template>
       </div>
 
-      <div class="mb-8 flex items-end justify-between md:mt-12">
+      <div class="mb-8 flex items-end justify-between md:mt-[88px]">
         <div class="flex w-auto gap-8 border-b border-gray-200">
           <button
             @click="activeTab = 'jurisdictions'"
