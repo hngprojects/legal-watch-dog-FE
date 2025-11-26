@@ -15,7 +15,7 @@ const props = defineProps<{
       cn(
         'group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50',
         'has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4',
-        'has-data-[state=checked]:border-neutral-900 has-data-[state=checked]:bg-neutral-900/5 dark:has-data-[state=checked]:border-neutral-50 dark:dark:has-data-[state=checked]:bg-neutral-50/10 dark:has-data-[state=checked]:bg-neutral-50/5 dark:has-data-[state=checked]:bg-neutral-900/10',
+        'has-data-[state=checked]:border-neutral-900 has-data-[state=checked]:bg-neutral-900/5',
         props.class,
       )
     "

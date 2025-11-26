@@ -26,8 +26,6 @@ const props = defineProps<{
       block
       w-fit
       px-2
-      dark:bg-neutral-950
-      dark:text-neutral-400
       data-slot="field-separator-content"
     >
       <slot />
