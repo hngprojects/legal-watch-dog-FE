@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Plus, Settings } from 'lucide-vue-next'
+import { Plus, Settings, MoreVertical, Trash2, Edit3 } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 
 import type { Jurisdiction } from '@/api/jurisdiction'
+import type { Source, SourceType, ScrapeFrequency } from '@/types/source'
+import { fetchSourcesByJurisdiction, updateSource, deleteSource } from '@/api/sources'
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,6 +16,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
 
@@ -29,152 +33,265 @@ const route = useRoute()
 const router = useRouter()
 const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
+
 const jurisdictionId = computed(() => route.params.id as string)
 
 const jurisdiction = ref<Jurisdiction | null>(null)
 const loading = ref(true)
 const activeTab = ref<'analysis' | 'sources' | 'output'>('analysis')
+
 const showSettingsMenu = ref(false)
 const showInlineEdit = ref(false)
-const subJurisdictionModalOpen = ref(false)
 
-const editForm = ref({
+const sources = ref<Source[]>([])
+const loadingSources = ref(true)
+
+// Source edit modal
+const editModalOpen = ref(false)
+const editingSource = ref<Source | null>(null)
+
+// Two separate forms
+const jurisdictionEditForm = ref({
   name: '',
   description: '',
   prompt: '',
 })
 
-const subJurisdictionForm = ref({
+const sourceEditForm = ref({
   name: '',
-  description: '',
-  prompt: '',
+  url: '',
+  source_type: '' as SourceType,
+  scrape_frequency: '' as ScrapeFrequency,
+  is_active: true,
 })
 
-const formatKey = (key: string) =>
-  key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+const activeMenuId = ref<string | null>(null)
 
-const stringifyValue = (value: unknown): string => {
-  if (value === null || value === undefined) return ''
-  if (typeof value === 'string') return value
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
-  if (Array.isArray(value)) return value.map((item) => stringifyValue(item)).join(', ')
-  if (typeof value === 'object') return JSON.stringify(value, null, 2)
-  return ''
+const toggleMenu = (sourceId: string, event: MouseEvent) => {
+  event.stopPropagation()
+  activeMenuId.value = activeMenuId.value === sourceId ? null : sourceId
 }
 
+const closeMenuOnClickOutside = () => {
+  activeMenuId.value = null
+}
+
+onMounted(() => {
+  document.addEventListener('click', closeMenuOnClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeMenuOnClickOutside)
+})
+
+const sourceTypeOptions = [
+  { value: 'web', label: 'Website' },
+  { value: 'rss', label: 'RSS Feed' },
+  { value: 'api', label: 'API' },
+  { value: 'pdf', label: 'PDF Document' },
+  { value: 'newsletter', label: 'Newsletter' },
+]
+
+const frequencyOptions = [
+  { value: 'HOURLY', label: 'Hourly' },
+  { value: 'DAILY', label: 'Daily' },
+  { value: 'WEEKLY', label: 'Weekly' },
+  { value: 'MONTHLY', label: 'Monthly' },
+]
+
+const openEditModal = (source: Source) => {
+  editingSource.value = source
+  sourceEditForm.value = {
+    name: source.name,
+    url: source.url,
+    source_type: source.source_type,
+    scrape_frequency: source.scrape_frequency as ScrapeFrequency,
+    is_active: source.is_active,
+  }
+  editModalOpen.value = true
+  activeMenuId.value = null
+}
+
+const closeEditModal = () => {
+  editModalOpen.value = false
+  editingSource.value = null
+}
+
+// Fixed: normalizeOutput restored
 const normalizeOutput = (raw: unknown): OutputItem[] => {
   if (!raw) return []
 
   if (Array.isArray(raw)) {
     return raw
       .map((item, index) => {
-        if (typeof item === 'string') {
-          return { title: item }
-        }
-
+        if (typeof item === 'string') return { title: item }
         if (typeof item === 'object' && item !== null) {
-          const record = item as Record<string, unknown>
+          const r = item as Record<string, unknown>
           const title =
-            (record.title as string) ||
-            (record.heading as string) ||
-            (record.change as string) ||
+            (r.title as string) ||
+            (r.heading as string) ||
+            (r.change as string) ||
             `Update ${index + 1}`
           const detail =
-            (record.detail as string) ||
-            (record.description as string) ||
-            (record.summary as string) ||
-            stringifyValue(record)
-
-          return {
-            title,
-            detail,
-          }
+            (r.detail as string) ||
+            (r.description as string) ||
+            (r.summary as string) ||
+            JSON.stringify(r)
+          return { title, detail }
         }
-
-        return { title: `Update ${index + 1}`, detail: stringifyValue(item) }
+        return { title: `Update ${index + 1}`, detail: String(item) }
       })
-      .filter((item) => item.title || item.detail)
+      .filter((i) => i.title || i.detail)
   }
 
-  if (typeof raw === 'object') {
-    const record = raw as Record<string, unknown>
-    const listCandidate = record.changes || record.updates || record.items
-
-    if (Array.isArray(listCandidate)) {
-      return normalizeOutput(listCandidate)
-    }
-
-    return Object.entries(record).map(([key, value]) => ({
-      title: formatKey(key),
-      detail: stringifyValue(value),
+  if (typeof raw === 'object' && raw !== null) {
+    const r = raw as Record<string, unknown>
+    const list = r.changes || r.updates || r.items
+    if (Array.isArray(list)) return normalizeOutput(list)
+    return Object.entries(r).map(([k, v]) => ({
+      title: k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      detail: String(v),
     }))
   }
-
-  if (typeof raw === 'string') return [{ title: raw }]
 
   return [{ title: String(raw) }]
 }
 
-const extractSources = (raw: unknown): string[] => {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return []
-  const record = raw as Record<string, unknown>
-  const sources = record.sources || record.links || record.source_list
-
-  if (Array.isArray(sources)) {
-    return sources.map((source) => stringifyValue(source)).filter(Boolean)
-  }
-
-  return []
-}
-
 const outputItems = computed<OutputItem[]>(() => normalizeOutput(jurisdiction.value?.scrape_output))
-const sourceItems = computed<string[]>(() => extractSources(jurisdiction.value?.scrape_output))
 
 const lastUpdatedText = computed(() => {
   if (!jurisdiction.value) return ''
-  const timestamp = jurisdiction.value.updated_at || jurisdiction.value.created_at
-  return timestamp ? new Date(timestamp).toLocaleString() : ''
+  const ts = jurisdiction.value.updated_at || jurisdiction.value.created_at
+  return ts ? new Date(ts).toLocaleString() : ''
 })
 
 const subJurisdictions = computed<NestedJurisdiction[]>(() => {
   if (!jurisdiction.value) return []
   const walk = (parentId: string, depth = 0): NestedJurisdiction[] =>
     jurisdictionStore.jurisdictions
-      .filter((item) => item.parent_id === parentId)
+      .filter((j) => j.parent_id === parentId)
       .flatMap((child) => [{ ...child, depth }, ...walk(child.id, depth + 1)])
-
   return walk(jurisdiction.value.id, 0)
 })
 
 const projectName = computed(() => {
   if (!jurisdiction.value?.project_id) return ''
-  const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
-  return project?.title || 'Project'
+  const p = projectStore.projects.find((pr) => pr.id === jurisdiction.value?.project_id)
+  return p?.title || 'Project'
 })
 
 const parentJurisdiction = computed(() => {
   if (!jurisdiction.value?.parent_id) return null
-  return (
-    jurisdictionStore.jurisdictions.find((item) => item.id === jurisdiction.value?.parent_id) ||
-    null
-  )
+  return jurisdictionStore.jurisdictions.find((j) => j.id === jurisdiction.value?.parent_id) || null
 })
+
+const loadSources = async () => {
+  if (!jurisdiction.value) return
+  loadingSources.value = true
+  try {
+    sources.value = await fetchSourcesByJurisdiction(jurisdiction.value.id)
+  } catch (error: unknown) {
+    Swal.fire('Error', error instanceof Error ? error.message : 'Failed to load sources', 'error')
+    sources.value = []
+  } finally {
+    loadingSources.value = false
+  }
+}
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
-  jurisdictionStore.setError(null)
-  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id) || null
+  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id)
   jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
 
-  if (!projectStore.projects.length) {
-    await projectStore.fetchProjects()
-  }
-
+  if (!projectStore.projects.length) await projectStore.fetchProjects()
   if (jurisdiction.value?.project_id) {
     await jurisdictionStore.fetchJurisdictions(jurisdiction.value.project_id)
   }
 
+  await loadSources()
   loading.value = false
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'sources') loadSources()
+})
+
+const saveEditedSource = async () => {
+  if (!editingSource.value) return
+
+  try {
+    const updated = await updateSource(editingSource.value.id, {
+      name: sourceEditForm.value.name.trim(),
+      url: sourceEditForm.value.url.trim(),
+      source_type: sourceEditForm.value.source_type,
+      scrape_frequency: sourceEditForm.value.scrape_frequency,
+      is_active: sourceEditForm.value.is_active,
+    })
+
+    const idx = sources.value.findIndex((s) => s.id === updated.id)
+    if (idx > -1) sources.value[idx] = updated
+
+    Swal.fire('Updated!', 'Source updated successfully.', 'success')
+    closeEditModal()
+  } catch (error: unknown) {
+    Swal.fire('Error', error instanceof Error ? error.message : 'Failed to update source', 'error')
+  }
+}
+
+const startEdit = () => {
+  jurisdictionEditForm.value = {
+    name: jurisdiction.value?.name || '',
+    description: jurisdiction.value?.description || '',
+    prompt: jurisdiction.value?.prompt || '',
+  }
+  showInlineEdit.value = true
+  showSettingsMenu.value = false
+}
+
+const saveEdit = async () => {
+  try {
+    const response = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, {
+      name: jurisdictionEditForm.value.name,
+      description: jurisdictionEditForm.value.description,
+      prompt: jurisdictionEditForm.value.prompt,
+    })
+
+    if (response) jurisdiction.value = response
+
+    await Swal.fire({
+      title: 'Updated!',
+      text: 'Jurisdiction updated successfully.',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false,
+    })
+    showInlineEdit.value = false
+  } catch {
+    Swal.fire('Error', jurisdictionStore.error || 'Failed to update jurisdiction', 'error')
+  }
+}
+
+const handleDeleteClick = async (source: Source) => {
+  const result = await Swal.fire({
+    title: 'Delete source?',
+    text: `"${source.name}" will be removed (soft-delete). You can restore it later.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d33',
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    await deleteSource(source.id)
+    sources.value = sources.value.filter((s) => s.id !== source.id)
+    Swal.fire('Deleted!', 'Source has been removed.', 'success')
+    activeMenuId.value = null
+  } catch {
+    Swal.fire('Error', 'Failed to delete source', 'error')
+  }
 }
 
 const goBack = () => {
@@ -185,54 +302,16 @@ const goBack = () => {
   }
 }
 
+const navigateToAddSources = () => {
+  router.push({ name: 'jurisdiction-sources', params: { id: jurisdictionId.value } })
+}
+
 const toggleSettingsMenu = () => {
   showSettingsMenu.value = !showSettingsMenu.value
 }
 
-const closeSettingsMenu = () => {
-  showSettingsMenu.value = false
-}
-
-const startEdit = () => {
-  editForm.value = {
-    name: jurisdiction.value?.name || '',
-    description: jurisdiction.value?.description || '',
-    prompt: jurisdiction.value?.prompt || '',
-  }
-  showInlineEdit.value = true
-  closeSettingsMenu()
-}
-
-const saveEdit = async () => {
-  try {
-    const response = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, {
-      name: editForm.value.name,
-      description: editForm.value.description,
-      prompt: editForm.value.prompt,
-    })
-
-    if (response) {
-      jurisdiction.value = response
-    }
-
-    await Swal.fire({
-      title: 'Updated!',
-      text: 'Jurisdiction updated successfully.',
-      icon: 'success',
-      timer: 1500,
-      showConfirmButton: false,
-    })
-
-    showInlineEdit.value = false
-  } catch (err) {
-    void err
-    Swal.fire('Error', jurisdictionStore.error || 'Failed to update jurisdiction', 'error')
-  }
-}
-
 const deleteJurisdiction = async () => {
-  closeSettingsMenu()
-
+  showSettingsMenu.value = false
   const confirm = await Swal.fire({
     title: 'Delete Jurisdiction?',
     text: 'This action cannot be undone.',
@@ -246,96 +325,29 @@ const deleteJurisdiction = async () => {
   if (!confirm.isConfirmed) return
 
   const projectId = jurisdiction.value?.project_id
-
   await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
-
-  await Swal.fire({
-    title: 'Deleted!',
-    text: 'Jurisdiction successfully deleted.',
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false,
-  })
-
-  if (projectId) {
-    router.push(`/dashboard/projects/${projectId}`)
-  } else {
-    router.push('/dashboard/projects')
-  }
-}
-
-const openSubJurisdictionModal = () => {
-  subJurisdictionModalOpen.value = true
-  subJurisdictionForm.value = {
-    name: '',
-    description: '',
-    prompt: '',
-  }
-  jurisdictionStore.setError(null)
-}
-
-const closeSubJurisdictionModal = () => {
-  subJurisdictionModalOpen.value = false
-  subJurisdictionForm.value = {
-    name: '',
-    description: '',
-    prompt: '',
-  }
-  jurisdictionStore.setError(null)
-}
-
-const createSubJurisdiction = async () => {
-  if (!jurisdiction.value) return
-  jurisdictionStore.setError(null)
-
-  if (!subJurisdictionForm.value.name.trim()) {
-    jurisdictionStore.setError('Sub-jurisdiction name is required')
-    return
-  }
-
-  if (!subJurisdictionForm.value.description.trim()) {
-    jurisdictionStore.setError('Description is required')
-    return
-  }
-
-  const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
-    name: subJurisdictionForm.value.name.trim(),
-    description: subJurisdictionForm.value.description.trim(),
-    prompt: subJurisdictionForm.value.prompt.trim() || null,
-    parent_id: jurisdiction.value.id,
-  })
-
-  if (created) {
-    closeSubJurisdictionModal()
-  }
+  await Swal.fire('Deleted!', 'Jurisdiction deleted.', 'success')
+  router.push(projectId ? `/dashboard/projects/${projectId}` : '/dashboard/projects')
 }
 
 const goToJurisdiction = (id: string) => {
   router.push(`/dashboard/jurisdictions/${id}`)
 }
 
-const navigateToAddSources = () => {
-  router.push({
-    name: 'jurisdiction-sources',
-    params: { id: jurisdictionId.value },
-  })
+const openSubJurisdictionModal = () => {
+  Swal.fire('Coming soon', 'Sub-jurisdiction creation is in development', 'info')
 }
 
 onMounted(() => loadJurisdiction(jurisdictionId.value))
 
-watch(
-  () => jurisdictionId.value,
-  (newId) => {
-    if (newId) {
-      loadJurisdiction(newId)
-    }
-  },
-)
+watch(jurisdictionId, (newId) => {
+  if (newId) loadJurisdiction(newId)
+})
 
 watch(
   () => jurisdictionStore.jurisdictions,
-  (newJurisdictions) => {
-    const found = newJurisdictions.find((j) => j.id === jurisdictionId.value)
+  (list) => {
+    const found = list.find((j) => j.id === jurisdictionId.value)
     if (found) jurisdiction.value = found
   },
   { deep: true },
@@ -344,6 +356,7 @@ watch(
 
 <template>
   <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12">
+    <!-- Loading State -->
     <div v-if="loading" class="mx-auto max-w-6xl">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
@@ -352,6 +365,7 @@ watch(
       </div>
     </div>
 
+    <!-- Not Found -->
     <div
       v-else-if="!jurisdiction"
       class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm"
@@ -359,13 +373,15 @@ watch(
       <h1 class="text-2xl font-semibold text-gray-900">Jurisdiction not found</h1>
       <button
         @click="goBack"
-        class="mt-4 inline-flex cursor-pointer items-center gap-2 text-[#401903] hover:underline"
+        class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline"
       >
         Back to Projects
       </button>
     </div>
 
+    <!-- Main Content -->
     <div v-else class="mx-auto max-w-6xl space-y-6 lg:space-y-8">
+      <!-- Header + Settings -->
       <header class="flex flex-wrap items-start justify-between gap-4">
         <Breadcrumb>
           <BreadcrumbList>
@@ -374,9 +390,7 @@ watch(
                 <RouterLink to="/dashboard/projects">Projects</RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
-
             <BreadcrumbSeparator />
-
             <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
                 <RouterLink :to="`/dashboard/projects/${jurisdiction.project_id}`">
@@ -384,9 +398,7 @@ watch(
                 </RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
+            <BreadcrumbSeparator v-if="jurisdiction.project_id && projectName" />
             <template v-if="parentJurisdiction">
               <BreadcrumbItem>
                 <BreadcrumbLink as-child>
@@ -395,10 +407,8 @@ watch(
                   </RouterLink>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-
               <BreadcrumbSeparator />
             </template>
-
             <BreadcrumbItem>
               <BreadcrumbPage>{{ jurisdiction.name }}</BreadcrumbPage>
             </BreadcrumbItem>
@@ -408,11 +418,10 @@ watch(
         <div class="relative">
           <button
             @click.stop="toggleSettingsMenu"
-            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-800"
+            class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 shadow-sm hover:bg-gray-50"
           >
             <Settings :size="18" />
           </button>
-
           <div
             v-if="showSettingsMenu"
             @click.stop
@@ -434,37 +443,33 @@ watch(
         </div>
       </header>
 
+      <!-- Jurisdiction Info -->
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
         <template v-if="showInlineEdit">
           <form @submit.prevent="saveEdit" class="space-y-4">
             <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                Jurisdiction Name
-              </label>
+              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Jurisdiction Name</label>
               <input
-                v-model="editForm.name"
-                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                v-model="jurisdictionEditForm.name"
+                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
               />
             </div>
-
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
               <textarea
-                v-model="editForm.description"
+                v-model="jurisdictionEditForm.description"
                 rows="3"
                 class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               ></textarea>
             </div>
-
             <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Instructions </label>
+              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Instructions</label>
               <textarea
-                v-model="editForm.prompt"
+                v-model="jurisdictionEditForm.prompt"
                 rows="3"
                 class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               ></textarea>
             </div>
-
             <div class="flex justify-end gap-3 pt-2">
               <button
                 type="button"
@@ -482,32 +487,26 @@ watch(
             </div>
           </form>
         </template>
-
         <template v-else>
-          <div class="flex flex-col gap-3">
-            <p class="text-xs font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
-              Jurisdiction
-            </p>
-            <h1 class="text-3xl font-bold text-[#1F1F1F]">{{ jurisdiction.name }}</h1>
-            <p v-if="jurisdiction.description" class="text-base leading-relaxed text-[#4B5563]">
-              {{ jurisdiction.description }}
-            </p>
-            <p v-if="lastUpdatedText" class="text-sm text-gray-400">
-              Updated {{ lastUpdatedText }}
-            </p>
-          </div>
+          <p class="text-xs font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
+            Jurisdiction
+          </p>
+          <h1 class="text-3xl font-bold text-[#1F1F1F]">{{ jurisdiction.name }}</h1>
+          <p v-if="jurisdiction.description" class="text-base leading-relaxed text-[#4B5563]">
+            {{ jurisdiction.description }}
+          </p>
+          <p v-if="lastUpdatedText" class="text-sm text-gray-400">Updated {{ lastUpdatedText }}</p>
         </template>
       </section>
 
+      <!-- Tabs -->
       <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
             <button
               @click="activeTab = 'analysis'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
+              :class="activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500'"
+              class="relative pb-4 text-sm font-semibold"
             >
               Analysis
               <span
@@ -515,13 +514,10 @@ watch(
                 class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
               ></span>
             </button>
-
             <button
               @click="activeTab = 'output'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'output' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
+              :class="activeTab === 'output' ? 'text-[#1F1F1F]' : 'text-gray-500'"
+              class="relative pb-4 text-sm font-semibold"
             >
               Output
               <span
@@ -529,13 +525,10 @@ watch(
                 class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
               ></span>
             </button>
-
             <button
               @click="activeTab = 'sources'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'sources' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
+              :class="activeTab === 'sources' ? 'text-[#1F1F1F]' : 'text-gray-500'"
+              class="relative pb-4 text-sm font-semibold"
             >
               Sources
               <span
@@ -546,17 +539,15 @@ watch(
           </div>
         </div>
 
-        <!-- Analysis Panel -->
+        <!-- Analysis Tab -->
         <div v-if="activeTab === 'analysis'" class="p-6">
-          <!-- Empty State for Analysis -->
           <div class="flex flex-col items-center justify-center px-8 py-16 text-center">
             <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
               <svg
-                xmlns="http://www.w3.org/2000/svg"
                 class="h-8 w-8 text-gray-400"
                 fill="none"
-                viewBox="0 0 24 24"
                 stroke="currentColor"
+                viewBox="0 0 24 24"
               >
                 <path
                   stroke-linecap="round"
@@ -572,18 +563,16 @@ watch(
             </p>
             <button
               @click="navigateToAddSources"
-              class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+              class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
             >
-              <span>+</span>
-              <span>Add Sources</span>
+              <span>+</span> Add Sources
             </button>
           </div>
         </div>
 
-        <!-- Output Panel (uses outputItems / normalizeOutput) -->
+        <!-- Output Tab -->
         <div v-else-if="activeTab === 'output'" class="p-6">
           <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">What Changed</h3>
-
           <div v-if="outputItems.length" class="space-y-3">
             <article
               v-for="(item, index) in outputItems"
@@ -599,7 +588,6 @@ watch(
               </p>
             </article>
           </div>
-
           <div
             v-else
             class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
@@ -611,39 +599,135 @@ watch(
           </div>
         </div>
 
-        <!-- Sources Panel (uses sourceItems / extractSources) -->
+        <!-- Sources Tab -->
         <div v-else class="p-6">
-          <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Sources</h3>
-
-          <ul v-if="sourceItems.length" class="space-y-2">
-            <li
-              v-for="(source, index) in sourceItems"
-              :key="index"
-              class="rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
+          <div class="mb-6 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
+            <button
+              @click="navigateToAddSources"
+              class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
             >
-              {{ source }}
-            </li>
-          </ul>
+              <Plus :size="16" /> Add Source
+            </button>
+          </div>
+
+          <div v-if="loadingSources" class="space-y-4">
+            <div v-for="i in 3" :key="i" class="h-24 animate-pulse rounded-lg bg-gray-100"></div>
+          </div>
+
+          <div v-else-if="sources.length" class="space-y-4">
+            <article
+              v-for="source in sources"
+              :key="source.id"
+              class="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-5 shadow-sm"
+            >
+              <div class="flex flex-1 items-center gap-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#401903]/10">
+                  <svg
+                    class="h-5 w-5 text-[#401903]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m4.950-5.05a4 4 0 010 5.656l-4 4a4 4 0 01-5.656-5.656l1.102-1.101"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-medium text-[#1F1F1F]">{{ source.name }}</h4>
+                  <p class="max-w-xl truncate text-sm text-gray-500">{{ source.url }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-6 text-sm">
+                <span
+                  :class="
+                    source.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                  "
+                  class="rounded-full px-3 py-1 text-xs font-medium"
+                >
+                  {{ source.is_active ? 'Active' : 'Paused' }}
+                </span>
+                <span class="text-gray-500 capitalize">{{ source.source_type }}</span>
+                <span class="text-gray-400">{{ source.scrape_frequency }}</span>
+
+                <div class="relative">
+                  <button
+                    @click.stop="toggleMenu(source.id, $event)"
+                    class="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-gray-100"
+                  >
+                    <MoreVertical :size="18" class="text-gray-500" />
+                  </button>
+
+                  <div
+                    v-if="activeMenuId === source.id"
+                    class="absolute top-10 right-0 z-20 w-48 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5"
+                    @click.stop
+                  >
+                    <button
+                      @click="openEditModal(source)"
+                      class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Edit3 :size="16" /> Edit Source
+                    </button>
+                    <button
+                      @click="handleDeleteClick(source)"
+                      class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-red-600 transition-colors hover:bg-red-50"
+                    >
+                      <Trash2 :size="16" /> Delete Source
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
 
           <div
             v-else
-            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-12 text-center"
           >
-            <p class="text-sm text-gray-500">No sources have been added yet.</p>
-            <p class="text-xs text-gray-400">Attach links or files to start tracking sources.</p>
+            <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+              <svg
+                class="h-8 w-8 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m4.950-5.05a4 4 0 010 5.656l-4 4a4 4 0 01-5.656-5.656l1.102-1.101"
+                />
+              </svg>
+            </div>
+            <h3 class="mb-2 text-lg font-semibold text-gray-900">No sources added yet</h3>
+            <p class="mb-6 max-w-md text-sm text-gray-500">
+              Connect websites, RSS feeds, or documents to start monitoring legal changes.
+            </p>
+            <button
+              @click="navigateToAddSources"
+              class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
+            >
+              <Plus :size="16" /> Add Your First Source
+            </button>
           </div>
         </div>
       </section>
 
+      <!-- Sub-Jurisdictions -->
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
         <div class="mb-4 flex items-center justify-between gap-4">
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdiction</h3>
           <button
-            class="flex items-center gap-2 rounded-full bg-[#401903] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
             @click="openSubJurisdictionModal"
+            class="flex items-center gap-2 rounded-full bg-[#401903] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a1102]"
           >
-            <Plus :size="16" />
-            Add Sub-jurisdiction
+            <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>
 
@@ -653,11 +737,10 @@ watch(
         >
           <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
             <svg
-              xmlns="http://www.w3.org/2000/svg"
               class="h-7 w-7 text-gray-400"
               fill="none"
-              viewBox="0 0 24 24"
               stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               <path
                 stroke-linecap="round"
@@ -679,14 +762,10 @@ watch(
             class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
             :style="{ paddingLeft: `${node.depth * 16 + 16}px` }"
           >
-            <h4
-              class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
-            >
+            <h4 class="mb-2 text-lg font-bold text-gray-900 group-hover:text-[#401903]">
               {{ node.name }}
             </h4>
-            <p class="text-sm leading-relaxed text-gray-600">
-              {{ node.description }}
-            </p>
+            <p class="text-sm leading-relaxed text-gray-600">{{ node.description }}</p>
             <p class="mt-2 text-xs text-gray-400">
               {{ new Date(node.created_at).toLocaleString() }}
             </p>
@@ -695,63 +774,78 @@ watch(
       </section>
     </div>
 
+    <!-- Edit Source Modal -->
     <teleport to="body">
       <div
-        v-if="subJurisdictionModalOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
-        @click.self="closeSubJurisdictionModal"
+        v-if="editModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+        @click.self="closeEditModal"
       >
-        <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
-          <h3 class="mb-2 text-2xl font-bold text-gray-900">Define your Sub-Jurisdiction</h3>
-          <p class="mb-6 text-sm text-gray-600">
-            Define a specific legal domain or region to monitor
-          </p>
-
-          <form @submit.prevent="createSubJurisdiction" class="space-y-5">
+        <div class="w-full max-w-2xl rounded-2xl bg-white p-8 shadow-2xl">
+          <h3 class="mb-6 text-2xl font-bold text-[#1F1F1F]">Edit Source</h3>
+          <form @submit.prevent="saveEditedSource" class="space-y-6">
             <div>
-              <label class="mb-2 block text-sm font-medium text-gray-900">
-                Sub-Jurisdiction Name
-              </label>
+              <label class="mb-2 block text-sm font-medium"
+                >Name <span class="text-red-500">*</span></label
+              >
               <input
-                v-model="subJurisdictionForm.name"
-                type="text"
-                placeholder="e.g Global Visa Monitoring"
+                v-model="sourceEditForm.name"
                 required
-                class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
               />
             </div>
-
             <div>
-              <label class="mb-2 block text-sm font-medium text-gray-900"> Description </label>
-              <textarea
-                v-model="subJurisdictionForm.description"
-                rows="4"
-                placeholder="What legal areas will you monitor?"
+              <label class="mb-2 block text-sm font-medium"
+                >URL <span class="text-red-500">*</span></label
+              >
+              <input
+                v-model="sourceEditForm.url"
+                type="url"
                 required
-                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              ></textarea>
+                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
+              />
             </div>
-
-            <div
-              v-if="jurisdictionStore.error"
-              class="rounded-lg bg-red-50 p-3 text-sm text-red-700"
-            >
-              {{ jurisdictionStore.error }}
+            <div>
+              <label class="mb-2 block text-sm font-medium">Type</label>
+              <select
+                v-model="sourceEditForm.source_type"
+                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
+              >
+                <option v-for="opt in sourceTypeOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </option>
+              </select>
             </div>
-
+            <div>
+              <label class="mb-2 block text-sm font-medium">Scrape Frequency</label>
+              <select
+                v-model="sourceEditForm.scrape_frequency"
+                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
+              >
+                <option v-for="opt in frequencyOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <input
+                type="checkbox"
+                v-model="sourceEditForm.is_active"
+                id="is_active"
+                class="h-5 w-5"
+              />
+              <label for="is_active" class="text-sm font-medium">Active (monitoring enabled)</label>
+            </div>
             <div class="flex justify-end gap-3 pt-4">
               <button
                 type="button"
-                @click="closeSubJurisdictionModal"
-                class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                @click="closeEditModal"
+                class="rounded-lg border border-[#D5D7DA] px-6 py-2.5"
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
-              >
-                Create Sub-Jurisdiction
+              <button type="submit" class="rounded-lg bg-[#401903] px-6 py-2.5 text-white">
+                Save Changes
               </button>
             </div>
           </form>
