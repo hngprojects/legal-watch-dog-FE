@@ -29,7 +29,7 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/about-us', // New Route
+      path: '/about-us', // About Us page
       name: 'about-us',
       component: AboutUsView,
     },
@@ -69,7 +69,7 @@ const router = createRouter({
       component: OtpView,
     },
     {
-      path: '/onboarding',
+      path: '/onboarding', // Onboarding page
       name: 'onboarding',
       component: OnboardingView,
     },
@@ -85,17 +85,17 @@ const router = createRouter({
       component: SkeletonView,
     },
     {
-      path: '/coming-soon',
+      path: '/coming-soon', // Coming Soon page
       name: 'coming-soon',
       component: ComingSoonView,
     },
     {
-      path: '/privacy-policy',
+      path: '/privacy-policy', // Privacy Policy page
       name: 'privacy-policy',
       component: PrivacyPolicyView,
     },
     {
-      path: '/faq',
+      path: '/faq', // FAQ page
       name: 'faq',
       component: FAQView,
     },
