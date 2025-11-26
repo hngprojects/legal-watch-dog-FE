@@ -12,9 +12,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
+import { createSource } from '@/api/sources'
 import type { Jurisdiction } from '@/api/jurisdiction'
+import type { SourceType, ScrapeFrequency } from '@/types/source'
 
 const route = useRoute()
 const router = useRouter()
@@ -24,16 +27,17 @@ const projectStore = useProjectStore()
 const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
 const loading = ref(true)
+const submitting = ref(false)
 
 const sourceForm = ref({
   name: '',
-  type: '',
+  type: '' as SourceType,
   url: '',
-  frequency: 'daily',
+  frequency: 'DAILY' as ScrapeFrequency,
 })
 
 const sourceTypes = [
-  { value: 'website', label: 'Website' },
+  { value: 'web', label: 'Website' },
   { value: 'rss', label: 'RSS Feed' },
   { value: 'api', label: 'API' },
   { value: 'pdf', label: 'PDF Document' },
@@ -41,10 +45,10 @@ const sourceTypes = [
 ]
 
 const frequencies = [
-  { value: 'hourly', label: 'Hourly' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'monthly', label: 'Monthly' },
+  { value: 'HOURLY', label: 'Hourly' },
+  { value: 'DAILY', label: 'Daily' },
+  { value: 'WEEKLY', label: 'Weekly' },
+  { value: 'MONTHLY', label: 'Monthly' },
 ]
 
 const projectName = computed(() => {
@@ -93,7 +97,6 @@ const validateForm = (): boolean => {
     return false
   }
 
-  // Basic URL validation
   try {
     new URL(sourceForm.value.url)
   } catch {
@@ -107,9 +110,18 @@ const validateForm = (): boolean => {
 const saveSources = async () => {
   if (!validateForm()) return
 
+  submitting.value = true
+
+  const payload = {
+    jurisdiction_id: jurisdictionId.value,
+    name: sourceForm.value.name.trim(),
+    url: sourceForm.value.url.trim(),
+    source_type: sourceForm.value.type,
+    scrape_frequency: sourceForm.value.frequency,
+  }
+
   try {
-    // Here you would typically call your API to save the source
-    // Example: await sourceStore.addSource(jurisdictionId.value, sourceForm.value)
+    await createSource(payload)
 
     await Swal.fire({
       title: 'Source Added!',
@@ -119,10 +131,37 @@ const saveSources = async () => {
       showConfirmButton: false,
     })
 
-    // Navigate back to jurisdiction detail page
     router.push(`/dashboard/jurisdictions/${jurisdictionId.value}`)
-  } catch (error) {
-    Swal.fire('Error', 'Failed to add source. Please try again.', 'error')
+  } catch (error: unknown) {
+    const err = error as {
+      response?: {
+        data?: {
+          message?: string
+          detail?: Array<{ msg?: string }> | string
+        }
+      }
+      message?: string
+    }
+
+    console.error('Create source error:', err.response?.data)
+
+    let msg = 'Failed to add source. Please check your input.'
+
+    if (err.response?.data) {
+      if (typeof err.response.data.detail === 'string') {
+        msg = err.response.data.detail
+      } else if (Array.isArray(err.response.data.detail) && err.response.data.detail[0]?.msg) {
+        msg = err.response.data.detail[0].msg
+      } else if (err.response.data.message) {
+        msg = err.response.data.message
+      }
+    } else if (err.message) {
+      msg = err.message
+    }
+
+    Swal.fire('Error', msg, 'error')
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -163,7 +202,7 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
             </BreadcrumbLink>
           </BreadcrumbItem>
 
-          <BreadcrumbSeparator />
+          <BreadcrumbSeparator v-if="jurisdiction?.project_id && projectName" />
 
           <template v-if="parentJurisdiction">
             <BreadcrumbItem>
@@ -173,7 +212,6 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
                 </RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
-
             <BreadcrumbSeparator />
           </template>
 
@@ -206,8 +244,7 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
           <!-- Source Name -->
           <div>
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-              Source Name
-              <span class="text-red-500">*</span>
+              Source Name <span class="text-red-500">*</span>
             </label>
             <input
               v-model="sourceForm.name"
@@ -221,8 +258,7 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
           <!-- Source Type -->
           <div>
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-              Source Type
-              <span class="text-red-500">*</span>
+              Source Type <span class="text-red-500">*</span>
             </label>
             <p class="mb-3 text-xs text-[#6B7280]">
               Select the format of the source you want to monitor.
@@ -248,8 +284,7 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
           <!-- Source URL -->
           <div>
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-              Source URL
-              <span class="text-red-500">*</span>
+              Source URL <span class="text-red-500">*</span>
             </label>
             <p class="mb-3 text-xs text-[#6B7280]">Provide the direct URL for the source.</p>
             <div class="relative">
@@ -302,7 +337,7 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
 
           <!-- Scrape Frequency -->
           <div>
-            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Scrape Frequency </label>
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Scrape Frequency</label>
             <p class="mb-3 text-xs text-[#6B7280]">
               How often should WatchDog check this source for changes?
             </p>
@@ -333,9 +368,11 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
             </button>
             <button
               type="submit"
-              class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+              :disabled="submitting"
+              class="flex items-center gap-2 rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Save Sources
+              <span v-if="submitting">Saving...</span>
+              <span v-else>Save Sources</span>
             </button>
           </div>
         </form>
