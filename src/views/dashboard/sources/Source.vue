@@ -1,237 +1,345 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { Plus, Search, X } from 'lucide-vue-next'
-import { useJurisdictionStore } from '@/stores/jurisdiction-store'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter, RouterLink } from 'vue-router'
+import { ChevronRight } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import { useJurisdictionStore } from '@/stores/jurisdiction-store'
+import { useProjectStore } from '@/stores/project-store'
 import type { Jurisdiction } from '@/api/jurisdiction'
 
-const props = defineProps<{
-  jurisdictionId: string
-}>()
-
+const route = useRoute()
+const router = useRouter()
 const jurisdictionStore = useJurisdictionStore()
-const instructions = ref('')
-const loading = ref(false)
-const saving = ref(false)
-const isSearching = ref(false)
-const searchQuery = ref('')
+const projectStore = useProjectStore()
 
-interface SourceItem {
-  id: string
-  url: string
-  added: boolean
-}
+const jurisdictionId = computed(() => route.params.id as string)
+const jurisdiction = ref<Jurisdiction | null>(null)
+const loading = ref(true)
 
-const searchResults = ref<SourceItem[]>([])
-const savedSources = ref<SourceItem[]>([])
+const sourceForm = ref({
+  name: '',
+  type: '',
+  url: '',
+  frequency: 'daily',
+})
 
-const loadData = async () => {
+const sourceTypes = [
+  { value: 'website', label: 'Website' },
+  { value: 'rss', label: 'RSS Feed' },
+  { value: 'api', label: 'API' },
+  { value: 'pdf', label: 'PDF Document' },
+  { value: 'newsletter', label: 'Newsletter' },
+]
+
+const frequencies = [
+  { value: 'hourly', label: 'Hourly' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+]
+
+const projectName = computed(() => {
+  if (!jurisdiction.value?.project_id) return ''
+  const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
+  return project?.title || 'Project'
+})
+
+const parentJurisdiction = computed(() => {
+  if (!jurisdiction.value?.parent_id) return null
+  return (
+    jurisdictionStore.jurisdictions.find((item) => item.id === jurisdiction.value?.parent_id) ||
+    null
+  )
+})
+
+const loadJurisdiction = async (id: string) => {
   loading.value = true
-  if (!props.jurisdictionId) {
-    loading.value = false
-    return
+  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id) || null
+  jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
+
+  if (!projectStore.projects.length) {
+    await projectStore.fetchProjects()
   }
 
-  try {
-    const jurisdiction: Jurisdiction | null = await jurisdictionStore.fetchOne(props.jurisdictionId)
-    if (jurisdiction) {
-      instructions.value = jurisdiction.prompt || ''
-      savedSources.value = (jurisdiction.sources ?? []).map((url: string, i: number) => ({
-        id: `saved-${i}`,
-        url,
-        added: true,
-      }))
-    }
-  } catch (err) {
-    console.error('Failed to load jurisdiction data:', err)
-  } finally {
-    loading.value = false
+  if (jurisdiction.value?.project_id) {
+    await jurisdictionStore.fetchJurisdictions(jurisdiction.value.project_id)
   }
+
+  loading.value = false
 }
 
-const handleSaveInstructions = async () => {
-  saving.value = true
+const validateForm = (): boolean => {
+  if (!sourceForm.value.name.trim()) {
+    Swal.fire('Error', 'Source name is required', 'error')
+    return false
+  }
+
+  if (!sourceForm.value.type) {
+    Swal.fire('Error', 'Please select a source type', 'error')
+    return false
+  }
+
+  if (!sourceForm.value.url.trim()) {
+    Swal.fire('Error', 'Source URL is required', 'error')
+    return false
+  }
+
+  // Basic URL validation
   try {
-    await jurisdictionStore.updateJurisdiction(props.jurisdictionId, {
-      prompt: instructions.value,
-    })
+    new URL(sourceForm.value.url)
+  } catch {
+    Swal.fire('Error', 'Please enter a valid URL', 'error')
+    return false
+  }
+
+  return true
+}
+
+const saveSources = async () => {
+  if (!validateForm()) return
+
+  try {
+    // Here you would typically call your API to save the source
+    // Example: await sourceStore.addSource(jurisdictionId.value, sourceForm.value)
 
     await Swal.fire({
-      title: 'Saved',
-      text: 'Instructions updated successfully',
+      title: 'Source Added!',
+      text: 'Your source has been successfully added and will be monitored.',
       icon: 'success',
-      timer: 1500,
+      timer: 2000,
       showConfirmButton: false,
-      toast: true,
-      position: 'top-end',
     })
-  } catch (error: unknown) {
-    const err = error as { response?: { data?: { message?: string } }; message?: string }
-    const msg = err.response?.data?.message || err.message || 'Failed to save instructions'
-    Swal.fire('Error', msg, 'error')
-  } finally {
-    saving.value = false
+
+    // Navigate back to jurisdiction detail page
+    router.push(`/dashboard/jurisdictions/${jurisdictionId.value}`)
+  } catch {
+    Swal.fire('Error', 'Failed to add source. Please try again.', 'error')
   }
 }
 
-const toggleAddSource = (id: string) => {
-  const item = searchResults.value.find((i) => i.id === id)
-  if (item) item.added = !item.added
+const cancel = () => {
+  router.push(`/dashboard/jurisdictions/${jurisdictionId.value}`)
 }
 
-const removeSearchResult = (id: string) => {
-  searchResults.value = searchResults.value.filter((i) => i.id !== id)
-}
-
-const removeSavedSource = (id: string) => {
-  savedSources.value = savedSources.value.filter((i) => i.id !== id)
-  const searchItem = searchResults.value.find((i) => i.id === id)
-  if (searchItem) searchItem.added = false
-}
-
-const handleSaveSearch = () => {
-  const newSources = searchResults.value.filter((item) => item.added)
-  newSources.forEach((newItem) => {
-    if (!savedSources.value.some((saved) => saved.id === newItem.id)) {
-      savedSources.value.push({ ...newItem })
-    }
-  })
-
-  isSearching.value = false
-  searchQuery.value = ''
-}
-
-onMounted(loadData)
-
-watch(
-  () => props.jurisdictionId,
-  (newVal) => {
-    if (newVal) loadData()
-  },
-)
+onMounted(() => loadJurisdiction(jurisdictionId.value))
 </script>
 
 <template>
-  <div>
-    <div v-if="!isSearching" class="flex flex-col">
-      <div class="px-6 py-6">
-        <div class="space-y-3">
-          <label class="block text-sm font-medium text-[#1F1F1F]">Instructions</label>
-          <div class="relative">
-            <textarea
-              v-model="instructions"
-              rows="6"
-              placeholder="Enter a brief description of what this source contains"
-              class="w-full resize-none rounded-lg border border-[#E5E7EB] bg-white p-4 text-sm text-[#1F1F1F] placeholder-[#9CA3AF] shadow-sm focus:border-[#401903] focus:ring-1 focus:ring-[#401903] focus:outline-none"
+  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12">
+    <div v-if="loading" class="mx-auto max-w-4xl">
+      <div class="space-y-4">
+        <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
+        <div class="h-8 w-80 animate-pulse rounded bg-gray-200"></div>
+        <div class="h-96 animate-pulse rounded-2xl bg-white shadow-sm ring-1 ring-gray-100"></div>
+      </div>
+    </div>
+
+    <div v-else class="mx-auto max-w-4xl space-y-6">
+      <!-- Breadcrumb Navigation -->
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink as-child>
+              <RouterLink to="/dashboard/projects">Projects</RouterLink>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbSeparator />
+
+          <BreadcrumbItem v-if="jurisdiction?.project_id && projectName">
+            <BreadcrumbLink as-child>
+              <RouterLink :to="`/dashboard/projects/${jurisdiction.project_id}`">
+                {{ projectName }}
+              </RouterLink>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbSeparator />
+
+          <template v-if="parentJurisdiction">
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink :to="`/dashboard/jurisdictions/${parentJurisdiction.id}`">
+                  {{ parentJurisdiction.name }}
+                </RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+          </template>
+
+          <BreadcrumbItem>
+            <BreadcrumbLink as-child>
+              <RouterLink :to="`/dashboard/jurisdictions/${jurisdictionId}`">
+                {{ jurisdiction?.name }}
+              </RouterLink>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbSeparator />
+
+          <BreadcrumbItem>
+            <BreadcrumbPage>Add Sources</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <!-- Main Form Card -->
+      <div class="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100">
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-[#1F1F1F]">Add Sources</h1>
+          <p class="mt-2 text-base text-[#6B7280]">
+            Connect sources to monitor legal changes and updates
+          </p>
+        </div>
+
+        <form @submit.prevent="saveSources" class="space-y-6">
+          <!-- Source Name -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+              Source Name
+              <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="sourceForm.name"
+              type="text"
+              placeholder="e.g. UK Visa and Immigration Service"
+              required
+              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm placeholder-gray-400 transition-colors focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
             />
           </div>
-          <div class="flex justify-end">
+
+          <!-- Source Type -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+              Source Type
+              <span class="text-red-500">*</span>
+            </label>
+            <p class="mb-3 text-xs text-[#6B7280]">
+              Select the format of the source you want to monitor.
+            </p>
+            <div class="relative">
+              <select
+                v-model="sourceForm.type"
+                required
+                class="h-12 w-full appearance-none rounded-lg border border-[#D5D7DA] bg-white px-4 pr-10 text-sm transition-colors focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              >
+                <option value="" disabled selected>Select Type</option>
+                <option v-for="type in sourceTypes" :key="type.value" :value="type.value">
+                  {{ type.label }}
+                </option>
+              </select>
+              <ChevronRight
+                :size="16"
+                class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 rotate-90 text-gray-400"
+              />
+            </div>
+          </div>
+
+          <!-- Source URL -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+              Source URL
+              <span class="text-red-500">*</span>
+            </label>
+            <p class="mb-3 text-xs text-[#6B7280]">Provide the direct URL for the source.</p>
+            <div class="relative">
+              <div class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="text-gray-400"
+                >
+                  <path
+                    d="M7.33333 8.66667L11.3333 4.66667M11.3333 4.66667H8.66667M11.3333 4.66667V7.33333M8 2H4.66667C3.95942 2 3.28115 2.28095 2.78105 2.78105C2.28095 3.28115 2 3.95942 2 4.66667V11.3333C2 12.0406 2.28095 12.7189 2.78105 13.219C3.28115 13.719 3.95942 14 4.66667 14H11.3333C12.0406 14 12.7189 13.719 13.219 13.219C13.719 12.7189 14 12.0406 14 11.3333V8"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </div>
+              <input
+                v-model="sourceForm.url"
+                type="url"
+                placeholder="https://www.gov.uk/government/..."
+                required
+                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 pl-10 text-sm placeholder-gray-400 transition-colors focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
+            </div>
+            <p class="mt-2 flex items-start gap-2 text-xs text-amber-600">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="mt-0.5 shrink-0"
+              >
+                <path
+                  d="M8 5.33333V8M8 10.6667H8.00667M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2C11.3137 2 14 4.68629 14 8Z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span>WatchDog will validate this source after saving.</span>
+            </p>
+          </div>
+
+          <!-- Scrape Frequency -->
+          <div>
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Scrape Frequency </label>
+            <p class="mb-3 text-xs text-[#6B7280]">
+              How often should WatchDog check this source for changes?
+            </p>
+            <div class="relative">
+              <select
+                v-model="sourceForm.frequency"
+                class="h-12 w-full appearance-none rounded-lg border border-[#D5D7DA] bg-white px-4 pr-10 text-sm transition-colors focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              >
+                <option v-for="freq in frequencies" :key="freq.value" :value="freq.value">
+                  {{ freq.label }}
+                </option>
+              </select>
+              <ChevronRight
+                :size="16"
+                class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 rotate-90 text-gray-400"
+              />
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex justify-end gap-3 pt-6">
             <button
-              @click="handleSaveInstructions"
-              :disabled="saving"
-              class="rounded-lg bg-[#401903] px-8 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102] disabled:opacity-70"
+              type="button"
+              @click="cancel"
+              class="rounded-lg border border-[#D5D7DA] px-6 py-2.5 text-sm font-medium text-[#374151] transition-colors hover:bg-gray-50"
             >
-              {{ saving ? 'Saving...' : 'Save' }}
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
+            >
+              Save Sources
             </button>
           </div>
-        </div>
-      </div>
-
-      <div class="rounded-b-2xl border-t border-gray-100 bg-white px-6 py-8">
-        <div class="mb-6 flex items-center justify-between">
-          <h3 class="text-sm font-bold text-[#1F1F1F]">Data Sources</h3>
-          <button
-            @click="isSearching = true"
-            class="flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-medium text-[#401903] transition-colors hover:bg-gray-50"
-          >
-            <Plus :size="16" class="text-[#401903]" />
-            Find New Sources
-          </button>
-        </div>
-
-        <div v-if="savedSources.length > 0" class="space-y-3">
-          <div
-            v-for="source in savedSources"
-            :key="source.id"
-            class="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-4 shadow-sm"
-          >
-            <div class="flex flex-col">
-              <span class="text-sm font-medium text-[#1F1F1F]">{{ source.url }}</span>
-              <span class="text-xs text-gray-400">{{ source.url }}</span>
-            </div>
-            <div class="flex items-center gap-4">
-              <input
-                type="checkbox"
-                class="h-5 w-5 rounded border-gray-300 text-[#401903] focus:ring-[#401903]"
-              />
-              <button
-                @click="removeSavedSource(source.id)"
-                class="text-gray-400 transition-colors hover:text-gray-600"
-              >
-                <X :size="20" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div v-else class="py-4 text-center text-sm text-gray-500">
-          No sources added yet. Click "Find New Sources" to begin.
-        </div>
+        </form>
       </div>
     </div>
-
-    <div v-else class="rounded-2xl bg-white p-8 shadow-sm">
-      <div class="space-y-6">
-        <div class="relative">
-          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-            <Search class="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="UK Visa"
-            class="h-12 w-full rounded-lg border border-gray-200 bg-white pr-4 pl-11 text-sm text-gray-900 placeholder-gray-400 focus:border-[#401903] focus:ring-1 focus:ring-[#401903] focus:outline-none"
-          />
-        </div>
-
-        <div class="space-y-3">
-          <div
-            v-for="item in searchResults"
-            :key="item.id"
-            class="flex items-center justify-between rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm transition-colors hover:border-gray-200"
-          >
-            <span class="text-sm text-gray-600">{{ item.url }}</span>
-            <div class="flex items-center gap-4">
-              <button
-                @click="removeSearchResult(item.id)"
-                class="text-gray-400 hover:text-gray-600"
-              >
-                <X :size="18" />
-              </button>
-              <button
-                @click="toggleAddSource(item.id)"
-                class="h-9 w-[70px] rounded border text-sm font-medium transition-all"
-                :class="
-                  item.added
-                    ? 'border-transparent bg-[#12B76A] text-white'
-                    : 'border-gray-200 bg-transparent text-[#401903] hover:bg-gray-50'
-                "
-              >
-                {{ item.added ? 'Added' : 'Add' }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex justify-end pt-4">
-          <button
-            @click="handleSaveSearch"
-            class="rounded-lg bg-[#401903] px-8 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
-          >
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  </main>
 </template>
