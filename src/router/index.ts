@@ -91,6 +91,11 @@ const router = createRouter({
       component: PrivacyPolicyView,
     },
     {
+      path: '/faq',
+      name: 'faq',
+      component: () => import('@/views/FAQView.vue'),
+    },
+    {
       path: '/pricing',
       name: 'pricing',
       component: () => import('@/views/PricingView.vue'),
