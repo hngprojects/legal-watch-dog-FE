@@ -2,12 +2,13 @@
 import PillTag from '@/components/reusable/PillTag.vue'
 import { Button } from '@/components/ui/button'
 import Icon from '@/components/reusable/Icon.vue'
-import { NoteIcon, PlayIcon } from '@hugeicons/core-free-icons'
+import { PlayIcon } from '@hugeicons/core-free-icons'
 
 import projectImg from '@/assets/Images/how-it-works/project.webp'
 import jurisdictionImg from '@/assets/Images/how-it-works/jurisdiction.webp'
 import sourcesImg from '@/assets/Images/how-it-works/sources.webp'
 import monitoringImg from '@/assets/Images/how-it-works/monitoring.webp'
+import workIcon from '@/assets/icons/workIcon.png'
 import alertsImg from '@/assets/Images/how-it-works/alerts.webp'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
@@ -78,8 +79,8 @@ const steps = [
           >
             <div class="space-y-4 lg:self-center" :class="[i % 2 !== 0 ? 'lg:pl-14' : 'lg:pr-14']">
               <div class="flex items-center justify-center gap-3 lg:justify-start">
-                <div class="bg-peach-amber-main rounded-full p-4">
-                  <Icon :icon="NoteIcon" :size="24" />
+                <div class="p-4">
+                  <img :src="workIcon" alt="icon" />
                 </div>
                 <h3 class="text-preset-heading-lg text-peach-amber-main">Step {{ i + 1 }}</h3>
               </div>

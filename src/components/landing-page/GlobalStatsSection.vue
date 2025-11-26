@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { Button } from '../ui/button'
+import backleft from '@/assets/Images/backleft.png'
+import backright from '@/assets/Images/backright.png'
 </script>
 
 <template>
@@ -43,29 +45,32 @@ import { Button } from '../ui/button'
     </div>
 
     <!-- Brown CTA Section -->
-    <div
-      class="relative flex min-h-130 flex-col items-center justify-center overflow-hidden rounded-2xl bg-[#401903] p-5 text-center text-white shadow-xl md:p-12"
+    <section
+      class="relative container mx-auto mt-12 mb-12 w-full overflow-hidden rounded-3xl bg-[#3C2610] px-6 py-24"
     >
-      <div
-        class="absolute top-0 left-0 h-full w-40 bg-bottom bg-no-repeat md:w-60 lg:w-90"
-        style="background-image: url('images/logo.png'); background-size: contain"
-      ></div>
-      <div
-        class="absolute top-0 right-0 h-full w-40 scale-x-[-1] bg-bottom bg-no-repeat md:w-60 lg:w-90"
-        style="background-image: url('images/logo.png'); background-size: contain"
-      ></div>
+      <img
+        :src="backleft"
+        alt=""
+        class="pointer-events-none absolute bottom-0 left-0 w-48 opacity-50 md:w-64"
+      />
+      <img
+        :src="backright"
+        alt=""
+        class="pointer-events-none absolute right-0 bottom-0 w-48 opacity-50 md:w-64"
+      />
 
-      <div class="relative z-10 mx-auto flex max-w-2xl flex-col gap-5">
-        <h2 class="text-3xl font-bold">Gain your Strategic Advantage</h2>
-
-        <p class="text-gray-200">
-          Stop reacting to change. Start predicting it. See how LegalWatchDog can transform your
-          workflow with intelligence and autonomous updates in real time.
+      <div class="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
+        <h2 class="text-3xl font-bold text-white md:text-4xl">Gain your Strategic Advantage</h2>
+        <p class="text-lg leading-relaxed text-white/80">
+          Stop worrying about regulatory blindsides. Start tracking changes with precision and
+          confidence today.
         </p>
-        <div>
-          <Button class="bg-accent"> Get Monitoring For Free </Button>
-        </div>
+        <Button
+          class="rounded-lg bg-[#F2AB6D] px-8 py-6 text-lg font-semibold text-white hover:bg-[#F2AB6D]/90"
+        >
+          Start monitoring now
+        </Button>
       </div>
-    </div>
+    </section>
   </section>
 </template>
