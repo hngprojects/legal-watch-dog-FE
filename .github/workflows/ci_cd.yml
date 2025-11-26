@@ -42,7 +42,7 @@ jobs:
         run: npm install
 
       - name: Create .env file for staging
-        if: github.ref == 'refs/heads/staging'
+        if: github.ref == 'refs/heads/staging' || (github.event_name == 'pull_request' && github.base_ref == 'staging')
         run: |
           cat <<EOF > .env
           VITE_USE_MOCK_API=false
@@ -51,7 +51,7 @@ jobs:
           echo ".env file created for staging"
 
       - name: Create .env file for production
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
         run: |
           cat <<EOF > .env
           VITE_USE_MOCK_API=false
@@ -78,7 +78,17 @@ jobs:
     name: CD - Frontend Deploy (Staging)
     runs-on: [self-hosted]
     needs: build
-    if: github.ref == 'refs/heads/staging'
+    # Only deploy to staging when:
+    # 1. PR from dev to staging is merged, OR
+    # 2. Direct push to staging branch (if branch protection allows)
+    if: |
+      (github.event_name == 'pull_request' && 
+       github.event.action == 'closed' && 
+       github.event.pull_request.merged == true && 
+       github.event.pull_request.base.ref == 'staging' && 
+       github.event.pull_request.head.ref == 'dev') ||
+      (github.event_name == 'push' && 
+       github.ref == 'refs/heads/staging')
     environment: staging
 
     steps:
@@ -143,12 +153,17 @@ jobs:
     name: CD - Frontend Deploy (Production)
     runs-on: [self-hosted]
     needs: build
-    if: >
-      github.event_name == 'pull_request' &&
-      github.event.action == 'closed' &&
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'main' &&
-      github.event.pull_request.head.ref == 'staging'
+    # Only deploy to production when:
+    # 1. PR from staging to main is merged, OR
+    # 2. Direct push to main branch (if branch protection allows)
+    if: |
+      (github.event_name == 'pull_request' && 
+       github.event.action == 'closed' && 
+       github.event.pull_request.merged == true && 
+       github.event.pull_request.base.ref == 'main' && 
+       github.event.pull_request.head.ref == 'staging') ||
+      (github.event_name == 'push' && 
+       github.ref == 'refs/heads/main')
     environment: production
 
     steps:
@@ -227,8 +242,12 @@ jobs:
         run: |
           echo "Preparing Slack message..."
 
-          # Get branch name
-          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          # Get branch name or PR info
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BRANCH_NAME="${{ github.event.pull_request.head.ref }} → ${{ github.event.pull_request.base.ref }}"
+          else
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          fi
           
           # Determine high-level outcome and set appropriate emoji
           if [ "$BUILD_RESULT" == "success" ] && ([ "$STAGING_RESULT" == "success" ] || [ "$STAGING_RESULT" == "skipped" ]) && ([ "$PROD_RESULT" == "success" ] || [ "$PROD_RESULT" == "skipped" ]); then
@@ -253,7 +272,7 @@ jobs:
           if [ "$STAGING_RESULT" == "success" ]; then
             DETAIL_MSG="${DETAIL_MSG}\n✅ *Test Environment:* Successfully deployed to staging server"
           elif [ "$STAGING_RESULT" == "skipped" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Test Environment:* Skipped (not a dev branch)"
+            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Test Environment:* Skipped (not deploying to staging)"
           else
             DETAIL_MSG="${DETAIL_MSG}\n❌ *Test Environment:* Failed to deploy to staging server"
           fi
@@ -262,7 +281,7 @@ jobs:
           if [ "$PROD_RESULT" == "success" ]; then
             DETAIL_MSG="${DETAIL_MSG}\n✅ *Live Website:* Successfully deployed to production server"
           elif [ "$PROD_RESULT" == "skipped" ]; then
-            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Live Website:* Skipped (not main branch)"
+            DETAIL_MSG="${DETAIL_MSG}\n⏭️ *Live Website:* Skipped (not deploying to production)"
           else
             DETAIL_MSG="${DETAIL_MSG}\n❌ *Live Website:* Failed to deploy to production server"
           fi
