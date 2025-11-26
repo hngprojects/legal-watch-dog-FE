@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth-store'
 import BrandLogo from '../reusable/BrandLogo.vue'
+import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -46,11 +47,13 @@ const handleLogout = async () => {
           />
         </svg>
       </button>
-      <div
-        class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-600"
-      >
-        U
-      </div>
+      <UserDropdown>
+        <div
+          class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-600"
+        >
+          U
+        </div>
+      </UserDropdown>
     </div>
   </nav>
 </template>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import AddPaymentModal from '@/components/pricing/AddPaymentModal.vue'
 import Icon from '@/components/reusable/Icon.vue'
 import Button from '@/components/ui/button/Button.vue'
 import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
 import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 const hasHistory = ref(false)
 </script>
@@ -27,7 +27,9 @@ const hasHistory = ref(false)
       </p>
 
       <div class="flex flex-col gap-x-6 gap-y-4 *:flex-1 md:flex-row">
-        <Button class="text-white"> Upgrade Plan </Button>
+        <Button asChild class="text-white">
+          <RouterLink :to="{ name: 'payment-plan' }"> Upgrade Plan </RouterLink>
+        </Button>
         <Button variant="outline"> Cancel Subscription </Button>
       </div>
     </article>
@@ -40,7 +42,11 @@ const hasHistory = ref(false)
       </p>
 
       <AddPaymentModal>
-        <Button variant="outline"> Add Payment Method </Button>
+        <Button asChild variant="outline">
+          <RouterLink :to="{ name: 'payment-method', params: { plan: 'professional' } }">
+            Add Payment Method
+          </RouterLink></Button
+        >
       </AddPaymentModal>
     </article>
   </section>
