@@ -15,6 +15,7 @@ export interface CreateProjectPayload {
   title: string
   description: string
   master_prompt: string
+  organization_id?: string
 }
 
 export interface ProjectErrorResponse {

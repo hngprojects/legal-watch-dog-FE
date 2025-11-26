@@ -19,6 +19,7 @@ import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import FAQView from '@/views/FAQView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
+import OrganizationView from '@/views/dashboard/OrganizationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -113,8 +114,15 @@ const router = createRouter({
           path: '',
           name: 'dashboard',
           redirect: {
-            name: 'projects',
+            name: 'organizations',
           },
+        },
+        {
+          path: 'organizations',
+          name: 'organizations',
+          component: OrganizationView,
+          alias: '/organizations',
+          meta: { requiresAuth: true },
         },
         {
           path: 'projects',

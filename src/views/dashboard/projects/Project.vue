@@ -21,6 +21,10 @@ const router = useRouter()
 const projectStore = useProjectStore()
 const jurisdictionStore = useJurisdictionStore()
 const projectId = route.params.id as string
+const organizationId = computed(() => {
+  const id = route.query.organizationId
+  return typeof id === 'string' ? id : ''
+})
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
@@ -32,7 +36,10 @@ const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
 )
 
 const goBack = () => {
-  router.push('/dashboard/projects')
+  router.push({
+    path: '/dashboard/projects',
+    query: organizationId.value ? { organizationId: organizationId.value } : undefined,
+  })
 }
 
 const openAddJurisdictionModal = () => {
@@ -77,7 +84,7 @@ onMounted(async () => {
   if (existingProject) {
     project.value = existingProject
   } else {
-    await projectStore.fetchProjects()
+    await projectStore.fetchProjects(organizationId.value || undefined)
     const foundProject = projectStore.projects.find((p) => p.id === projectId)
     project.value = foundProject || null
   }

@@ -21,9 +21,17 @@ interface CreateProjectResponse {
 }
 
 export const projectService = {
-  listProjects: () => api.get<ProjectsResponse>('/projects'),
+  listProjects: (organizationId?: string) =>
+    organizationId
+      ? api.get<ProjectsResponse>(`/organizations/${organizationId}/projects`)
+      : api.get<ProjectsResponse>('/projects'),
   createProject: (payload: CreateProjectPayload) =>
-    api.post<CreateProjectResponse>('/projects', payload),
+    payload.organization_id
+      ? api.post<CreateProjectResponse>(
+          `/organizations/${payload.organization_id}/projects`,
+          payload,
+        )
+      : api.post<CreateProjectResponse>('/projects', payload),
   updateProject: (id: string, payload: UpdateProjectPayload) =>
     api.patch<Project>(`/projects/${id}`, payload),
   deleteProject: (id: string) => api.delete<{ success: boolean }>(`/projects/${id}`),

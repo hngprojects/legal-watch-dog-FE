@@ -1,18 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useProjectStore } from '@/stores/project-store'
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const projectStore = useProjectStore()
 const { projects, loading, error } = storeToRefs(projectStore)
 const router = useRouter()
+const route = useRoute()
 
 const showCreateModal = ref(false)
 const formData = ref({
   title: '',
   description: '',
   master_prompt: '',
+})
+
+const organizationId = computed(() => {
+  const id = route.query.organizationId
+  return typeof id === 'string' ? id : ''
 })
 
 // Kebab menu state — now uses string IDs
@@ -28,6 +34,11 @@ const closeMenu = () => {
 }
 
 const openCreateModal = () => {
+  if (!organizationId.value) {
+    projectStore.setError('Select an organization before creating a project.')
+    router.push({ name: 'organizations' })
+    return
+  }
   showCreateModal.value = true
   formData.value = { title: '', description: '', master_prompt: '' }
   projectStore.setError(null)
@@ -47,6 +58,11 @@ const closeCreateModal = () => {
 const handleCreateProject = async () => {
   projectStore.setError(null)
 
+  if (!organizationId.value) {
+    projectStore.setError('Select an organization before creating a project.')
+    return
+  }
+
   if (!formData.value.title.trim()) return projectStore.setError('Project name is required')
   if (!formData.value.description.trim()) return projectStore.setError('Description is required')
   if (!formData.value.master_prompt.trim())
@@ -56,6 +72,7 @@ const handleCreateProject = async () => {
     title: formData.value.title.trim(),
     description: formData.value.description.trim(),
     master_prompt: formData.value.master_prompt.trim(),
+    organization_id: organizationId.value,
   })
 
   if (newProject) {
@@ -65,17 +82,51 @@ const handleCreateProject = async () => {
 }
 
 const goToProject = (id: string) => {
-  router.push(`/dashboard/projects/${id}`)
+  router.push({ path: `/dashboard/projects/${id}`, query: { organizationId: organizationId.value } })
 }
 
 onMounted(() => {
-  projectStore.fetchProjects()
+  if (organizationId.value) {
+    projectStore.fetchProjects(organizationId.value)
+  } else {
+    projectStore.setError('Select an organization to view projects.')
+  }
 })
+
+watch(
+  () => route.query.organizationId,
+  (newVal) => {
+    const id = typeof newVal === 'string' ? newVal : ''
+    if (id) {
+      projectStore.fetchProjects(id)
+    } else {
+      projectStore.projects = []
+      projectStore.setError('Select an organization to view projects.')
+    }
+  },
+)
 </script>
 
 <template>
   <main class="min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-12 lg:py-14">
-    <div class="mx-auto max-w-7xl">
+    <div
+      v-if="!organizationId"
+      class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-100"
+    >
+      <h1 class="text-2xl font-bold text-gray-900">Choose an organization first</h1>
+      <p class="mt-2 text-sm text-gray-600">
+        Projects live under organizations. Select an organization to view or create projects.
+      </p>
+      <div class="mt-6 flex justify-center">
+        <RouterLink
+          to="/dashboard/organizations"
+          class="rounded-full bg-[#401903] px-6 py-3 text-sm font-semibold text-white hover:bg-[#2a1102]"
+        >
+          Go to Organizations
+        </RouterLink>
+      </div>
+    </div>
+    <div v-else class="mx-auto max-w-7xl">
       <div v-if="loading" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <div v-for="n in 6" :key="n" class="animate-pulse rounded-2xl bg-white p-8 shadow-sm">
           <div class="mb-4 h-6 w-3/4 rounded bg-gray-200"></div>
@@ -83,6 +134,15 @@ onMounted(() => {
             <div class="h-4 w-full rounded bg-gray-200"></div>
             <div class="h-4 w-5/6 rounded bg-gray-200"></div>
           </div>
+        </div>
+      </div>
+
+      <div v-else-if="error" class="flex min-h-[600px] items-center justify-center">
+        <div class="text-center">
+          <p class="mb-4 text-red-600">{{ error }}</p>
+          <button @click="projectStore.fetchProjects(organizationId)" class="text-[#401903] underline">
+            Retry
+          </button>
         </div>
       </div>
 
@@ -154,15 +214,6 @@ onMounted(() => {
               />
             </svg>
             Create Project
-          </button>
-        </div>
-      </div>
-
-      <div v-else-if="error" class="flex min-h-[600px] items-center justify-center">
-        <div class="text-center">
-          <p class="mb-4 text-red-600">{{ error }}</p>
-          <button @click="projectStore.fetchProjects" class="text-[#401903] underline">
-            Retry
           </button>
         </div>
       </div>

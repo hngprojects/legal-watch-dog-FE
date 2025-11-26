@@ -25,12 +25,12 @@ export const useProjectStore = defineStore('projects', {
       this.error = message
     },
 
-    async fetchProjects() {
+    async fetchProjects(organizationId?: string) {
       this.projects = []
       this.loading = true
       this.setError(null)
       try {
-        const { data } = await projectService.listProjects()
+        const { data } = await projectService.listProjects(organizationId)
         this.projects = data.data.projects
       } catch (error) {
         const err = error as ProjectErrorResponse

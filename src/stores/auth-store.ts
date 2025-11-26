@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
+import { userService } from '@/api/user'
 import type {
   LoginPayload,
   RegisterPayload,
@@ -13,6 +14,7 @@ import type {
   PasswordResetConfirmResponse,
   VerifyOtpResponse,
 } from '@/types/auth'
+import type { UserProfile } from '@/types/user'
 
 interface Organisation {
   id: string
@@ -22,11 +24,11 @@ interface Organisation {
 
 interface User {
   id: string
-  first_name: string
-  last_name: string
+  first_name?: string
+  last_name?: string
   email: string
-  role: string
-  organisation_id: string
+  role?: string
+  organisation_id?: string
 }
 
 interface State {
@@ -243,6 +245,24 @@ export const useAuthStore = defineStore('auth', {
       const responseBody = response.data as PasswordResetConfirmResponse
       this.clearAuthState()
       return responseBody
+    },
+
+    async loadCurrentUser(): Promise<UserProfile | null> {
+      if (!this.accessToken) return null
+      try {
+        const response = await userService.getCurrentUser()
+        const apiUser =
+          (response.data?.data?.user as UserProfile | undefined) ??
+          (response.data?.data as UserProfile | undefined) ??
+          null
+        if (apiUser) {
+          this.user = apiUser as User
+          return apiUser
+        }
+      } catch (error) {
+        // swallow; caller can handle missing user
+      }
+      return null
     },
 
     async logout() {
