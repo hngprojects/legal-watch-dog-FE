@@ -46,10 +46,18 @@ const showInlineEdit = ref(false)
 const sources = ref<Source[]>([])
 const loadingSources = ref(true)
 
+// Source edit modal
 const editModalOpen = ref(false)
 const editingSource = ref<Source | null>(null)
 
-const editForm = ref({
+// Two separate forms
+const jurisdictionEditForm = ref({
+  name: '',
+  description: '',
+  prompt: '',
+})
+
+const sourceEditForm = ref({
   name: '',
   url: '',
   source_type: '' as SourceType,
@@ -93,7 +101,7 @@ const frequencyOptions = [
 
 const openEditModal = (source: Source) => {
   editingSource.value = source
-  editForm.value = {
+  sourceEditForm.value = {
     name: source.name,
     url: source.url,
     source_type: source.source_type,
@@ -109,18 +117,7 @@ const closeEditModal = () => {
   editingSource.value = null
 }
 
-const formatKey = (key: string) =>
-  key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
-
-const stringifyValue = (value: unknown): string => {
-  if (value === null || value === undefined) return ''
-  if (typeof value === 'string') return value
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
-  if (Array.isArray(value)) return value.map(stringifyValue).join(', ')
-  if (typeof value === 'object') return JSON.stringify(value, null, 2)
-  return String(value)
-}
-
+// Fixed: normalizeOutput restored
 const normalizeOutput = (raw: unknown): OutputItem[] => {
   if (!raw) return []
 
@@ -139,10 +136,10 @@ const normalizeOutput = (raw: unknown): OutputItem[] => {
             (r.detail as string) ||
             (r.description as string) ||
             (r.summary as string) ||
-            stringifyValue(r)
+            JSON.stringify(r)
           return { title, detail }
         }
-        return { title: `Update ${index + 1}`, detail: stringifyValue(item) }
+        return { title: `Update ${index + 1}`, detail: String(item) }
       })
       .filter((i) => i.title || i.detail)
   }
@@ -152,8 +149,8 @@ const normalizeOutput = (raw: unknown): OutputItem[] => {
     const list = r.changes || r.updates || r.items
     if (Array.isArray(list)) return normalizeOutput(list)
     return Object.entries(r).map(([k, v]) => ({
-      title: formatKey(k),
-      detail: stringifyValue(v),
+      title: k.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      detail: String(v),
     }))
   }
 
@@ -194,8 +191,7 @@ const loadSources = async () => {
   try {
     sources.value = await fetchSourcesByJurisdiction(jurisdiction.value.id)
   } catch (error: unknown) {
-    const err = error as { message?: string }
-    Swal.fire('Error', err.message || 'Failed to load sources', 'error')
+    Swal.fire('Error', error instanceof Error ? error.message : 'Failed to load sources', 'error')
     sources.value = []
   } finally {
     loadingSources.value = false
@@ -225,11 +221,11 @@ const saveEditedSource = async () => {
 
   try {
     const updated = await updateSource(editingSource.value.id, {
-      name: editForm.value.name.trim(),
-      url: editForm.value.url.trim(),
-      source_type: editForm.value.source_type,
-      scrape_frequency: editForm.value.scrape_frequency,
-      is_active: editForm.value.is_active,
+      name: sourceEditForm.value.name.trim(),
+      url: sourceEditForm.value.url.trim(),
+      source_type: sourceEditForm.value.source_type,
+      scrape_frequency: sourceEditForm.value.scrape_frequency,
+      is_active: sourceEditForm.value.is_active,
     })
 
     const idx = sources.value.findIndex((s) => s.id === updated.id)
@@ -238,12 +234,44 @@ const saveEditedSource = async () => {
     Swal.fire('Updated!', 'Source updated successfully.', 'success')
     closeEditModal()
   } catch (error: unknown) {
-    const err = error as { message?: string }
-    Swal.fire('Error', err.message || 'Failed to update source', 'error')
+    Swal.fire('Error', error instanceof Error ? error.message : 'Failed to update source', 'error')
   }
 }
 
-const confirmDelete = async (source: Source) => {
+const startEdit = () => {
+  jurisdictionEditForm.value = {
+    name: jurisdiction.value?.name || '',
+    description: jurisdiction.value?.description || '',
+    prompt: jurisdiction.value?.prompt || '',
+  }
+  showInlineEdit.value = true
+  showSettingsMenu.value = false
+}
+
+const saveEdit = async () => {
+  try {
+    const response = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, {
+      name: jurisdictionEditForm.value.name,
+      description: jurisdictionEditForm.value.description,
+      prompt: jurisdictionEditForm.value.prompt,
+    })
+
+    if (response) jurisdiction.value = response
+
+    await Swal.fire({
+      title: 'Updated!',
+      text: 'Jurisdiction updated successfully.',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false,
+    })
+    showInlineEdit.value = false
+  } catch {
+    Swal.fire('Error', jurisdictionStore.error || 'Failed to update jurisdiction', 'error')
+  }
+}
+
+const handleDeleteClick = async (source: Source) => {
   const result = await Swal.fire({
     title: 'Delete source?',
     text: `"${source.name}" will be removed (soft-delete). You can restore it later.`,
@@ -261,19 +289,9 @@ const confirmDelete = async (source: Source) => {
     sources.value = sources.value.filter((s) => s.id !== source.id)
     Swal.fire('Deleted!', 'Source has been removed.', 'success')
     activeMenuId.value = null
-  } catch (error: unknown) {
-    const err = error as { message?: string }
-    Swal.fire('Error', err.message || 'Failed to delete source', 'error')
+  } catch {
+    Swal.fire('Error', 'Failed to delete source', 'error')
   }
-}
-
-const handleDeleteClick = (source: Source) => {
-  confirmDelete(source)
-  activeMenuId.value = null
-}
-
-const navigateToAddSources = () => {
-  router.push({ name: 'jurisdiction-sources', params: { id: jurisdictionId.value } })
 }
 
 const goBack = () => {
@@ -284,41 +302,12 @@ const goBack = () => {
   }
 }
 
+const navigateToAddSources = () => {
+  router.push({ name: 'jurisdiction-sources', params: { id: jurisdictionId.value } })
+}
+
 const toggleSettingsMenu = () => {
   showSettingsMenu.value = !showSettingsMenu.value
-}
-
-const startEdit = () => {
-  editForm.value = {
-    name: jurisdiction.value?.name || '',
-    url: '',
-    source_type: '' as SourceType,
-    scrape_frequency: '' as ScrapeFrequency,
-    is_active: true,
-  }
-  showInlineEdit.value = true
-  showSettingsMenu.value = false
-}
-
-const saveEdit = async () => {
-  try {
-    const response = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, {
-      name: editForm.value.name,
-    })
-
-    if (response) jurisdiction.value = response
-
-    await Swal.fire({
-      title: 'Updated!',
-      text: 'Jurisdiction updated successfully.',
-      icon: 'success',
-      timer: 1500,
-      showConfirmButton: false,
-    })
-    showInlineEdit.value = false
-  } catch {
-    Swal.fire('Error', jurisdictionStore.error || 'Failed to update jurisdiction', 'error')
-  }
 }
 
 const deleteJurisdiction = async () => {
@@ -337,15 +326,7 @@ const deleteJurisdiction = async () => {
 
   const projectId = jurisdiction.value?.project_id
   await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
-
-  await Swal.fire({
-    title: 'Deleted!',
-    text: 'Jurisdiction successfully deleted.',
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false,
-  })
-
+  await Swal.fire('Deleted!', 'Jurisdiction deleted.', 'success')
   router.push(projectId ? `/dashboard/projects/${projectId}` : '/dashboard/projects')
 }
 
@@ -469,29 +450,26 @@ watch(
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Jurisdiction Name</label>
               <input
-                v-model="editForm.name"
+                v-model="jurisdictionEditForm.name"
                 class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
               />
             </div>
-
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
               <textarea
-                v-model="editForm.description"
+                v-model="jurisdictionEditForm.description"
                 rows="3"
                 class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               ></textarea>
             </div>
-
             <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Instructions </label>
+              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Instructions</label>
               <textarea
-                v-model="editForm.prompt"
+                v-model="jurisdictionEditForm.prompt"
                 rows="3"
                 class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               ></textarea>
             </div>
-
             <div class="flex justify-end gap-3 pt-2">
               <button
                 type="button"
@@ -811,7 +789,7 @@ watch(
                 >Name <span class="text-red-500">*</span></label
               >
               <input
-                v-model="editForm.name"
+                v-model="sourceEditForm.name"
                 required
                 class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
               />
@@ -821,7 +799,7 @@ watch(
                 >URL <span class="text-red-500">*</span></label
               >
               <input
-                v-model="editForm.url"
+                v-model="sourceEditForm.url"
                 type="url"
                 required
                 class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
@@ -830,7 +808,7 @@ watch(
             <div>
               <label class="mb-2 block text-sm font-medium">Type</label>
               <select
-                v-model="editForm.source_type"
+                v-model="sourceEditForm.source_type"
                 class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
               >
                 <option v-for="opt in sourceTypeOptions" :key="opt.value" :value="opt.value">
@@ -841,7 +819,7 @@ watch(
             <div>
               <label class="mb-2 block text-sm font-medium">Scrape Frequency</label>
               <select
-                v-model="editForm.scrape_frequency"
+                v-model="sourceEditForm.scrape_frequency"
                 class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4"
               >
                 <option v-for="opt in frequencyOptions" :key="opt.value" :value="opt.value">
@@ -850,7 +828,12 @@ watch(
               </select>
             </div>
             <div class="flex items-center gap-3">
-              <input type="checkbox" v-model="editForm.is_active" id="is_active" class="h-5 w-5" />
+              <input
+                type="checkbox"
+                v-model="sourceEditForm.is_active"
+                id="is_active"
+                class="h-5 w-5"
+              />
               <label for="is_active" class="text-sm font-medium">Active (monitoring enabled)</label>
             </div>
             <div class="flex justify-end gap-3 pt-4">
