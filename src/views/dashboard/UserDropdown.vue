@@ -12,7 +12,7 @@ import { RouterLink } from 'vue-router'
       <slot />
     </DropdownMenuTrigger>
     <DropdownMenuContent>
-      <DropdownMenuItem>
+      <DropdownMenuItem asChild>
         <RouterLink :to="{ name: 'billing' }"> Billing </RouterLink>
       </DropdownMenuItem>
     </DropdownMenuContent>
