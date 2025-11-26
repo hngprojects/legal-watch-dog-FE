@@ -79,6 +79,19 @@ const editingSourceId = ref<string | null>(null)
 const scrapingState = ref<Record<string, boolean>>({})
 const scrapeResults = ref<Record<string, unknown>>({})
 const scrapeErrors = ref<Record<string, string>>({})
+const storedScrapeResults = ref<
+  Array<{
+    id: string
+    jurisdictionId: string
+    sourceId: string
+    sourceName: string
+    fetchedAt: string
+    status: string
+    summary: string
+    payload: unknown
+  }>
+>([])
+const expandedSources = ref<Record<string, boolean>>({})
 
 const formatKey = (key: string) =>
   key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
@@ -163,6 +176,40 @@ const getErrorMessage = (err: unknown, fallback: string) => {
   if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg ?? fallback
 
   return apiErr.response?.data?.message ?? fallback
+}
+
+const STORAGE_KEY = 'lawdog-scrape-results'
+
+const loadStoredScrapeResults = () => {
+  if (typeof localStorage === 'undefined') return
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    const parsed = raw ? (JSON.parse(raw) as typeof storedScrapeResults.value) : []
+    storedScrapeResults.value = parsed.filter(
+      (item) => item.jurisdictionId === jurisdictionId.value,
+    )
+
+    type StoredResult = (typeof storedScrapeResults.value)[number]
+    const latestBySource: Record<string, StoredResult> = {}
+    storedScrapeResults.value.forEach((item) => {
+      const existing = latestBySource[item.sourceId]
+      const isNewer =
+        !existing || new Date(item.fetchedAt).getTime() > new Date(existing.fetchedAt).getTime()
+      if (isNewer) {
+        latestBySource[item.sourceId] = item
+      }
+    })
+    scrapeResults.value = { ...scrapeResults.value, ...latestBySource }
+  } catch (err) {
+    console.error('Failed to load stored scrape results', err)
+  }
+}
+
+const persistScrapeResult = (result: (typeof storedScrapeResults.value)[number]) => {
+  if (typeof localStorage === 'undefined') return
+  const next = [result, ...storedScrapeResults.value]
+  storedScrapeResults.value = next
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
 }
 
 // const monitoringInstructions = computed(
@@ -469,16 +516,39 @@ const startScrape = async (source: Source) => {
   scrapeErrors.value = { ...scrapeErrors.value, [source.id]: '' }
   scrapingState.value = { ...scrapingState.value, [source.id]: true }
   try {
-    const { data } = await sourceApi.scrape(source.id)
-    const payload = (data as { data?: unknown })?.data ?? data
-    scrapeResults.value = { ...scrapeResults.value, [source.id]: payload }
     await Swal.fire({
       title: 'Scrape started',
-      text: 'Awaiting scrape result. Showing response if available.',
-      icon: 'success',
-      timer: 1400,
+      text: 'Simulating scrape... please wait.',
+      icon: 'info',
+      timer: 1200,
       showConfirmButton: false,
     })
+
+    const result = (await new Promise((resolve) =>
+      setTimeout(
+        () =>
+          resolve({
+            id: `${source.id}-${Date.now()}`,
+            jurisdictionId: jurisdiction.value?.id ?? jurisdictionId.value,
+            sourceId: source.id,
+            sourceName: source.name,
+            status: 'completed',
+            fetchedAt: new Date().toISOString(),
+            summary: `Simulated scrape result for ${source.name}.`,
+            payload: {
+              items: [
+                `Update from ${source.name}`,
+                `Checked at ${new Date().toLocaleString()}`,
+                `Frequency: ${source.scrape_frequency}`,
+              ],
+            },
+          }),
+        1800,
+      ),
+    )) as (typeof storedScrapeResults.value)[number]
+
+    scrapeResults.value = { ...scrapeResults.value, [source.id]: result }
+    persistScrapeResult(result)
   } catch (err) {
     const message = getErrorMessage(err, 'Scrape API not available yet.')
     scrapeErrors.value = { ...scrapeErrors.value, [source.id]: message }
@@ -539,6 +609,9 @@ const goToJurisdiction = (id: string) => {
 }
 
 onMounted(() => loadJurisdiction(jurisdictionId.value))
+onMounted(() => {
+  loadStoredScrapeResults()
+})
 
 watch(
   () => jurisdictionId.value,
@@ -856,6 +929,12 @@ watch(
                     {{ scrapingState[source.id] ? 'Scraping...' : 'Start Scrape' }}
                   </button>
                   <button
+                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    @click="expandedSources[source.id] = !expandedSources[source.id]"
+                  >
+                    {{ expandedSources[source.id] ? 'Hide Result' : 'View Result' }}
+                  </button>
+                  <button
                     class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
                     @click="deleteSource(source)"
                   >
@@ -868,8 +947,11 @@ watch(
                 {{ scrapeErrors[source.id] }}
               </div>
 
-              <div v-if="scrapeResults[source.id]" class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800">
-                <div class="mb-1 text-[11px] font-semibold uppercase text-gray-500">Result</div>
+              <div
+                v-if="expandedSources[source.id] && scrapeResults[source.id]"
+                class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
+              >
+                <div class="mb-1 text-[11px] font-semibold uppercase text-gray-500">Most Recent Result</div>
                 <pre class="whitespace-pre-wrap wrap-break-word text-[11px] leading-5">
 {{ typeof scrapeResults[source.id] === 'string' ? scrapeResults[source.id] : JSON.stringify(scrapeResults[source.id], null, 2) }}
                 </pre>
@@ -878,34 +960,68 @@ watch(
           </div>
         </div>
 
-        <!-- Output Panel (uses outputItems / normalizeOutput) -->
-        <div v-else-if="activeTab === 'output'" class="p-6">
-          <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">What Changed</h3>
+        <!-- Output Panel (uses stored simulated results + normalized output) -->
+        <div v-else-if="activeTab === 'output'" class="p-6 space-y-6">
+          <div>
+            <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Latest Scrape Results</h3>
 
-          <div v-if="outputItems.length" class="space-y-3">
-            <article
-              v-for="(item, index) in outputItems"
-              :key="index"
-              class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
-            >
-              <p class="text-sm font-semibold text-[#3C2610]">{{ item.title }}</p>
-              <p
-                v-if="item.detail"
-                class="mt-2 text-sm leading-6 whitespace-pre-line text-[#4B5563]"
+            <div v-if="storedScrapeResults.length" class="space-y-3">
+              <article
+                v-for="item in storedScrapeResults"
+                :key="item.id"
+                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
               >
-                {{ item.detail }}
-              </p>
-            </article>
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-sm font-semibold text-[#3C2610]">{{ item.sourceName }}</p>
+                  <span class="text-[11px] uppercase tracking-wide text-[#9CA3AF]">
+                    {{ new Date(item.fetchedAt).toLocaleString() }}
+                  </span>
+                </div>
+                <p class="mt-2 text-sm leading-6 text-[#4B5563]">{{ item.summary }}</p>
+                <pre
+                  v-if="item.payload"
+                  class="mt-3 whitespace-pre-wrap text-xs leading-5 text-[#374151]"
+                >{{ typeof item.payload === 'string' ? item.payload : JSON.stringify(item.payload, null, 2) }}</pre>
+              </article>
+            </div>
+
+            <div
+              v-else
+              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+            >
+              <p class="text-sm text-gray-500">No simulated scrape results yet.</p>
+              <p class="text-xs text-gray-400">Trigger a scrape from the Analysis tab to see output.</p>
+            </div>
           </div>
 
-          <div
-            v-else
-            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-          >
-            <p class="text-sm text-gray-500">No output has been generated for this jurisdiction.</p>
-            <p class="text-xs text-gray-400">
-              Connect sources or add monitoring instructions to see updates.
-            </p>
+          <div>
+            <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">What Changed</h3>
+
+            <div v-if="outputItems.length" class="space-y-3">
+              <article
+                v-for="(item, index) in outputItems"
+                :key="index"
+                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
+              >
+                <p class="text-sm font-semibold text-[#3C2610]">{{ item.title }}</p>
+                <p
+                  v-if="item.detail"
+                  class="mt-2 text-sm leading-6 whitespace-pre-line text-[#4B5563]"
+                >
+                  {{ item.detail }}
+                </p>
+              </article>
+            </div>
+
+            <div
+              v-else
+              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+            >
+              <p class="text-sm text-gray-500">No output has been generated for this jurisdiction.</p>
+              <p class="text-xs text-gray-400">
+                Connect sources or add monitoring instructions to see updates.
+              </p>
+            </div>
           </div>
         </div>
 
