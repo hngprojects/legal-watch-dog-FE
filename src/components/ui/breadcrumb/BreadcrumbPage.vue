@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { HTMLAttributes } from "vue"
+import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 
 const props = defineProps<{
-  class?: HTMLAttributes["class"]
+  class?: HTMLAttributes['class']
 }>()
 </script>
 
@@ -13,7 +13,7 @@ const props = defineProps<{
     role="link"
     aria-disabled="true"
     aria-current="page"
-    :class="cn('text-neutral-950 font-normal dark:text-neutral-50', props.class)"
+    :class="cn('font-normal text-neutral-950 dark:text-neutral-50', props.class)"
   >
     <slot />
   </span>

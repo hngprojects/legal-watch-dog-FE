@@ -293,16 +293,16 @@ const handleResend = async () => {
 
             <div class="flex items-center justify-center gap-2 text-sm text-gray-700">
               <span>Didn't receive the link?</span>
-            <button
-              type="button"
-              @click="handleResend"
-              :disabled="timer > 0 || isResending"
-              class="btn--link disabled:link--disabled"
-            >
-              <span v-if="isResending">Sending...</span>
-              <span v-else-if="timer > 0">{{ formatTime(timer) }}</span>
-              <span v-else>Resend Code</span>
-            </button>
+              <button
+                type="button"
+                @click="handleResend"
+                :disabled="timer > 0 || isResending"
+                class="btn--link disabled:link--disabled"
+              >
+                <span v-if="isResending">Sending...</span>
+                <span v-else-if="timer > 0">{{ formatTime(timer) }}</span>
+                <span v-else>Resend Code</span>
+              </button>
             </div>
 
             <RouterLink

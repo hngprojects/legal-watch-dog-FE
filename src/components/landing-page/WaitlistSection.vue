@@ -265,9 +265,23 @@ const testimonials = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-linear-to-b from-[#FAF7F4] to-[#F5F1EC]">
+  <div class="relative min-h-screen overflow-hidden bg-[#F7F7F7]">
+    <!-- Gradient Background -->
+    <div
+      class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+      style="
+        background: radial-gradient(
+          ellipse,
+          #f8d9c5 0%,
+          rgba(248, 217, 197, 0.5) 40%,
+          rgba(247, 247, 247, 0.8) 70%,
+          #f7f7f7 100%
+        );
+      "
+    ></div>
+
     <!-- HERO SECTION -->
-    <section class="px-4 pt-12 pb-16 sm:px-6 lg:px-8">
+    <section class="relative z-10 px-4 pt-12 pb-16 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-5xl text-center">
         <Badge
           variant="secondary"
@@ -349,7 +363,7 @@ const testimonials = [
     </section>
 
     <!-- FEATURES -->
-    <section class="px-4 py-16 sm:px-6 lg:px-8">
+    <section class="relative z-10 bg-white/50 px-4 py-16 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-6xl text-center">
         <h2 class="mb-4 text-3xl font-bold sm:text-4xl">
           Intelligent <span class="text-[#F59E0B]">Legal</span> Monitoring
@@ -460,7 +474,7 @@ const testimonials = [
     </section>
 
     <!-- FOOTER EARLY ACCESS -->
-    <section class="relative mt-20 overflow-hidden bg-[#3a1f14] px-4 py-16 sm:px-6 lg:px-8">
+    <section class="relative z-10 overflow-hidden bg-[#3a1f14] px-4 py-16 sm:px-6 lg:px-8">
       <div class="absolute inset-0 opacity-10">
         <div class="absolute top-10 left-10 h-64 w-64 rounded-full border-4 border-white"></div>
         <div class="absolute right-10 bottom-10 h-96 w-96 rounded-full border-4 border-white"></div>
