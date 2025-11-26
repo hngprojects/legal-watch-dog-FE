@@ -24,14 +24,11 @@ export const sourceApi = {
 
   getOne: (sourceId: string) => api.get<ApiResponse<Source>>(`/sources/${sourceId}`),
 
-  update: (sourceId: string, payload: CreateSourcePayload) =>
+  update: (sourceId: string, payload: UpdateSourcePayload) =>
     api.put<ApiResponse<Source>>(`/sources/${sourceId}`, payload),
 
   patch: (sourceId: string, payload: UpdateSourcePayload) =>
     api.patch<ApiResponse<Source>>(`/sources/${sourceId}`, payload),
-
-  update: (sourceId: string, payload: CreateSourcePayload) =>
-    api.put<ApiResponse<Source>>(`/sources/${sourceId}`, payload),
 
   delete: (sourceId: string) => api.delete<ApiResponse<{ success?: boolean }>>(`/sources/${sourceId}`),
 

@@ -25,6 +25,10 @@ const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
 
 const jurisdictionId = computed(() => route.params.id as string)
+const organizationId = computed(() => {
+  const id = route.query.organizationId
+  return typeof id === 'string' ? id : ''
+})
 const jurisdiction = ref<Jurisdiction | null>(null)
 const loading = ref(true)
 const submitting = ref(false)
@@ -70,8 +74,8 @@ const loadJurisdiction = async (id: string) => {
   const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id) || null
   jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
 
-  if (!projectStore.projects.length) {
-    await projectStore.fetchProjects()
+  if (!projectStore.projects.length && organizationId.value) {
+    await projectStore.fetchProjects(organizationId.value)
   }
 
   if (jurisdiction.value?.project_id) {

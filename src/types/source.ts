@@ -1,4 +1,5 @@
-export type SourceType = 'web' | 'pdf' | 'api'
+export type SourceType = 'web' | 'rss' | 'api' | 'pdf' | 'newsletter'
+export type ScrapeFrequency = 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
 
 export interface Source {
   id: string
@@ -6,7 +7,7 @@ export interface Source {
   name: string
   url: string
   source_type: SourceType
-  scrape_frequency: string
+  scrape_frequency: ScrapeFrequency
   auth_details?: Record<string, unknown> | null
   scraping_rules?: Record<string, unknown> | null
   is_active?: boolean
@@ -21,7 +22,7 @@ export interface CreateSourcePayload {
   name: string
   url: string
   source_type?: SourceType
-  scrape_frequency?: string
+  scrape_frequency?: ScrapeFrequency
   auth_details?: Record<string, unknown> | null
   scraping_rules?: Record<string, unknown> | null
 }
@@ -29,4 +30,13 @@ export interface CreateSourcePayload {
 export type UpdateSourcePayload = Partial<CreateSourcePayload> & {
   is_active?: boolean
   is_deleted?: boolean
+}
+
+export interface SourceResponse {
+  status?: string
+  status_code?: number
+  message?: string
+  data: {
+    source: Source
+  }
 }

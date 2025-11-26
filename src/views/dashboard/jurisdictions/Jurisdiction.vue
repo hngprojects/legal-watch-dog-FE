@@ -6,7 +6,7 @@ import Swal from 'sweetalert2'
 
 import type { Jurisdiction } from '@/api/jurisdiction'
 import { sourceApi } from '@/api/source'
-import type { Source } from '@/types/source'
+import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -59,7 +59,13 @@ const subJurisdictionForm = ref({
 
 const sourceError = ref<string | null>(null)
 const sourceLoading = ref(false)
-const sourceForm = ref({
+const sourceForm = ref<{
+  name: string
+  url: string
+  source_type: SourceType
+  scrape_frequency: ScrapeFrequency
+  scraping_rules: string
+}>({
   name: '',
   url: '',
   source_type: 'web',
@@ -139,20 +145,25 @@ const normalizeOutput = (raw: unknown): OutputItem[] => {
   return [{ title: String(raw) }]
 }
 
-const extractSources = (raw: unknown): string[] => {
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return []
-  const record = raw as Record<string, unknown>
-  const sources = record.sources || record.links || record.source_list
-
-  if (Array.isArray(sources)) {
-    return sources.map((source) => stringifyValue(source)).filter(Boolean)
+const outputItems = computed<OutputItem[]>(() => normalizeOutput(jurisdiction.value?.scrape_output))
+type ApiErrorResponse = {
+  response?: {
+    data?: {
+      message?: string
+      detail?: string | Array<{ msg?: string }>
+    }
   }
-
-  return []
 }
 
-const outputItems = computed<OutputItem[]>(() => normalizeOutput(jurisdiction.value?.scrape_output))
-const sourceItems = computed<string[]>(() => extractSources(jurisdiction.value?.scrape_output))
+const getErrorMessage = (err: unknown, fallback: string) => {
+  const apiErr = err as ApiErrorResponse
+  const detail = apiErr.response?.data?.detail
+
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg ?? fallback
+
+  return apiErr.response?.data?.message ?? fallback
+}
 
 // const monitoringInstructions = computed(
 //   () => jurisdiction.value?.prompt || jurisdiction.value?.description || '',
@@ -373,13 +384,10 @@ const fetchSources = async (jurisdictionId: string) => {
   sourcesError.value = null
   try {
     const { data } = await sourceApi.list({ jurisdiction_id: jurisdictionId })
-    sources.value = (data as any)?.data?.sources || (data as any)?.sources || []
+    const payload = data?.data
+    sources.value = payload?.sources ?? []
   } catch (err) {
-    const message =
-      (err as any)?.response?.data?.message ||
-      (err as any)?.response?.data?.detail ||
-      'Failed to load sources'
-    sourcesError.value = message
+    sourcesError.value = getErrorMessage(err, 'Failed to load sources')
   } finally {
     sourcesLoading.value = false
   }
@@ -414,6 +422,7 @@ const createSource = async () => {
     try {
       rules = JSON.parse(sourceForm.value.scraping_rules)
     } catch (e) {
+      void e;
       sourceError.value = 'Scraping rules must be valid JSON'
       sourceLoading.value = false
       return
@@ -425,7 +434,7 @@ const createSource = async () => {
       jurisdiction_id: jurisdiction.value.id,
       name: sourceForm.value.name.trim(),
       url: sourceForm.value.url.trim(),
-      source_type: sourceForm.value.source_type as 'web' | 'pdf' | 'api',
+      source_type: sourceForm.value.source_type,
       scrape_frequency: sourceForm.value.scrape_frequency,
       scraping_rules: rules,
     }
@@ -450,11 +459,7 @@ const createSource = async () => {
 
     closeAddSourceModal()
   } catch (err) {
-    const message =
-      (err as any)?.response?.data?.message ||
-      (err as any)?.response?.data?.detail ||
-      'Failed to create source'
-    sourceError.value = message
+    sourceError.value = getErrorMessage(err, 'Failed to create source')
   } finally {
     sourceLoading.value = false
   }
@@ -465,7 +470,8 @@ const startScrape = async (source: Source) => {
   scrapingState.value = { ...scrapingState.value, [source.id]: true }
   try {
     const { data } = await sourceApi.scrape(source.id)
-    scrapeResults.value = { ...scrapeResults.value, [source.id]: (data as any)?.data || data }
+    const payload = (data as { data?: unknown })?.data ?? data
+    scrapeResults.value = { ...scrapeResults.value, [source.id]: payload }
     await Swal.fire({
       title: 'Scrape started',
       text: 'Awaiting scrape result. Showing response if available.',
@@ -474,10 +480,7 @@ const startScrape = async (source: Source) => {
       showConfirmButton: false,
     })
   } catch (err) {
-    const message =
-      (err as any)?.response?.data?.message ||
-      (err as any)?.response?.data?.detail ||
-      'Scrape API not available yet.'
+    const message = getErrorMessage(err, 'Scrape API not available yet.')
     scrapeErrors.value = { ...scrapeErrors.value, [source.id]: message }
     await Swal.fire('Error', message, 'error')
   } finally {
@@ -521,10 +524,7 @@ const deleteSource = async (source: Source) => {
       showConfirmButton: false,
     })
   } catch (err) {
-    const message =
-      (err as any)?.response?.data?.message ||
-      (err as any)?.response?.data?.detail ||
-      'Failed to delete source'
+    const message = getErrorMessage(err, 'Failed to delete source')
     await Swal.fire('Error', message, 'error')
   }
 }
@@ -862,7 +862,7 @@ watch(
 
               <div v-if="scrapeResults[source.id]" class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800">
                 <div class="mb-1 text-[11px] font-semibold uppercase text-gray-500">Result</div>
-                <pre class="whitespace-pre-wrap break-words text-[11px] leading-5">
+                <pre class="whitespace-pre-wrap wrap-break-word text-[11px] leading-5">
 {{ typeof scrapeResults[source.id] === 'string' ? scrapeResults[source.id] : JSON.stringify(scrapeResults[source.id], null, 2) }}
                 </pre>
               </div>
