@@ -8,6 +8,7 @@ import {
   Target01Icon,
 } from '@hugeicons/core-free-icons'
 import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 const activeBillingCycle = ref<'monthly' | 'yearly'>('monthly')
 
@@ -17,6 +18,7 @@ const pricings = [
     description: 'Best for individual consultants and small teams.',
     icon: Target01Icon,
     price: 0,
+    yearly: 0,
     benefits: [
       '1 Projects',
       '2 Jurisdictions',
@@ -30,6 +32,7 @@ const pricings = [
     title: 'Professional',
     description: 'Designed for growing legal and compliance teams.',
     price: 79,
+    yearly: 768,
     icon: Briefcase01Icon,
     benefits: [
       '20 Projects',
@@ -45,6 +48,7 @@ const pricings = [
     title: 'Enterprise',
     description: 'For large companies with complex regulatory needs.',
     price: 99,
+    yearly: 960,
     icon: Building03Icon,
     benefits: [
       'Unlimited projects and jurisdictions',
@@ -80,15 +84,19 @@ const pricings = [
           Monthly
         </button>
         <button
+          class="relative"
           :class="{ 'bg-chocolate-brown-main text-white': activeBillingCycle === 'yearly' }"
           @click="() => (activeBillingCycle = 'yearly')"
         >
+          <div class="bg-accent-main absolute -top-6 -right-6 rounded-full p-2">
+            <p class="text-xs text-nowrap text-white">Save 20%</p>
+          </div>
           Yearly
         </button>
       </div>
 
       <div
-        class="flex flex-col justify-start gap-x-6 gap-y-12 text-start md:flex-row md:flex-wrap md:justify-center xl:items-center"
+        class="flex flex-col justify-start gap-x-6 gap-y-12 text-start md:flex-row md:flex-wrap md:justify-center xl:flex-nowrap xl:items-center"
       >
         <article
           :key="i"
@@ -113,19 +121,19 @@ const pricings = [
             <p class="text-gray-600">{{ plan.description }}</p>
           </div>
           <p>
-            <span class="text-3xl font-medium">${{ plan.price }}</span
-            ><span class="text-gray-500"> /month</span>
+            <span class="text-3xl font-medium"
+              >${{ activeBillingCycle === 'monthly' ? plan.price : plan.yearly }}</span
+            ><span class="text-gray-500">
+              {{ activeBillingCycle === 'monthly' ? '/month' : '/year' }}
+            </span>
           </p>
 
-          <Button
-            variant="outline"
-            class="border-chocolate-brown-main text-chocolate-brown-main hover:bg-chocolate-brown-main w-full bg-gray-50 py-8 text-xl font-medium hover:text-white"
-            :class="[
-              i === 1 &&
-                'bg-chocolate-brown-main hover:text-chocolate-brown-main text-white hover:bg-gray-50',
-            ]"
-          >
-            {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
+          <Button asChild :variant="i == 1 ? 'default' : 'outline'" class="w-full">
+            <RouterLink
+              :to="{ name: 'payment-method', params: { plan: plan.title.toLowerCase() } }"
+            >
+              {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
+            </RouterLink>
           </Button>
 
           <ul class="space-y-5 pt-4">

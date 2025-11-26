@@ -157,6 +157,18 @@ const router = createRouter({
           component: () => import('@/views/dashboard/settings/BillingView.vue'),
           meta: { requiresAuth: true },
         },
+        {
+          path: 'payment/plan',
+          name: 'payment-plan',
+          component: () => import('@/views/dashboard/payments/PlanView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'payment/method/:plan',
+          name: 'payment-method',
+          component: () => import('@/views/dashboard/payments/PaymentMethodView.vue'),
+          meta: { requiresAuth: true },
+        },
       ],
     },
   ],
