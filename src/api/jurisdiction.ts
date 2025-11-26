@@ -3,7 +3,7 @@ import api from '@/lib/api'
 export interface Jurisdiction {
   id: string
   project_id: string
-  parent_id?: string | null
+  parent_id: string | null
   name: string
   description: string
   prompt?: string | null
@@ -41,8 +41,14 @@ export const jurisdictionApi = {
   getOne: (jurisdictionId: string) =>
     api.get<SingleJurisdictionResponse>(`/jurisdictions/${jurisdictionId}`),
 
-  create: (data: { project_id: string; name: string; description: string; prompt?: string }) =>
-    api.post<SingleJurisdictionResponse>('/jurisdictions/', data),
+  create: (data: {
+    project_id: string
+    name: string
+    description: string
+    prompt?: string | null
+    parent_id?: string | null
+    scrape_output?: Record<string, unknown> | null
+  }) => api.post<SingleJurisdictionResponse>('/jurisdictions/', data),
 
   update: (jurisdictionId: string, data: Partial<Jurisdiction>) =>
     api.patch<SingleJurisdictionResponse>(`/jurisdictions/${jurisdictionId}`, data),
