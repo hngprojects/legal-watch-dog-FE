@@ -14,15 +14,14 @@ import Dashboard from '@/assets/Images/Dashboard.png'
       </div>
       <!-- <img :src="previewImage" alt="Dashboard preview" class="h-auto w-full shadow-2xl" /> -->
 
-      <!-- <div class="aspect-video w-full max-w-4xl shadow-2xl"> -->
-      <!-- <iframe
+      <div class="aspect-video w-full max-w-4xl shadow-2xl">
+        <iframe
           src="https://drive.google.com/file/d/13Tm2Ysa0wwVKmkTOLcZe9c5eMmxJDb1b/preview"
           allow="autoplay"
           class="size-full"
           allowfullscreen
-        ></iframe> -->
-
-      <!-- </div> -->
+        ></iframe>
+      </div>
     </div>
   </section>
 </template>

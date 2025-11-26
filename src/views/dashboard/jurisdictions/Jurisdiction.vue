@@ -130,10 +130,6 @@ const extractSources = (raw: unknown): string[] => {
 const outputItems = computed<OutputItem[]>(() => normalizeOutput(jurisdiction.value?.scrape_output))
 const sourceItems = computed<string[]>(() => extractSources(jurisdiction.value?.scrape_output))
 
-// const monitoringInstructions = computed(
-//   () => jurisdiction.value?.prompt || jurisdiction.value?.description || '',
-// )
-
 const lastUpdatedText = computed(() => {
   if (!jurisdiction.value) return ''
   const timestamp = jurisdiction.value.updated_at || jurisdiction.value.created_at
@@ -316,6 +312,13 @@ const createSubJurisdiction = async () => {
 
 const goToJurisdiction = (id: string) => {
   router.push(`/dashboard/jurisdictions/${id}`)
+}
+
+const navigateToAddSources = () => {
+  router.push({
+    name: 'jurisdiction-sources',
+    params: { id: jurisdictionId.value },
+  })
 }
 
 onMounted(() => loadJurisdiction(jurisdictionId.value))
@@ -570,6 +573,7 @@ watch(
               Add sources to generate your first document.
             </p>
             <button
+              @click="navigateToAddSources"
               class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2a1102]"
             >
               <span>+</span>
