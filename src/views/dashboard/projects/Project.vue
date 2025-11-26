@@ -1,12 +1,20 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
-import { ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
-import { ArrowLeftIcon, ChevronRight, Plus, Settings } from 'lucide-vue-next'
-import vector from '@/assets/icons/Vector.png'
+import type { Jurisdiction } from '@/api/jurisdiction'
+import { ArrowLeftIcon, Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,6 +26,10 @@ const loading = ref(true)
 const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
 const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
+
+const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
+  jurisdictionStore.jurisdictions.filter((item) => !item.parent_id),
+)
 
 const goBack = () => {
   router.push('/dashboard/projects')
@@ -193,17 +205,21 @@ watch(
 
     <div v-else class="mx-auto max-w-7xl">
       <div class="mb-8 flex items-center justify-between">
-        <nav class="flex items-center gap-2 text-sm">
-          <button
-            @click="goBack"
-            class="flex cursor-pointer items-center gap-2 text-gray-500 transition-colors hover:text-gray-700"
-          >
-            <img :src="vector" alt="Arrow-icon" class="h-3" />
-            <span>Project</span>
-          </button>
-          <ChevronRight :size="18" />
-          <span class="font-medium text-[#C17A3F]">{{ project.title }}</span>
-        </nav>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink to="/dashboard/projects">Projects</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbPage>{{ project.title }}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <div class="relative">
           <button
@@ -341,7 +357,7 @@ watch(
 
           <div v-else class="space-y-3 p-6">
             <article
-              v-for="jurisdiction in jurisdictionStore.jurisdictions"
+              v-for="jurisdiction in topLevelJurisdictions"
               :key="jurisdiction.id"
               @click="goToJurisdiction(jurisdiction.id)"
               class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
@@ -354,7 +370,6 @@ watch(
               <p class="text-sm leading-relaxed text-gray-600">
                 {{ jurisdiction.description }}
               </p>
-              <!-- Creation time -->
               <p class="mt-2 text-xs text-gray-400">
                 {{ new Date(jurisdiction.created_at).toLocaleString() }}
               </p>
