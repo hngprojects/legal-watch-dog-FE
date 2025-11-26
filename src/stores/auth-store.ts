@@ -3,6 +3,7 @@ import { authService } from '@/api/auth'
 import type {
   LoginPayload,
   RegisterPayload,
+  RegisterResponse,
   ResendOtpPayload,
   VerifyOTPPayload,
   PasswordResetRequestPayload,
@@ -10,6 +11,7 @@ import type {
   PasswordResetConfirmPayload,
   PasswordResetVerifyResponse,
   PasswordResetConfirmResponse,
+  VerifyOtpResponse,
 } from '@/types/auth'
 
 interface Organisation {
@@ -46,27 +48,11 @@ interface ApiTokenData {
   user?: User
 }
 
-interface RegisterApiResponse {
-  status: string
-  status_code: number
-  message: string
-  data: {
-    email: string
-  }
-}
-
 interface LoginApiResponse {
   status: string
   status_code: number
   message: string
   data: ApiTokenData
-}
-
-interface VerifyOtpApiResponse {
-  status?: string
-  message?: string
-  login_data?: ApiTokenData
-  data?: ApiTokenData
 }
 
 interface ResendOtpApiResponse {
@@ -76,7 +62,7 @@ interface ResendOtpApiResponse {
 }
 
 interface SignupDraft {
-  companyName: string
+  name: string
   email: string
   password: string
   confirmPassword: string
@@ -182,9 +168,9 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async register(payload: RegisterPayload) {
-      const response = await authService.registerOrganisation(payload)
-      const responseBody = response.data as unknown as RegisterApiResponse
-      const registeredEmail = responseBody.data?.email || payload.email
+      const response = await authService.registerUser(payload)
+      const responseBody = response.data as RegisterResponse
+      const registeredEmail = responseBody?.data?.email || payload.email
       this.setUserEmail(registeredEmail)
       this.setOtpPurpose('signup')
       this.setResetToken(null)
@@ -206,19 +192,28 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async verifyOTP(payload: VerifyOTPPayload) {
-      const response = await authService.verifyOtp(payload)
-      const responseBody = response.data as unknown as VerifyOtpApiResponse
-      const userData = responseBody.data
+      const response = await authService.verifyOtp({
+        ...payload,
+        otp_purpose: payload.otp_purpose ?? this.otpPurpose ?? 'signup',
+      })
+      const responseBody = response.data as VerifyOtpResponse
+      const authData = responseBody.data ?? responseBody.login_data
 
-      if (userData) {
-        this.user = null
-        this.setOtpPurpose(null)
-        return { ...responseBody, next: 'login' }
+      this.setUserEmail(payload.email)
+
+      if (authData?.access_token) {
+        this.handleLoginSuccess(authData.access_token, true, authData.user as User | undefined)
       }
+
+      this.setOtpPurpose(null)
+      return responseBody
     },
 
     async resendOTP(email: string) {
-      const payload: ResendOtpPayload = { email }
+      const payload: ResendOtpPayload = {
+        email,
+        otp_purpose: this.otpPurpose ?? 'signup',
+      }
       const response = await authService.resendOtp(payload)
       const responseBody = response.data as unknown as ResendOtpApiResponse
       this.setUserEmail(email)

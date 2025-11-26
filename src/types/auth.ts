@@ -3,13 +3,15 @@ export interface RegisterPayload {
   email: string
   password: string
   confirm_password: string
-  industry: string
 }
 
 export interface RegisterResponse {
-  status_code: number
-  message: string
-  email: string
+  status?: string
+  status_code?: number
+  message?: string
+  data?: {
+    email?: string
+  }
 }
 
 export interface LoginPayload {
@@ -45,17 +47,21 @@ export interface RefreshTokenResponse {
 export interface VerifyOTPPayload {
   email: string
   code: string
+  otp_purpose?: 'signup' | 'password-reset' | string
 }
 
 export interface VerifyOtpResponse {
-  message: string
+  status?: string
+  status_code?: number
+  message?: string
   otp_purpose?: string
-  next: 'login' | 'dashboard'
+  data?: LoginResponse
   login_data?: LoginResponse
 }
 
 export interface ResendOtpPayload {
   email: string
+  otp_purpose?: 'signup' | 'password-reset' | string
 }
 
 export interface ResendOtpResponse {
