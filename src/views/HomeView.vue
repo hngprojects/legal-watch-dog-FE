@@ -4,6 +4,8 @@ import FeaturesSection from '@/components/landing-page/FeaturesSection.vue'
 import GlobalStatsSection from '@/components/landing-page/GlobalStatsSection.vue'
 import HeroSection from '@/components/landing-page/HeroSection.vue'
 import HowItWorks from '@/components/landing-page/HowItWorks.vue'
+import Monitor from '@/components/landing-page/Monitor.vue'
+import HomeFrame from '@/components/landing-page/HomeFrame.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
 </script>
@@ -28,7 +30,9 @@ import MainHeader from '@/components/landing-page/MainHeader.vue'
       <HeroSection />
       <DashboardPreview />
       <HowItWorks />
+      <HomeFrame />
       <FeaturesSection />
+      <Monitor />
       <GlobalStatsSection />
     </main>
     <MainFooter />
