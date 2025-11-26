@@ -54,7 +54,7 @@ jobs:
           path: build.tar.gz
 
   # -------------------------
-  # 2. DEPLOY TO STAGING (DEV BRANCH)
+  # 2. DEPLOY TO STAGING
   # -------------------------
   deploy_staging:
     name: CD - Frontend Deploy (Staging)
@@ -69,6 +69,23 @@ jobs:
         with:
           name: frontend-build
 
+      - name: Generate staging enviornment file
+        run: |
+          cat <<EOT > .env
+          /// <reference types="vite/client" />
+          /// <reference types="lucide-vue-next" />
+          interface ImportMetaEnv {
+            readonly VITE_USE_MOCK_API?: string
+            readonly VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}"
+          }
+          interface ImportMeta {
+            readonly env: ImportMetaEnv
+          }
+          
+          EOF
+          echo ".env file created successfully."
+
+
       - name: Set up SSH and Deploy
         env:
           SERVER_PASS: ${{ secrets.STAGING_PASS }}
@@ -79,6 +96,8 @@ jobs:
           echo "copying files to server"
 
           sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no .env $SERVER_USER@$SERVER_IP:/tmp/frontend_env
 
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
@@ -98,6 +117,8 @@ jobs:
             git checkout "$BRANCH"
             git fetch origin "$BRANCH"
             git reset --hard origin/"$BRANCH"
+
+            mv /tmp/frontend_env .env || true
 
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
@@ -135,9 +156,24 @@ jobs:
         with:
           name: frontend-build
 
-      - name: Set up SSH and Deploy
+      - name: Generate production environment file
+        run: |
+          cat <<EOT > .env
+          /// <reference types="vite/client" />
+          /// <reference types="lucide-vue-next" />
+          interface ImportMetaEnv {
+            readonly VITE_USE_MOCK_API?: string
+            readonly VITE_API_BASE_URL="${{ secrets.VITE_API_BASE_URL }}"
+          }
+          interface ImportMeta {
+            readonly env: ImportMetaEnv
+          }
+          
+          EOF
+
+PROD_PASS      - name: Set up SSH and Deploy
         env:
-          SERVER_PASS: ${{ secrets.PROD_PASS }}
+          SERVER_PASS: ${{ secrets. }}
           SERVER_USER: ${{ secrets.PROD_USER }}
           SERVER_IP: ${{ secrets.PROD_IP }}
         run: |
@@ -145,6 +181,8 @@ jobs:
           echo "copying files to server"
 
           sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no build.tar.gz $SERVER_USER@$SERVER_IP:/tmp/
+
+          sshpass -p "$SERVER_PASS" scp -o StrictHostKeyChecking=no .env $SERVER_USER@$SERVER_IP:/tmp/frontend_env
 
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
@@ -163,6 +201,8 @@ jobs:
             git checkout "$BRANCH"
             git fetch origin "$BRANCH"
             git reset --hard origin/"$BRANCH"
+
+            mv /tmp/frontend_env .env || true
 
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
