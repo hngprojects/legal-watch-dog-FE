@@ -140,7 +140,7 @@ function copyEmail() {
             >
               <p class="text-lg font-medium">{{ EMAIL }}</p>
               <button
-                class="bg-peach-amber-50 flex items-center gap-2 rounded-md px-2.5 py-1.5"
+                class="flex items-center gap-2 rounded-md bg-[#FFF6F0] px-2.5 py-1.5"
                 @click="copyEmail"
               >
                 <span>{{ copyRef }}</span>
