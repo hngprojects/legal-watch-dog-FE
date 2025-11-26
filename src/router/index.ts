@@ -10,8 +10,6 @@ import LoginView from '@/views/authentication/LoginView.vue'
 import SignupView from '@/views/authentication/SignupView.vue'
 import OtpView from '@/views/authentication/OtpView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
-import ComingSoonView from '@/views/ComingSoonView.vue'
-import HowItWorksView from '@/views/HowItWorksView.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
 import PrivacyPolicyView from '@/views/PrivacyPolicyView.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
@@ -21,7 +19,6 @@ import { useAuthStore } from '@/stores/auth-store'
 import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
-import FAQView from '@/views/FAQView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 
 const router = createRouter({
@@ -65,7 +62,7 @@ const router = createRouter({
     {
       path: '/how-it-works',
       name: 'how-it-works',
-      component: HowItWorksView,
+      component: () => import('@/views/HowItWorksView.vue'),
     },
     {
       path: '/login',
@@ -93,7 +90,7 @@ const router = createRouter({
       component: OtpView,
     },
     {
-      path: '/onboarding',
+      path: '/onboarding', // Onboarding page
       name: 'onboarding',
       component: OnboardingView,
     },
@@ -109,19 +106,24 @@ const router = createRouter({
       component: SkeletonView,
     },
     {
-      path: '/coming-soon',
+      path: '/coming-soon', // Coming Soon page
       name: 'coming-soon',
-      component: ComingSoonView,
+      component: () => import('@/views/ComingSoonView.vue'),
     },
     {
-      path: '/privacy-policy',
+      path: '/privacy-policy', // Privacy Policy page
       name: 'privacy-policy',
       component: PrivacyPolicyView,
     },
     {
-      path: '/faq',
+      path: '/faq', // FAQ page
       name: 'faq',
-      component: FAQView,
+      component: () => import('@/views/FAQView.vue'),
+    },
+    {
+      path: '/pricing',
+      name: 'pricing',
+      component: () => import('@/views/PricingView.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
@@ -171,6 +173,24 @@ const router = createRouter({
           path: 'jurisdictions/:id/sources',
           name: 'jurisdiction-sources',
           component: () => import('@/views/dashboard/sources/Source.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'settings/billing',
+          name: 'billing',
+          component: () => import('@/views/dashboard/settings/BillingView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'payment/plan',
+          name: 'payment-plan',
+          component: () => import('@/views/dashboard/payments/PlanView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'payment/method/:plan',
+          name: 'payment-method',
+          component: () => import('@/views/dashboard/payments/PaymentMethodView.vue'),
           meta: { requiresAuth: true },
         },
       ],
