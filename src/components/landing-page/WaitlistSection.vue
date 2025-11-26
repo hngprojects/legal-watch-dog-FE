@@ -11,8 +11,8 @@ import BrainIcon from '@/assets/icons/brain.svg'
 import CheckedIcon from '@/assets/icons/checked.svg'
 import GlobeIcon from '@/assets/icons/globe.svg'
 import GlobeIcon2 from '@/assets/icons/globe2.svg'
-import BackLeft from '@/assets/images/backleft.png'
-import BackRight from '@/assets/images/backright.png'
+import BackLeft from '@/assets/Images/backleft.png'
+import BackRight from '@/assets/Images/backright.png'
 
 // Top Waitlist Form
 const form = reactive<WaitlistPayload>({
