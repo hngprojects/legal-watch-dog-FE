@@ -63,13 +63,6 @@ const avatarInitials = computed(() => {
   return initials || first?.[0]?.toUpperCase() || 'U'
 })
 
-const statusChips = computed(() => {
-  const chips: string[] = []
-  if (userProfile.value?.is_verified) chips.push('Verified')
-  if (userProfile.value?.is_active) chips.push('Active')
-  return chips
-})
-
 const organizationList = computed<Organization[]>(() => {
   if (organizations.value.length) return organizations.value
   const profileOrgs = userProfile.value?.organizations
@@ -209,7 +202,7 @@ const saveEdits = () => {
       <template v-else>
         <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:p-8">
           <div
-            class="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center md:gap-10"
+            class="flex flex-col items-start justify-between gap-6 md:flex-row md:gap-10"
           >
             <div class="flex flex-col gap-6">
               <div
@@ -279,7 +272,7 @@ const saveEdits = () => {
             </div>
             <button
               type="button"
-              class="text-sm font-semibold text-[#401903] underline decoration-2 underline-offset-4"
+              class="btn btn--link"
               @click="authStore.user?.id && organizationStore.fetchOrganizations(authStore.user.id)"
             >
               Refresh
@@ -315,12 +308,6 @@ const saveEdits = () => {
                   class="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-[#C35A11]"
                 >
                   {{ org.user_role || 'Member' }}
-                </span>
-                <span
-                  class="text-xs font-medium"
-                  :class="org.is_active === false ? 'text-red-600' : 'text-[#6B7280]'"
-                >
-                  {{ org.is_active === false ? 'Inactive' : 'Active' }}
                 </span>
               </div>
             </article>
