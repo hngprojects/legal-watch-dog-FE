@@ -1,4 +1,3 @@
-// src/types/source.ts
 export type SourceType = 'web' | 'api' | 'pdf'
 export type ScrapeFrequency = 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
 
@@ -24,7 +23,6 @@ export type CreateSourcePayload = {
   url: string
   source_type: SourceType
   scrape_frequency: ScrapeFrequency
-  // optional flags
   is_active?: boolean
   has_auth?: boolean
   scraping_rules?: Record<string, unknown> | null

@@ -119,17 +119,17 @@ const router = createRouter({
       component: SkeletonView,
     },
     {
-      path: '/coming-soon', // Coming Soon page
+      path: '/coming-soon', 
       name: 'coming-soon',
       component: () => import('@/views/ComingSoonView.vue'),
     },
     {
-      path: '/privacy-policy', // Privacy Policy page
+      path: '/privacy-policy', 
       name: 'privacy-policy',
       component: PrivacyPolicyView,
     },
     {
-      path: '/faq', // FAQ page
+      path: '/faq', 
       name: 'faq',
       component: () => import('@/views/FAQView.vue'),
     },

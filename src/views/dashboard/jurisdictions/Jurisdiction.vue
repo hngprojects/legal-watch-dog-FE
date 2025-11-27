@@ -5,8 +5,8 @@ import { Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { sourceApi } from '@/api/source'
-import type { Source, ScrapeFrequency, SourceType, CreateSourcePayload, UpdateSourcePayload } from '@/types/source'
+import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,9 +15,22 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
+import { useSourceStore } from '@/stores/source-store'
+
+interface StoredScrapeResult {
+  id: string
+  jurisdictionId: string
+  sourceId: string
+  sourceName: string
+  status: string
+  fetchedAt: string
+  summary: string
+  payload?: unknown
+}
 
 interface OutputItem {
   title: string
@@ -28,51 +41,41 @@ interface NestedJurisdiction extends Jurisdiction {
   depth: number
 }
 
+
 const route = useRoute()
 const router = useRouter()
 const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
-const jurisdictionId = computed(() => route.params.id as string)
+const orgStore = useOrganizationStore()
+const sourceStore = useSourceStore()
 
+const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
+
 const loading = ref(true)
 const activeTab = ref<'analysis' | 'sources' | 'output'>('analysis')
+
 const showSettingsMenu = ref(false)
 const showInlineEdit = ref(false)
+
 const subJurisdictionModalOpen = ref(false)
 const addSourceModalOpen = ref(false)
-const orgStore = useOrganizationStore()
+
 const activeOrganizationId = computed<string>(() => {
-  if (typeof route.query.organizationId === 'string') {
-    return route.query.organizationId
-  }
-  if (projectOrganizationId.value) {
-    return projectOrganizationId.value
-  }
+  if (typeof route.query.organizationId === 'string') return route.query.organizationId
   return orgStore.currentOrganizationId || ''
 })
 
-const editForm = ref({
-  name: '',
-  description: '',
-  prompt: '',
-})
+const editForm = ref({ name: '', description: '', prompt: '' })
+const subJurisdictionForm = ref({ name: '', description: '', prompt: '' })
 
-const subJurisdictionForm = ref({
-  name: '',
-  description: '',
-  prompt: '',
-})
-
-const sourceError = ref<string | null>(null)
-const sourceLoading = ref(false)
 const sourceForm = ref<{
   id?: string | null
   name: string
   url: string
   source_type: SourceType
   scrape_frequency: ScrapeFrequency
-  is_active?: boolean
+  is_active: boolean
 }>({
   id: null,
   name: '',
@@ -82,214 +85,77 @@ const sourceForm = ref<{
   is_active: true,
 })
 
-const sources = ref<Source[]>([])
-const sourcesLoading = ref(false)
-const sourcesError = ref<string | null>(null)
+interface ScrapeResponseData {
+  summary?: string
+  payload?: unknown
+}
+
+
+const sources = computed(() => sourceStore.sources)
+const sourcesLoading = computed(() => sourceStore.loading)
+const sourcesError = computed(() => sourceStore.error)
 const editingSourceId = ref<string | null>(null)
+
 const scrapingState = ref<Record<string, boolean>>({})
-const scrapeResults = ref<Record<string, unknown>>({})
+const scrapeResults = ref<Record<string, StoredScrapeResult>>({})
 const scrapeErrors = ref<Record<string, string>>({})
-const storedScrapeResults = ref<Array<Record<string, unknown>>>([])
+
+const storedScrapeResults = ref<StoredScrapeResult[]>([])
 const expandedSources = ref<Record<string, boolean>>({})
-
-const formatKey = (key: string) =>
-  key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
-
-const stringifyValue = (value: unknown): string => {
-  if (value === null || value === undefined) return ''
-  if (typeof value === 'string') return value
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
-  if (Array.isArray(value)) return value.map((item) => stringifyValue(item)).join(', ')
-  if (typeof value === 'object') return JSON.stringify(value, null, 2)
-  return ''
-}
-
-const normalizeOutput = (raw: unknown): OutputItem[] => {
-  if (!raw) return []
-
-  if (Array.isArray(raw)) {
-    return raw
-      .map((item, index) => {
-        if (typeof item === 'string') {
-          return { title: item }
-        }
-
-        if (typeof item === 'object' && item !== null) {
-          const record = item as Record<string, unknown>
-          const title =
-            (record.title as string) ||
-            (record.heading as string) ||
-            (record.change as string) ||
-            `Update ${index + 1}`
-          const detail =
-            (record.detail as string) ||
-            (record.description as string) ||
-            (record.summary as string) ||
-            stringifyValue(record)
-
-          return {
-            title,
-            detail,
-          }
-        }
-
-        return { title: `Update ${index + 1}`, detail: stringifyValue(item) }
-      })
-      .filter((item) => item.title || item.detail)
-  }
-
-  if (typeof raw === 'object') {
-    const record = raw as Record<string, unknown>
-    const listCandidate = record.changes || record.updates || record.items
-
-    if (Array.isArray(listCandidate)) {
-      return normalizeOutput(listCandidate)
-    }
-
-    return Object.entries(record).map(([key, value]) => ({
-      title: formatKey(key),
-      detail: stringifyValue(value),
-    }))
-  }
-
-  if (typeof raw === 'string') return [{ title: raw }]
-
-  return [{ title: String(raw) }]
-}
-
-const outputItems = computed<OutputItem[]>(() => normalizeOutput(jurisdiction.value?.scrape_output))
-type ApiErrorResponse = {
-  response?: {
-    data?: {
-      message?: string
-      detail?: string | Array<{ msg?: string }>
-    }
-  }
-}
-
-const getErrorMessage = (err: unknown, fallback: string) => {
-  const apiErr = err as ApiErrorResponse
-  const detail = apiErr.response?.data?.detail
-
-  if (typeof detail === 'string') return detail
-  if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg ?? fallback
-
-  return apiErr.response?.data?.message ?? fallback
-}
 
 const STORAGE_KEY = 'lawdog-scrape-results'
 
 const loadStoredScrapeResults = () => {
-  if (typeof localStorage === 'undefined') return
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? (JSON.parse(raw) as typeof storedScrapeResults.value) : []
-    // filter for this jurisdiction
-    storedScrapeResults.value = parsed.filter(
-      (item: any) => item.jurisdictionId === jurisdictionId.value,
-    )
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (!raw) return
 
-    // hydrate latest scrapeResults map
-    const latestBySource: Record<string, any> = {}
-    storedScrapeResults.value.forEach((item: any) => {
-      const existing = latestBySource[item.sourceId]
-      const isNewer =
-        !existing || new Date(item.fetchedAt).getTime() > new Date(existing.fetchedAt).getTime()
-      if (isNewer) {
-        latestBySource[item.sourceId] = item
-      }
-    })
-    scrapeResults.value = { ...scrapeResults.value, ...latestBySource }
-  } catch (err) {
-    console.error('Failed to load stored scrape results', err)
+  const parsed: StoredScrapeResult[] = JSON.parse(raw)
+  storedScrapeResults.value = parsed.filter(
+    (item) => item.jurisdictionId === jurisdictionId.value,
+  )
+
+  const latest: Record<string, StoredScrapeResult> = {}
+
+  for (const item of storedScrapeResults.value) {
+    const existing = latest[item.sourceId]
+    if (
+      !existing ||
+      new Date(item.fetchedAt).getTime() > new Date(existing.fetchedAt).getTime()
+    ) {
+      latest[item.sourceId] = item
+    }
   }
+
+  scrapeResults.value = latest
 }
 
-const persistScrapeResult = (result: any) => {
-  if (typeof localStorage === 'undefined') return
+const persistScrapeResult = (result: StoredScrapeResult) => {
   const next = [result, ...storedScrapeResults.value]
   storedScrapeResults.value = next
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
 }
 
-const lastUpdatedText = computed(() => {
-  if (!jurisdiction.value) return ''
-  const timestamp = jurisdiction.value.updated_at || jurisdiction.value.created_at
-  return timestamp ? new Date(timestamp).toLocaleString() : ''
-})
-
-const subJurisdictions = computed<NestedJurisdiction[]>(() => {
-  if (!jurisdiction.value) return []
-  const walk = (parentId: string, depth = 0): NestedJurisdiction[] =>
-    jurisdictionStore.jurisdictions
-      .filter((item) => item.parent_id === parentId)
-      .flatMap((child) => [{ ...child, depth }, ...walk(child.id, depth + 1)])
-
-  return walk(jurisdiction.value.id, 0)
-})
-
-const projectName = computed(() => {
-  if (!jurisdiction.value?.project_id) return ''
-  const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
-  return project?.title || 'Project'
-})
-
-const projectOrganizationId = computed(() => {
-  if (!jurisdiction.value?.project_id) return ''
-  const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
-  return project?.org_id || ''
-})
-
-const parentJurisdiction = computed(() => {
-  if (!jurisdiction.value?.parent_id) return null
-  return (
-    jurisdictionStore.jurisdictions.find((item) => item.id === jurisdiction.value?.parent_id) ||
-    null
-  )
-})
-
-/* -------------------------
-   Load jurisdiction & sources
-   ------------------------- */
 const loadJurisdiction = async (id: string) => {
   loading.value = true
-  jurisdictionStore.setError(null)
-  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id) || null
+
+  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id)
   jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
 
-  if (!projectStore.projects.length && activeOrganizationId.value) {
+  if (!projectStore.projects.length) {
     await projectStore.fetchProjects(activeOrganizationId.value)
   }
 
-  if (jurisdiction.value?.project_id) {
-    await jurisdictionStore.fetchJurisdictions(jurisdiction.value.project_id)
-    await fetchSources(jurisdiction.value.id)
+  if (jurisdiction.value) {
+    await sourceStore.fetchSources(jurisdiction.value.id)
   }
 
   loading.value = false
 }
 
-/* -------------------------
-   Sources: fetch / create / update / delete
-   ------------------------- */
-const fetchSources = async (jurisdiction_id: string) => {
-  sourcesLoading.value = true
-  sourcesError.value = null
-  try {
-    const res = await sourceApi.list({ jurisdiction_id })
-    const payload = res?.data?.data
-    sources.value = payload?.sources ?? []
-  } catch (err) {
-    sourcesError.value = getErrorMessage(err, 'Failed to load sources')
-  } finally {
-    sourcesLoading.value = false
-  }
-}
-
 const openAddSourceModal = () => {
   addSourceModalOpen.value = true
-  sourceError.value = null
   editingSourceId.value = null
+
   sourceForm.value = {
     id: null,
     name: '',
@@ -302,36 +168,13 @@ const openAddSourceModal = () => {
 
 const closeAddSourceModal = () => {
   addSourceModalOpen.value = false
-  sourceError.value = null
   editingSourceId.value = null
-  sourceForm.value = {
-    id: null,
-    name: '',
-    url: '',
-    source_type: 'web',
-    scrape_frequency: 'DAILY',
-    is_active: true,
-  }
 }
 
 const createSourceFromForm = async () => {
   if (!jurisdiction.value) return
-  sourceError.value = null
-  sourceLoading.value = true
 
-  // basic validation
-  if (!sourceForm.value.name.trim()) {
-    sourceError.value = 'Source name is required'
-    sourceLoading.value = false
-    return
-  }
-  if (!sourceForm.value.url.trim()) {
-    sourceError.value = 'URL is required'
-    sourceLoading.value = false
-    return
-  }
-
-  const payload: CreateSourcePayload = {
+  const payload = {
     jurisdiction_id: jurisdiction.value.id,
     name: sourceForm.value.name.trim(),
     url: sourceForm.value.url.trim(),
@@ -339,50 +182,32 @@ const createSourceFromForm = async () => {
     scrape_frequency: sourceForm.value.scrape_frequency,
   }
 
-  try {
-    const res = await sourceApi.create(payload)
-    const created = res?.data?.data?.source
-    if (created) {
-      // push to local sources list (keeps UI snappy) and re-fetch for canonical order
-      sources.value = [created, ...sources.value]
-      await fetchSources(jurisdiction.value.id)
-      await Swal.fire({
-        title: 'Source added',
-        text: 'Source created successfully.',
-        icon: 'success',
-        timer: 1200,
-        showConfirmButton: false,
-      })
-      closeAddSourceModal()
-    } else {
-      throw new Error(res?.data?.message || 'Unexpected response from server')
-    }
-  } catch (err) {
-    sourceError.value = getErrorMessage(err, 'Failed to create source')
-  } finally {
-    sourceLoading.value = false
+  const res = await sourceStore.createSource(payload)
+
+  if (res) {
+    closeAddSourceModal()
+    Swal.fire('Source Added', '', 'success')
   }
 }
 
 const startEditSource = (src: Source) => {
   editingSourceId.value = src.id
+  addSourceModalOpen.value = true
+
   sourceForm.value = {
     id: src.id,
     name: src.name,
     url: src.url,
-    source_type: src.source_type || 'web',
-    scrape_frequency: src.scrape_frequency || 'DAILY',
-    is_active: src.is_active ?? true,
+    source_type: src.source_type,
+    scrape_frequency: src.scrape_frequency,
+    is_active: src.is_active ?? true, 
   }
-  addSourceModalOpen.value = true
 }
 
 const saveEditedSource = async () => {
-  if (!jurisdiction.value || !editingSourceId.value) return
-  sourceError.value = null
-  sourceLoading.value = true
+  if (!editingSourceId.value) return
 
-  const payload: UpdateSourcePayload = {
+  const payload = {
     name: sourceForm.value.name.trim(),
     url: sourceForm.value.url.trim(),
     source_type: sourceForm.value.source_type,
@@ -390,183 +215,117 @@ const saveEditedSource = async () => {
     is_active: sourceForm.value.is_active,
   }
 
-  try {
-    const res = await sourceApi.update(editingSourceId.value, payload)
-    const updated = res?.data?.data?.source
-    if (updated) {
-      // update local list immediately
-      sources.value = sources.value.map((s) => (s.id === updated.id ? updated : s))
-      await Swal.fire({
-        title: 'Updated',
-        text: 'Source updated successfully.',
-        icon: 'success',
-        timer: 1200,
-        showConfirmButton: false,
-      })
-      closeAddSourceModal()
-    } else {
-      throw new Error(res?.data?.message || 'Unexpected response from server')
-    }
-  } catch (err) {
-    sourceError.value = getErrorMessage(err, 'Failed to update source')
-  } finally {
-    sourceLoading.value = false
+  const updated = await sourceStore.updateSource(editingSourceId.value, payload)
+
+  if (updated) {
+    closeAddSourceModal()
+    Swal.fire('Updated!', '', 'success')
   }
 }
 
 const deleteSource = async (src: Source) => {
   const confirm = await Swal.fire({
     title: 'Delete source?',
-    text: 'This action cannot be undone.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#d33',
   })
 
-  if (!confirm.isConfirmed || !jurisdiction.value) return
+  if (!confirm.isConfirmed) return
 
+  const ok = await sourceStore.deleteSource(src.id)
+
+  if (ok) Swal.fire('Deleted', '', 'success')
+}
+
+// const startScrape = async (source: Source) => {
+//   scrapingState.value[source.id] = true
+//   scrapeErrors.value[source.id] = ''
+
+//   const res = await sourceStore.scrapeSource(source.id)
+
+//   scrapingState.value[source.id] = false
+
+//   if (!res) {
+//     scrapeErrors.value[source.id] = 'Scrape failed'
+//     return
+//   }
+
+//   const stored: StoredScrapeResult = {
+//     id: `${source.id}-${Date.now()}`,
+//     jurisdictionId: jurisdictionId.value,
+//     sourceId: source.id,
+//     sourceName: source.name,
+//     status: 'completed',
+//     fetchedAt: new Date().toISOString(),
+//     summary: res.summary ?? 'Scrape completed',
+//     payload: res.payload ?? {},
+//   }
+
+//   scrapeResults.value[source.id] = stored
+//   persistScrapeResult(stored)
+// }
+
+const stringifyValue = (v: unknown) => {
+  if (typeof v === 'string') return v
   try {
-    await sourceApi.delete(src.id)
-    sources.value = sources.value.filter((s) => s.id !== src.id)
-    await Swal.fire({
-      title: 'Deleted',
-      text: 'Source removed.',
-      icon: 'success',
-      timer: 1200,
-      showConfirmButton: false,
-    })
-  } catch (err) {
-    const message = getErrorMessage(err, 'Failed to delete source')
-    await Swal.fire('Error', message, 'error')
+    return JSON.stringify(v, null, 2)
+  } catch {
+    return String(v)
   }
 }
 
-/* -------------------------
-   Scraping (simulate or call backend)
-   ------------------------- */
-const startScrape = async (source: Source) => {
-  scrapeErrors.value = { ...scrapeErrors.value, [source.id]: '' }
-  scrapingState.value = { ...scrapingState.value, [source.id]: true }
-  try {
-    // show a small info modal
-    await Swal.fire({
-      title: 'Scrape started',
-      text: 'Scraping... please wait.',
-      icon: 'info',
-      timer: 900,
-      showConfirmButton: false,
-    })
+const normalizeOutput = (raw: unknown): OutputItem[] => {
+  if (!raw) return []
 
-    // call backend if available, otherwise simulate
-    try {
-      const res = await sourceApi.scrape(source.id)
-      // Backend may return data describing the scrape; persist if provided
-      const payload: any = res?.data?.data
-      const result = {
-        id: `${source.id}-${Date.now()}`,
-        jurisdictionId: jurisdiction.value?.id ?? jurisdictionId.value,
-        sourceId: source.id,
-        sourceName: source.name,
-        status: 'completed',
-        fetchedAt: new Date().toISOString(),
-        summary: payload?.summary || `Scrape completed for ${source.name}`,
-        payload: payload ?? {},
-      }
-      scrapeResults.value = { ...scrapeResults.value, [source.id]: result }
-      persistScrapeResult(result)
-    } catch (err) {
-      // if backend not ready, keep using simulated result
-      const result = {
-        id: `${source.id}-${Date.now()}`,
-        jurisdictionId: jurisdiction.value?.id ?? jurisdictionId.value,
-        sourceId: source.id,
-        sourceName: source.name,
-        status: 'completed',
-        fetchedAt: new Date().toISOString(),
-        summary: `Simulated scrape result for ${source.name}.`,
-        payload: {
-          items: [
-            `Update from ${source.name}`,
-            `Checked at ${new Date().toLocaleString()}`,
-            `Frequency: ${source.scrape_frequency}`,
-          ],
-        },
-      }
-      scrapeResults.value = { ...scrapeResults.value, [source.id]: result }
-      persistScrapeResult(result)
-    }
-  } catch (err) {
-    const message = getErrorMessage(err, 'Scrape API not available yet.')
-    scrapeErrors.value = { ...scrapeErrors.value, [source.id]: message }
-    await Swal.fire('Error', message, 'error')
-  } finally {
-    scrapingState.value = { ...scrapingState.value, [source.id]: false }
+  if (Array.isArray(raw)) {
+    return raw.map((item, i) => ({
+      title: `Update ${i + 1}`,
+      detail: stringifyValue(item),
+    }))
   }
+
+  if (typeof raw === 'object') {
+    return Object.entries(raw as Record<string, unknown>).map(([key, val]) => ({
+      title: key,
+      detail: stringifyValue(val),
+    }))
+  }
+
+  return [{ title: 'Result', detail: stringifyValue(raw) }]
 }
 
-/* -------------------------
-   Navigation & lifecycle
-   ------------------------- */
+const outputItems = computed(() => normalizeOutput(jurisdiction.value?.scrape_output))
+
 const goBack = () => {
-  const targetOrgId = activeOrganizationId.value
-
-  if (jurisdiction.value?.project_id && targetOrgId) {
-    router.push({
-      name: 'project-detail',
-      params: { organizationId: targetOrgId, id: jurisdiction.value.project_id },
-    })
-    return
-  }
-
-  if (targetOrgId) {
-    router.push({ name: 'organization-projects', params: { organizationId: targetOrgId } })
-    return
-  }
-
-  router.push({ name: 'organizations' })
+  router.push({ name: 'organization-projects', params: { organizationId: activeOrganizationId.value } })
 }
 
-const toggleSettingsMenu = () => {
-  showSettingsMenu.value = !showSettingsMenu.value
-}
+const toggleSettingsMenu = () => (showSettingsMenu.value = !showSettingsMenu.value)
 const closeSettingsMenu = () => (showSettingsMenu.value = false)
 
 const startEdit = () => {
   editForm.value = {
-    name: jurisdiction.value?.name || '',
-    description: jurisdiction.value?.description || '',
-    prompt: jurisdiction.value?.prompt || '',
+    name: jurisdiction.value?.name ?? '',
+    description: jurisdiction.value?.description ?? '',
+    prompt: jurisdiction.value?.prompt ?? '',
   }
   showInlineEdit.value = true
   closeSettingsMenu()
 }
 
 const saveEdit = async () => {
-  try {
-    const response = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, {
-      name: editForm.value.name || undefined,
-      description: editForm.value.description || undefined,
-      prompt: editForm.value.prompt || undefined,
-    })
+  const payload = {
+    name: editForm.value.name,
+    description: editForm.value.description,
+    prompt: editForm.value.prompt,
+  }
 
-    if (response) {
-      jurisdiction.value = response
-    }
+  const updated = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, payload)
 
-    await Swal.fire({
-      title: 'Updated!',
-      text: 'Jurisdiction updated successfully.',
-      icon: 'success',
-      timer: 1500,
-      showConfirmButton: false,
-    })
-
+  if (updated) {
+    jurisdiction.value = updated
+    Swal.fire('Updated!', '', 'success')
     showInlineEdit.value = false
-  } catch (err) {
-    void err
-    Swal.fire('Error', jurisdictionStore.error || 'Failed to update jurisdiction', 'error')
   }
 }
 
@@ -574,80 +333,49 @@ const deleteJurisdiction = async () => {
   closeSettingsMenu()
 
   const confirm = await Swal.fire({
-    title: 'Delete Jurisdiction?',
-    text: 'This action cannot be undone.',
-    icon: 'warning',
+    title: 'Delete?',
     showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#d33',
   })
 
   if (!confirm.isConfirmed) return
 
-  const projectId = jurisdiction.value?.project_id
-
   await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
 
-  await Swal.fire({
-    title: 'Deleted!',
-    text: 'Jurisdiction successfully deleted.',
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false,
-  })
+  Swal.fire('Deleted!', '', 'success')
 
-  const targetOrgId = activeOrganizationId.value
-
-  if (projectId && targetOrgId) {
-    router.push({
-      name: 'project-detail',
-      params: { organizationId: targetOrgId, id: projectId },
-    })
-    return
-  }
-
-  if (targetOrgId) {
-    router.push({ name: 'organization-projects', params: { organizationId: targetOrgId } })
-    return
-  }
-
-  router.push({ name: 'organizations' })
+  goBack()
 }
+
+const parentJurisdiction = computed(() => {
+  if (!jurisdiction.value) return null
+  return jurisdictionStore.jurisdictions.find((j) => j.id === jurisdiction.value?.parent_id) || null
+})
+
+const subJurisdictions = computed(() => {
+  if (!jurisdiction.value) return []
+
+  const walk = (parentId: string, depth = 0): NestedJurisdiction[] =>
+    jurisdictionStore.jurisdictions
+      .filter((j) => j.parent_id === parentId)
+      .flatMap((child) => [{ ...child, depth }, ...walk(child.id, depth + 1)])
+
+  return walk(jurisdiction.value.id)
+})
 
 const openSubJurisdictionModal = () => {
   subJurisdictionModalOpen.value = true
-  subJurisdictionForm.value = {
-    name: '',
-    description: '',
-    prompt: '',
-  }
-  jurisdictionStore.setError(null)
+  subJurisdictionForm.value = { name: '', description: '', prompt: '' }
 }
 
 const closeSubJurisdictionModal = () => {
   subJurisdictionModalOpen.value = false
-  subJurisdictionForm.value = {
-    name: '',
-    description: '',
-    prompt: '',
-  }
-  jurisdictionStore.setError(null)
 }
 
 const createSubJurisdiction = async () => {
   if (!jurisdiction.value) return
-  jurisdictionStore.setError(null)
 
-  if (!subJurisdictionForm.value.name.trim()) {
-    jurisdictionStore.setError('Sub-jurisdiction name is required')
-    return
-  }
-
-  if (!subJurisdictionForm.value.description.trim()) {
-    jurisdictionStore.setError('Description is required')
-    return
-  }
+  if (!subJurisdictionForm.value.name.trim()) return
+  if (!subJurisdictionForm.value.description.trim()) return
 
   const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
     name: subJurisdictionForm.value.name.trim(),
@@ -656,45 +384,46 @@ const createSubJurisdiction = async () => {
     parent_id: jurisdiction.value.id,
   })
 
-  if (created) {
-    closeSubJurisdictionModal()
-  }
+  if (created) closeSubJurisdictionModal()
 }
 
 const goToJurisdiction = (id: string) => {
-  const targetOrgId = activeOrganizationId.value
-
   router.push({
     path: `/dashboard/jurisdictions/${id}`,
-    query: targetOrgId ? { organizationId: targetOrgId } : undefined,
+    query: { organizationId: activeOrganizationId.value },
   })
 }
 
-/* lifecycle */
-onMounted(() => loadJurisdiction(jurisdictionId.value))
-onMounted(() => loadStoredScrapeResults())
+const lastUpdatedText = computed(() => {
+  const t = jurisdiction.value?.updated_at || jurisdiction.value?.created_at
+  return t ? new Date(t).toLocaleString() : ''
+})
 
 watch(
   () => jurisdictionId.value,
-  (newId) => {
-    if (newId) {
-      loadJurisdiction(newId)
-    }
-  },
+  (id) => id && loadJurisdiction(id),
 )
 
 watch(
   () => jurisdictionStore.jurisdictions,
-  (newJurisdictions) => {
-    const found = newJurisdictions.find((j) => j.id === jurisdictionId.value)
+  () => {
+    const found = jurisdictionStore.jurisdictions.find((j) => j.id === jurisdictionId.value)
     if (found) jurisdiction.value = found
   },
   { deep: true },
 )
+
+onMounted(() => {
+  loadJurisdiction(jurisdictionId.value)
+  loadStoredScrapeResults()
+})
 </script>
+
+
 
 <template>
   <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12">
+    <!-- Loading state -->
     <div v-if="loading" class="mx-auto max-w-6xl">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
@@ -703,13 +432,20 @@ watch(
       </div>
     </div>
 
+    <!-- No jurisdiction -->
     <div v-else-if="!jurisdiction" class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm">
       <h1 class="text-2xl font-semibold text-gray-900">Jurisdiction not found</h1>
-      <button @click="goBack" class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline">Back to Projects</button>
+      <button
+        @click="goBack"
+        class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline"
+      >
+        Back to Projects
+      </button>
     </div>
 
+    <!-- Main -->
     <div v-else class="mx-auto max-w-6xl space-y-6 lg:space-y-8">
-      <!-- Header & Breadcrumbs -->
+      <!-- BREADCRUMBS + HEADER -->
       <header class="flex flex-wrap items-start justify-between gap-4">
         <Breadcrumb>
           <BreadcrumbList>
@@ -723,24 +459,40 @@ watch(
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organization-projects', params: { organizationId: activeOrganizationId } }">Projects</RouterLink>
+                <RouterLink
+                  :to="{
+                    name: 'organization-projects',
+                    params: { organizationId: activeOrganizationId },
+                  }"
+                >
+                  Projects
+                </RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
 
             <BreadcrumbSeparator />
 
-            <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
+            <!-- <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'project-detail', params: { organizationId: activeOrganizationId, id: jurisdiction.project_id } }">{{ projectName }}</RouterLink>
+                <RouterLink
+                  :to="{
+                    name: 'project-detail',
+                    params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
+                  }"
+                >
+                  {{ projectName }}
+                </RouterLink>
               </BreadcrumbLink>
-            </BreadcrumbItem>
+            </BreadcrumbItem> -->
 
             <BreadcrumbSeparator />
 
             <template v-if="parentJurisdiction">
               <BreadcrumbItem>
                 <BreadcrumbLink as-child>
-                  <RouterLink :to="`/dashboard/jurisdictions/${parentJurisdiction.id}`">{{ parentJurisdiction.name }}</RouterLink>
+                  <RouterLink :to="`/dashboard/jurisdictions/${parentJurisdiction.id}`">
+                    {{ parentJurisdiction.name }}
+                  </RouterLink>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -752,281 +504,573 @@ watch(
           </BreadcrumbList>
         </Breadcrumb>
 
+        <!-- Settings dropdown -->
         <div class="relative">
-          <button @click.stop="toggleSettingsMenu" class="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-gray-600 shadow-sm hover:bg-gray-50">
+          <button
+            @click.stop="toggleSettingsMenu"
+            class="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-gray-600 shadow-sm hover:bg-gray-50"
+          >
             <Settings :size="18" />
           </button>
 
-          <div v-if="showSettingsMenu" @click.stop class="absolute right-0 z-50 mt-2 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black/5">
-            <button @click="startEdit" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">Edit Jurisdiction</button>
-            <button @click="deleteJurisdiction" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">Delete Jurisdiction</button>
+          <div
+            v-if="showSettingsMenu"
+            @click.stop
+            class="absolute right-0 z-50 mt-2 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black/5"
+          >
+            <button
+              @click="startEdit"
+              class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+            >
+              Edit Jurisdiction
+            </button>
+            <button
+              @click="deleteJurisdiction"
+              class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+            >
+              Delete Jurisdiction
+            </button>
           </div>
         </div>
       </header>
 
-      <!-- Jurisdiction summary -->
+      <!-- JURISDICTION DETAILS CARD -->
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
+        <!-- EDIT MODE -->
         <div v-if="showInlineEdit">
           <form @submit.prevent="saveEdit" class="space-y-4">
             <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Jurisdiction Name</label>
-              <input v-model="editForm.name" class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Name</label>
+              <input
+                v-model="editForm.name"
+                class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
             </div>
+
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
-              <textarea v-model="editForm.description" rows="3" class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"></textarea>
+              <textarea
+                v-model="editForm.description"
+                rows="3"
+                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
             </div>
+
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Monitoring Instructions</label>
-              <textarea v-model="editForm.prompt" rows="3" class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"></textarea>
+              <textarea
+                v-model="editForm.prompt"
+                rows="3"
+                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
             </div>
+
             <div class="flex justify-end gap-3 pt-2">
-              <button type="button" @click="showInlineEdit = false" class="rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]">Cancel</button>
-              <button type="submit" class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white">Save Changes</button>
+              <button
+                type="button"
+                @click="showInlineEdit = false"
+                class="rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
+              >
+                Save Changes
+              </button>
             </div>
           </form>
         </div>
 
+        <!-- VIEW MODE -->
         <div v-else class="flex flex-col gap-3">
-          <p class="text-xs font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">Jurisdiction</p>
+          <p class="text-xs font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
+            Jurisdiction
+          </p>
           <h1 class="text-3xl font-bold text-[#1F1F1F]">{{ jurisdiction.name }}</h1>
-          <p v-if="jurisdiction.description" class="text-base leading-relaxed text-[#4B5563]">{{ jurisdiction.description }}</p>
-          <p v-if="lastUpdatedText" class="text-sm text-gray-400">Updated {{ lastUpdatedText }}</p>
+          <p
+            v-if="jurisdiction.description"
+            class="text-base leading-relaxed text-[#4B5563]"
+          >
+            {{ jurisdiction.description }}
+          </p>
+          <p v-if="lastUpdatedText" class="text-sm text-gray-400">
+            Updated {{ lastUpdatedText }}
+          </p>
         </div>
       </section>
 
-      <!-- Sources/Analysis/Output section -->
+      <!-- MAIN TAB SECTION -->
       <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
+        <!-- TAB HEADERS -->
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
-            <button @click="activeTab = 'analysis'" :class="['relative pb-4 text-sm font-semibold transition-colors', activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]']">
+            <button
+              @click="activeTab = 'analysis'"
+              :class="[
+                'relative pb-4 text-sm font-semibold transition-colors',
+                activeTab === 'analysis'
+                  ? 'text-[#1F1F1F]'
+                  : 'text-gray-500 hover:text-[#1F1F1F]',
+              ]"
+            >
               Analysis
-              <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
+              <span
+                v-if="activeTab === 'analysis'"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
+              ></span>
             </button>
 
-            <button @click="activeTab = 'output'" :class="['relative pb-4 text-sm font-semibold transition-colors', activeTab === 'output' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]']">
+            <button
+              @click="activeTab = 'output'"
+              :class="[
+                'relative pb-4 text-sm font-semibold transition-colors',
+                activeTab === 'output'
+                  ? 'text-[#1F1F1F]'
+                  : 'text-gray-500 hover:text-[#1F1F1F]',
+              ]"
+            >
               Output
-              <span v-if="activeTab === 'output'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
+              <span
+                v-if="activeTab === 'output'"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
+              ></span>
             </button>
 
-            <button @click="activeTab = 'sources'" :class="['relative pb-4 text-sm font-semibold transition-colors', activeTab === 'sources' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]']">
+            <button
+              @click="activeTab = 'sources'"
+              :class="[
+                'relative pb-4 text-sm font-semibold transition-colors',
+                activeTab === 'sources'
+                  ? 'text-[#1F1F1F]'
+                  : 'text-gray-500 hover:text-[#1F1F1F]',
+              ]"
+            >
               Sources
-              <span v-if="activeTab === 'sources'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
+              <span
+                v-if="activeTab === 'sources'"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
+              ></span>
             </button>
           </div>
         </div>
 
-        <!-- Analysis -->
+        <!-- ANALYSIS TAB -->
         <div v-if="activeTab === 'analysis'" class="space-y-4 p-6">
+          <!-- Header -->
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
               <p class="text-xs text-gray-500">Trigger scraping per source and view results.</p>
             </div>
-            <button class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-4 py-2 text-sm font-medium text-white" @click="openAddSourceModal">
+
+            <button
+              class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-4 py-2 text-sm font-medium text-white"
+              @click="openAddSourceModal"
+            >
               <Plus :size="16" /> Add Source
             </button>
           </div>
 
+          <!-- Loading skeleton -->
           <div v-if="sourcesLoading" class="space-y-2">
             <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
           </div>
 
+          <!-- Error -->
           <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
             {{ sourcesError }}
           </div>
 
-          <div v-else-if="sources.length === 0" class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-            <p class="text-sm text-gray-500">No sources have been added yet.</p>
-            <p class="text-xs text-gray-400">Add a source to start scraping content.</p>
-            <button class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white" @click="openAddSourceModal">
+          <!-- Empty -->
+          <div
+            v-else-if="sources.length === 0"
+            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+          >
+            <p class="text-sm text-gray-500">No sources added yet.</p>
+            <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
+            <button
+              class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
+              @click="openAddSourceModal"
+            >
               <Plus :size="16" /> Add Source
             </button>
           </div>
 
+          <!-- Sources list -->
           <div v-else class="space-y-3">
-            <div v-for="source in sources" :key="source.id" class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm">
+            <div
+              v-for="source in sources"
+              :key="source.id"
+              class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm"
+            >
               <div class="flex items-center justify-between gap-3">
                 <div>
                   <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
                   <p class="text-xs text-gray-500">{{ source.url }}</p>
-                  <p class="text-[11px] tracking-wide text-gray-400 uppercase">{{ source.source_type }} • {{ source.scrape_frequency }}</p>
+                  <p class="text-[11px] tracking-wide text-gray-400 uppercase">
+                    {{ source.source_type }} • {{ source.scrape_frequency }}
+                  </p>
                 </div>
 
                 <div class="flex items-center gap-2">
-                  <button class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50" @click="startEditSource(source)">Edit</button>
-                  <button class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50" :disabled="scrapingState[source.id]" @click="startScrape(source)">
-                    {{ scrapingState[source.id] ? 'Scraping...' : 'Start Scrape' }}
+                  <button
+                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    @click="startEditSource(source)"
+                  >
+                    Edit
                   </button>
-                  <button class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50" @click="expandedSources[source.id] = !expandedSources[source.id]">
+
+                  <!-- <button
+                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    :disabled="scrapingState[source.id]"
+                    @click="startScrape(source)"
+                  >
+                    {{ scrapingState[source.id] ? 'Scraping...' : 'Start Scrape' }}
+                  </button> -->
+
+                  <button
+                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    @click="expandedSources[source.id] = !expandedSources[source.id]"
+                  >
                     {{ expandedSources[source.id] ? 'Hide Result' : 'View Result' }}
                   </button>
-                  <button class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50" @click="deleteSource(source)">Delete</button>
+
+                  <button
+                    class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                    @click="deleteSource(source)"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
 
-              <div v-if="scrapeErrors[source.id]" class="mt-2 text-xs text-red-600">{{ scrapeErrors[source.id] }}</div>
+              <!-- Scrape error -->
+              <div
+                v-if="scrapeErrors[source.id]"
+                class="mt-2 text-xs text-red-600"
+              >
+                {{ scrapeErrors[source.id] }}
+              </div>
 
-              <div v-if="expandedSources[source.id] && scrapeResults[source.id]" class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800">
-                <div class="mb-1 text-[11px] font-semibold text-gray-500 uppercase">Most Recent Result</div>
-                <pre class="text-[11px] leading-5 wrap-break-word whitespace-pre-wrap">{{ typeof scrapeResults[source.id] === 'string' ? scrapeResults[source.id] : JSON.stringify(scrapeResults[source.id], null, 2) }}</pre>
+              <!-- Scrape result -->
+              <div
+                v-if="expandedSources[source.id] && scrapeResults[source.id]"
+                class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
+              >
+                <div class="mb-1 text-[11px] font-semibold text-gray-500 uppercase">
+                  Most Recent Result
+                </div>
+                <pre class="text-[11px] leading-5 whitespace-pre-wrap">
+{{ JSON.stringify(scrapeResults[source.id], null, 2) }}
+                </pre>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Output -->
+        <!-- OUTPUT TAB -->
         <div v-else-if="activeTab === 'output'" class="space-y-6 p-6">
           <div>
             <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Latest Scrape Results</h3>
 
+            <!-- Stored results -->
             <div v-if="storedScrapeResults.length" class="space-y-3">
-              <article v-for="(item, index) in storedScrapeResults" :key="index" class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4">
+              <article
+                v-for="(item, index) in storedScrapeResults"
+                :key="index"
+                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
+              >
                 <div class="flex items-center justify-between gap-2">
                   <p class="text-sm font-semibold text-[#3C2610]">{{ item.sourceName }}</p>
-                  <span class="text-[11px] tracking-wide text-[#9CA3AF] uppercase">{{ new Date(item.fetchedAt as string).toLocaleString() }}</span>
+                  <span class="text-[11px] tracking-wide text-[#9CA3AF] uppercase">
+                    {{ new Date(item.fetchedAt).toLocaleString() }}
+                  </span>
                 </div>
-                <p class="mt-2 text-sm leading-6 text-[#4B5563]">{{ item.summary }}</p>
-                <pre v-if="item.payload" class="mt-3 text-xs leading-5 whitespace-pre-wrap text-[#374151]">{{ typeof item.payload === 'string' ? item.payload : JSON.stringify(item.payload, null, 2) }}</pre>
+
+                <p class="mt-2 text-sm leading-6 text-[#4B5563]">
+                  {{ item.summary }}
+                </p>
+
+                <pre
+                  v-if="item.payload"
+                  class="mt-3 text-xs leading-5 whitespace-pre-wrap text-[#374151]"
+                >
+{{ typeof item.payload === 'string' ? item.payload : JSON.stringify(item.payload, null, 2) }}
+                </pre>
               </article>
             </div>
 
-            <div v-else class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-              <p class="text-sm text-gray-500">No simulated scrape results yet.</p>
-              <p class="text-xs text-gray-400">Trigger a scrape from the Analysis tab to see output.</p>
+            <!-- No results -->
+            <div
+              v-else
+              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+            >
+              <p class="text-sm text-gray-500">No scrape results yet.</p>
+              <p class="text-xs text-gray-400">Trigger a scrape from the Analysis tab.</p>
             </div>
           </div>
 
+          <!-- Processed Output -->
           <div>
             <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">What Changed</h3>
 
             <div v-if="outputItems.length" class="space-y-3">
-              <article v-for="(item, index) in outputItems" :key="index" class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4">
+              <article
+                v-for="(item, index) in outputItems"
+                :key="index"
+                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
+              >
                 <p class="text-sm font-semibold text-[#3C2610]">{{ item.title }}</p>
-                <p v-if="item.detail" class="mt-2 text-sm leading-6 whitespace-pre-line text-[#4B5563]">{{ item.detail }}</p>
+                <p
+                  v-if="item.detail"
+                  class="mt-2 text-sm leading-relaxed whitespace-pre-line text-[#4B5563]"
+                >
+                  {{ item.detail }}
+                </p>
               </article>
             </div>
 
-            <div v-else class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-              <p class="text-sm text-gray-500">No output has been generated for this jurisdiction.</p>
-              <p class="text-xs text-gray-400">Connect sources or add monitoring instructions to see updates.</p>
+            <div
+              v-else
+              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+            >
+              <p class="text-sm text-gray-500">No output generated.</p>
+              <p class="text-xs text-gray-400">Add sources or monitoring instructions.</p>
             </div>
           </div>
         </div>
 
-        <!-- Sources list -->
+        <!-- SOURCES TAB -->
         <div v-else class="p-6">
           <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Sources</h3>
 
+          <!-- Loading -->
           <div v-if="sourcesLoading" class="space-y-2">
             <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
           </div>
 
-          <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ sourcesError }}</div>
+          <!-- Error -->
+          <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {{ sourcesError }}
+          </div>
 
+          <!-- List -->
           <ul v-else-if="sources.length" class="space-y-2">
-            <li v-for="source in sources" :key="source.id" class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]">
+            <li
+              v-for="source in sources"
+              :key="source.id"
+              class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
+            >
               <div>
                 <p class="font-semibold text-gray-900">{{ source.name }}</p>
                 <p class="text-xs text-gray-500">{{ source.url }}</p>
-                <p class="text-[11px] tracking-wide text-gray-400 uppercase">{{ source.source_type }} • {{ source.scrape_frequency }}</p>
+                <p class="text-[11px] tracking-wide text-gray-400 uppercase">
+                  {{ source.source_type }} • {{ source.scrape_frequency }}
+                </p>
               </div>
+
               <div class="flex items-center gap-2">
-                <button class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50" @click="startEditSource(source)">Edit</button>
-                <button class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50" @click="deleteSource(source)">Delete</button>
+                <button
+                  class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                  @click="startEditSource(source)"
+                >
+                  Edit
+                </button>
+
+                <button
+                  class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                  @click="deleteSource(source)"
+                >
+                  Delete
+                </button>
               </div>
             </li>
           </ul>
 
-          <div v-else class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-            <p class="text-sm text-gray-500">No sources have been added yet.</p>
-            <p class="text-xs text-gray-400">Attach links or files to start tracking sources.</p>
-            <button class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white" @click="openAddSourceModal">
-              <Plus :size="16" /> Add Source
-            </button>
+          <!-- Empty -->
+          <div
+            v-else
+            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+          >
+            <p class="text-sm text-gray-500">No sources available.</p>
+            <p class="text-xs text-gray-400">Add one to start monitoring.</p>
           </div>
         </div>
       </section>
 
-      <!-- Sub-jurisdictions -->
+      <!-- SUBJURISDICTION SECTION -->
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
         <div class="mb-4 flex items-center justify-between gap-4">
-          <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdiction</h3>
-          <button class="flex items-center gap-2 rounded-full bg-[#401903] px-4 py-2 text-sm font-medium text-white" @click="openSubJurisdictionModal">
+          <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
+
+          <button
+            class="flex items-center gap-2 rounded-full bg-[#401903] px-4 py-2 text-sm font-medium text-white"
+            @click="openSubJurisdictionModal"
+          >
             <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>
 
-        <div v-if="subJurisdictions.length === 0" class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center">
+        <!-- Empty -->
+        <div
+          v-if="subJurisdictions.length === 0"
+          class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center"
+        >
           <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-7 w-7 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+              />
             </svg>
           </div>
-          <p class="mb-1 text-base font-medium text-gray-900">No Jurisdictions added</p>
-          <p class="text-sm text-gray-500">Search source or Click add sources to get started.</p>
+
+          <p class="mb-1 text-base font-medium text-gray-900">No Sub-Jurisdictions</p>
+          <p class="text-sm text-gray-500">Create one to begin categorizing legal domains.</p>
         </div>
 
+        <!-- List -->
         <div v-else class="space-y-3">
-          <article v-for="node in subJurisdictions" :key="node.id" @click="goToJurisdiction(node.id)" class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10" :style="{ paddingLeft: `${node.depth * 16 + 16}px` }">
-            <h4 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]">{{ node.name }}</h4>
-            <p class="text-sm leading-relaxed text-gray-600">{{ node.description }}</p>
-            <p class="mt-2 text-xs text-gray-400">{{ new Date(node.created_at).toLocaleString() }}</p>
+          <article
+            v-for="node in subJurisdictions"
+            :key="node.id"
+            @click="goToJurisdiction(node.id)"
+            class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
+            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }"
+          >
+            <h4
+              class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+            >
+              {{ node.name }}
+            </h4>
+
+            <p class="text-sm leading-relaxed text-gray-600">
+              {{ node.description }}
+            </p>
+
+            <p class="mt-2 text-xs text-gray-400">
+              {{ new Date(node.created_at).toLocaleString() }}
+            </p>
           </article>
         </div>
       </section>
     </div>
 
-    <!-- Modals -->
+    <!-- MODALS -->
     <teleport to="body">
-      <!-- Sub-jurisdiction modal -->
-      <div v-if="subJurisdictionModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]" @click.self="closeSubJurisdictionModal">
+      <!-- SUB-JURISDICTION MODAL -->
+      <div
+        v-if="subJurisdictionModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
+        @click.self="closeSubJurisdictionModal"
+      >
         <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
           <h3 class="mb-2 text-2xl font-bold text-gray-900">Define your Sub-Jurisdiction</h3>
-          <p class="mb-6 text-sm text-gray-600">Define a specific legal domain or region to monitor</p>
+          <p class="mb-6 text-sm text-gray-600">
+            Define a specific legal domain or region to monitor
+          </p>
 
           <form @submit.prevent="createSubJurisdiction" class="space-y-5">
             <div>
-              <label class="mb-2 block text-sm font-medium text-gray-900">Sub-Jurisdiction Name</label>
-              <input v-model="subJurisdictionForm.name" type="text" placeholder="e.g Global Visa Monitoring" required class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+              <label class="mb-2 block text-sm font-medium text-gray-900"
+                >Sub-Jurisdiction Name</label
+              >
+              <input
+                v-model="subJurisdictionForm.name"
+                type="text"
+                required
+                placeholder="e.g Global Visa Monitoring"
+                class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
             </div>
 
             <div>
               <label class="mb-2 block text-sm font-medium text-gray-900">Description</label>
-              <textarea v-model="subJurisdictionForm.description" rows="4" placeholder="What legal areas will you monitor?" required class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"></textarea>
+              <textarea
+                v-model="subJurisdictionForm.description"
+                rows="4"
+                required
+                placeholder="What legal areas will you monitor?"
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              ></textarea>
             </div>
 
-            <div v-if="jurisdictionStore.error" class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ jurisdictionStore.error }}</div>
-
             <div class="flex justify-end gap-3 pt-4">
-              <button type="button" @click="closeSubJurisdictionModal" class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700">Cancel</button>
-              <button type="submit" class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white">Create Sub-Jurisdiction</button>
+              <button
+                type="button"
+                @click="closeSubJurisdictionModal"
+                class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white"
+              >
+                Create Sub-Jurisdiction
+              </button>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- Add / Edit Source modal -->
-      <div v-if="addSourceModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]" @click.self="closeAddSourceModal">
+      <!-- SOURCE MODAL -->
+      <div
+        v-if="addSourceModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
+        @click.self="closeAddSourceModal"
+      >
         <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
-          <h3 class="mb-2 text-2xl font-bold text-gray-900">{{ editingSourceId ? 'Edit Source' : 'Add Source' }}</h3>
-          <p class="mb-6 text-sm text-gray-600">Attach a source to monitor for this jurisdiction.</p>
+          <h3 class="mb-2 text-2xl font-bold text-gray-900">
+            {{ editingSourceId ? 'Edit Source' : 'Add Source' }}
+          </h3>
+          <p class="mb-6 text-sm text-gray-600">
+            Attach a source to monitor for this jurisdiction.
+          </p>
 
-          <form @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()" class="space-y-4">
+          <form
+            @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()"
+            class="space-y-4"
+          >
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-800">Name</label>
-              <input v-model="sourceForm.name" required class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" placeholder="e.g. Supreme Court Opinions" />
+              <input
+                v-model="sourceForm.name"
+                required
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                placeholder="e.g. Supreme Court Opinions"
+              />
             </div>
 
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-800">URL</label>
-              <input v-model="sourceForm.url" type="url" required class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" placeholder="https://example.com" />
+              <input
+                v-model="sourceForm.url"
+                type="url"
+                required
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                placeholder="https://example.com"
+              />
             </div>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-800">Source Type</label>
-                <select v-model="sourceForm.source_type" class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
+                <select
+                  v-model="sourceForm.source_type"
+                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                >
                   <option value="web">Web</option>
                   <option value="api">API</option>
                   <option value="pdf">PDF</option>
@@ -1035,7 +1079,10 @@ watch(
 
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-800">Scrape Frequency</label>
-                <select v-model="sourceForm.scrape_frequency" class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
+                <select
+                  v-model="sourceForm.scrape_frequency"
+                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                >
                   <option value="HOURLY">Hourly</option>
                   <option value="DAILY">Daily</option>
                   <option value="WEEKLY">Weekly</option>
@@ -1044,12 +1091,25 @@ watch(
               </div>
             </div>
 
-            <div v-if="sourceError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ sourceError }}</div>
+            <div v-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {{ sourcesError }}
+            </div>
 
             <div class="flex justify-end gap-3 pt-2">
-              <button type="button" @click="closeAddSourceModal" class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700">Cancel</button>
-              <button type="submit" :disabled="sourceLoading" class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70">
-                <span v-if="sourceLoading">Saving...</span>
+              <button
+                type="button"
+                @click="closeAddSourceModal"
+                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                :disabled="sourcesLoading"
+                class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <span v-if="sourcesLoading">Saving...</span>
                 <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
               </button>
             </div>
