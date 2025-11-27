@@ -678,7 +678,7 @@ watch(
                 <RouterLink
                   :to="{
                     name: 'organization-projects',
-                    params: { organizationId: organizationId || projectOrganizationId },
+                    params: { organizationId: activeOrganizationId },
                   }"
                 >
                   Projects
@@ -694,7 +694,7 @@ watch(
                   :to="{
                     name: 'project-detail',
                     params: {
-                      organizationId: organizationId || projectOrganizationId,
+                      organizationId: activeOrganizationId,
                       id: jurisdiction.project_id,
                     },
                   }"
