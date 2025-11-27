@@ -1,4 +1,5 @@
-export type SourceType = 'web' | 'rss' | 'api' | 'pdf' | 'newsletter'
+// src/types/source.ts
+export type SourceType = 'web' | 'api' | 'pdf'
 export type ScrapeFrequency = 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
 
 export interface Source {
@@ -8,35 +9,27 @@ export interface Source {
   url: string
   source_type: SourceType
   scrape_frequency: ScrapeFrequency
-  auth_details?: Record<string, unknown> | null
-  scraping_rules?: Record<string, unknown> | null
   is_active?: boolean
   is_deleted?: boolean
+  has_auth?: boolean
   created_at?: string
-  updated_at?: string
-  deleted_at?: string | null
+  updated_at?: string | null
+  // include scraping_rules if backend will provide it in future
+  scraping_rules?: Record<string, unknown> | null
 }
 
-export interface CreateSourcePayload {
+export type CreateSourcePayload = {
   jurisdiction_id: string
   name: string
   url: string
-  source_type?: SourceType
-  scrape_frequency?: ScrapeFrequency
-  auth_details?: Record<string, unknown> | null
+  source_type: SourceType
+  scrape_frequency: ScrapeFrequency
+  // optional flags
+  is_active?: boolean
+  has_auth?: boolean
   scraping_rules?: Record<string, unknown> | null
 }
 
-export type UpdateSourcePayload = Partial<CreateSourcePayload> & {
-  is_active?: boolean
-  is_deleted?: boolean
-}
-
-export interface SourceResponse {
-  status?: string
-  status_code?: number
-  message?: string
-  data: {
-    source: Source
-  }
-}
+export type UpdateSourcePayload = Partial<
+  Pick<Source, 'name' | 'url' | 'source_type' | 'scrape_frequency' | 'is_active' | 'is_deleted' | 'has_auth' | 'scraping_rules'>
+>
