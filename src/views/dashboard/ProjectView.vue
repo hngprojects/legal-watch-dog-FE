@@ -32,7 +32,7 @@ const formData = ref({
 
 const inviteForm = ref({
   email: '',
-  role: 'member',
+  role: 'Member',
 })
 const inviteSending = ref(false)
 const inviteMessage = ref<string | null>(null)
@@ -181,7 +181,7 @@ watch(
     inviteMessage.value = null
     inviteError.value = null
     inviteForm.value.email = ''
-    inviteForm.value.role = 'member'
+    inviteForm.value.role = 'Member'
     if (id) {
       projectStore.fetchProjects(id)
     } else {
@@ -424,7 +424,7 @@ watch(
                 class="h-11 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               >
                 <option value="Admin">Admin</option>
-                <option value="member">Member</option>
+                <option value="Member">Member</option>
                 <option value="Viewer">Viewer</option>
               </select>
             </div>

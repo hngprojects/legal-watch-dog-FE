@@ -170,9 +170,14 @@ const router = createRouter({
         },
         {
           path: 'organizations/:organizationId',
+          name: 'organization-profile',
+          component: () => import('@/views/dashboard/OrganizationProfileView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'organizations/:organizationId/projects',
           name: 'organization-projects',
           component: ProjectView,
-          alias: '/dashboard/organizations/:organizationId/projects',
           meta: { requiresAuth: true },
         },
         {

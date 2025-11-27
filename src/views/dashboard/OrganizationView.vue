@@ -62,8 +62,8 @@ const handleCreateOrganization = async () => {
   }
 }
 
-const goToProjects = (organizationId: string) => {
-  router.push({ name: 'organization-projects', params: { organizationId } })
+const goToOrganization = (organizationId: string) => {
+  router.push({ name: 'organization-profile', params: { organizationId } })
 }
 
 onMounted(async () => {
@@ -192,8 +192,11 @@ onMounted(async () => {
           <div
             class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
           >
-            <button @click="goToProjects(org.id)" class="btn btn--primary flex items-center gap-1">
-              View Projects
+            <button
+              @click="goToOrganization(org.id)"
+              class="btn btn--primary flex items-center gap-1"
+            >
+              View Organization
               <svg
                 class="h-4 w-4"
                 viewBox="0 0 24 24"
