@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthLayout from '@/components/authentication/AuthLayout.vue'
@@ -52,6 +52,17 @@ const MIN_PASSWORD_LENGTH = 8
 
 const sanitize = (value: string) => value.trim()
 
+const hydrateFromDraft = () => {
+  if (authStore.signupDraft) {
+    companyName.value = authStore.signupDraft.companyName
+    email.value = authStore.signupDraft.email
+    password.value = authStore.signupDraft.password
+    confirmPassword.value = authStore.signupDraft.confirmPassword
+  }
+}
+
+onMounted(hydrateFromDraft)
+
 const resetForm = () => {
   companyName.value = ''
   email.value = ''
@@ -61,6 +72,7 @@ const resetForm = () => {
   showPassword.value = false
   showConfirmPassword.value = false
   errors.value = []
+  serverError.value = ''
 }
 
 const validateSignupForm = () => {
@@ -116,10 +128,18 @@ const validateSignupForm = () => {
   return validationErrors.length === 0
 }
 
+const captureDraft = () => ({
+  companyName: companyName.value,
+  email: email.value,
+  password: password.value,
+  confirmPassword: confirmPassword.value,
+})
+
 const handleCreateAccount = async () => {
   if (!validateSignupForm()) return
   serverError.value = ''
   isSubmitting.value = true
+  authStore.setSignupDraft(captureDraft())
 
   const sanitizedEmail = sanitize(email.value).toLowerCase()
 
@@ -134,15 +154,35 @@ const handleCreateAccount = async () => {
 
     if (response && response.status_code === 201) {
       resetForm()
-      router.push({ name: 'otp' })
+      router.push({ name: 'otp', query: { flow: 'signup' } })
     } else {
       serverError.value = 'Registration successful but failed to receive OTP instructions.'
     }
   } catch (error) {
     if (isAxiosError(error)) {
-      serverError.value =
-        (error.response?.data as { message?: string })?.message ??
-        'An error occurred while creating your account.'
+      const apiMessage = (error.response?.data as { message?: string })?.message
+      const isPendingOtp =
+        typeof apiMessage === 'string' &&
+        apiMessage.toLowerCase().includes('pending otp verification')
+
+      if (isPendingOtp) {
+        try {
+          authStore.setUserEmail(sanitizedEmail)
+          authStore.setOtpPurpose('signup')
+          await authStore.resendOTP(sanitizedEmail)
+          resetForm()
+          router.push({ name: 'otp' })
+          return
+        } catch (resendError) {
+          serverError.value =
+            (isAxiosError(resendError) &&
+              (resendError.response?.data as { message?: string })?.message) ||
+            'We could not resend your OTP. Please try again.'
+          return
+        }
+      }
+
+      serverError.value = apiMessage ?? 'An error occurred while creating your account.'
     } else {
       serverError.value = 'An unexpected error occurred. Please try again.'
     }
@@ -161,12 +201,6 @@ const handleCreateAccount = async () => {
         </p>
       </template>
       <form @submit.prevent="handleCreateAccount" class="space-y-5">
-        <div
-          v-if="serverError"
-          class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
-        >
-          {{ serverError }}
-        </div>
         <div
           v-if="errors.length"
           class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
@@ -323,6 +357,13 @@ const handleCreateAccount = async () => {
           <span v-if="!isSubmitting">Signup</span>
           <span v-else>Creating account...</span>
         </button>
+
+        <div
+          v-if="serverError"
+          class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
+        >
+          {{ serverError }}
+        </div>
 
         <div class="relative mt-9 py-2">
           <div class="absolute inset-0 flex items-center">

@@ -14,7 +14,7 @@ import Timeline from '@/assets/Images/Timeline.png'
       <!-- Section Header -->
       <div class="mb-16 text-center">
         <HeadingText tag="h2" align="center" class="mb-4">
-          Powerful <span class="text-[#EB9654]">Features</span> to <br />
+          Powerful <span class="text-accent">Features</span> to <br />
           Keep You Informed
         </HeadingText>
         <BodyText align="center" tone="muted" class="mx-auto max-w-[700px] font-semibold">
@@ -27,7 +27,7 @@ import Timeline from '@/assets/Images/Timeline.png'
       <div class="flex flex-col gap-8">
         <!-- Card 1: AI Powered Summaries -->
         <div
-          class="relative flex min-h-[290px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#FFEBDA] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
+          class="bg-accent relative flex min-h-[290px] flex-col gap-6 overflow-hidden rounded-4xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
         >
           <!-- Text Section -->
           <div class="relative z-10 flex flex-col justify-center sm:mt-20 sm:max-w-[46%] lg:mt-28">
@@ -50,7 +50,7 @@ import Timeline from '@/assets/Images/Timeline.png'
         </div>
         <!-- Card 2: Change Timeline -->
         <div
-          class="relative flex min-h-[290px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#FFEBDA] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
+          class="bg-accent relative flex min-h-[290px] flex-col gap-6 overflow-hidden rounded-4xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
         >
           <!-- Image Section (White Card Anchored to Bottom-Left) -->
           <div
@@ -74,7 +74,7 @@ import Timeline from '@/assets/Images/Timeline.png'
 
         <!-- Card 3: Source Verification -->
         <div
-          class="relative flex min-h-[290px] flex-col gap-6 overflow-hidden rounded-4xl bg-[#FFEBDA] p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
+          class="bg-accent relative flex min-h-[290px] flex-col gap-6 overflow-hidden rounded-4xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.12)] sm:min-h-[340px] sm:p-12"
         >
           <!-- Text Section -->
           <div class="relative z-10 flex flex-col justify-center sm:mt-20 sm:max-w-[46%] lg:mt-28">
