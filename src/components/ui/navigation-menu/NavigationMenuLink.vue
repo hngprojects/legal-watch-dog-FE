@@ -18,7 +18,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
     v-bind="forwarded"
     :class="
       cn(
-        'dark:outline-ring/40 outline-ring/50 flex flex-col gap-1 rounded-sm p-2 text-sm ring-neutral-950/10 transition-[color,box-shadow] hover:bg-neutral-100 hover:text-neutral-900 focus:bg-neutral-100 focus:text-neutral-900 focus-visible:ring-4 focus-visible:outline-1 data-[active=true]:bg-neutral-100/50 data-[active=true]:text-neutral-900 data-[active=true]:hover:bg-neutral-100 data-[active=true]:focus:bg-neutral-100 dark:dark:ring-neutral-300/20 dark:ring-neutral-300/10 dark:ring-neutral-950/20 dark:hover:bg-neutral-800 dark:hover:text-neutral-50 dark:focus:bg-neutral-800 dark:focus:text-neutral-50 dark:data-[active=true]:bg-neutral-800/50 dark:data-[active=true]:text-neutral-50 dark:data-[active=true]:hover:bg-neutral-800 dark:data-[active=true]:focus:bg-neutral-800 [&_svg:not([class*=\'size-\'])]:size-4 [&_svg:not([class*=\'text-\'])]:text-neutral-500 dark:[&_svg:not([class*=\'text-\'])]:text-neutral-400',
+        'outline-ring/50 flex flex-col gap-1 rounded-sm p-2 text-sm ring-neutral-950/10 transition-[color,box-shadow] hover:bg-neutral-100 hover:text-neutral-900 focus:bg-neutral-100 focus:text-neutral-900 focus-visible:ring-4 focus-visible:outline-1 data-[active=true]:bg-neutral-100/50 data-[active=true]:text-neutral-900 data-[active=true]:hover:bg-neutral-100 data-[active=true]:focus:bg-neutral-100 [&_svg:not([class*=\'size-\'])]:size-4 [&_svg:not([class*=\'text-\'])]:text-neutral-500',
         props.class,
       )
     "

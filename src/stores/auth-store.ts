@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
+import { userService } from '@/api/user'
 import type {
   LoginPayload,
   RegisterPayload,
+  RegisterResponse,
   ResendOtpPayload,
   VerifyOTPPayload,
   PasswordResetRequestPayload,
@@ -10,7 +12,9 @@ import type {
   PasswordResetConfirmPayload,
   PasswordResetVerifyResponse,
   PasswordResetConfirmResponse,
+  VerifyOtpResponse,
 } from '@/types/auth'
+import type { UserProfile } from '@/types/user'
 
 interface Organisation {
   id: string
@@ -18,13 +22,8 @@ interface Organisation {
   created_at: string
 }
 
-interface User {
-  id: string
-  first_name: string
-  last_name: string
-  email: string
-  role: string
-  organisation_id: string
+type User = UserProfile & {
+  organisation_id?: string
 }
 
 interface State {
@@ -46,27 +45,11 @@ interface ApiTokenData {
   user?: User
 }
 
-interface RegisterApiResponse {
-  status: string
-  status_code: number
-  message: string
-  data: {
-    email: string
-  }
-}
-
 interface LoginApiResponse {
   status: string
   status_code: number
   message: string
   data: ApiTokenData
-}
-
-interface VerifyOtpApiResponse {
-  status?: string
-  message?: string
-  login_data?: ApiTokenData
-  data?: ApiTokenData
 }
 
 interface ResendOtpApiResponse {
@@ -76,7 +59,7 @@ interface ResendOtpApiResponse {
 }
 
 interface SignupDraft {
-  companyName: string
+  name: string
   email: string
   password: string
   confirmPassword: string
@@ -182,9 +165,9 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async register(payload: RegisterPayload) {
-      const response = await authService.registerOrganisation(payload)
-      const responseBody = response.data as unknown as RegisterApiResponse
-      const registeredEmail = responseBody.data?.email || payload.email
+      const response = await authService.registerUser(payload)
+      const responseBody = response.data as RegisterResponse
+      const registeredEmail = responseBody?.data?.email || payload.email
       this.setUserEmail(registeredEmail)
       this.setOtpPurpose('signup')
       this.setResetToken(null)
@@ -206,19 +189,28 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async verifyOTP(payload: VerifyOTPPayload) {
-      const response = await authService.verifyOtp(payload)
-      const responseBody = response.data as unknown as VerifyOtpApiResponse
-      const userData = responseBody.data
+      const response = await authService.verifyOtp({
+        ...payload,
+        otp_purpose: payload.otp_purpose ?? this.otpPurpose ?? 'signup',
+      })
+      const responseBody = response.data as VerifyOtpResponse
+      const authData = responseBody.data ?? responseBody.login_data
 
-      if (userData) {
-        this.user = null
-        this.setOtpPurpose(null)
-        return { ...responseBody, next: 'login' }
+      this.setUserEmail(payload.email)
+
+      if (authData?.access_token) {
+        this.handleLoginSuccess(authData.access_token, true, authData.user as User | undefined)
       }
+
+      this.setOtpPurpose(null)
+      return responseBody
     },
 
     async resendOTP(email: string) {
-      const payload: ResendOtpPayload = { email }
+      const payload: ResendOtpPayload = {
+        email,
+        otp_purpose: this.otpPurpose ?? 'signup',
+      }
       const response = await authService.resendOtp(payload)
       const responseBody = response.data as unknown as ResendOtpApiResponse
       this.setUserEmail(email)
@@ -248,6 +240,28 @@ export const useAuthStore = defineStore('auth', {
       const responseBody = response.data as PasswordResetConfirmResponse
       this.clearAuthState()
       return responseBody
+    },
+
+    async loadCurrentUser(): Promise<UserProfile | null> {
+      if (!this.accessToken) return null
+      try {
+        const response = await userService.getCurrentUser()
+        const payload = response.data?.data
+        const apiUser =
+          (payload && typeof payload === 'object' && 'user' in payload
+            ? (payload as { user?: UserProfile }).user
+            : (payload as UserProfile | undefined)) ?? null
+        if (apiUser) {
+          this.user = apiUser as User
+          return apiUser
+        }
+      } catch (error) {
+        const status = (error as { response?: { status?: number } })?.response?.status
+        if (status === 401) {
+          this.clearAuthState()
+        }
+      }
+      return null
     },
 
     async logout() {
