@@ -34,33 +34,54 @@ interface SingleJurisdictionResponse {
 }
 
 export const jurisdictionApi = {
-  getAll: (projectId?: string) =>
-    projectId
-      ? api.get<JurisdictionResponse>(`/jurisdictions/project/${projectId}`)
-      : api.get<JurisdictionResponse>('/jurisdictions/'),
+  getAll: (organizationId: string) =>
+    api.get<JurisdictionResponse>(`/organizations/${organizationId}/jurisdictions/`),
 
-  getOne: (jurisdictionId: string) =>
-    api.get<SingleJurisdictionResponse>(`/jurisdictions/${jurisdictionId}`),
+  getByProject: (organizationId: string, projectId: string) =>
+    api.get<JurisdictionResponse>(
+      `/organizations/${organizationId}/jurisdictions/project/${projectId}`
+    ),
 
-  create: (data: {
-    project_id: string
-    name: string
-    description: string
-    prompt?: string | null
-    parent_id?: string | null
-    scrape_output?: Record<string, unknown> | null
-  }) => api.post<SingleJurisdictionResponse>('/jurisdictions/', data),
+  getOne: (organizationId: string, jurisdictionId: string) =>
+    api.get<SingleJurisdictionResponse>(
+      `/organizations/${organizationId}/jurisdictions/${jurisdictionId}`
+    ),
 
-  update: (jurisdictionId: string, data: Partial<Jurisdiction>) =>
-    api.patch<SingleJurisdictionResponse>(`/jurisdictions/${jurisdictionId}`, data),
+  create: (
+    organizationId: string,
+    data: {
+      project_id: string
+      name: string
+      description: string
+      prompt?: string | null
+      parent_id?: string | null
+      scrape_output?: Record<string, unknown> | null
+    }
+  ) =>
+    api.post<SingleJurisdictionResponse>(
+      `/organizations/${organizationId}/jurisdictions/`,
+      data
+    ),
 
-  delete: (jurisdictionId: string) => api.delete(`/jurisdictions/${jurisdictionId}`),
+  update: (
+    organizationId: string,
+    jurisdictionId: string,
+    data: Partial<Jurisdiction>
+  ) =>
+    api.patch<SingleJurisdictionResponse>(
+      `/organizations/${organizationId}/jurisdictions/${jurisdictionId}`,
+      data
+    ),
 
-  restore: (jurisdictionId: string) =>
-    api.post(`/jurisdictions/${jurisdictionId}/restoration`),
+  delete: (organizationId: string, jurisdictionId: string) =>
+    api.delete(`/organizations/${organizationId}/jurisdictions/${jurisdictionId}`),
 
-  deleteByProject: (projectId: string) => api.delete(`/jurisdictions/project/${projectId}`),
+  restore: (organizationId: string, jurisdictionId: string) =>
+    api.post(`/organizations/${organizationId}/jurisdictions/${jurisdictionId}/restoration`),
 
-  restoreByProject: (projectId: string) =>
-    api.post(`/jurisdictions/project/${projectId}/restoration`),
+  deleteByProject: (organizationId: string, projectId: string) =>
+    api.delete(`/organizations/${organizationId}/jurisdictions/project/${projectId}/`),
+
+  restoreByProject: (organizationId: string, projectId: string) =>
+    api.post(`/organizations/${organizationId}/jurisdictions/project/${projectId}/restoration`),
 }

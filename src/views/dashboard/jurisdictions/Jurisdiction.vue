@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/breadcrumb'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
+import { useOrganizationStore } from '@/stores/organization-store'
 
 interface OutputItem {
   title: string
@@ -40,9 +41,15 @@ const showSettingsMenu = ref(false)
 const showInlineEdit = ref(false)
 const subJurisdictionModalOpen = ref(false)
 const addSourceModalOpen = ref(false)
-const organizationId = computed(() => {
-  const id = route.query.organizationId
-  return typeof id === 'string' ? id : ''
+const orgStore = useOrganizationStore()
+const activeOrganizationId = computed<string>(() => {
+  if (typeof route.query.organizationId === 'string') {
+    return route.query.organizationId
+  }
+  if (projectOrganizationId.value) {
+    return projectOrganizationId.value
+  }
+  return orgStore.currentOrganizationId || ''
 })
 
 const editForm = ref({
@@ -243,7 +250,6 @@ const projectOrganizationId = computed(() => {
   const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
   return project?.org_id || ''
 })
-const activeOrganizationId = computed(() => organizationId.value || projectOrganizationId.value)
 
 const parentJurisdiction = computed(() => {
   if (!jurisdiction.value?.parent_id) return null
@@ -272,7 +278,7 @@ const loadJurisdiction = async (id: string) => {
 }
 
 const goBack = () => {
-  const targetOrgId = organizationId.value || projectOrganizationId.value
+  const targetOrgId = activeOrganizationId.value
 
   if (jurisdiction.value?.project_id && targetOrgId) {
     router.push({
@@ -362,7 +368,7 @@ const deleteJurisdiction = async () => {
     showConfirmButton: false,
   })
 
-  const targetOrgId = organizationId.value || projectOrganizationId.value
+  const targetOrgId = activeOrganizationId.value
 
   if (projectId && targetOrgId) {
     router.push({
@@ -469,7 +475,7 @@ const createSource = async () => {
     try {
       rules = JSON.parse(sourceForm.value.scraping_rules)
     } catch (e) {
-      void e;
+      void e
       sourceError.value = 'Scraping rules must be valid JSON'
       sourceLoading.value = false
       return
@@ -600,7 +606,7 @@ const deleteSource = async (source: Source) => {
 }
 
 const goToJurisdiction = (id: string) => {
-  const targetOrgId = organizationId.value || projectOrganizationId.value
+  const targetOrgId = activeOrganizationId.value
 
   router.push({
     path: `/dashboard/jurisdictions/${id}`,
@@ -862,7 +868,7 @@ watch(
         </div>
 
         <!-- Analysis Panel -->
-        <div v-if="activeTab === 'analysis'" class="p-6 space-y-4">
+        <div v-if="activeTab === 'analysis'" class="space-y-4 p-6">
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
@@ -878,7 +884,7 @@ watch(
           </div>
 
           <div v-if="sourcesLoading" class="space-y-2">
-            <div v-for="n in 3" :key="n" class="h-12 w-full rounded-lg bg-gray-100 animate-pulse" />
+            <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
           </div>
 
           <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -910,7 +916,7 @@ watch(
                 <div>
                   <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
                   <p class="text-xs text-gray-500">{{ source.url }}</p>
-                  <p class="text-[11px] uppercase tracking-wide text-gray-400">
+                  <p class="text-[11px] tracking-wide text-gray-400 uppercase">
                     {{ source.source_type }} • {{ source.scrape_frequency }}
                   </p>
                 </div>
@@ -951,9 +957,15 @@ watch(
                 v-if="expandedSources[source.id] && scrapeResults[source.id]"
                 class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
               >
-                <div class="mb-1 text-[11px] font-semibold uppercase text-gray-500">Most Recent Result</div>
-                <pre class="whitespace-pre-wrap wrap-break-word text-[11px] leading-5">
-{{ typeof scrapeResults[source.id] === 'string' ? scrapeResults[source.id] : JSON.stringify(scrapeResults[source.id], null, 2) }}
+                <div class="mb-1 text-[11px] font-semibold text-gray-500 uppercase">
+                  Most Recent Result
+                </div>
+                <pre class="text-[11px] leading-5 wrap-break-word whitespace-pre-wrap"
+                  >{{
+                    typeof scrapeResults[source.id] === 'string'
+                      ? scrapeResults[source.id]
+                      : JSON.stringify(scrapeResults[source.id], null, 2)
+                  }}
                 </pre>
               </div>
             </div>
@@ -961,7 +973,7 @@ watch(
         </div>
 
         <!-- Output Panel (uses stored simulated results + normalized output) -->
-        <div v-else-if="activeTab === 'output'" class="p-6 space-y-6">
+        <div v-else-if="activeTab === 'output'" class="space-y-6 p-6">
           <div>
             <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Latest Scrape Results</h3>
 
@@ -973,15 +985,20 @@ watch(
               >
                 <div class="flex items-center justify-between gap-2">
                   <p class="text-sm font-semibold text-[#3C2610]">{{ item.sourceName }}</p>
-                  <span class="text-[11px] uppercase tracking-wide text-[#9CA3AF]">
+                  <span class="text-[11px] tracking-wide text-[#9CA3AF] uppercase">
                     {{ new Date(item.fetchedAt).toLocaleString() }}
                   </span>
                 </div>
                 <p class="mt-2 text-sm leading-6 text-[#4B5563]">{{ item.summary }}</p>
                 <pre
                   v-if="item.payload"
-                  class="mt-3 whitespace-pre-wrap text-xs leading-5 text-[#374151]"
-                >{{ typeof item.payload === 'string' ? item.payload : JSON.stringify(item.payload, null, 2) }}</pre>
+                  class="mt-3 text-xs leading-5 whitespace-pre-wrap text-[#374151]"
+                  >{{
+                    typeof item.payload === 'string'
+                      ? item.payload
+                      : JSON.stringify(item.payload, null, 2)
+                  }}</pre
+                >
               </article>
             </div>
 
@@ -990,7 +1007,9 @@ watch(
               class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
             >
               <p class="text-sm text-gray-500">No simulated scrape results yet.</p>
-              <p class="text-xs text-gray-400">Trigger a scrape from the Analysis tab to see output.</p>
+              <p class="text-xs text-gray-400">
+                Trigger a scrape from the Analysis tab to see output.
+              </p>
             </div>
           </div>
 
@@ -1017,7 +1036,9 @@ watch(
               v-else
               class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
             >
-              <p class="text-sm text-gray-500">No output has been generated for this jurisdiction.</p>
+              <p class="text-sm text-gray-500">
+                No output has been generated for this jurisdiction.
+              </p>
               <p class="text-xs text-gray-400">
                 Connect sources or add monitoring instructions to see updates.
               </p>
@@ -1030,7 +1051,7 @@ watch(
           <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Sources</h3>
 
           <div v-if="sourcesLoading" class="space-y-2">
-            <div v-for="n in 3" :key="n" class="h-12 w-full rounded-lg bg-gray-100 animate-pulse" />
+            <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
           </div>
 
           <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -1046,7 +1067,7 @@ watch(
               <div>
                 <p class="font-semibold text-gray-900">{{ source.name }}</p>
                 <p class="text-xs text-gray-500">{{ source.url }}</p>
-                <p class="text-[11px] uppercase tracking-wide text-gray-400">
+                <p class="text-[11px] tracking-wide text-gray-400 uppercase">
                   {{ source.source_type }} • {{ source.scrape_frequency }}
                 </p>
               </div>
@@ -1067,7 +1088,10 @@ watch(
             </li>
           </ul>
 
-          <div v-else class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+          <div
+            v-else
+            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+          >
             <p class="text-sm text-gray-500">No sources have been added yet.</p>
             <p class="text-xs text-gray-400">Attach links or files to start tracking sources.</p>
             <button

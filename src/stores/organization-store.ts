@@ -106,4 +106,11 @@ export const useOrganizationStore = defineStore('organizations', {
       }
     },
   },
+  getters: {
+    currentOrganization: (state) => state.organizations[0] || null,
+
+    currentOrganizationId: (state) => state.organizations[0]?.id || null,
+
+    hasOrganizations: (state) => state.organizations.length > 0,
+  },
 })
