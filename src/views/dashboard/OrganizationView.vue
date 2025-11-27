@@ -39,7 +39,8 @@ const closeCreateModal = () => {
 const handleCreateOrganization = async () => {
   organizationStore.setError(null)
 
-  if (!formData.value.name.trim()) return organizationStore.setError('Organization name is required')
+  if (!formData.value.name.trim())
+    return organizationStore.setError('Organization name is required')
   if (!formData.value.industry.trim()) return organizationStore.setError('Industry is required')
 
   const created = await organizationStore.addOrganization({
@@ -53,7 +54,11 @@ const handleCreateOrganization = async () => {
       organizationStore.fetchOrganizations(userId)
     }
     closeCreateModal()
-    await Swal.fire('Organization created', 'You can now add projects under this organization.', 'success')
+    await Swal.fire(
+      'Organization created',
+      'You can now add projects under this organization.',
+      'success',
+    )
   }
 }
 
@@ -79,13 +84,12 @@ onMounted(async () => {
     >
       <h1 class="mb-4 text-3xl font-bold text-gray-900 lg:text-4xl">No Organization Yet</h1>
       <p class="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-gray-600">
-        Create an organization to start grouping projects and jurisdictions.<br class="hidden sm:block" />
+        Create an organization to start grouping projects and jurisdictions.<br
+          class="hidden sm:block"
+        />
         Projects and jurisdictions are scoped within organizations.
       </p>
-      <button
-        @click="openCreateModal"
-        class="btn btn--primary"
-      >
+      <button @click="openCreateModal" class="btn btn--primary">
         <svg
           width="20"
           height="20"
@@ -113,18 +117,17 @@ onMounted(async () => {
     </div>
 
     <div v-else class="mx-auto max-w-7xl">
-      <div class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+      <div
+        class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
+      >
         <div>
-          <p class="text-sm uppercase tracking-wide text-[#9CA3AF]">Organization Workspace</p>
+          <p class="text-sm tracking-wide text-[#9CA3AF] uppercase">Organization Workspace</p>
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">Organizations</h1>
           <p class="mt-1 text-sm text-gray-600">
             Manage your organizations and dive into their projects.
           </p>
         </div>
-        <button
-          @click="openCreateModal"
-          class="flex items-center gap-1 btn btn--primary"
-        >
+        <button @click="openCreateModal" class="btn btn--primary flex items-center gap-1">
           <svg
             width="20"
             height="20"
@@ -178,19 +181,28 @@ onMounted(async () => {
           class="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10"
         >
           <div class="p-8">
-            <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Organization</p>
-            <h3 class="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-[#401903]">
+            <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Organization</p>
+            <h3
+              class="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+            >
               {{ org.name }}
             </h3>
             <p class="text-sm text-gray-600">{{ org.industry || 'Industry not specified' }}</p>
           </div>
-          <div class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4">
-            <button
-              @click="goToProjects(org.id)"
-              class="btn btn--primary flex items-center gap-1"
-            >
+          <div
+            class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
+          >
+            <button @click="goToProjects(org.id)" class="btn btn--primary flex items-center gap-1">
               View Projects
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M9 18l6-6-6-6"></path>
               </svg>
             </button>
@@ -210,7 +222,13 @@ onMounted(async () => {
             @click="closeCreateModal"
             class="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M1 1L13 13M13 1L1 13"
                 stroke="currentColor"
@@ -266,12 +284,7 @@ onMounted(async () => {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  class="btn btn--primary"
-                >
-                  Save Organization
-                </button>
+                <button type="submit" class="btn btn--primary">Save Organization</button>
               </div>
             </form>
           </div>

@@ -260,7 +260,10 @@ export const useAuthStore = defineStore('auth', {
           return apiUser
         }
       } catch (error) {
-        // swallow; caller can handle missing user
+        const status = (error as { response?: { status?: number } })?.response?.status
+        if (status === 401) {
+          this.clearAuthState()
+        }
       }
       return null
     },
