@@ -16,6 +16,9 @@ import { RouterLink } from 'vue-router'
         <RouterLink :to="{ name: 'profile' }"> Profile </RouterLink>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
+        <RouterLink :to="{ name: 'organizations' }"> Organizations </RouterLink>
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild>
         <RouterLink :to="{ name: 'billing' }"> Billing </RouterLink>
       </DropdownMenuItem>
     </DropdownMenuContent>
