@@ -15,6 +15,7 @@ export interface RawOrganization {
   industry?: string
   is_active?: boolean
   user_role?: string
+  role?: string
   created_at?: string
   updated_at?: string
 }

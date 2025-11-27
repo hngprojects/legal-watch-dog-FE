@@ -5,9 +5,11 @@ interface CurrentUserResponse {
   status?: string
   status_code?: number
   message?: string
-  data?: {
-    user?: UserProfile
-  }
+  data?:
+    | {
+        user?: UserProfile
+      }
+    | UserProfile
 }
 
 export const userService = {
