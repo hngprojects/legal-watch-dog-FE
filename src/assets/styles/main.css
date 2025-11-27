@@ -114,6 +114,10 @@
   @apply btn bg-accent-main hover:bg-accent-subtle text-surface px-5 py-4;
 }
 
+@utility btn--with-icon {
+  @apply flex gap-2 items-center;
+}
+
 @utility btn--link {
   @apply btn text-accent-main underline hover:no-underline;
 }

@@ -169,9 +169,10 @@ const router = createRouter({
           meta: { requiresAuth: true },
         },
         {
-          path: 'organizations/:organizationId/projects',
+          path: 'organizations/:organizationId',
           name: 'organization-projects',
           component: ProjectView,
+          alias: '/dashboard/organizations/:organizationId/projects',
           meta: { requiresAuth: true },
         },
         {

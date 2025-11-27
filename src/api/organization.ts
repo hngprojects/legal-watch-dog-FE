@@ -1,5 +1,5 @@
 import api from '@/lib/api'
-import type { CreateOrganizationPayload, RawOrganization } from '@/types/organization'
+import type { CreateOrganizationPayload, InviteMemberPayload, RawOrganization } from '@/types/organization'
 
 interface OrganizationsResponse {
   status: string
@@ -24,8 +24,19 @@ interface OrganizationResponse {
   data: RawOrganization
 }
 
+interface InviteMemberResponse {
+  status?: string
+  status_code?: number
+  message?: string
+  data?: {
+    message?: string
+  }
+}
+
 export const organizationService = {
   listOrganizations: () => api.get<OrganizationsResponse>(`/users/me/organizations`),
   createOrganization: (payload: CreateOrganizationPayload) =>
     api.post<OrganizationResponse>('/organizations', payload),
+  inviteMember: (organizationId: string, payload: InviteMemberPayload) =>
+    api.post<InviteMemberResponse>(`/organizations/${organizationId}/invitations`, payload),
 }
