@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MainFooter from '@/components/landing-page/MainFooter.vue'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
-import Terms from '@/components/landing-page/Terms.vue';
+import Terms from '@/components/landing-page/Terms.vue'
 </script>
 
 <template>

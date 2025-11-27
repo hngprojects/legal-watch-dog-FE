@@ -25,7 +25,10 @@ export const useProjectStore = defineStore('projects', {
       this.error = message
     },
 
-    async fetchProjects(organizationId: string, params?: { q?: string; page?: number; limit?: number }) {
+    async fetchProjects(
+      organizationId: string,
+      params?: { q?: string; page?: number; limit?: number },
+    ) {
       this.projects = []
       this.loading = true
       this.setError(null)
@@ -99,7 +102,11 @@ export const useProjectStore = defineStore('projects', {
       }
     },
 
-    async updateProject(organizationId: string | null, projectId: string, payload: UpdateProjectPayload) {
+    async updateProject(
+      organizationId: string | null,
+      projectId: string,
+      payload: UpdateProjectPayload,
+    ) {
       this.setError(null)
 
       try {
@@ -107,7 +114,9 @@ export const useProjectStore = defineStore('projects', {
           organizationId || this.projects.find((p) => p.id === projectId)?.org_id || ''
 
         if (!resolvedOrgId) {
-          this.setError('Organization context missing. Please reopen this project from Organizations.')
+          this.setError(
+            'Organization context missing. Please reopen this project from Organizations.',
+          )
           return null
         }
 

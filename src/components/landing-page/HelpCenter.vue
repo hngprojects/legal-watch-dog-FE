@@ -26,7 +26,10 @@
               <img :src="help1" alt="Phone Icon" class="h-full w-full object-contain" />
             </div>
 
-            <TypographyHeading level="h3" class="mb-1 text-xl font-semibold text-gray-900 text-center">
+            <TypographyHeading
+              level="h3"
+              class="mb-1 text-center text-xl font-semibold text-gray-900"
+            >
               Contact Support
             </TypographyHeading>
 
@@ -43,7 +46,10 @@
               <img :src="help2" alt="Search Icon" class="h-full w-full object-contain" />
             </div>
 
-            <TypographyHeading level="h3" class="mb-4 text-xl font-semibold text-gray-900 text-center">
+            <TypographyHeading
+              level="h3"
+              class="mb-4 text-center text-xl font-semibold text-gray-900"
+            >
               Search Articles
             </TypographyHeading>
           </div>
@@ -56,7 +62,10 @@
               <img :src="help3" alt="User Icon" class="h-full w-full object-contain" />
             </div>
 
-            <TypographyHeading level="h3" class="mb-1 text-xl font-semibold text-gray-900 text-center">
+            <TypographyHeading
+              level="h3"
+              class="mb-1 text-center text-xl font-semibold text-gray-900"
+            >
               User Guide
             </TypographyHeading>
 
@@ -71,12 +80,12 @@
       <div class="mb-16 px-4 text-center sm:px-6 lg:px-8">
         <TypographyHeading
           level="h2"
-          class="mb-3 text-4xl font-extrabold text-gray-900 md:text-5xl text-center"
+          class="mb-3 text-center text-4xl font-extrabold text-gray-900 md:text-5xl"
         >
           Need Help?
         </TypographyHeading>
 
-        <TypographyText class="block mx-auto max-w-2xl text-center text-lg text-gray-700">
+        <TypographyText class="mx-auto block max-w-2xl text-center text-lg text-gray-700">
           Get answers, find support, and learn how to make the most of Legal Watchdog.
         </TypographyText>
       </div>
@@ -101,12 +110,12 @@
             </div>
 
             <!-- Title -->
-            <TypographyHeading level="h3" class="mb-2 text-xl font-bold text-gray-900 text-center">
+            <TypographyHeading level="h3" class="mb-2 text-center text-xl font-bold text-gray-900">
               {{ feature.title }}
             </TypographyHeading>
 
             <!-- Description -->
-            <TypographyText class="block text-center mb-4 text-sm text-gray-600">
+            <TypographyText class="mb-4 block text-center text-sm text-gray-600">
               {{ feature.description }}
             </TypographyText>
           </div>

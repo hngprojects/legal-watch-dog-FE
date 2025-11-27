@@ -22,7 +22,6 @@
 
       <nav aria-label="Footer navigation">
         <div class="grid grid-cols-2 gap-y-10 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
-
           <!-- PRODUCT -->
           <div>
             <h3 class="mb-5 text-base font-bold text-[#401903]">Product</h3>
@@ -94,7 +93,6 @@
               </button>
             </form>
           </div>
-
         </div>
       </nav>
 
@@ -123,7 +121,6 @@
           </a>
         </div>
       </div>
-
     </div>
   </footer>
 </template>

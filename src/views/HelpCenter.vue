@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import HelpCenter from '@/components/landing-page/HelpCenter.vue';
+import HelpCenter from '@/components/landing-page/HelpCenter.vue'
 import MainFooter from '@/components/landing-page/MainFooter.vue'
 import MainHeader from '@/components/landing-page/MainHeader.vue'
-
 </script>
 
 <template>

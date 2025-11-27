@@ -178,7 +178,7 @@ const saveEdits = () => {
     <div class="mx-auto flex max-w-6xl flex-col gap-6">
       <div class="flex items-start justify-between">
         <div>
-          <p class="text-sm font-semibold uppercase tracking-wide text-[#9CA3AF]">Profile</p>
+          <p class="text-sm font-semibold tracking-wide text-[#9CA3AF] uppercase">Profile</p>
           <h1 class="text-3xl font-bold text-[#0F172A]">Profile Information</h1>
         </div>
       </div>
@@ -194,16 +194,12 @@ const saveEdits = () => {
 
       <div v-else-if="profileError" class="rounded-2xl border border-red-100 bg-red-50 p-6">
         <p class="text-sm font-medium text-red-700">{{ profileError }}</p>
-        <button class="btn btn--link" @click="fetchProfile">
-          Retry
-        </button>
+        <button class="btn btn--link" @click="fetchProfile">Retry</button>
       </div>
 
       <template v-else>
         <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:p-8">
-          <div
-            class="flex flex-col items-start justify-between gap-6 md:flex-row md:gap-10"
-          >
+          <div class="flex flex-col items-start justify-between gap-6 md:flex-row md:gap-10">
             <div class="flex flex-col gap-6">
               <div
                 class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md"
@@ -217,11 +213,7 @@ const saveEdits = () => {
                 </div>
               </div>
             </div>
-            <button
-              type="button"
-              class="btn btn--primary"
-              @click="openEditModal"
-            >
+            <button type="button" class="btn btn--primary" @click="openEditModal">
               Edit Profile
             </button>
           </div>
@@ -257,9 +249,7 @@ const saveEdits = () => {
           <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 class="text-lg font-semibold text-[#0F172A]">Organizations</h2>
-              <p class="text-sm text-[#6B7280]">
-                Organizations you belong to and your roles.
-              </p>
+              <p class="text-sm text-[#6B7280]">Organizations you belong to and your roles.</p>
             </div>
             <button
               type="button"
@@ -271,14 +261,21 @@ const saveEdits = () => {
           </div>
 
           <div v-if="orgLoading" class="grid gap-4">
-            <div v-for="skeleton in 3" :key="skeleton" class="h-24 animate-pulse rounded-xl bg-gray-100" />
+            <div
+              v-for="skeleton in 3"
+              :key="skeleton"
+              class="h-24 animate-pulse rounded-xl bg-gray-100"
+            />
           </div>
 
           <div v-else-if="orgError" class="rounded-xl border border-red-100 bg-red-50 p-4">
             <p class="text-sm font-medium text-red-700">{{ orgError }}</p>
           </div>
 
-          <div v-else-if="organizationList.length === 0" class="rounded-xl bg-gray-50 p-6 text-sm text-[#6B7280]">
+          <div
+            v-else-if="organizationList.length === 0"
+            class="rounded-xl bg-gray-50 p-6 text-sm text-[#6B7280]"
+          >
             You have not joined any organizations yet.
           </div>
 
@@ -339,7 +336,9 @@ const saveEdits = () => {
               />
             </div>
             <div class="space-y-2">
-              <label class="text-sm font-semibold text-[#0F172A]" for="edit-email">Email Address</label>
+              <label class="text-sm font-semibold text-[#0F172A]" for="edit-email"
+                >Email Address</label
+              >
               <Input
                 id="edit-email"
                 v-model="editForm.email"

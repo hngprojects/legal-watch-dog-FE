@@ -34,8 +34,8 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     error.value = null
     try {
       const response = projectId
-        ? await jurisdictionApi.getByProject(orgId, projectId)           // Fixed
-        : await jurisdictionApi.getAll(orgId)                            // Fixed
+        ? await jurisdictionApi.getByProject(orgId, projectId) // Fixed
+        : await jurisdictionApi.getAll(orgId) // Fixed
       jurisdictions.value = response.data.data.jurisdictions
     } catch (err) {
       const apiError = err as ApiError
@@ -53,7 +53,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await jurisdictionApi.getOne(orgId, jurisdictionId)   // Fixed
+      const response = await jurisdictionApi.getOne(orgId, jurisdictionId) // Fixed
       const jurisdiction = response.data.data.jurisdiction
 
       const index = jurisdictions.value.findIndex((j) => j.id === jurisdictionId)
@@ -86,7 +86,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     try {
       // Fixed: project_id is required by new API
       const response = await jurisdictionApi.create(orgId, {
-        project_id: projectId,   // Explicitly include it
+        project_id: projectId, // Explicitly include it
         ...data,
       })
       const newJurisdiction = response.data.data.jurisdiction
@@ -105,7 +105,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
   ) => {
     const orgId = getOrgId()
     try {
-      const response = await jurisdictionApi.update(orgId, jurisdictionId, data)   // Fixed
+      const response = await jurisdictionApi.update(orgId, jurisdictionId, data) // Fixed
       const updatedJurisdiction = response.data.data.jurisdiction
 
       const index = jurisdictions.value.findIndex((j) => j.id === jurisdictionId)
@@ -124,7 +124,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
   const deleteJurisdiction = async (jurisdictionId: string) => {
     const orgId = getOrgId()
     try {
-      await jurisdictionApi.delete(orgId, jurisdictionId)   // Fixed
+      await jurisdictionApi.delete(orgId, jurisdictionId) // Fixed
       jurisdictions.value = jurisdictions.value.filter((j) => j.id !== jurisdictionId)
     } catch (err) {
       const apiError = err as ApiError

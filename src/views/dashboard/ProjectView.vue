@@ -376,9 +376,7 @@ watch(
 
             <form @submit.prevent="handleCreateProject" class="space-y-5">
               <div>
-                <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                  Organization
-                </label>
+                <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Organization </label>
                 <select
                   v-model="selectedOrganizationId"
                   required

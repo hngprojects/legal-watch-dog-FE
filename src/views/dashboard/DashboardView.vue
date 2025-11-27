@@ -35,7 +35,9 @@ const handleCreateProject = async () => {
   if (!formData.value.master_prompt.trim())
     return projectStore.setError('Master prompt is required')
 
-  projectStore.setError('Projects are scoped to organizations. Please create one from an organization.')
+  projectStore.setError(
+    'Projects are scoped to organizations. Please create one from an organization.',
+  )
 }
 
 const goToProject = (id: string) => {
@@ -136,7 +138,10 @@ const goToProject = (id: string) => {
       <!-- Error -->
       <div v-else-if="error" class="py-12 text-center">
         <p class="text-red-600">{{ error }}</p>
-        <button @click="router.push({ name: 'organizations' })" class="mt-4 text-[#401903] underline">
+        <button
+          @click="router.push({ name: 'organizations' })"
+          class="mt-4 text-[#401903] underline"
+        >
           Go to Organizations
         </button>
       </div>
