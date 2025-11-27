@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useProjectStore } from '@/stores/project-store'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
@@ -35,25 +35,13 @@ const handleCreateProject = async () => {
   if (!formData.value.master_prompt.trim())
     return projectStore.setError('Master prompt is required')
 
-  const newProject = await projectStore.addProject({
-    title: formData.value.title.trim(),
-    description: formData.value.description.trim(),
-    master_prompt: formData.value.master_prompt.trim(),
-  })
-
-  if (newProject) {
-    closeCreateModal()
-    router.push(`/dashboard/projects/`)
-  }
+  projectStore.setError('Projects are scoped to organizations. Please create one from an organization.')
 }
 
 const goToProject = (id: string) => {
-  router.push(`/dashboard/projects/${id}`)
+  void id
+  router.push({ name: 'organizations' })
 }
-
-onMounted(() => {
-  projectStore.fetchProjects()
-})
 </script>
 
 <template>
@@ -148,8 +136,8 @@ onMounted(() => {
       <!-- Error -->
       <div v-else-if="error" class="py-12 text-center">
         <p class="text-red-600">{{ error }}</p>
-        <button @click="projectStore.fetchProjects" class="mt-4 text-[#401903] underline">
-          Retry
+        <button @click="router.push({ name: 'organizations' })" class="mt-4 text-[#401903] underline">
+          Go to Organizations
         </button>
       </div>
 

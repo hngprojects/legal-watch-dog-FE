@@ -95,6 +95,11 @@ const Privacys = [{ label: 'Privacy Policy', path: '/privacy-policy' }]
       <Separator class="mt-6 bg-gray-200" />
       <div class="flex flex-col-reverse gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-sm text-[#3C2610]">&copy; 2025 LegalWatchDog | All Rights Reserved</p>
+        <div class="flex flex-wrap items-center gap-4 text-sm text-[#3C2610]">
+          <RouterLink to="/faq" class="hover:text-[#592304]">FAQ</RouterLink>
+          <RouterLink to="/waitlist" class="hover:text-[#592304]">Join Waitlist</RouterLink>
+          <RouterLink to="/privacy-policy" class="hover:text-[#592304]">Privacy Policy</RouterLink>
+        </div>
       </div>
     </div>
   </footer>

@@ -24,7 +24,10 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
       jurisdictions.value = response.data.data.jurisdictions
     } catch (err) {
       const apiError = err as ApiError
-      error.value = apiError.response?.data?.detail || 'Failed to load jurisdictions'
+      error.value =
+        (apiError.response?.data as any)?.message ||
+        apiError.response?.data?.detail ||
+        'Failed to load jurisdictions'
     } finally {
       loading.value = false
     }

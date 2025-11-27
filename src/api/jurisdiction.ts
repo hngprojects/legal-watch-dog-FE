@@ -35,9 +35,9 @@ interface SingleJurisdictionResponse {
 
 export const jurisdictionApi = {
   getAll: (projectId?: string) =>
-    api.get<JurisdictionResponse>('/jurisdictions/', {
-      params: projectId ? { project_id: projectId } : undefined,
-    }),
+    projectId
+      ? api.get<JurisdictionResponse>(`/jurisdictions/project/${projectId}`)
+      : api.get<JurisdictionResponse>('/jurisdictions/'),
 
   getOne: (jurisdictionId: string) =>
     api.get<SingleJurisdictionResponse>(`/jurisdictions/${jurisdictionId}`),
@@ -57,5 +57,10 @@ export const jurisdictionApi = {
   delete: (jurisdictionId: string) => api.delete(`/jurisdictions/${jurisdictionId}`),
 
   restore: (jurisdictionId: string) =>
-    api.post(`/jurisdictions/jurisdictions/${jurisdictionId}/restoration`),
+    api.post(`/jurisdictions/${jurisdictionId}/restoration`),
+
+  deleteByProject: (projectId: string) => api.delete(`/jurisdictions/project/${projectId}`),
+
+  restoreByProject: (projectId: string) =>
+    api.post(`/jurisdictions/project/${projectId}/restoration`),
 }

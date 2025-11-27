@@ -25,6 +25,10 @@ const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
 
 const jurisdictionId = computed(() => route.params.id as string)
+const organizationId = computed(() => {
+  const id = route.query.organizationId
+  return typeof id === 'string' ? id : ''
+})
 const jurisdiction = ref<Jurisdiction | null>(null)
 const loading = ref(true)
 const submitting = ref(false)
@@ -56,6 +60,12 @@ const projectName = computed(() => {
   const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
   return project?.title || 'Project'
 })
+const projectOrganizationId = computed(() => {
+  if (!jurisdiction.value?.project_id) return ''
+  const project = projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id)
+  return project?.org_id || ''
+})
+const activeOrganizationId = computed(() => organizationId.value || projectOrganizationId.value)
 
 const parentJurisdiction = computed(() => {
   if (!jurisdiction.value?.parent_id) return null
@@ -70,8 +80,8 @@ const loadJurisdiction = async (id: string) => {
   const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id) || null
   jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
 
-  if (!projectStore.projects.length) {
-    await projectStore.fetchProjects()
+  if (!projectStore.projects.length && organizationId.value) {
+    await projectStore.fetchProjects(organizationId.value)
   }
 
   if (jurisdiction.value?.project_id) {
@@ -188,7 +198,26 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink as-child>
-              <RouterLink to="/dashboard/projects">Projects</RouterLink>
+              <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          <BreadcrumbSeparator />
+
+          <BreadcrumbItem>
+            <BreadcrumbLink as-child>
+              <RouterLink
+                :to="
+                  activeOrganizationId
+                    ? {
+                        name: 'organization-projects',
+                        params: { organizationId: activeOrganizationId },
+                      }
+                    : { name: 'organizations' }
+                "
+              >
+                Projects
+              </RouterLink>
             </BreadcrumbLink>
           </BreadcrumbItem>
 
@@ -196,7 +225,12 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
 
           <BreadcrumbItem v-if="jurisdiction?.project_id && projectName">
             <BreadcrumbLink as-child>
-              <RouterLink :to="`/dashboard/projects/${jurisdiction.project_id}`">
+              <RouterLink
+                :to="{
+                  name: 'project-detail',
+                  params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
+                }"
+              >
                 {{ projectName }}
               </RouterLink>
             </BreadcrumbLink>
