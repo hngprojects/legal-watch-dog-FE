@@ -5,7 +5,7 @@ import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings, FileQuestion } from 'lucide-vue-next'
+import { ArrowLeftIcon, Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 import {
   Breadcrumb,
@@ -21,22 +21,32 @@ const router = useRouter()
 const projectStore = useProjectStore()
 const jurisdictionStore = useJurisdictionStore()
 const projectId = route.params.id as string
+const organizationId = computed(
+  () => (route.params.organizationId as string) || project.value?.org_id || '',
+)
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
 const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
 
-const topLevelJurisdictions = computed<Jurisdiction[]>(() => {
-  if (!project.value?.id) return []
+const projectJurisdictions = computed<Jurisdiction[]>(() =>
+  jurisdictionStore.jurisdictions.filter((item) => item.project_id === projectId),
+)
 
-  return jurisdictionStore.jurisdictions.filter(
-    (j) => j.project_id === project.value!.id && !j.parent_id,
-  )
-})
+const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
+  projectJurisdictions.value.filter((item) => !item.parent_id),
+)
 
 const goBack = () => {
-  router.push('/dashboard/projects')
+  if (organizationId.value) {
+    router.push({
+      name: 'organization-projects',
+      params: { organizationId: organizationId.value },
+    })
+  } else {
+    router.push({ name: 'organizations' })
+  }
 }
 
 const openAddJurisdictionModal = () => {
@@ -72,7 +82,10 @@ const handleCreateJurisdiction = async () => {
 }
 
 const goToJurisdiction = (jurisdictionId: string) => {
-  router.push(`/dashboard/jurisdictions/${jurisdictionId}`)
+  router.push({
+    path: `/dashboard/jurisdictions/${jurisdictionId}`,
+    query: organizationId.value ? { organizationId: organizationId.value } : undefined,
+  })
 }
 
 onMounted(async () => {
@@ -81,7 +94,11 @@ onMounted(async () => {
   if (existingProject) {
     project.value = existingProject
   } else {
-    await projectStore.fetchProjects()
+    if (organizationId.value) {
+      await projectStore.fetchProjects(organizationId.value)
+    } else {
+      projectStore.setError('Organization context missing. Please navigate from Organizations.')
+    }
     const foundProject = projectStore.projects.find((p) => p.id === projectId)
     project.value = foundProject || null
   }
@@ -96,7 +113,7 @@ const showInlineEdit = ref(false)
 const editForm = ref({
   title: '',
   description: '',
-  master_prompt: '', // Added master_prompt for edit form
+  master_prompt: '',
 })
 
 const toggleSettingsMenu = () => {
@@ -122,7 +139,12 @@ const deleteProject = async () => {
 
   if (!confirm.isConfirmed) return
 
-  await projectStore.deleteProject(projectId)
+  if (!organizationId.value) {
+    projectStore.setError('Organization context missing. Please navigate from Organizations.')
+    return
+  }
+
+  await projectStore.deleteProject(projectId, organizationId.value)
 
   await Swal.fire({
     title: 'Deleted!',
@@ -132,14 +154,18 @@ const deleteProject = async () => {
     showConfirmButton: false,
   })
 
-  router.push('/dashboard/projects')
+  if (organizationId.value) {
+    router.push({ name: 'organization-projects', params: { organizationId: organizationId.value } })
+  } else {
+    router.push({ name: 'organizations' })
+  }
 }
 
 const startEdit = () => {
   editForm.value = {
     title: project.value?.title || '',
     description: project.value?.description || '',
-    master_prompt: project.value?.master_prompt || '', // Initialize with current value
+    master_prompt: project.value?.master_prompt || '',
   }
 
   showInlineEdit.value = true
@@ -148,10 +174,11 @@ const startEdit = () => {
 
 const saveEdit = async () => {
   try {
-    const updated = await projectStore.updateProject(projectId, {
+    const orgIdForUpdate = organizationId.value || project.value?.org_id || ''
+    const updated = await projectStore.updateProject(orgIdForUpdate, projectId, {
       title: editForm.value.title,
       description: editForm.value.description,
-      master_prompt: editForm.value.master_prompt, // Include master_prompt in update
+      master_prompt: editForm.value.master_prompt,
     })
 
     if (project.value && updated) {
@@ -209,34 +236,36 @@ watch(
 
     <div v-else class="mx-auto max-w-7xl">
       <div class="mb-8 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <RouterLink
-            to="/dashboard/projects"
-            class="text-[#926233] transition-colors hover:text-[#7a4e26]"
-          >
-            <ArrowLeftIcon :size="20" />
-          </RouterLink>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
 
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink as-child>
-                  <RouterLink to="/dashboard/projects" class="text-gray-500 hover:text-gray-900">
-                    Projects
-                  </RouterLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
+            <BreadcrumbSeparator />
 
-              <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink
+                  :to="{
+                    name: 'organization-projects',
+                    params: { organizationId: organizationId },
+                  }"
+                >
+                  Projects
+                </RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
 
-              <BreadcrumbItem>
-                <BreadcrumbPage class="font-medium text-[#926233]">
-                  {{ project.title }}
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbPage>{{ project.title }}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <div class="relative">
           <button
@@ -284,18 +313,13 @@ watch(
               ></textarea>
             </div>
 
-            <!-- Added Master Prompt field for editing -->
             <div>
-              <label class="text-sm font-medium text-[#1F1F1F]">Instructions</label>
+              <label class="text-sm font-medium text-[#1F1F1F]">Master Prompt</label>
               <textarea
                 v-model="editForm.master_prompt"
                 rows="3"
-                placeholder="e.g. Summarize any changes to visa policy in the UK, EU, USA, Canada..."
                 class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
               ></textarea>
-              <p class="mt-1.5 text-xs text-[#717680]">
-                Define the AI prompt that will be used to analyze changes
-              </p>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
@@ -322,7 +346,7 @@ watch(
         </template>
       </div>
 
-      <div class="mb-8 flex items-end justify-between md:mt-12">
+      <div class="mb-8 flex items-end justify-between md:mt-[88px]">
         <div class="flex w-auto gap-8 border-b border-gray-200">
           <button
             @click="activeTab = 'jurisdictions'"
@@ -371,16 +395,11 @@ watch(
           </div>
 
           <div
-            v-else-if="jurisdictionStore.jurisdictions.length === 0"
-            class="flex flex-col items-center justify-center rounded-[10px] bg-white py-24 text-center shadow-sm"
+            v-else-if="projectJurisdictions.length === 0"
+            class="flex flex-col items-center justify-center bg-white py-20"
           >
-            <div
-              class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white ring-1 ring-gray-200"
-            >
-              <FileQuestion class="text-gray-400" :size="24" />
-            </div>
-            <h3 class="mb-1 text-base font-medium text-gray-900">No Jurisdictions added</h3>
-            <p class="text-sm text-gray-500">Search source or Click add sources to get started.</p>
+            <p class="text-sm text-gray-500">No jurisdictions yet for this project.</p>
+            <p class="mt-2 text-xs text-gray-400">Add one to start monitoring changes.</p>
           </div>
 
           <div v-else class="space-y-3 p-6">

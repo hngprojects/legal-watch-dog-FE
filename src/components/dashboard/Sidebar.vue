@@ -6,7 +6,7 @@ const route = useRoute()
 
 const menuItems = [
   { name: 'Dashboard', path: '/dashboard', icon: 'HomeIcon' },
-  { name: 'Projects', path: '/dashboard/projects', icon: 'ProjectsIcon' },
+  { name: 'Organizations', path: '/dashboard/organizations', icon: 'ProjectsIcon' },
   { name: 'Jurisdictions', path: '/dashboard/jurisdictions', icon: 'JurisdictionsIcon' },
 ]
 

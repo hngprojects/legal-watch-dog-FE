@@ -1,19 +1,43 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useProjectStore } from '@/stores/project-store'
+import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useProjectStore } from '@/stores/project-store'
+import { useOrganizationStore } from '@/stores/organization-store'
+import { useAuthStore } from '@/stores/auth-store'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 
 const projectStore = useProjectStore()
+const organizationStore = useOrganizationStore()
+const authStore = useAuthStore()
 const { projects, loading, error } = storeToRefs(projectStore)
+const { organizations, loading: orgLoading } = storeToRefs(organizationStore)
 const router = useRouter()
+const route = useRoute()
 
 const showCreateModal = ref(false)
 const formData = ref({
   title: '',
   description: '',
-  // Remove master_prompt from initial form data
 })
+
+const organizationId = computed(() => {
+  const id = route.params.organizationId
+  return typeof id === 'string' ? id : ''
+})
+const organizationName = computed(() => {
+  const currentId = organizationId.value
+  if (!currentId) return ''
+  return organizations.value.find((org) => org.id === currentId)?.name || 'Organization'
+})
+const selectedOrganizationId = ref<string | ''>(organizationId.value)
 
 // Kebab menu state — now uses string IDs
 const activeMenuId = ref<string | null>(null)
@@ -22,49 +46,143 @@ const closeMenu = () => {
   activeMenuId.value = null
 }
 
-const openCreateModal = () => {
+const ensureOrganizations = async () => {
+  if (organizations.value.length || orgLoading.value) return
+  let userId = authStore.user?.id
+  if (!userId) {
+    const loaded = await authStore.loadCurrentUser?.()
+    userId = loaded?.id
+  }
+  if (userId) {
+    await organizationStore.fetchOrganizations(userId)
+  }
+}
+
+const openCreateModal = async () => {
+  await ensureOrganizations()
+
+  if (!organizationId.value && !organizations.value.length) {
+    projectStore.setError('Add an organization before creating a project.')
+    router.push({ name: 'organizations' })
+    return
+  }
+
   showCreateModal.value = true
-  formData.value = { title: '', description: '' } // Remove master_prompt
+  formData.value = { title: '', description: '' }
+  selectedOrganizationId.value = organizationId.value || organizations.value[0]?.id || ''
   projectStore.setError(null)
 }
 
 const closeCreateModal = () => {
   showCreateModal.value = false
-  formData.value = { title: '', description: '' } // Remove master_prompt
+  formData.value = { title: '', description: '' }
   projectStore.setError(null)
 }
 
 const handleCreateProject = async () => {
   projectStore.setError(null)
 
+  const orgIdToUse = selectedOrganizationId.value || organizationId.value
+
+  if (!orgIdToUse) {
+    projectStore.setError('Select an organization before creating a project.')
+    return
+  }
+
   if (!formData.value.title.trim()) return projectStore.setError('Project name is required')
   if (!formData.value.description.trim()) return projectStore.setError('Description is required')
-  // Remove master_prompt validation
 
   const newProject = await projectStore.addProject({
     title: formData.value.title.trim(),
     description: formData.value.description.trim(),
-    master_prompt: '', // You can set a default value or empty string
+    organization_id: orgIdToUse,
   })
 
   if (newProject) {
     closeCreateModal()
-    router.push(`/dashboard/projects/`)
+    router.push({
+      name: 'organization-projects',
+      params: { organizationId: orgIdToUse },
+    })
   }
 }
 
 const goToProject = (id: string) => {
-  router.push(`/dashboard/projects/${id}`)
+  router.push({
+    name: 'project-detail',
+    params: { organizationId: organizationId.value, id },
+  })
 }
 
 onMounted(() => {
-  projectStore.fetchProjects()
+  if (organizationId.value) {
+    projectStore.fetchProjects(organizationId.value)
+  } else {
+    projectStore.setError('Select an organization to view projects.')
+  }
+  void ensureOrganizations()
 })
+
+watch(
+  () => route.params.organizationId,
+  (newVal) => {
+    const id = typeof newVal === 'string' ? newVal : ''
+    selectedOrganizationId.value = id
+    if (id) {
+      projectStore.fetchProjects(id)
+    } else {
+      projectStore.projects = []
+      projectStore.setError('Select an organization to view projects.')
+    }
+  },
+)
 </script>
 
 <template>
   <main class="min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-12 lg:py-14">
-    <div class="mx-auto max-w-7xl">
+    <div
+      v-if="!organizationId"
+      class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-100"
+    >
+      <h1 class="text-2xl font-bold text-gray-900">Choose an organization first</h1>
+      <p class="mt-2 text-sm text-gray-600">
+        Projects live under organizations. Select an organization to view or create projects.
+      </p>
+      <div class="mt-6 flex justify-center">
+        <RouterLink
+          to="/dashboard/organizations"
+          class="rounded-full bg-[#401903] px-6 py-3 text-sm font-semibold text-white hover:bg-[#2a1102]"
+        >
+          Go to Organizations
+        </RouterLink>
+      </div>
+    </div>
+    <div v-else class="mx-auto max-w-7xl space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbPage>{{ organizationName || 'Projects' }}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <RouterLink
+          :to="{ name: 'organizations' }"
+          class="text-sm font-medium text-[#401903] hover:underline"
+        >
+          Back to organizations
+        </RouterLink>
+      </div>
+
       <div v-if="loading" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <div v-for="n in 6" :key="n" class="animate-pulse rounded-2xl bg-white p-8 shadow-sm">
           <div class="mb-4 h-6 w-3/4 rounded bg-gray-200"></div>
@@ -72,6 +190,19 @@ onMounted(() => {
             <div class="h-4 w-full rounded bg-gray-200"></div>
             <div class="h-4 w-5/6 rounded bg-gray-200"></div>
           </div>
+        </div>
+      </div>
+
+      <div v-else-if="error" class="flex min-h-[600px] items-center justify-center">
+        <div class="text-center">
+          <p class="mb-4 text-red-600">{{ error }}</p>
+          <button
+            @click="organizationId && projectStore.fetchProjects(organizationId)"
+            :disabled="!organizationId"
+            class="text-[#401903] underline disabled:cursor-not-allowed disabled:text-gray-400"
+          >
+            Retry
+          </button>
         </div>
       </div>
 
@@ -143,15 +274,6 @@ onMounted(() => {
               />
             </svg>
             Create Project
-          </button>
-        </div>
-      </div>
-
-      <div v-else-if="error" class="flex min-h-[600px] items-center justify-center">
-        <div class="text-center">
-          <p class="mb-4 text-red-600">{{ error }}</p>
-          <button @click="projectStore.fetchProjects" class="text-[#401903] underline">
-            Retry
           </button>
         </div>
       </div>
@@ -254,6 +376,23 @@ onMounted(() => {
 
             <form @submit.prevent="handleCreateProject" class="space-y-5">
               <div>
+                <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Organization </label>
+                <select
+                  v-model="selectedOrganizationId"
+                  required
+                  class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                >
+                  <option value="" disabled>Select organization</option>
+                  <option v-for="org in organizations" :key="org.id" :value="org.id">
+                    {{ org.name }}
+                  </option>
+                </select>
+                <p class="mt-1.5 text-xs text-[#717680]">
+                  Choose which organization this project belongs to.
+                </p>
+              </div>
+
+              <div>
                 <label for="projName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
                   Project Name
                 </label>
@@ -280,8 +419,6 @@ onMounted(() => {
                   class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
                 />
               </div>
-
-              <!-- REMOVED Master Prompt field from create modal -->
 
               <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
                 {{ error }}

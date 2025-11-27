@@ -179,7 +179,11 @@ const handleContinue = async () => {
         response?.message ?? 'Code verified. You can now create a new password.'
       router.replace({ name: 'reset-password' })
     } else {
-      const response = await authStore.verifyOTP({ email: email.value, code })
+      const response = await authStore.verifyOTP({
+        email: email.value,
+        code,
+        otp_purpose: otpPurpose.value ?? 'signup',
+      })
 
       successMessage.value = (response?.message as string) ?? 'Your account is verified.'
       router.replace({

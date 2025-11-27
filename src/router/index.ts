@@ -3,6 +3,8 @@ import HomeView from '@/views/HomeView.vue'
 import AboutUsView from '@/views/AboutUsView.vue'
 import Contact from '@/views/Contact.vue'
 import Career from '@/views/Career.vue'
+import Terms from '@/views/Terms.vue'
+import HelpCenter from '@/views/HelpCenter.vue'
 import Features from '@/views/Features.vue'
 import Blogs from '@/views/Blogs.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
@@ -20,6 +22,7 @@ import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
+import OrganizationView from '@/views/dashboard/OrganizationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,14 +38,24 @@ const router = createRouter({
       component: AboutUsView,
     },
     {
-      path: '/contact',
-      name: 'contact',
+      path: '/contact-us',
+      name: 'contact-us',
       component: Contact,
     },
     {
       path: '/career',
       name: 'career',
       component: Career,
+    },
+    {
+      path: '/helpcenter',
+      name: 'helpcenter',
+      component: HelpCenter,
+    },
+    {
+      path: '/terms',
+      name: 'terms',
+      component: Terms,
     },
     {
       path: '/blogs',
@@ -139,18 +152,30 @@ const router = createRouter({
           path: '',
           name: 'dashboard',
           redirect: {
-            name: 'projects',
+            name: 'organizations',
           },
         },
         {
-          path: 'projects',
-          name: 'projects',
-          component: ProjectView,
-          alias: '/projects',
+          path: 'organizations',
+          name: 'organizations',
+          component: OrganizationView,
+          alias: '/organizations',
           meta: { requiresAuth: true },
         },
         {
-          path: 'projects/:id',
+          path: 'profile',
+          name: 'profile',
+          component: () => import('@/views/dashboard/profile/ProfileView.vue'),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'organizations/:organizationId/projects',
+          name: 'organization-projects',
+          component: ProjectView,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: 'organizations/:organizationId/projects/:id',
           name: 'project-detail',
           component: () => import('@/views/dashboard/projects/Project.vue'),
           meta: { requiresAuth: true },
