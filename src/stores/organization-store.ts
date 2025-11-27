@@ -12,7 +12,7 @@ const mapRawOrganization = (org: RawOrganization): Organization => ({
   name: org.name,
   industry: org.industry,
   is_active: org.is_active,
-  user_role: org.user_role,
+  user_role: org.user_role || org.role,
   created_at: org.created_at,
   updated_at: org.updated_at,
 })

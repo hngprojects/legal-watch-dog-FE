@@ -22,12 +22,7 @@ interface Organisation {
   created_at: string
 }
 
-interface User {
-  id: string
-  first_name?: string
-  last_name?: string
-  email: string
-  role?: string
+type User = UserProfile & {
   organisation_id?: string
 }
 
@@ -251,10 +246,11 @@ export const useAuthStore = defineStore('auth', {
       if (!this.accessToken) return null
       try {
         const response = await userService.getCurrentUser()
+        const payload = response.data?.data
         const apiUser =
-          (response.data?.data?.user as UserProfile | undefined) ??
-          (response.data?.data as UserProfile | undefined) ??
-          null
+          (payload && typeof payload === 'object' && 'user' in payload
+            ? (payload as { user?: UserProfile }).user
+            : (payload as UserProfile | undefined)) ?? null
         if (apiUser) {
           this.user = apiUser as User
           return apiUser
