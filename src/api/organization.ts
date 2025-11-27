@@ -25,8 +25,8 @@ interface OrganizationResponse {
 }
 
 export const organizationService = {
-  listOrganizations: (userId: string) =>
-    api.get<OrganizationsResponse>(`/users/${userId}/organisations`),
+  listOrganizations: () =>
+    api.get<OrganizationsResponse>(`/users/me/organizations`),
   createOrganization: (payload: CreateOrganizationPayload) =>
     api.post<OrganizationResponse>('/organizations', payload),
 }

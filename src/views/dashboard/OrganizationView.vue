@@ -18,6 +18,12 @@ const formData = ref({
   industry: '',
 })
 
+const ensureUserId = async () => {
+  if (authStore.user?.id) return authStore.user.id
+  const loadedUser = await authStore.loadCurrentUser()
+  return loadedUser?.id
+}
+
 const openCreateModal = () => {
   showCreateModal.value = true
   formData.value = { name: '', industry: '' }
@@ -42,6 +48,10 @@ const handleCreateOrganization = async () => {
   })
 
   if (created) {
+    const userId = await ensureUserId()
+    if (userId) {
+      organizationStore.fetchOrganizations(userId)
+    }
     closeCreateModal()
     await Swal.fire('Organization created', 'You can now add projects under this organization.', 'success')
   }
@@ -52,11 +62,7 @@ const goToProjects = (organizationId: string) => {
 }
 
 onMounted(async () => {
-  let userId = authStore.user?.id
-  if (!userId) {
-    const loadedUser = await authStore.loadCurrentUser()
-    userId = loadedUser?.id
-  }
+  const userId = await ensureUserId()
   if (!userId) {
     organizationStore.setError('User information missing. Please re-login.')
     return
@@ -78,7 +84,7 @@ onMounted(async () => {
       </p>
       <button
         @click="openCreateModal"
-        class="inline-flex items-center gap-3 rounded-xl bg-[#401903] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-[#592304] hover:shadow-xl"
+        class="btn btn--primary"
       >
         <svg
           width="20"
@@ -117,7 +123,7 @@ onMounted(async () => {
         </div>
         <button
           @click="openCreateModal"
-          class="flex items-center gap-3 rounded-full bg-[#401903] px-8 py-4 font-medium text-white shadow-md transition-all hover:bg-[#592304] hover:shadow-lg"
+          class="flex items-center gap-1 btn btn--primary"
         >
           <svg
             width="20"
@@ -164,7 +170,7 @@ onMounted(async () => {
           Retry
         </button>
       </div>
-
+      <!-- Card -->
       <div v-else class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <article
           v-for="org in organizations"
@@ -179,12 +185,9 @@ onMounted(async () => {
             <p class="text-sm text-gray-600">{{ org.industry || 'Industry not specified' }}</p>
           </div>
           <div class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4">
-            <div class="text-xs font-medium uppercase tracking-wide text-[#9CA3AF]">
-              Projects are scoped within this organization
-            </div>
             <button
               @click="goToProjects(org.id)"
-              class="inline-flex items-center gap-2 rounded-full bg-[#401903] px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#2a1102]"
+              class="btn btn--primary flex items-center gap-1"
             >
               View Projects
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -265,7 +268,7 @@ onMounted(async () => {
                 </button>
                 <button
                   type="submit"
-                  class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
+                  class="btn btn--primary"
                 >
                   Save Organization
                 </button>
