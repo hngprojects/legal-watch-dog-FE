@@ -1,32 +1,7 @@
-<script setup lang="ts">
-import Frame from '@/assets/images/Frame.png'
-import { RouterLink } from 'vue-router'
-
-// Only include items that have existing routes in src/router/index.ts
-const Products = [
-  { label: 'How it Works', path: '/how-it-works' },
-  { label: 'Features', path: '/features' },
-  { label: 'Pricing', path: '/pricing' },
-  { label: 'Onboarding', path: '/onboarding' },
-  { label: 'Waitlist', path: '/waitlist' },
-]
-
-const Companys = [
-  { label: 'About', path: '/about-us' },
-  { label: 'Contact', path: '/contact' },
-  { label: 'Career', path: '/career' },
-  { label: 'Blogs', path: '/blogs' },
-]
-
-const Supports = [{ label: 'FAQ', path: '/faq' }]
-
-const Privacys = [{ label: 'Privacy Policy', path: '/privacy-policy' }]
-</script>
-
 <template>
-  <footer class="bg-white text-gray-800">
-    <div class="mx-auto max-w-7xl px-16 py-10">
-      <div class="mb-6">
+  <footer class="border-t border-gray-100 bg-[#F9FAFB] text-gray-800">
+    <div class="mx-auto max-w-7xl px-6 pt-16 pb-6 lg:px-8">
+      <div class="mb-12">
         <div class="flex items-center gap-3">
           <img
             :src="Frame"
@@ -34,73 +9,161 @@ const Privacys = [{ label: 'Privacy Policy', path: '/privacy-policy' }]
             class="h-10 w-auto object-contain"
             loading="lazy"
           />
-          <h2 class="text-lg font-bold text-[#3C2610]">Watch Dog</h2>
+
+          <h2 class="text-lg font-bold text-[#401903]">Watch Dog</h2>
         </div>
 
-        <p class="mt-3 max-w-2xl pb-[30px] text-gray-500">
+        <TypographyText class="mt-3 max-w-lg text-sm text-gray-500">
           LegalWatchDog helps us track cross-border regulation updates in hours, not weeks.
-        </p>
-        <Separator class="mt-6 bg-gray-200" />
+        </TypographyText>
       </div>
 
-      <!-- Links  -->
-      <nav aria-label="Footer navigation" class="mt-8">
-        <div class="grid grid-cols-1 gap-8 py-6 sm:grid-cols-2 md:grid-cols-4">
+      <div class="mb-12 border-t border-gray-300"></div>
+
+      <nav aria-label="Footer navigation">
+        <div class="grid grid-cols-2 gap-y-10 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
+
+          <!-- PRODUCT -->
           <div>
-            <h3 class="mb-3 font-semibold text-[#3C2610]">Product</h3>
-            <ul class="space-y-2 text-sm font-light text-gray-600 opacity-100">
-              <li v-for="(product, i) in Products" :key="i">
-                <RouterLink :to="product.path" class="hover:underline">
-                  {{ product.label }}
-                </RouterLink>
+            <h3 class="mb-5 text-base font-bold text-[#401903]">Product</h3>
+            <ul class="space-y-3 text-sm text-[#6B7280]">
+              <li v-for="(item, i) in products" :key="i">
+                <router-link :to="item.path" class="hover:text-gray-900">
+                  {{ item.label }}
+                </router-link>
               </li>
             </ul>
           </div>
 
+          <!-- COMPANY -->
           <div>
-            <h3 class="mb-3 font-semibold text-[#3C2610]">Company</h3>
-            <ul class="space-y-2 text-sm font-light text-gray-600 opacity-100">
-              <li v-for="(company, i) in Companys" :key="i">
-                <RouterLink :to="company.path" class="hover:underline">
-                  {{ company.label }}
-                </RouterLink>
+            <h3 class="mb-5 text-base font-bold text-[#401903]">Company</h3>
+            <ul class="space-y-3 text-sm text-[#6B7280]">
+              <li v-for="(item, i) in companies" :key="i">
+                <router-link :to="item.path" class="hover:text-gray-900">
+                  {{ item.label }}
+                </router-link>
               </li>
             </ul>
           </div>
 
+          <!-- SUPPORT -->
           <div>
-            <h3 class="mb-3 font-semibold text-[#3C2610]">Support</h3>
-            <ul class="space-y-2 text-sm font-light text-gray-600 opacity-100">
-              <li v-for="(support, i) in Supports" :key="i">
-                <RouterLink :to="support.path" class="hover:underline">
-                  {{ support.label }}
-                </RouterLink>
+            <h3 class="mb-5 text-base font-bold text-[#401903]">Support</h3>
+            <ul class="space-y-3 text-sm text-[#6B7280]">
+              <li v-for="(item, i) in supports" :key="i">
+                <router-link :to="item.path" class="hover:text-gray-900">
+                  {{ item.label }}
+                </router-link>
               </li>
             </ul>
           </div>
 
-          <div>
-            <h3 class="mb-3 font-semibold text-[#3C2610]">Privacy</h3>
-            <ul class="space-y-2 text-sm font-light text-gray-600 opacity-100">
-              <li v-for="(privacy, i) in Privacys" :key="i">
-                <RouterLink :to="privacy.path" class="hover:underline">
-                  {{ privacy.label }}
-                </RouterLink>
+          <!-- PRIVACY (now comes BEFORE subscribe on mobile) -->
+          <div class="order-4 md:order-4">
+            <h3 class="mb-5 text-base font-bold text-[#401903]">Privacy Policy</h3>
+            <ul class="space-y-3 text-sm text-[#6B7280]">
+              <li v-for="(item, i) in privacys" :key="i">
+                <router-link :to="item.path" class="hover:text-gray-900">
+                  {{ item.label }}
+                </router-link>
               </li>
             </ul>
           </div>
+
+          <!-- SUBSCRIBE (now LAST on mobile) -->
+          <div class="order-5 col-span-2 md:order-5 lg:col-span-1">
+            <h3 class="mb-5 text-base font-bold text-[#401903]">Subscribe to our newsletter</h3>
+            <TypographyText class="mb-4 text-sm text-gray-600">
+              Join our newsletter to get early alerts on regulation updates, price fluctuations, and
+              compliance insights that matter to your business.
+            </TypographyText>
+
+            <form class="space-y-3">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                class="w-full rounded border border-gray-300 px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:border-[#401903] focus:ring-1 focus:ring-[#401903] focus:outline-none"
+                required
+              />
+              <button
+                type="submit"
+                class="w-full rounded bg-[#401903] px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-[#3F1A0F] lg:w-1/2"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+
         </div>
       </nav>
 
-      <Separator class="mt-6 bg-gray-200" />
-      <div class="flex flex-col-reverse gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-sm text-[#3C2610]">&copy; 2025 LegalWatchDog | All Rights Reserved</p>
-        <div class="flex flex-wrap items-center gap-4 text-sm text-[#3C2610]">
-          <RouterLink to="/faq" class="hover:text-[#592304]">FAQ</RouterLink>
-          <RouterLink to="/waitlist" class="hover:text-[#592304]">Join Waitlist</RouterLink>
-          <RouterLink to="/privacy-policy" class="hover:text-[#592304]">Privacy Policy</RouterLink>
+      <div
+        class="mt-12 flex flex-col items-center justify-between border-t border-gray-200 pt-6 text-sm md:flex-row"
+      >
+        <p class="mb-4 text-[#5D2D18] md:mb-0">
+          Copyright &copy; 2025 LegalWatchDog | All Rights Reserved
+        </p>
+
+        <div class="flex space-x-4 text-lg text-[#5D2D18]">
+          <a href="#" aria-label="Facebook" class="transition duration-150 hover:text-black">
+            <img :src="Facebook" alt="facebook-icon" />
+          </a>
+          <a href="#" aria-label="Twitter" class="transition duration-150 hover:text-black">
+            <img :src="Twitter" alt="Twitter-icon" />
+          </a>
+          <a href="#" aria-label="Instagram" class="transition duration-150 hover:text-black">
+            <img :src="Instagram" alt="Instagram-icon" />
+          </a>
+          <a href="#" aria-label="LinkedIn" class="transition duration-150 hover:text-black">
+            <img :src="LinkedIn" alt="LinkedIn-icon" />
+          </a>
+          <a href="#" aria-label="YouTube" class="transition duration-150 hover:text-black">
+            <img :src="YouTube" alt="YouTube-icon" />
+          </a>
         </div>
       </div>
+
     </div>
   </footer>
 </template>
+
+<script setup lang="ts">
+import { TypographyText } from '../ui/typography'
+import Frame from '@/assets/images/Frame.png'
+import Facebook from '@/assets/images/Facebook.png'
+import Twitter from '@/assets/images/Twitter.png'
+import Instagram from '@/assets/images/Instagram.png'
+import LinkedIn from '@/assets/images/LinkedIn.png'
+import YouTube from '@/assets/images/YouTube.png'
+import { RouterLink } from 'vue-router'
+
+const products = [
+  { label: 'Features', path: '/features' },
+  { label: 'Pricing', path: '/pricing' },
+  { label: 'Case studies', path: '/case-studies' },
+  { label: 'Reviews', path: '/reviews' },
+  { label: 'Updates', path: '/updates' },
+]
+
+const companies = [
+  { label: 'About', path: '/about-us' },
+  { label: 'Contact us', path: '/contact-us' },
+  { label: 'Careers', path: '/career' },
+  { label: 'FAQ', path: '/faq' },
+  { label: 'Blog', path: '/blogs' },
+]
+
+const supports = [
+  { label: 'Getting started', path: '/help/getting-started' },
+  { label: 'Help center', path: '/help' },
+  { label: 'Server status', path: '/status' },
+  { label: 'Report a bug', path: '/report' },
+  { label: 'Chat support', path: '/chat' },
+]
+
+const privacys = [
+  { label: 'Copyright', path: '/copyright' },
+  { label: 'Terms of Service', path: '/terms' },
+]
+</script>

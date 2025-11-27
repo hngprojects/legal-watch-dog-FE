@@ -3,6 +3,8 @@ import HomeView from '@/views/HomeView.vue'
 import AboutUsView from '@/views/AboutUsView.vue'
 import Contact from '@/views/Contact.vue'
 import Career from '@/views/Career.vue'
+import Terms from '@/views/Terms.vue'
+import HelpCenter from '@/views/HelpCenter.vue'
 import Features from '@/views/Features.vue'
 import Blogs from '@/views/Blogs.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
@@ -36,14 +38,24 @@ const router = createRouter({
       component: AboutUsView,
     },
     {
-      path: '/contact',
-      name: 'contact',
+      path: '/contact-us',
+      name: 'contact-us',
       component: Contact,
     },
     {
       path: '/career',
       name: 'career',
       component: Career,
+    },
+    {
+      path: '/helpcenter',
+      name: 'helpcenter',
+      component: HelpCenter,
+    },
+    {
+      path: '/terms',
+      name: 'terms',
+      component: Terms,
     },
     {
       path: '/blogs',
