@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import Swal from 'sweetalert2'
 import { Input } from '@/components/ui/input'
 import { userService } from '@/api/user'
 import { useAuthStore } from '@/stores/auth-store'
@@ -21,14 +22,27 @@ const editForm = ref({
   name: '',
   role: '',
   email: '',
-  phone: '',
+})
+
+const fallbackNameFromEmail = computed(() => {
+  const email = userProfile.value?.email || ''
+  if (!email) return ''
+  const handle = email.split('@')[0] || ''
+  if (!handle) return ''
+  const spaced = handle.replace(/[._]/g, ' ').trim()
+  return spaced
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() + part.slice(1))
+    .join(' ')
 })
 
 const fullName = computed(() => {
+  if (userProfile.value?.name) return userProfile.value.name
   const first = userProfile.value?.first_name ?? ''
   const last = userProfile.value?.last_name ?? ''
   const name = [first, last].filter(Boolean).join(' ').trim()
-  return name || userProfile.value?.email || 'User'
+  return name || fallbackNameFromEmail.value || 'User'
 })
 
 const primaryRole = computed(() => {
@@ -55,8 +69,6 @@ const statusChips = computed(() => {
   if (userProfile.value?.is_active) chips.push('Active')
   return chips
 })
-
-const displayedPhone = computed(() => userProfile.value?.phone_number || 'Not provided')
 
 const organizationList = computed<Organization[]>(() => {
   if (organizations.value.length) return organizations.value
@@ -87,12 +99,17 @@ const fetchProfile = async () => {
       return
     }
 
-    userProfile.value = apiUser
+    userProfile.value = {
+      ...apiUser,
+      // fallbacks for readable display when name fields are missing
+      name: apiUser.name || apiUser.first_name || fallbackNameFromEmail.value || 'User',
+    }
 
     if (apiUser.id) {
       authStore.user = {
         ...(authStore.user ?? {}),
         id: apiUser.id,
+        name: apiUser.name,
         first_name: apiUser.first_name,
         last_name: apiUser.last_name,
         email: apiUser.email,
@@ -125,19 +142,27 @@ watch(
   userProfile,
   (profile) => {
     if (!profile) return
-    const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim()
+    const name =
+      profile.name ||
+      [profile.first_name, profile.last_name].filter(Boolean).join(' ').trim() ||
+      fallbackNameFromEmail.value ||
+      ''
     editForm.value = {
-      name: name || '',
+      name,
       role: profile.role || organizations.value[0]?.user_role || '',
       email: profile.email || '',
-      phone: profile.phone_number || '',
     }
   },
   { immediate: true },
 )
 
 const openEditModal = () => {
-  showEditModal.value = true
+  Swal.fire({
+    icon: 'info',
+    title: 'Profile editing unavailable',
+    text: 'Profile updates are temporarily disabled. Please check back soon.',
+    confirmButtonColor: '#401903',
+  })
 }
 
 const closeEditModal = () => {
@@ -145,25 +170,12 @@ const closeEditModal = () => {
 }
 
 const saveEdits = () => {
-  if (!userProfile.value) return closeEditModal()
-  const [firstName, ...rest] = editForm.value.name.trim().split(' ')
-  const lastName = rest.join(' ')
-  userProfile.value = {
-    ...userProfile.value,
-    first_name: firstName || userProfile.value.first_name,
-    last_name: lastName || userProfile.value.last_name,
-    role: editForm.value.role || userProfile.value.role,
-    email: editForm.value.email || userProfile.value.email,
-    phone_number: editForm.value.phone || userProfile.value.phone_number,
-  }
-  authStore.user = {
-    ...(authStore.user ?? {}),
-    id: userProfile.value.id,
-    first_name: userProfile.value.first_name,
-    last_name: userProfile.value.last_name,
-    email: userProfile.value.email,
-    role: userProfile.value.role,
-  }
+  Swal.fire({
+    icon: 'info',
+    title: 'Profile editing unavailable',
+    text: 'Profile updates are temporarily disabled. Please check back soon.',
+    confirmButtonColor: '#401903',
+  })
   closeEditModal()
 }
 </script>
@@ -176,14 +188,6 @@ const saveEdits = () => {
           <p class="text-sm font-semibold uppercase tracking-wide text-[#9CA3AF]">Profile</p>
           <h1 class="text-3xl font-bold text-[#0F172A]">Profile Information</h1>
         </div>
-        <button
-          v-if="!profileLoading"
-          type="button"
-          class="rounded-full bg-[#401903] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
-          @click="openEditModal"
-        >
-          Edit
-        </button>
       </div>
 
       <div
@@ -197,7 +201,7 @@ const saveEdits = () => {
 
       <div v-else-if="profileError" class="rounded-2xl border border-red-100 bg-red-50 p-6">
         <p class="text-sm font-medium text-red-700">{{ profileError }}</p>
-        <button class="mt-4 text-sm font-semibold text-[#401903]" @click="fetchProfile">
+        <button class="btn btn--link" @click="fetchProfile">
           Retry
         </button>
       </div>
@@ -207,14 +211,14 @@ const saveEdits = () => {
           <div
             class="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center md:gap-10"
           >
-            <div class="flex items-center gap-6">
+            <div class="flex flex-col gap-6">
               <div
                 class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md"
               >
                 {{ avatarInitials }}
               </div>
-              <div class="space-y-2">
-                <div>
+              <div class="space-y-3">
+                <div class="space-y-2">
                   <p class="text-2xl font-semibold text-[#0F172A]">{{ fullName }}</p>
                   <p class="text-sm text-[#6B7280]">{{ primaryRole }}</p>
                 </div>
@@ -222,7 +226,7 @@ const saveEdits = () => {
                   <span
                     v-for="status in statusChips"
                     :key="status"
-                    class="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700"
+                    class="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700"
                   >
                     {{ status }}
                   </span>
@@ -231,7 +235,7 @@ const saveEdits = () => {
             </div>
             <button
               type="button"
-              class="rounded-full border border-[#401903] px-4 py-2 text-sm font-semibold text-[#401903] transition hover:bg-[#401903] hover:text-white"
+              class="btn btn--primary"
               @click="openEditModal"
             >
               Edit Profile
@@ -258,15 +262,6 @@ const saveEdits = () => {
               <Input
                 id="email"
                 :model-value="userProfile?.email || ''"
-                readonly
-                class="h-12 rounded-xl border-[#E5E7EB] bg-[#F8FAFC] text-sm text-[#111827] shadow-none"
-              />
-            </div>
-            <div class="space-y-2">
-              <label class="text-sm font-semibold text-[#0F172A]" for="phone">Phone Number</label>
-              <Input
-                id="phone"
-                :model-value="displayedPhone"
                 readonly
                 class="h-12 rounded-xl border-[#E5E7EB] bg-[#F8FAFC] text-sm text-[#111827] shadow-none"
               />
@@ -375,16 +370,6 @@ const saveEdits = () => {
                 class="h-12 rounded-xl border-[#E5E7EB] text-sm text-[#111827]"
               />
             </div>
-            <div class="space-y-2">
-              <label class="text-sm font-semibold text-[#0F172A]" for="edit-phone">Phone Number</label>
-              <Input
-                id="edit-phone"
-                v-model="editForm.phone"
-                placeholder="+123"
-                class="h-12 rounded-xl border-[#E5E7EB] text-sm text-[#111827]"
-              />
-            </div>
-
             <div class="flex items-center justify-between gap-3 pt-4">
               <button
                 type="button"
