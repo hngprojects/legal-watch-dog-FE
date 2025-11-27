@@ -185,12 +185,7 @@ const handleCreateAccount = async () => {
           </ul>
         </div>
 
-        <FormControl
-          v-model="name"
-          label="Full Name"
-          placeholder="Enter your full name"
-          required
-        />
+        <FormControl v-model="name" label="Full Name" placeholder="Enter your full name" required />
 
         <FormControl
           v-model="email"

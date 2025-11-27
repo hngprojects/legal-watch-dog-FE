@@ -65,7 +65,7 @@ export const useOrganizationStore = defineStore('organizations', {
       this.loading = true
       this.setError(null)
       try {
-        const response = await organizationService.listOrganizations(userId)
+        const response = await organizationService.listOrganizations()
         const rawList = parseRawOrganizations(response?.data?.data)
         this.organizations = rawList.map((org) => mapRawOrganization(org))
       } catch (error) {
