@@ -215,15 +215,6 @@ const saveEdits = () => {
                   <p class="text-2xl font-semibold text-[#0F172A]">{{ fullName }}</p>
                   <p class="text-sm text-[#6B7280]">{{ primaryRole }}</p>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="status in statusChips"
-                    :key="status"
-                    class="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700"
-                  >
-                    {{ status }}
-                  </span>
-                </div>
               </div>
             </div>
             <button
