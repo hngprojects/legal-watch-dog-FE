@@ -130,12 +130,12 @@
 
 <script setup lang="ts">
 import { TypographyText } from '../ui/typography'
-import Frame from '@/assets/Images/Frame.png'
-import Facebook from '@/assets/Images/Facebook.png'
-import Twitter from '@/assets/Images/Twitter.png'
-import Instagram from '@/assets/Images/Instagram.png'
-import LinkedIn from '@/assets/Images/LinkedIn.png'
-import YouTube from '@/assets/Images/YouTube.png'
+import Frame from '@/assets/images/Frame.png'
+import Facebook from '@/assets/images/Facebook.png'
+import Twitter from '@/assets/images/Twitter.png'
+import Instagram from '@/assets/images/Instagram.png'
+import LinkedIn from '@/assets/images/LinkedIn.png'
+import YouTube from '@/assets/images/YouTube.png'
 import { RouterLink } from 'vue-router'
 
 const products = [
