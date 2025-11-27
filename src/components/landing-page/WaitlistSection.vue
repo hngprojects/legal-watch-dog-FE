@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { submitWaitlist, type WaitlistPayload, type earlyAccessPayload } from '@/api/waitlist'
+import { submitWaitlist, type earlyAccessPayload } from '@/api/waitlist'
 import EmailIcon from '@/assets/icons/sms.svg'
 import BellIcon from '@/assets/icons/bell2.svg'
 import BrainIcon from '@/assets/icons/brain.svg'
@@ -16,9 +16,9 @@ import GlobeIcon2 from '@/assets/icons/globe2.svg'
 import earlyAccessBg from '@/assets/Images/earlyAccess-bg.png'
 
 // Top Waitlist Form
-const form = reactive<WaitlistPayload>({
-  organization_email: '',
-})
+// const form = reactive<WaitlistPayload>({
+//   organization_email: '',
+// })
 
 // Footer Early Access Form
 const earlyAccessForm = reactive<earlyAccessPayload>({
@@ -27,9 +27,9 @@ const earlyAccessForm = reactive<earlyAccessPayload>({
 })
 
 // Inline error states
-const formErrors = reactive({
-  organization_email: '',
-})
+// const formErrors = reactive({
+//   organization_email: '',
+// })
 
 const earlyAccessErrors = reactive({
   organization_name: '',
@@ -39,37 +39,44 @@ const earlyAccessErrors = reactive({
 const isSubmitting = ref(false)
 const feedback = ref<{ type: 'success' | 'error'; message: string } | null>(null)
 
-const handleSubmit = async () => {
-  if (isSubmitting.value) return
+// const handleSubmit = async () => {
+//   if (isSubmitting.value) return
 
-  feedback.value = null
-  formErrors.organization_email = ''
+//   feedback.value = null
+//   formErrors.organization_email = ''
 
-  if (!form.organization_email.trim()) {
-    formErrors.organization_email = 'Work email is required'
-  }
+//   if (!form.organization_email.trim()) {
+//     formErrors.organization_email = 'Work email is required'
+//   }
 
-  if (formErrors.organization_email) return
+//   if (formErrors.organization_email) return
 
-  isSubmitting.value = true
+//   isSubmitting.value = true
 
-  try {
-    const response = await submitWaitlist({ ...form })
+//   try {
+//     const response = await submitWaitlist({ ...form })
 
-    feedback.value = {
-      type: 'success',
-      message: response.message ?? 'You are on the waitlist!',
-    }
+//     feedback.value = {
+//       type: 'success',
+//       message: response.message ?? 'You are on the waitlist!',
+//     }
 
-    form.organization_email = ''
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Please try again shortly.'
-    feedback.value = {
-      type: 'error',
-      message: errorMessage,
-    }
-  } finally {
-    isSubmitting.value = false
+//     form.organization_email = ''
+//   } catch (error: unknown) {
+//     const errorMessage = error instanceof Error ? error.message : 'Please try again shortly.'
+//     feedback.value = {
+//       type: 'error',
+//       message: errorMessage,
+//     }
+//   } finally {
+//     isSubmitting.value = false
+//   }
+// }
+
+const scrollToWaitlistForm = () => {
+  const waitlistFormElement = document.getElementById('waitlist-form')
+  if (waitlistFormElement) {
+    waitlistFormElement.scrollIntoView({ behavior: 'smooth' })
   }
 }
 
@@ -239,21 +246,21 @@ const testimonials = [
               <img :src="EmailIcon" class="h-5 w-5" alt="email" />
             </div>
             <Input
-              v-model="form.organization_email"
+              v-model="earlyAccessForm.organization_email"
               type="email"
               placeholder="Enter Email"
               class="h-full w-full rounded-l-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
             />
-            <p v-if="formErrors.organization_email" class="mt-1 text-left text-xs text-red-600">
-              {{ formErrors.organization_email }}
+            <p v-if="earlyAccessErrors.organization_email" class="mt-1 text-left text-xs text-red-600">
+              {{ earlyAccessErrors.organization_email }}
             </p>
           </div>
 
           <!-- Submit Button -->
           <Button
-            @click="handleSubmit"
+            @click="scrollToWaitlistForm"
             :disabled="isSubmitting"
-            class="flex h-full items-center gap-2 rounded-l-none bg-[#3a1f14] px-6 py-3 whitespace-nowrap text-white hover:bg-[#2d1810]"
+            class="flex h-full items-center gap-2 rounded-l-none bg-[#3a1f14] px-6 py-3 whitespace-nowrap text-white hover:text-white hover:bg-[#2d1810]"
           >
             <span v-if="!isSubmitting">Join the Waitlist</span>
             <span v-else>Submitting...</span>
@@ -413,7 +420,7 @@ const testimonials = [
       </div>
     </section>
 
-    <section>
+    <section id="waitlist-form">
       <!-- FOOTER EARLY ACCESS -->
       <section
         class="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8"
