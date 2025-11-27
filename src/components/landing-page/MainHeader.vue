@@ -16,8 +16,8 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
 
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
-  { name: 'About', to: { path: '/about-us' } },
   { name: 'How it Works', to: { path: '/how-it-works' } },
+  { name: 'contact-us', to: { path: '/contact-us' } },
   // { name: 'Features', to: { path: '/coming-soon' } },
 ]
 
