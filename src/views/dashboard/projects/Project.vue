@@ -7,6 +7,7 @@ import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
 import { ArrowLeftIcon, Plus, Settings } from 'lucide-vue-next'
+import checkmark from '@/assets/Images/checkmark.png'
 import Swal from 'sweetalert2'
 import {
   Breadcrumb,
@@ -231,6 +232,7 @@ watch(
   },
   { deep: true },
 )
+const selected = ref('AI')
 </script>
 
 <template>
@@ -313,7 +315,32 @@ watch(
           </div>
         </div>
       </div>
+      <div
+        class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5"
+      >
+        <!-- LEFT SECTION -->
+        <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
+          <!-- Icon -->
+          <div
+            class="flex h-[40px] w-[40px] items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-[48px] sm:w-[48px]"
+          >
+            <img :src="checkmark" alt="check-mark" class="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
 
+          <!-- Text -->
+          <p class="text-[14px] leading-snug text-[#3A2B1B] sm:text-[16px]">
+            Hiring a specialist give you the best possible result.
+            <span class="cursor-pointer underline">learn more about a specialist</span>
+          </p>
+        </div>
+
+        <!-- RIGHT BUTTON -->
+        <button
+          class="h-[40px] w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-[44px] sm:w-auto sm:px-6 sm:text-[15px]"
+        >
+          Hire a Specialist
+        </button>
+      </div>
       <div class="mb-8 flex flex-col gap-5 rounded-[10px] bg-white p-5">
         <template v-if="showInlineEdit">
           <form @submit.prevent="saveEdit" class="w-full space-y-4">
@@ -364,6 +391,35 @@ watch(
         <template v-else>
           <h1 class="text-2xl leading-[30px] font-bold text-gray-900">{{ project.title }}</h1>
           <p class="text-sm leading-5 font-normal text-[#4B5563]">{{ project.description }}</p>
+          <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center ">
+            <!-- LEFT LABEL -->
+            <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
+
+            <!-- SELECT WRAPPER -->
+            <div
+              class="relative flex h-[48px] w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-[240px]"
+            >
+              <select
+                v-model="selected"
+                class="w-full cursor-pointer appearance-none bg-transparent text-[16px] font-medium text-[#374151] focus:outline-none"
+              >
+                <option value="AI">AI</option>
+                <option value="Manual">Manual</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+
+              <!-- CHEVRON ICON -->
+              <svg
+                class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </template>
       </div>
 
@@ -379,19 +435,6 @@ watch(
             Jurisdictions
             <div
               v-if="activeTab === 'jurisdictions'"
-              class="absolute right-0 bottom-0 left-0 h-0.5 bg-[#401903]"
-            ></div>
-          </button>
-          <button
-            @click="activeTab = 'activity'"
-            :class="[
-              'relative pb-4 text-sm font-medium transition-colors',
-              activeTab === 'activity' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
-            ]"
-          >
-            Activity
-            <div
-              v-if="activeTab === 'activity'"
               class="absolute right-0 bottom-0 left-0 h-0.5 bg-[#401903]"
             ></div>
           </button>
@@ -443,13 +486,6 @@ watch(
               </p>
             </article>
           </div>
-        </div>
-
-        <div
-          v-else-if="activeTab === 'activity'"
-          class="flex flex-col items-center justify-center bg-white py-20"
-        >
-          <p class="text-sm text-gray-500">No activity yet</p>
         </div>
       </div>
     </div>
