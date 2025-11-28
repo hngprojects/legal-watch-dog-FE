@@ -33,6 +33,10 @@ const router = useRouter()
 const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
 const jurisdictionId = computed(() => route.params.id as string)
+const organizationName = computed(() => {
+  if (!activeOrganizationId.value) return ''
+  return orgStore.organizations.find((org) => org.id === activeOrganizationId.value)?.name || ''
+})
 
 const jurisdiction = ref<Jurisdiction | null>(null)
 const loading = ref(true)
@@ -668,6 +672,16 @@ watch(
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
                 <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink :to="{ name: 'organization-projects', params: { organizationId: activeOrganizationId } }">
+                  {{ organizationName || 'Organization' }}
+                </RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
 

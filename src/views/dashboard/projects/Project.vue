@@ -2,6 +2,7 @@
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
+import { useOrganizationStore } from '@/stores/organization-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
@@ -20,10 +21,15 @@ const route = useRoute()
 const router = useRouter()
 const projectStore = useProjectStore()
 const jurisdictionStore = useJurisdictionStore()
+const organizationStore = useOrganizationStore()
 const projectId = route.params.id as string
 const organizationId = computed(
   () => (route.params.organizationId as string) || project.value?.org_id || '',
 )
+const organizationName = computed(() => {
+  if (!organizationId.value) return ''
+  return organizationStore.organizations.find((org) => org.id === organizationId.value)?.name || ''
+})
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
@@ -248,12 +254,17 @@ watch(
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'organization-projects',
-                    params: { organizationId: organizationId },
-                  }"
-                >
+                <RouterLink :to="{ name: 'organization-projects', params: { organizationId } }">
+                  {{ organizationName || 'Organization' }}
+                </RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink :to="{ name: 'organization-projects', params: { organizationId } }">
                   Projects
                 </RouterLink>
               </BreadcrumbLink>

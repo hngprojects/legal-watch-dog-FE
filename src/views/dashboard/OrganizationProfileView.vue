@@ -21,8 +21,13 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { EllipsisVertical } from 'lucide-vue-next'
+import ProjectFormModal from '@/components/dashboard/ProjectFormModal.vue'
+import { DropdownMenu } from '@/components/ui/dropdown-menu'
+import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
+import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
+import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
 
-type MemberRole = 'Admin' | 'User' | 'Manager'
+type MemberRole = 'Admin' | 'User' | 'Manager' | 'Member'
 type MemberStatus = 'Active' | 'Pending'
 
 type Member = {
@@ -39,7 +44,7 @@ const organizationStore = useOrganizationStore()
 const projectStore = useProjectStore()
 const authStore = useAuthStore()
 const { organizations, loading: orgLoading } = storeToRefs(organizationStore)
-const { projects, loading: projectsLoading } = storeToRefs(projectStore)
+const { projects, loading: projectsLoading, error: projectError } = storeToRefs(projectStore)
 
 const orgId = computed(() => {
   const id = route.params.organizationId
@@ -61,6 +66,73 @@ const organization = computed(() =>
 )
 
 const primaryProject = computed(() => projects.value[0] || null)
+const projectModalOpen = ref(false)
+const projectModalMode = ref<'edit' | 'create'>('create')
+const editingProject = ref<{ id?: string; title?: string; description?: string } | null>(null)
+const organizationOptions = computed(() =>
+  orgId.value && organization.value
+    ? [{ id: orgId.value, name: organization.value.name }]
+    : [],
+)
+
+const goToProject = (projectId: string) => {
+  if (!orgId.value) return
+  router.push({ name: 'project-detail', params: { organizationId: orgId.value, id: projectId } })
+}
+
+const openEditProject = () => {
+  if (!primaryProject.value) return
+  editingProject.value = { ...primaryProject.value }
+  projectModalMode.value = 'edit'
+  projectModalOpen.value = true
+  projectStore.setError(null)
+}
+
+const openCreateProject = () => {
+  editingProject.value = null
+  projectModalMode.value = 'create'
+  projectModalOpen.value = true
+  projectStore.setError(null)
+}
+
+const closeProjectModal = () => {
+  projectModalOpen.value = false
+  editingProject.value = null
+  projectStore.setError(null)
+}
+
+const handleProjectSave = async (payload: {
+  title: string
+  description: string
+  organizationId: string
+  projectId?: string
+}) => {
+  if (!payload.projectId || !orgId.value) return
+  await projectStore.updateProject(orgId.value, payload.projectId, {
+    title: payload.title,
+    description: payload.description,
+  })
+  projectModalOpen.value = false
+  editingProject.value = null
+  await Swal.fire('Updated', 'Project updated successfully.', 'success')
+}
+
+const deleteProject = async () => {
+  if (!primaryProject.value || !orgId.value) return
+  const confirm = await Swal.fire({
+    title: 'Delete Project?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d33',
+  })
+  if (!confirm.isConfirmed) return
+  await projectStore.deleteProject(primaryProject.value.id, orgId.value)
+  await Swal.fire('Deleted', 'Project successfully deleted.', 'success')
+  await loadProjects()
+}
 
 const initials = (name: string) =>
   name
@@ -221,9 +293,6 @@ watch(
           <p class="text-sm font-medium uppercase tracking-wide text-[#9CA3AF]">
             Organization Profile
           </p>
-          <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">
-            {{ organization?.name || 'Organization' }}
-          </h1>
         </div>
         <RouterLink to="/dashboard/organizations" class="text-sm text-[#401903] underline">
           Back to organizations
@@ -254,37 +323,52 @@ watch(
       </section>
 
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
-        <div class="mb-4 flex items-center justify-between">
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Projects</p>
             <p class="text-sm text-gray-500">
               {{ projects.length ? `Showing ${projects.length}` : 'No projects yet' }}
             </p>
           </div>
-          <button @click="openProjects" class="btn--link">
-            View all
-          </button>
+          <div class="flex items-center gap-3">
+            <button @click="openCreateProject" class="btn--primary">Add Project</button>
+            <button @click="openProjects" class="btn--link">View all</button>
+          </div>
         </div>
 
         <div v-if="projectsLoading" class="space-y-4">
           <div class="h-20 animate-pulse rounded-xl bg-gray-100"></div>
         </div>
-        <div v-else-if="!primaryProject" class="rounded-xl border border-dashed border-gray-200 p-6">
+        <div v-else-if="!primaryProject" class="space-y-4 rounded-xl border border-dashed border-gray-200 p-6 text-center">
           <p class="text-sm text-gray-600">No projects yet. Create one to start tracking changes.</p>
+          <div class="flex justify-center">
+            <button class="btn--primary" @click="openCreateProject">Add Project</button>
+          </div>
         </div>
         <div
           v-else
-          class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/60 p-5"
+          class="flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 bg-gray-50/60 p-5 transition hover:bg-white"
+          @click="goToProject(primaryProject.id)"
         >
           <div>
             <p class="text-sm font-semibold text-gray-900">{{ primaryProject.title }}</p>
           </div>
-          <button
-            @click="openProjects"
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <button
+                @click.stop
             class="rounded-full p-2 text-gray-500 transition hover:bg-white hover:text-gray-700"
           >
             <EllipsisVertical :size="18" />
           </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @click.stop="openEditProject">Edit</DropdownMenuItem>
+              <DropdownMenuItem class="text-red-600" @click.stop="deleteProject">
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </section>
 
@@ -441,4 +525,15 @@ watch(
       </RouterLink>
     </div>
   </main>
+
+  <ProjectFormModal
+    :open="projectModalOpen"
+    :mode="projectModalMode"
+    :organizations="organizationOptions"
+    :default-organization-id="orgId"
+    :project="editingProject || undefined"
+    :error="projectError"
+    @close="closeProjectModal"
+    @save="handleProjectSave"
+  />
 </template>

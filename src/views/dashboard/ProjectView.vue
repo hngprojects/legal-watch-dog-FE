@@ -5,9 +5,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { organizationService } from '@/api/organization'
-import type { OrganizationErrorResponse } from '@/types/organization'
-import Swal from 'sweetalert2'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,6 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import ProjectFormModal from '@/components/dashboard/ProjectFormModal.vue'
 
 const projectStore = useProjectStore()
 const organizationStore = useOrganizationStore()
@@ -25,17 +23,14 @@ const { organizations, loading: orgLoading } = storeToRefs(organizationStore)
 const router = useRouter()
 const route = useRoute()
 
-const showCreateModal = ref(false)
-const formData = ref({
-  title: '',
-  description: '',
-})
+const showProjectModal = ref(false)
+const projectModalMode = ref<'create' | 'edit'>('create')
 
 const inviteForm = ref({
   email: '',
   role: 'Member',
 })
-const inviteSending = ref(false)
+// const inviteSending = ref(false)
 const inviteMessage = ref<string | null>(null)
 const inviteError = ref<string | null>(null)
 
@@ -48,14 +43,9 @@ const organizationName = computed(() => {
   if (!currentId) return ''
   return organizations.value.find((org) => org.id === currentId)?.name || 'Organization'
 })
-const selectedOrganizationId = ref<string | ''>(organizationId.value)
-
-// Kebab menu state — now uses string IDs
-const activeMenuId = ref<string | null>(null)
-
-const closeMenu = () => {
-  activeMenuId.value = null
-}
+const organizationOptions = computed(() =>
+  organizations.value.map((org) => ({ id: org.id, name: org.name })),
+)
 
 const ensureOrganizations = async () => {
   if (organizations.value.length || orgLoading.value) return
@@ -78,39 +68,48 @@ const openCreateModal = async () => {
     return
   }
 
-  showCreateModal.value = true
-  formData.value = { title: '', description: '' }
-  selectedOrganizationId.value = organizationId.value || organizations.value[0]?.id || ''
+  projectModalMode.value = 'create'
+  showProjectModal.value = true
   projectStore.setError(null)
 }
 
-const closeCreateModal = () => {
-  showCreateModal.value = false
-  formData.value = { title: '', description: '' }
+const closeProjectModal = () => {
+  showProjectModal.value = false
   projectStore.setError(null)
 }
 
-const handleCreateProject = async () => {
+const handleProjectSave = async (payload: {
+  title: string
+  description: string
+  organizationId: string
+  projectId?: string
+}) => {
   projectStore.setError(null)
 
-  const orgIdToUse = selectedOrganizationId.value || organizationId.value
+  const orgIdToUse = payload.organizationId || organizationId.value
 
   if (!orgIdToUse) {
     projectStore.setError('Select an organization before creating a project.')
     return
   }
 
-  if (!formData.value.title.trim()) return projectStore.setError('Project name is required')
-  if (!formData.value.description.trim()) return projectStore.setError('Description is required')
+  if (projectModalMode.value === 'edit' && payload.projectId) {
+    await projectStore.updateProject(orgIdToUse, payload.projectId, {
+      title: payload.title,
+      description: payload.description,
+    })
+    closeProjectModal()
+    return
+  }
 
   const newProject = await projectStore.addProject({
-    title: formData.value.title.trim(),
-    description: formData.value.description.trim(),
+    title: payload.title,
+    description: payload.description,
     organization_id: orgIdToUse,
   })
 
   if (newProject) {
-    closeCreateModal()
+    closeProjectModal()
     router.push({
       name: 'organization-projects',
       params: { organizationId: orgIdToUse },
@@ -118,47 +117,47 @@ const handleCreateProject = async () => {
   }
 }
 
-const sendInvitation = async () => {
-  inviteError.value = null
-  inviteMessage.value = null
+// const sendInvitation = async () => {
+//   inviteError.value = null
+//   inviteMessage.value = null
 
-  if (!organizationId.value) {
-    inviteError.value = 'Select an organization before inviting teammates.'
-    return
-  }
+//   if (!organizationId.value) {
+//     inviteError.value = 'Select an organization before inviting teammates.'
+//     return
+//   }
 
-  if (!inviteForm.value.email.trim()) {
-    inviteError.value = 'Email is required'
-    return
-  }
+//   if (!inviteForm.value.email.trim()) {
+//     inviteError.value = 'Email is required'
+//     return
+//   }
 
-  inviteSending.value = true
-  try {
-    const { data } = await organizationService.inviteMember(organizationId.value, {
-      invited_email: inviteForm.value.email.trim(),
-      role_name: inviteForm.value.role,
-    })
+//   inviteSending.value = true
+//   try {
+//     const { data } = await organizationService.inviteMember(organizationId.value, {
+//       invited_email: inviteForm.value.email.trim(),
+//       role_name: inviteForm.value.role,
+//     })
 
-    const message = data.message || data.data?.message || 'Invitation sent successfully.'
+//     const message = data.message || data.data?.message || 'Invitation sent successfully.'
 
-    inviteMessage.value = message
-    await Swal.fire('Invitation sent', message, 'success')
-    inviteForm.value.email = ''
-  } catch (error) {
-    const err = error as OrganizationErrorResponse
-    if (!err.response) {
-      inviteError.value = 'Network error: Unable to reach server'
-    } else {
-      inviteError.value =
-        err.response.data?.detail?.[0]?.msg ||
-        err.response.data?.message ||
-        'Failed to send invitation'
-    }
-    await Swal.fire('Could not send invite', inviteError.value, 'error')
-  } finally {
-    inviteSending.value = false
-  }
-}
+//     inviteMessage.value = message
+//     await Swal.fire('Invitation sent', message, 'success')
+//     inviteForm.value.email = ''
+//   } catch (error) {
+//     const err = error as OrganizationErrorResponse
+//     if (!err.response) {
+//       inviteError.value = 'Network error: Unable to reach server'
+//     } else {
+//       inviteError.value =
+//         err.response.data?.detail?.[0]?.msg ||
+//         err.response.data?.message ||
+//         'Failed to send invitation'
+//     }
+//     await Swal.fire('Could not send invite', inviteError.value, 'error')
+//   } finally {
+//     inviteSending.value = false
+//   }
+// }
 
 const goToProject = (id: string) => {
   router.push({
@@ -180,7 +179,6 @@ watch(
   () => route.params.organizationId,
   (newVal) => {
     const id = typeof newVal === 'string' ? newVal : ''
-    selectedOrganizationId.value = id
     inviteMessage.value = null
     inviteError.value = null
     inviteForm.value.email = ''
@@ -227,7 +225,13 @@ watch(
             <BreadcrumbSeparator />
 
             <BreadcrumbItem>
-              <BreadcrumbPage>{{ organizationName || 'Projects' }}</BreadcrumbPage>
+              <BreadcrumbPage>{{ organizationName || 'Organization' }}</BreadcrumbPage>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbPage>Projects</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -259,12 +263,12 @@ watch(
           </div>
 
           <div v-else-if="projects.length === 0" class="flex items-center justify-center">
-            <div class="text-center">
+            <div class="text-center flex flex-col items-center">
               <div class="mb-6 flex justify-center">
                 <svg
-                  width="120"
-                  height="120"
-                  viewBox="0 0 120 120"
+                  width="240"
+                  height="240"
+                  viewBox="0 0 240 240"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -333,7 +337,9 @@ watch(
           <div v-else class="space-y-8">
             <!-- Header with Create Button -->
             <div class="flex items-center justify-between">
-              <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Projects</h1>
+              <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">
+                {{ organizationName || 'Organization' }}'s Projects
+              </h1>
               <button
                 @click="openCreateModal"
                 class="btn--with-icon btn--primary"
@@ -365,7 +371,7 @@ watch(
             </div>
 
             <!-- Projects Grid -->
-            <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3" @click="closeMenu">
+            <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               <article
                 v-for="project in projects"
                 :key="project.id"
@@ -390,7 +396,7 @@ watch(
           </div>
         </div>
 
-        <aside class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
+        <!-- <aside class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
           <div class="flex items-start justify-between gap-4">
             <div>
               <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
@@ -458,117 +464,21 @@ watch(
               Recipients get an email to join this organization with the selected role.
             </p>
           </form>
-        </aside>
+        </aside> -->
       </div>
     </div>
 
-    <teleport to="body">
-      <div
-        v-if="showCreateModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-[2px]"
-        @click.self="closeCreateModal"
-      >
-        <div class="relative w-full max-w-[540px] rounded-sm bg-white shadow-xl">
-          <button
-            @click="closeCreateModal"
-            class="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M1 1L13 13M13 1L1 13"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-
-          <div class="p-8">
-            <div class="mb-6">
-              <h3 class="mb-2 text-xl font-bold text-[#080808]">Create New Project</h3>
-              <p class="text-sm text-[#6B7280]">
-                Set up a new project to track legal and regulatory changes
-              </p>
-            </div>
-
-            <form @submit.prevent="handleCreateProject" class="space-y-5">
-              <div>
-                <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Organization </label>
-                <select
-                  v-model="selectedOrganizationId"
-                  required
-                  class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                >
-                  <option value="" disabled>Select organization</option>
-                  <option v-for="org in organizations" :key="org.id" :value="org.id">
-                    {{ org.name }}
-                  </option>
-                </select>
-                <p class="mt-1.5 text-xs text-[#717680]">
-                  Choose which organization this project belongs to.
-                </p>
-              </div>
-
-              <div>
-                <label for="projName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                  Project Name
-                </label>
-                <input
-                  v-model="formData.title"
-                  id="projName"
-                  placeholder="e.g Global Visa Monitoring"
-                  required
-                  class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                />
-                <p class="mt-1.5 text-xs text-[#717680]">Give your project a descriptive name</p>
-              </div>
-
-              <div>
-                <label for="desc" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                  Description
-                </label>
-                <textarea
-                  v-model="formData.description"
-                  id="desc"
-                  rows="3"
-                  placeholder="What legal areas will you monitor?"
-                  required
-                  class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                />
-              </div>
-
-              <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-                {{ error }}
-              </div>
-
-              <div class="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  @click="closeCreateModal"
-                  class="cursor-pointer rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
-                >
-                  Save Project
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </teleport>
   </main>
+
+  <ProjectFormModal
+    :open="showProjectModal"
+    :mode="projectModalMode"
+    :organizations="organizationOptions"
+    :default-organization-id="organizationId || organizations[0]?.id"
+    :error="projectStore.error"
+    @close="closeProjectModal"
+    @save="handleProjectSave"
+  />
 </template>
 
 <style scoped>
