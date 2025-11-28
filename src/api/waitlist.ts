@@ -7,7 +7,7 @@ export type earlyAccessPayload = {
   organization_email: string
 }
 
-const WAITLIST_ENDPOINT = 'https://api.staging.minamoto.emerj.net/api/v1/waitlist/signup'
+const WAITLIST_ENDPOINT =  `${import.meta.env.VITE_API_BASE_URL}/waitlist/signup`
 
 type WaitlistSuccessResponse = {
   status: string
