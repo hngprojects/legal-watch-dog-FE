@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { pricings } from '@/api/pricing'
+import { PRICINGS } from '@/api/pricing'
 import { ref } from 'vue'
 import PricingCard from './PricingCard.vue'
 
@@ -42,7 +42,7 @@ const activeBillingCycle = ref<'monthly' | 'yearly'>('monthly')
       <div
         class="flex flex-col justify-start gap-x-6 gap-y-12 text-start md:flex-row md:flex-wrap md:justify-center xl:flex-nowrap xl:items-center"
       >
-        <template :key="i" v-for="(plan, i) in pricings">
+        <template :key="i" v-for="(plan, i) in PRICINGS">
           <PricingCard :i="i" :activeBillingCycle="activeBillingCycle" :plan="plan" />
         </template>
       </div>

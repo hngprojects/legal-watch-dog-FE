@@ -1,6 +1,6 @@
 import { Briefcase01Icon, Building03Icon, Target01Icon } from '@hugeicons/core-free-icons'
 
-export const pricings = [
+export const PRICINGS = [
   {
     title: 'Free',
     description: 'Best for individual consultants and small teams.',

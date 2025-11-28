@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import PricingCard from '@/components/pricing/PricingCard.vue'
 import { useRoute } from 'vue-router'
-import { pricings } from '@/api/pricing'
+import { PRICINGS } from '@/api/pricing'
 
 const route = useRoute()
-const plan = pricings.find((plan) => plan.title.toLowerCase() === route.params.plan)!
+const plan = PRICINGS.find((plan) => plan.title.toLowerCase() === route.params.plan)!
 const cycle = route.query.cycle as 'monthly' | 'yearly'
 </script>
 
