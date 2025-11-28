@@ -1,4 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
+// Layouts
+import LandingLayout from '@/layout/LandingLayout.vue'
+import EmptyLayout from '@/layout/EmptyLayout.vue'
+import DashboardLayout from '@/layout/DashboardLayout.vue'
+
+// Landing pages
 import HomeView from '@/views/HomeView.vue'
 import AboutUsView from '@/views/AboutUsView.vue'
 import Contact from '@/views/Contact.vue'
@@ -8,141 +15,82 @@ import HelpCenter from '@/views/HelpCenter.vue'
 import Features from '@/views/Features.vue'
 import Blogs from '@/views/Blogs.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
-import LoginView from '@/views/authentication/LoginView.vue'
-import SignupView from '@/views/authentication/SignupView.vue'
-import OtpView from '@/views/authentication/OtpView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
 import PrivacyPolicyView from '@/views/PrivacyPolicyView.vue'
-import DashboardLayout from '@/layout/DashboardLayout.vue'
-import ProjectView from '@/views/dashboard/ProjectView.vue'
-import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
-import { useAuthStore } from '@/stores/auth-store'
+
+// Auth pages
+import LoginView from '@/views/authentication/LoginView.vue'
+import SignupView from '@/views/authentication/SignupView.vue'
+import OtpView from '@/views/authentication/OtpView.vue'
 import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
-import NotFoundView from '@/views/NotFoundView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
+
+// Dashboard pages
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
+import ProjectView from '@/views/dashboard/ProjectView.vue'
+import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
+
+// Store
+import { useAuthStore } from '@/stores/auth-store'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      component: LandingLayout,
+      children: [
+        { path: '', name: 'home', component: HomeView },
+        { path: 'about-us', name: 'about-us', component: AboutUsView },
+        { path: 'contact-us', name: 'contact-us', component: Contact },
+        { path: 'career', name: 'career', component: Career },
+        { path: 'helpcenter', name: 'helpcenter', component: HelpCenter },
+        { path: 'terms', name: 'terms', component: Terms },
+        { path: 'blogs', name: 'blogs', component: Blogs },
+        { path: 'features', name: 'features', component: Features },
+        { path: 'waitlist', name: 'waitlist', component: WaitlistView },
+        {
+          path: 'how-it-works',
+          name: 'how-it-works',
+          component: () => import('@/views/HowItWorksView.vue'),
+        },
+        {
+          path: 'coming-soon',
+          name: 'coming-soon',
+          component: () => import('@/views/ComingSoonView.vue'),
+        },
+        { path: 'privacy-policy', name: 'privacy-policy', component: PrivacyPolicyView },
+        {
+          path: 'faq',
+          name: 'faq',
+          component: () => import('@/views/FAQView.vue'),
+        },
+        {
+          path: 'pricing',
+          name: 'pricing',
+          component: () => import('@/views/PricingView.vue'),
+        },
+        { path: 'skeleton', name: 'skeleton', component: SkeletonView },
+        { path: 'onboarding', name: 'onboarding', component: OnboardingView },
+      ],
     },
+
     {
-      path: '/about-us',
-      name: 'about-us',
-      component: AboutUsView,
+      path: '/',
+      component: EmptyLayout,
+      children: [
+        { path: 'login', name: 'login', component: LoginView },
+        { path: 'signup', name: 'signup', component: SignupView },
+        { path: 'forgot-password', name: 'forgot-password', component: ForgotPasswordView },
+        { path: 'reset-password', name: 'reset-password', component: ResetPasswordView },
+        { path: 'otp', name: 'otp', component: OtpView },
+        { path: 'auth-status', name: 'auth-status', component: AuthStatusView, alias: '/success' },
+      ],
     },
-    {
-      path: '/contact-us',
-      name: 'contact-us',
-      component: Contact,
-    },
-    {
-      path: '/career',
-      name: 'career',
-      component: Career,
-    },
-    {
-      path: '/helpcenter',
-      name: 'helpcenter',
-      component: HelpCenter,
-    },
-    {
-      path: '/terms',
-      name: 'terms',
-      component: Terms,
-    },
-    {
-      path: '/blogs',
-      name: 'blogs',
-      component: Blogs,
-    },
-    {
-      path: '/features',
-      name: 'features',
-      component: Features,
-    },
-    {
-      path: '/waitlist',
-      name: 'waitlist',
-      component: WaitlistView,
-    },
-    {
-      path: '/how-it-works',
-      name: 'how-it-works',
-      component: () => import('@/views/HowItWorksView.vue'),
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: LoginView,
-    },
-    {
-      path: '/signup',
-      name: 'signup',
-      component: SignupView,
-    },
-    {
-      path: '/forgot-password',
-      name: 'forgot-password',
-      component: ForgotPasswordView,
-    },
-    {
-      path: '/reset-password',
-      name: 'reset-password',
-      component: ResetPasswordView,
-    },
-    {
-      path: '/otp',
-      name: 'otp',
-      component: OtpView,
-    },
-    {
-      path: '/onboarding', // Onboarding page
-      name: 'onboarding',
-      component: OnboardingView,
-    },
-    {
-      path: '/auth-status',
-      name: 'auth-status',
-      component: AuthStatusView,
-      alias: '/success',
-    },
-    {
-      path: '/skeleton',
-      name: 'skeleton',
-      component: SkeletonView,
-    },
-    {
-      path: '/coming-soon', 
-      name: 'coming-soon',
-      component: () => import('@/views/ComingSoonView.vue'),
-    },
-    {
-      path: '/privacy-policy', 
-      name: 'privacy-policy',
-      component: PrivacyPolicyView,
-    },
-    {
-      path: '/faq', 
-      name: 'faq',
-      component: () => import('@/views/FAQView.vue'),
-    },
-    {
-      path: '/pricing',
-      name: 'pricing',
-      component: () => import('@/views/PricingView.vue'),
-    },
-    {
-      path: '/:pathMatch(.*)*',
-      name: 'not-found',
-      component: NotFoundView,
-    },
+
     {
       path: '/dashboard',
       component: DashboardLayout,
@@ -151,9 +99,7 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          redirect: {
-            name: 'organizations',
-          },
+          redirect: { name: 'organizations' },
         },
         {
           path: 'organizations',
@@ -180,7 +126,6 @@ const router = createRouter({
           component: () => import('@/views/dashboard/projects/Project.vue'),
           meta: { requiresAuth: true },
         },
-
         {
           path: 'jurisdictions',
           name: 'jurisdictions',
@@ -220,7 +165,14 @@ const router = createRouter({
         },
       ],
     },
+
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/NotFoundView.vue'),
+    },
   ],
+
   scrollBehavior: () => ({ top: 0 }),
 })
 
@@ -233,13 +185,9 @@ router.beforeEach(async (to) => {
     return { name: 'dashboard' }
   }
 
-  if (!requiresAuth) {
-    return true
-  }
+  if (!requiresAuth) return true
 
-  if (auth.isAuthenticated) {
-    return true
-  }
+  if (auth.isAuthenticated) return true
 
   return { name: 'login', query: { redirect: to.fullPath } }
 })
