@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Plus, Settings } from 'lucide-vue-next'
+import { Plus, Settings, Search } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
+
+import aiIcon from '@/assets/icons/ai_icon.png'
+
+import SuggestedSources from '@/views/dashboard/sources/SuggestedSources.vue'
 
 import type { Jurisdiction } from '@/api/jurisdiction'
 import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
@@ -32,15 +36,9 @@ interface StoredScrapeResult {
   payload?: unknown
 }
 
-interface OutputItem {
-  title: string
-  detail?: string
-}
-
 interface NestedJurisdiction extends Jurisdiction {
   depth: number
 }
-
 
 const route = useRoute()
 const router = useRouter()
@@ -67,9 +65,14 @@ const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
 
 const loading = ref(true)
-const activeTab = ref<'analysis' | 'sources' | 'output'>('analysis')
+const activeTab = ref<'analysis' | 'sources'>('analysis')
 
 const showSettingsMenu = ref(false)
+const showAddSourceMenu = ref(false)
+
+// Toggle for showing Suggested Sources view inside Sources tab
+const showSuggestedSources = ref(false)
+
 const showInlineEdit = ref(false)
 
 const subJurisdictionModalOpen = ref(false)
@@ -94,18 +97,11 @@ const sourceForm = ref<{
   is_active: true,
 })
 
-interface ScrapeResponseData {
-  summary?: string
-  payload?: unknown
-}
-
-
 const sources = computed(() => sourceStore.sources)
 const sourcesLoading = computed(() => sourceStore.loading)
 const sourcesError = computed(() => sourceStore.error)
 const editingSourceId = ref<string | null>(null)
 
-const scrapingState = ref<Record<string, boolean>>({})
 const scrapeResults = ref<Record<string, StoredScrapeResult>>({})
 const scrapeErrors = ref<Record<string, string>>({})
 
@@ -138,12 +134,6 @@ const loadStoredScrapeResults = () => {
   scrapeResults.value = latest
 }
 
-const persistScrapeResult = (result: StoredScrapeResult) => {
-  const next = [result, ...storedScrapeResults.value]
-  storedScrapeResults.value = next
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-}
-
 const loadJurisdiction = async (id: string) => {
   loading.value = true
 
@@ -160,6 +150,42 @@ const loadJurisdiction = async (id: string) => {
 
   loading.value = false
 }
+
+const toggleAddSourceMenu = () => {
+  showAddSourceMenu.value = !showAddSourceMenu.value
+}
+
+const closeAddSourceMenu = () => {
+  showAddSourceMenu.value = false
+}
+
+const handleManualAddSource = () => {
+  closeAddSourceMenu()
+  openAddSourceModal()
+}
+
+const handleAiSuggestedSource = () => {
+  closeAddSourceMenu()
+  activeTab.value = 'sources'
+  showSuggestedSources.value = true
+}
+
+
+const cancelSuggestions = () => {
+  showSuggestedSources.value = false
+}
+
+const handleSuggestionsSaved = (count: number) => {
+  if (count === 0) {
+     showSuggestedSources.value = false
+     return
+  }
+  
+  showSuggestedSources.value = false
+  Swal.fire('Sources Saved', `${count} sources added successfully.`, 'success')
+}
+
+
 
 const openAddSourceModal = () => {
   addSourceModalOpen.value = true
@@ -246,64 +272,6 @@ const deleteSource = async (src: Source) => {
   if (ok) Swal.fire('Deleted', '', 'success')
 }
 
-// const startScrape = async (source: Source) => {
-//   scrapingState.value[source.id] = true
-//   scrapeErrors.value[source.id] = ''
-
-//   const res = await sourceStore.scrapeSource(source.id)
-
-//   scrapingState.value[source.id] = false
-
-//   if (!res) {
-//     scrapeErrors.value[source.id] = 'Scrape failed'
-//     return
-//   }
-
-//   const stored: StoredScrapeResult = {
-//     id: `${source.id}-${Date.now()}`,
-//     jurisdictionId: jurisdictionId.value,
-//     sourceId: source.id,
-//     sourceName: source.name,
-//     status: 'completed',
-//     fetchedAt: new Date().toISOString(),
-//     summary: res.summary ?? 'Scrape completed',
-//     payload: res.payload ?? {},
-//   }
-
-//   scrapeResults.value[source.id] = stored
-//   persistScrapeResult(stored)
-// }
-
-const stringifyValue = (v: unknown) => {
-  if (typeof v === 'string') return v
-  try {
-    return JSON.stringify(v, null, 2)
-  } catch {
-    return String(v)
-  }
-}
-
-const normalizeOutput = (raw: unknown): OutputItem[] => {
-  if (!raw) return []
-
-  if (Array.isArray(raw)) {
-    return raw.map((item, i) => ({
-      title: `Update ${i + 1}`,
-      detail: stringifyValue(item),
-    }))
-  }
-
-  if (typeof raw === 'object') {
-    return Object.entries(raw as Record<string, unknown>).map(([key, val]) => ({
-      title: key,
-      detail: stringifyValue(val),
-    }))
-  }
-
-  return [{ title: 'Result', detail: stringifyValue(raw) }]
-}
-
-const outputItems = computed(() => normalizeOutput(jurisdiction.value?.scrape_output))
 
 const goBack = () => {
   router.push({ name: 'organization-projects', params: { organizationId: activeOrganizationId.value } })
@@ -431,8 +399,7 @@ onMounted(() => {
 
 
 <template>
-  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12">
-    <!-- Loading state -->
+  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12" @click="closeAddSourceMenu">
     <div v-if="loading" class="mx-auto max-w-6xl">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
@@ -441,7 +408,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- No jurisdiction -->
     <div v-else-if="!jurisdiction" class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm">
       <h1 class="text-2xl font-semibold text-gray-900">Jurisdiction not found</h1>
       <button
@@ -452,9 +418,7 @@ onMounted(() => {
       </button>
     </div>
 
-    <!-- Main -->
     <div v-else class="mx-auto max-w-6xl space-y-6 lg:space-y-8">
-      <!-- BREADCRUMBS + HEADER -->
       <header class="flex flex-wrap items-start justify-between gap-4">
         <Breadcrumb>
           <BreadcrumbList>
@@ -491,21 +455,6 @@ onMounted(() => {
 
             <BreadcrumbSeparator />
 
-            <!-- <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
-              <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'project-detail',
-                    params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
-                  }"
-                >
-                  {{ projectName }}
-                </RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem> -->
-
-            <BreadcrumbSeparator />
-
             <template v-if="parentJurisdiction">
               <BreadcrumbItem>
                 <BreadcrumbLink as-child>
@@ -523,7 +472,6 @@ onMounted(() => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <!-- Settings dropdown -->
         <div class="relative">
           <button
             @click.stop="toggleSettingsMenu"
@@ -553,9 +501,7 @@ onMounted(() => {
         </div>
       </header>
 
-      <!-- JURISDICTION DETAILS CARD -->
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-        <!-- EDIT MODE -->
         <div v-if="showInlineEdit">
           <form @submit.prevent="saveEdit" class="space-y-4">
             <div>
@@ -602,7 +548,6 @@ onMounted(() => {
           </form>
         </div>
 
-        <!-- VIEW MODE -->
         <div v-else class="flex flex-col gap-3">
           <p class="text-xs font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
             Jurisdiction
@@ -620,9 +565,7 @@ onMounted(() => {
         </div>
       </section>
 
-      <!-- MAIN TAB SECTION -->
       <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
-        <!-- TAB HEADERS -->
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
             <button
@@ -637,22 +580,6 @@ onMounted(() => {
               Analysis
               <span
                 v-if="activeTab === 'analysis'"
-                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
-              ></span>
-            </button>
-
-            <button
-              @click="activeTab = 'output'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'output'
-                  ? 'text-[#1F1F1F]'
-                  : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
-            >
-              Output
-              <span
-                v-if="activeTab === 'output'"
                 class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
               ></span>
             </button>
@@ -675,49 +602,88 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- ANALYSIS TAB -->
         <div v-if="activeTab === 'analysis'" class="space-y-4 p-6">
-          <!-- Header -->
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
               <p class="text-xs text-gray-500">Trigger scraping per source and view results.</p>
             </div>
 
-            <button
-              class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-4 py-2 text-sm font-medium text-white"
-              @click="openAddSourceModal"
-            >
-              <Plus :size="16" /> Add Source
-            </button>
+            <div class="relative">
+              <button
+                class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-4 py-2 text-sm font-medium text-white"
+                @click.stop="toggleAddSourceMenu"
+              >
+                <Plus :size="16" /> Add Source
+              </button>
+              
+              <div
+                v-if="showAddSourceMenu"
+                class="absolute right-0 top-full mt-2 w-[240px] rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50"
+              >
+                <button
+                  @click="handleManualAddSource"
+                  class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
+                >
+                   <Search :size="18" />
+                   Search for sources.
+                </button>
+
+                <button
+                  @click="handleAiSuggestedSource"
+                  class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
+                >
+                   <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
+                   AI Suggested sources
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- Loading skeleton -->
           <div v-if="sourcesLoading" class="space-y-2">
             <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
           </div>
 
-          <!-- Error -->
           <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
             {{ sourcesError }}
           </div>
 
-          <!-- Empty -->
           <div
             v-else-if="sources.length === 0"
             class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
           >
             <p class="text-sm text-gray-500">No sources added yet.</p>
             <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
-            <button
-              class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
-              @click="openAddSourceModal"
-            >
-              <Plus :size="16" /> Add Source
-            </button>
+            
+            <div class="relative mt-4 inline-block">
+               <button
+                  class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
+                  @click.stop="toggleAddSourceMenu"
+                >
+                  <Plus :size="16" /> Add Source
+                </button>
+                <div
+                  v-if="showAddSourceMenu"
+                  class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[240px] rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50 text-left"
+                >
+                  <button
+                    @click="handleManualAddSource"
+                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
+                  >
+                      <Search :size="18" />
+                      Search for sources.
+                  </button>
+                  <button
+                    @click="handleAiSuggestedSource"
+                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
+                  >
+                      <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
+                      AI Suggested sources
+                  </button>
+                </div>
+             </div>
           </div>
 
-          <!-- Sources list -->
           <div v-else class="space-y-3">
             <div
               v-for="source in sources"
@@ -741,14 +707,6 @@ onMounted(() => {
                     Edit
                   </button>
 
-                  <!-- <button
-                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    :disabled="scrapingState[source.id]"
-                    @click="startScrape(source)"
-                  >
-                    {{ scrapingState[source.id] ? 'Scraping...' : 'Start Scrape' }}
-                  </button> -->
-
                   <button
                     class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
                     @click="expandedSources[source.id] = !expandedSources[source.id]"
@@ -765,7 +723,6 @@ onMounted(() => {
                 </div>
               </div>
 
-              <!-- Scrape error -->
               <div
                 v-if="scrapeErrors[source.id]"
                 class="mt-2 text-xs text-red-600"
@@ -773,7 +730,6 @@ onMounted(() => {
                 {{ scrapeErrors[source.id] }}
               </div>
 
-              <!-- Scrape result -->
               <div
                 v-if="expandedSources[source.id] && scrapeResults[source.id]"
                 class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
@@ -789,137 +745,69 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- OUTPUT TAB -->
-        <div v-else-if="activeTab === 'output'" class="space-y-6 p-6">
-          <div>
-            <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Latest Scrape Results</h3>
+        <div v-else class="p-6">
+          
+          <div v-if="showSuggestedSources">
+            <SuggestedSources 
+              @cancel="cancelSuggestions" 
+              @save="handleSuggestionsSaved" 
+            />
+          </div>
 
-            <!-- Stored results -->
-            <div v-if="storedScrapeResults.length" class="space-y-3">
-              <article
-                v-for="(item, index) in storedScrapeResults"
-                :key="index"
-                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
+          <div v-else>
+            <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Data Sources</h3>
+
+            <div v-if="sourcesLoading" class="space-y-2">
+              <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
+            </div>
+
+            <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {{ sourcesError }}
+            </div>
+
+            <ul v-else-if="sources.length" class="space-y-2">
+              <li
+                v-for="source in sources"
+                :key="source.id"
+                class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
               >
-                <div class="flex items-center justify-between gap-2">
-                  <p class="text-sm font-semibold text-[#3C2610]">{{ item.sourceName }}</p>
-                  <span class="text-[11px] tracking-wide text-[#9CA3AF] uppercase">
-                    {{ new Date(item.fetchedAt).toLocaleString() }}
-                  </span>
+                <div>
+                  <p class="font-semibold text-gray-900">{{ source.name }}</p>
+                  <p class="text-xs text-gray-500">{{ source.url }}</p>
+                  <p class="text-[11px] tracking-wide text-gray-400 uppercase">
+                    {{ source.source_type }} • {{ source.scrape_frequency }}
+                  </p>
                 </div>
 
-                <p class="mt-2 text-sm leading-6 text-[#4B5563]">
-                  {{ item.summary }}
-                </p>
+                <div class="flex items-center gap-2">
+                  <button
+                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    @click="startEditSource(source)"
+                  >
+                    Edit
+                  </button>
 
-                <pre
-                  v-if="item.payload"
-                  class="mt-3 text-xs leading-5 whitespace-pre-wrap text-[#374151]"
-                >
-{{ typeof item.payload === 'string' ? item.payload : JSON.stringify(item.payload, null, 2) }}
-                </pre>
-              </article>
-            </div>
-
-            <!-- No results -->
-            <div
-              v-else
-              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-            >
-              <p class="text-sm text-gray-500">No scrape results yet.</p>
-              <p class="text-xs text-gray-400">Trigger a scrape from the Analysis tab.</p>
-            </div>
-          </div>
-
-          <!-- Processed Output -->
-          <div>
-            <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">What Changed</h3>
-
-            <div v-if="outputItems.length" class="space-y-3">
-              <article
-                v-for="(item, index) in outputItems"
-                :key="index"
-                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
-              >
-                <p class="text-sm font-semibold text-[#3C2610]">{{ item.title }}</p>
-                <p
-                  v-if="item.detail"
-                  class="mt-2 text-sm leading-relaxed whitespace-pre-line text-[#4B5563]"
-                >
-                  {{ item.detail }}
-                </p>
-              </article>
-            </div>
+                  <button
+                    class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                    @click="deleteSource(source)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            </ul>
 
             <div
               v-else
               class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
             >
-              <p class="text-sm text-gray-500">No output generated.</p>
-              <p class="text-xs text-gray-400">Add sources or monitoring instructions.</p>
+              <p class="text-sm text-gray-500">No sources available.</p>
+              <p class="text-xs text-gray-400">Add one to start monitoring.</p>
             </div>
-          </div>
-        </div>
-
-        <!-- SOURCES TAB -->
-        <div v-else class="p-6">
-          <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Sources</h3>
-
-          <!-- Loading -->
-          <div v-if="sourcesLoading" class="space-y-2">
-            <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
-          </div>
-
-          <!-- Error -->
-          <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {{ sourcesError }}
-          </div>
-
-          <!-- List -->
-          <ul v-else-if="sources.length" class="space-y-2">
-            <li
-              v-for="source in sources"
-              :key="source.id"
-              class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
-            >
-              <div>
-                <p class="font-semibold text-gray-900">{{ source.name }}</p>
-                <p class="text-xs text-gray-500">{{ source.url }}</p>
-                <p class="text-[11px] tracking-wide text-gray-400 uppercase">
-                  {{ source.source_type }} • {{ source.scrape_frequency }}
-                </p>
-              </div>
-
-              <div class="flex items-center gap-2">
-                <button
-                  class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                  @click="startEditSource(source)"
-                >
-                  Edit
-                </button>
-
-                <button
-                  class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                  @click="deleteSource(source)"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          </ul>
-
-          <!-- Empty -->
-          <div
-            v-else
-            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-          >
-            <p class="text-sm text-gray-500">No sources available.</p>
-            <p class="text-xs text-gray-400">Add one to start monitoring.</p>
           </div>
         </div>
       </section>
 
-      <!-- SUBJURISDICTION SECTION -->
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
         <div class="mb-4 flex items-center justify-between gap-4">
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
@@ -932,7 +820,6 @@ onMounted(() => {
           </button>
         </div>
 
-        <!-- Empty -->
         <div
           v-if="subJurisdictions.length === 0"
           class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center"
@@ -958,7 +845,6 @@ onMounted(() => {
           <p class="text-sm text-gray-500">Create one to begin categorizing legal domains.</p>
         </div>
 
-        <!-- List -->
         <div v-else class="space-y-3">
           <article
             v-for="node in subJurisdictions"
@@ -985,9 +871,7 @@ onMounted(() => {
       </section>
     </div>
 
-    <!-- MODALS -->
     <teleport to="body">
-      <!-- SUB-JURISDICTION MODAL -->
       <div
         v-if="subJurisdictionModalOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
@@ -1044,7 +928,6 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- SOURCE MODAL -->
       <div
         v-if="addSourceModalOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"

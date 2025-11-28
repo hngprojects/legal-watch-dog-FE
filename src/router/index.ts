@@ -172,7 +172,6 @@ const router = createRouter({
   scrollBehavior: () => ({ top: 0 }),
 })
 
-
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
