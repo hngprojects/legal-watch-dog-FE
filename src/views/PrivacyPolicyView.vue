@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
-import MainHeader from '@/components/landing-page/MainHeader.vue'
 
 type Section = {
   id: string
@@ -62,7 +60,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex min-h-screen flex-col bg-[#F7F4EF] text-gray-800">
-    <MainHeader />
 
     <main class="relative flex-1">
       <div
@@ -396,6 +393,5 @@ onBeforeUnmount(() => {
       </section>
     </main>
 
-    <MainFooter />
   </div>
 </template>
