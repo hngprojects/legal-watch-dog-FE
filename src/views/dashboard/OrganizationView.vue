@@ -14,7 +14,7 @@ import {
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useInvitationStore } from '@/stores/invitation-store'
-import illustrationImg from '@/assets/images/illustration-Container.png'
+import illustrationImg from '@/assets/images/dashboardillustration.png'
 
 const organizationStore = useOrganizationStore()
 const { organizations, loading, error } = storeToRefs(organizationStore)
