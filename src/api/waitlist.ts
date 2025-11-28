@@ -1,3 +1,5 @@
+import api from '@/lib/api'
+
 export type WaitlistPayload = {
   organization_name: string
   organization_email: string
@@ -6,8 +8,6 @@ export type earlyAccessPayload = {
   organization_name: string
   organization_email: string
 }
-
-const WAITLIST_ENDPOINT =  `${import.meta.env.VITE_API_BASE_URL}/waitlist/signup`
 
 type WaitlistSuccessResponse = {
   status: string
@@ -31,38 +31,18 @@ const FALLBACK_ERROR_MESSAGE =
   'Unable to submit right now. Please check your details and try again shortly.'
 
 export async function submitWaitlist(payload: WaitlistPayload) {
-  const response = await fetch(WAITLIST_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
-  const contentType = response.headers.get('content-type') ?? ''
-  const isJsonResponse = contentType.includes('application/json')
-
-  let responseBody: unknown = null
   try {
-    responseBody = isJsonResponse ? await response.json() : await response.text()
-  } catch (error) {
-    console.warn('[waitlist] failed to parse response', error)
-  }
-
-  if (!response.ok) {
-    const message = extractErrorMessage(responseBody) ?? FALLBACK_ERROR_MESSAGE
+    const response = await api.post<WaitlistSuccessResponse>('/waitlist/signup', payload)
+    
+    return {
+      ok: true,
+      ...response.data,
+      message: response.data?.message ?? FALLBACK_SUCCESS_MESSAGE,
+    }
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data?: unknown } }
+    const message = extractErrorMessage(axiosError.response?.data) ?? FALLBACK_ERROR_MESSAGE
     throw new Error(message)
-  }
-
-  const successBody =
-    typeof responseBody === 'object' && responseBody !== null
-      ? (responseBody as WaitlistSuccessResponse)
-      : null
-
-  return {
-    ok: true,
-    ...successBody,
-    message: successBody?.message ?? FALLBACK_SUCCESS_MESSAGE,
   }
 }
 
