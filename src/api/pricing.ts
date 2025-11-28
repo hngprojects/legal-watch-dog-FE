@@ -2,11 +2,11 @@ import { Briefcase01Icon, Building03Icon, Target01Icon } from '@hugeicons/core-f
 
 export const PRICINGS = [
   {
-    title: 'Free',
+    title: 'Essential',
     description: 'Best for individual consultants and small teams.',
     icon: Target01Icon,
-    price: 0,
-    yearly: 0,
+    price: 29,
+    yearly: 288,
     benefits: [
       '1 Projects',
       '2 Jurisdictions',
