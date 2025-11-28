@@ -157,11 +157,11 @@ onMounted(async () => {
         class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
       >
         <div>
-          <p class="text-sm tracking-wide text-[#9CA3AF] uppercase">Organization Workspace</p>
-          <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">Organizations</h1>
-          <p class="mt-1 text-sm text-gray-600">
+          <!-- <p class="text-sm tracking-wide text-[#9CA3AF] uppercase">Organization Workspace</p> -->
+          <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Organizations</h1>
+          <!-- <p class="mt-1 text-sm text-gray-600">
             Manage your organizations and dive into their projects.
-          </p>
+          </p> -->
         </div>
         <button @click="openCreateModal" class="btn--primary btn--with-icon">
           <svg
@@ -190,7 +190,7 @@ onMounted(async () => {
         </button>
       </div>
 
-      <div class="mb-8">
+      <div class="mb-8 hidden">
         <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
           <div class="mb-4 flex items-center justify-between">
             <div>
@@ -246,6 +246,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+  
 
       <div v-else-if="error" class="py-12 text-center">
         <p class="text-red-600">{{ error }}</p>
@@ -261,19 +262,22 @@ onMounted(async () => {
         <article
           v-for="org in organizations"
           :key="org.id"
-          class="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10"
+           @click="goToOrganization(org.id)"
+          class="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10 cursor-pointer"
         >
           <div class="p-8">
-            <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Organization</p>
+            <!-- <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Organization</p> -->
             <h3
-              class="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+              class="mb-2 text-xl font-bold text-[#1F1F1F] transition-colors group-hover:text-[#401903]"
             >
               {{ org.name }}
             </h3>
-            <p class="text-sm text-gray-600">{{ org.industry || 'Industry not specified' }}</p>
+            <p class="text-sm text-[#4B5563]">{{ org.industry || 'Industry not specified' }}</p>
+            <p class="text-sm text-[#4B5563] mt-6">Projects available: <span class="text-black">
+              {{ 0 }}</span></p>
           </div>
           <div
-            class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
+            class="hidden items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
           >
             <button
               @click="goToOrganization(org.id)"
