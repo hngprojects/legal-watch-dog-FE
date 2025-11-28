@@ -1,0 +1,22 @@
+import api from '@/lib/api'
+import type { Invitation } from '@/types/invitation'
+
+type ApiResponse<T> = {
+  status?: string
+  status_code?: number
+  message?: string
+  data?: T
+}
+
+type InvitationsPayload = {
+  invitations?: Invitation[]
+  data?: Invitation[]
+  // Some responses return the array directly
+  [key: string]: unknown
+}
+
+export const invitationService = {
+  listMyInvitations: () => api.get<ApiResponse<InvitationsPayload>>('/users/me/invitations'),
+  acceptInvitation: (token: string) =>
+    api.get<ApiResponse<{ message?: string }>>(`/auth/invitations/${token}/accept`),
+}

@@ -26,6 +26,7 @@ import OtpView from '@/views/authentication/OtpView.vue'
 import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
+import AcceptInviteView from '@/views/authentication/AcceptInviteView.vue'
 
 // Dashboard pages
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
@@ -88,9 +89,9 @@ const router = createRouter({
         { path: 'reset-password', name: 'reset-password', component: ResetPasswordView },
         { path: 'otp', name: 'otp', component: OtpView },
         { path: 'auth-status', name: 'auth-status', component: AuthStatusView, alias: '/success' },
+        { path: 'auth/accept-invite/:token', name: 'accept-invite', component: AcceptInviteView },
       ],
     },
-
     {
       path: '/dashboard',
       component: DashboardLayout,
@@ -106,62 +107,57 @@ const router = createRouter({
           name: 'organizations',
           component: OrganizationView,
           alias: '/organizations',
-          meta: { requiresAuth: true },
         },
         {
           path: 'profile',
           name: 'profile',
           component: () => import('@/views/dashboard/profile/ProfileView.vue'),
-          meta: { requiresAuth: true },
+        },
+        {
+          path: 'organizations/:organizationId',
+          name: 'organization-profile',
+          component: () => import('@/views/dashboard/OrganizationProfileView.vue'),
         },
         {
           path: 'organizations/:organizationId/projects',
           name: 'organization-projects',
           component: ProjectView,
-          meta: { requiresAuth: true },
         },
         {
           path: 'organizations/:organizationId/projects/:id',
           name: 'project-detail',
           component: () => import('@/views/dashboard/projects/Project.vue'),
-          meta: { requiresAuth: true },
         },
         {
           path: 'jurisdictions',
           name: 'jurisdictions',
           component: JurisdictionView,
           alias: '/jurisdictions',
-          meta: { requiresAuth: true },
         },
         {
           path: 'jurisdictions/:id',
           name: 'jurisdiction-detail',
           component: () => import('@/views/dashboard/jurisdictions/Jurisdiction.vue'),
-          meta: { requiresAuth: true },
         },
         {
           path: 'jurisdictions/:id/sources',
           name: 'jurisdiction-sources',
           component: () => import('@/views/dashboard/sources/Source.vue'),
-          meta: { requiresAuth: true },
         },
         {
           path: 'settings/billing',
           name: 'billing',
           component: () => import('@/views/dashboard/settings/BillingView.vue'),
-          meta: { requiresAuth: true },
         },
         {
           path: 'payment/plan',
           name: 'payment-plan',
           component: () => import('@/views/dashboard/payments/PlanView.vue'),
-          meta: { requiresAuth: true },
         },
         {
           path: 'payment/method/:plan',
           name: 'payment-method',
           component: () => import('@/views/dashboard/payments/PaymentMethodView.vue'),
-          meta: { requiresAuth: true },
         },
       ],
     },
@@ -175,6 +171,7 @@ const router = createRouter({
 
   scrollBehavior: () => ({ top: 0 }),
 })
+
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore()

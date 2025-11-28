@@ -37,3 +37,8 @@ export interface OrganizationErrorResponse {
     }
   }
 }
+
+export interface InviteMemberPayload {
+  invited_email: string
+  role_name: string
+}
