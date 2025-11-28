@@ -94,10 +94,10 @@ const sourceForm = ref<{
   is_active: true,
 })
 
-interface ScrapeResponseData {
-  summary?: string
-  payload?: unknown
-}
+// interface ScrapeResponseData {
+//   summary?: string
+//   payload?: unknown
+// }
 
 
 const sources = computed(() => sourceStore.sources)
@@ -105,7 +105,7 @@ const sourcesLoading = computed(() => sourceStore.loading)
 const sourcesError = computed(() => sourceStore.error)
 const editingSourceId = ref<string | null>(null)
 
-const scrapingState = ref<Record<string, boolean>>({})
+// const scrapingState = ref<Record<string, boolean>>({})
 const scrapeResults = ref<Record<string, StoredScrapeResult>>({})
 const scrapeErrors = ref<Record<string, string>>({})
 
@@ -138,11 +138,11 @@ const loadStoredScrapeResults = () => {
   scrapeResults.value = latest
 }
 
-const persistScrapeResult = (result: StoredScrapeResult) => {
-  const next = [result, ...storedScrapeResults.value]
-  storedScrapeResults.value = next
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-}
+// const persistScrapeResult = (result: StoredScrapeResult) => {
+//   const next = [result, ...storedScrapeResults.value]
+//   storedScrapeResults.value = next
+//   localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+// }
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
@@ -209,7 +209,7 @@ const startEditSource = (src: Source) => {
     url: src.url,
     source_type: src.source_type,
     scrape_frequency: src.scrape_frequency,
-    is_active: src.is_active ?? true, 
+    is_active: src.is_active ?? true,
   }
 }
 

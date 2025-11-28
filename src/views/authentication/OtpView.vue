@@ -50,7 +50,7 @@ const backRoute = computed(() =>
 const isPasswordResetFlow = computed(() => otpPurpose.value === 'password-reset')
 const backText = computed(() => (isPasswordResetFlow.value ? 'Back to login' : 'Back to sign up'))
 const isComplete = computed(() => otpDigits.value.join('').length === DIGIT_COUNT)
-const timerDuration = computed(() => (isPasswordResetFlow.value ? 0.3 * 60 : 0.2 * 60))
+const timerDuration = computed(() => (isPasswordResetFlow.value ? 5 * 60 : 5 * 60))
 
 const startTimer = (seconds?: number) => {
   timer.value = typeof seconds === 'number' ? seconds : timerDuration.value

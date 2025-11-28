@@ -43,6 +43,11 @@
     text-decoration: none;
   }
 }
+
+@utility container--wide {
+  @apply max-w-[1200px] w-full m-auto;
+}
+
 @utility text-preset-display-lg {
   @apply font-sans text-[48px] leading-[1.3] font-semibold tracking-normal;
 }
