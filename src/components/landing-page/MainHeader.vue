@@ -33,7 +33,7 @@ const logout = () => {
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
   { name: 'How it Works', to: { path: '/how-it-works' } },
-  { name: 'contact-us', to: { path: '/contact-us' } },
+  { name: 'Contact Us', to: { path: '/contact-us' } },
 ]
 
 // Handle body scroll lock for mobile menu
