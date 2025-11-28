@@ -103,7 +103,7 @@
           Copyright &copy; 2025 LegalWatchDog | All Rights Reserved
         </p>
 
-        <div class="flex space-x-4 text-lg text-[#5D2D18]">
+        <!-- <div class="flex space-x-4 text-lg text-[#5D2D18]">
           <a href="#" aria-label="Facebook" class="transition duration-150 hover:text-black">
             <img :src="Facebook" alt="facebook-icon" />
           </a>
@@ -119,7 +119,7 @@
           <a href="#" aria-label="YouTube" class="transition duration-150 hover:text-black">
             <img :src="YouTube" alt="YouTube-icon" />
           </a>
-        </div>
+        </div> -->
       </div>
     </div>
   </footer>
@@ -128,11 +128,11 @@
 <script setup lang="ts">
 import { TypographyText } from '../ui/typography'
 import Frame from '@/assets/images/Frame.png'
-import Facebook from '@/assets/images/Facebook.png'
-import Twitter from '@/assets/images/Twitter.png'
-import Instagram from '@/assets/images/Instagram.png'
-import LinkedIn from '@/assets/images/LinkedIn.png'
-import YouTube from '@/assets/images/YouTube.png'
+// import Facebook from '@/assets/images/Facebook.png'
+// import Twitter from '@/assets/images/Twitter.png'
+// import Instagram from '@/assets/images/Instagram.png'
+// import LinkedIn from '@/assets/images/LinkedIn.png'
+// import YouTube from '@/assets/images/YouTube.png'
 import { RouterLink } from 'vue-router'
 
 const products = [
