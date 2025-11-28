@@ -6,16 +6,20 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { submitWaitlist, type WaitlistPayload, type earlyAccessPayload } from '@/api/waitlist'
 import EmailIcon from '@/assets/icons/sms.svg'
+import UserIcon from '@/assets/icons/user.svg'
 import BellIcon from '@/assets/icons/bell2.svg'
 import BrainIcon from '@/assets/icons/brain.svg'
 import CheckedIcon from '@/assets/icons/checked.svg'
 import GlobeIcon from '@/assets/icons/globe.svg'
 import GlobeIcon2 from '@/assets/icons/globe2.svg'
-import BackLeft from '@/assets/Images/backleft.png'
-import BackRight from '@/assets/Images/backright.png'
+import Swal from 'sweetalert2'
+// import BackLeft from '@/assets/Images/backleft.png'
+// import BackRight from '@/assets/Images/backright.png'
+import earlyAccessBg from '@/assets/Images/earlyAccess-bg.png'
 
 // Top Waitlist Form
 const form = reactive<WaitlistPayload>({
+  organization_name: '',
   organization_email: '',
 })
 
@@ -27,6 +31,7 @@ const earlyAccessForm = reactive<earlyAccessPayload>({
 
 // Inline error states
 const formErrors = reactive({
+  organization_name: '',
   organization_email: '',
 })
 
@@ -36,37 +41,48 @@ const earlyAccessErrors = reactive({
 })
 
 const isSubmitting = ref(false)
-const feedback = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+
 
 const handleSubmit = async () => {
   if (isSubmitting.value) return
 
-  feedback.value = null
+  formErrors.organization_name = ''
   formErrors.organization_email = ''
+
+  if (!form.organization_name.trim()) {
+    formErrors.organization_name = 'Organization name is required'
+  }
 
   if (!form.organization_email.trim()) {
     formErrors.organization_email = 'Work email is required'
   }
 
-  if (formErrors.organization_email) return
+  if (formErrors.organization_name || formErrors.organization_email) return
 
   isSubmitting.value = true
 
   try {
     const response = await submitWaitlist({ ...form })
 
-    feedback.value = {
-      type: 'success',
-      message: response.message ?? 'You are on the waitlist!',
-    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: response.message ?? 'You are on the waitlist!',
+    })
 
+    form.organization_name = ''
     form.organization_email = ''
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Please try again shortly.'
-    feedback.value = {
-      type: 'error',
-      message: errorMessage,
-    }
+    // feedback.value = {
+    //   type: 'error',
+    //   message: errorMessage,
+    // }
+     Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: errorMessage,
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -75,7 +91,6 @@ const handleSubmit = async () => {
 const handleEarlyAccessSubmit = async () => {
   if (isSubmitting.value) return
 
-  feedback.value = null
   earlyAccessErrors.organization_name = ''
   earlyAccessErrors.organization_email = ''
 
@@ -94,19 +109,21 @@ const handleEarlyAccessSubmit = async () => {
   try {
     const response = await submitWaitlist({ ...earlyAccessForm })
 
-    feedback.value = {
-      type: 'success',
-      message: response.message ?? "You're on the waitlist!",
-    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: response.message ?? "You're on the waitlist!",
+    })
 
     earlyAccessForm.organization_name = ''
     earlyAccessForm.organization_email = ''
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unable to submit right now.'
-    feedback.value = {
-      type: 'error',
-      message: errorMessage,
-    }
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: errorMessage,
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -194,9 +211,9 @@ const testimonials = [
 </script>
 
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-[#FAFAFA]">
+  <div class="relative flex min-h-screen flex-col gap-35 overflow-hidden bg-[#FAFAFA]">
     <!-- Gradient Background -->
-    <div
+    <!-- <div
       class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
       style="
         background: radial-gradient(
@@ -207,14 +224,14 @@ const testimonials = [
           #fafafa 100%
         );
       "
-    ></div>
+    ></div> -->
 
     <!-- HERO SECTION -->
-    <section class="relative z-10 px-4 pt-20 pb-24 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-4xl text-center">
+    <section class="relative z-10 px-4 pt-12 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-5xl text-center">
         <Badge
           variant="secondary"
-          class="mb-8 inline-block rounded-full border border-gray-300 bg-white px-4 py-1.5 text-xs font-medium text-gray-700 shadow-sm"
+          class="mb-8 border-0 bg-white! px-6 py-3 text-sm font-semibold text-gray-600! shadow-sm"
         >
           Join the Waitlist
         </Badge>
@@ -224,24 +241,40 @@ const testimonials = [
           Without the Weekly Stress
         </h1>
 
-        <p class="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-[#6B7280] sm:text-lg">
+        <p class="mx-auto mb-12 max-w-3xl text-lg text-gray-600">
           LegalWatchDog tracks government updates, policy shifts, and regulatory changes for you.
           Get clear summaries, real-time alerts, and complete visibility across all your
           jurisdictions.
         </p>
 
         <!-- TOP FORM -->
-        <div class="mx-auto mb-2 flex max-w-[560px] flex-col items-center gap-3 sm:flex-row">
+         <div class="mx-auto mb-2 flex max-w-[496px] flex-col justify-center gap-3">
+          <!-- Name Input -->
+          <div class="relative w-full">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <img :src="UserIcon" class="h-5 w-5" alt="user" />
+            </div>
+            <Input
+              v-model="form.organization_name"
+              type="text"
+              placeholder="Enter Full Name"
+              class="h-12 w-full rounded-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
+            />
+            <p v-if="formErrors.organization_name" class="mt-1 text-left text-xs text-red-600">
+              {{ formErrors.organization_name }}
+            </p>
+          </div>
+
           <!-- Email Input -->
-          <div class="relative w-full sm:flex-1">
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+          <div class="relative w-full">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
               <img :src="EmailIcon" class="h-5 w-5" alt="email" />
             </div>
             <Input
               v-model="form.organization_email"
               type="email"
-              placeholder="Enter Email"
-              class="h-12 w-full rounded-lg border border-gray-300 bg-white px-4 pl-12 text-sm text-gray-900 placeholder-gray-500 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+              placeholder="Enter Organization Email"
+              class="h-12 w-full rounded-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
             />
             <p v-if="formErrors.organization_email" class="mt-1 text-left text-xs text-red-600">
               {{ formErrors.organization_email }}
@@ -252,21 +285,14 @@ const testimonials = [
           <Button
             @click="handleSubmit"
             :disabled="isSubmitting"
-            class="h-12 w-full rounded-lg bg-[#401903] px-6 text-sm font-medium whitespace-nowrap text-white hover:bg-[#2d1810] sm:w-auto"
+            class="flex h-full items-center gap-2 bg-[#3a1f14] px-6 py-3 whitespace-nowrap text-white hover:text-white hover:bg-[#2d1810]"
           >
             <span v-if="!isSubmitting">Join the Waitlist</span>
             <span v-else>Submitting...</span>
           </Button>
         </div>
 
-        <!-- Global feedback -->
-        <p
-          v-if="feedback"
-          class="mb-4 text-sm"
-          :class="feedback.type === 'success' ? 'text-green-600' : 'text-red-600'"
-        >
-          {{ feedback.message }}
-        </p>
+        
 
         <!-- Dashboard Mockup -->
         <div class="mx-auto mt-24 max-w-5xl">
@@ -292,10 +318,10 @@ const testimonials = [
     </section>
 
     <!-- FEATURES -->
-    <section class="relative z-10 bg-white px-4 py-20 sm:px-6 lg:px-8">
+    <section class="relative px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-6xl text-center">
         <h2 class="mb-4 text-4xl font-bold text-[#1F1F1F] sm:text-5xl">
-          Intelligent <span class="text-[#F59E0B]">Legal</span> Monitoring
+          Intelligent <span class="text-[#F2AB6D]">Legal</span> Monitoring
         </h2>
         <p class="mx-auto mb-16 max-w-2xl text-base text-[#6B7280]">
           Automated tracking, AI-powered analysis, and actionable insights for compliance
@@ -306,46 +332,54 @@ const testimonials = [
           <Card
             v-for="(feature, idx) in features"
             :key="idx"
-            class="rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:shadow-md"
+            class="rounded-2xl border-0 gap-6 bg-white px-6 pt-8 pb-11.5 text-left transition hover:shadow-md"
           >
+            <!-- <div
+              class="flex h-14 w-14 items-center justify-center rounded-full bg-[#FCEBD8] text-2xl text-white"
+            >
+              <img :src="feature.icon" alt="" />
+          </div> -->
             <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF3E2]">
               <img :src="feature.icon" alt="" class="h-6 w-6" />
             </div>
-            <h3 class="mb-2 text-lg font-bold text-[#1F1F1F]">{{ feature.title }}</h3>
-            <p class="text-sm leading-relaxed text-[#6B7280]">{{ feature.description }}</p>
+            <!-- <h3 class="mb-2 text-lg font-bold text-[#1F1F1F]">{{ feature.title }}</h3>
+            <p class="text-sm leading-relaxed text-[#6B7280]">{{ feature.description }}</p> -->
+             <div class="flex flex-col gap-2 text-left">
+              <h3 class="text-lg font-bold text-gray-900">{{ feature.title }}</h3>
+              <p class="text-sm text-gray-600">{{ feature.description }}</p>
+            </div>
           </Card>
         </div>
       </div>
     </section>
 
-    <!-- PROJECTS, RECENT UPDATES AND JURISDICTION -->
-    <section class="bg-[#FAFAFA] px-4 py-20 sm:px-6 lg:px-8">
+    <!-- PROJECTS, RECENT UPDATES AND JURISDICTION  -->
+    <section class="bg-[#FAFAFA] px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-6xl text-center">
         <h2 class="mb-4 text-4xl font-bold text-[#1F1F1F] sm:text-5xl">
-          Powerful <span class="text-[#F59E0B]">Dashboard,</span> Simple
-          <span class="text-[#F59E0B]">Interface</span>
+          Powerful <span class="text-[#F2AB6D]">Dashboard,</span> Simple
+          <span class="text-[#F2AB6D]">Interface</span>
         </h2>
         <p class="mx-auto mb-16 max-w-2xl text-base text-[#6B7280]">
           Everything you need to stay compliant in one clean, intuitive platform
         </p>
-
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <!-- Active Projects -->
-          <div class="rounded-2xl bg-white p-6 text-left shadow-sm transition hover:shadow-md">
+        <div class="grid grid-cols-1 gap-9 sm:grid-cols-2 lg:grid-cols-3">
+           <!-- Active Projects -->
+          <div class="rounded-md bg-white p-6 text-left shadow-sm transition hover:shadow-md">
             <div class="mb-6 flex items-center justify-between">
-              <h4 class="text-lg font-bold text-[#1F1F1F]">Active Projects</h4>
-              <p class="text-sm text-[#9CA3AF]">{{ activeProjects.length }} total</p>
+              <h4 class="text-lg font-bold">Active Projects</h4>
+              <p class="text-sm text-[#6a7282]">{{ activeProjects.length }} total</p>
             </div>
             <div class="flex flex-col gap-3">
               <div
                 v-for="(project, idx) in activeProjects"
                 :key="idx"
-                class="flex items-center justify-between rounded-lg bg-[#F9FAFB] p-4"
+                class="flex flex-row items-center justify-between rounded-md border-0 bg-[#F9FAFB] p-4 transition"
               >
                 <h3 class="text-sm font-medium text-[#1F1F1F]">{{ project.projects }}</h3>
                 <span
                   :class="getPriorityClasses(project.priority)"
-                  class="rounded-md px-2.5 py-1 text-xs font-medium"
+                  class="rounded-[4px] px-2 py-1 text-xs font-medium"
                 >
                   {{ project.priority }}
                 </span>
@@ -354,99 +388,106 @@ const testimonials = [
           </div>
 
           <!-- Recent Updates -->
-          <div class="rounded-2xl bg-white p-6 text-left shadow-sm transition hover:shadow-md">
+          <div class="rounded-md bg-white p-6 text-left shadow-sm transition hover:shadow-md">
             <div class="mb-6 flex items-center justify-between">
-              <h4 class="text-lg font-bold text-[#1F1F1F]">Recent Updates</h4>
-              <p class="text-sm text-[#9CA3AF]">Today</p>
+              <h4 class="text-lg font-bold">Recent Updates</h4>
+              <p class="text-sm text-[#6a7282]">Today</p>
             </div>
             <div class="flex flex-col gap-4">
-              <div
+              <Card
                 v-for="(update, idx) in recentUpdates"
                 :key="idx"
-                class="flex items-start justify-between border-b border-gray-100 pb-4 last:border-0"
+                class="flex flex-row items-start justify-between rounded-none border-b border-[#F3F4F6] bg-white p-3 shadow-none transition last-of-type:border-none"
               >
                 <div class="flex flex-col gap-1">
                   <h3 class="text-sm font-medium text-[#1F1F1F]">{{ update.update }}</h3>
                   <p class="text-xs text-[#9CA3AF]">{{ update.time }}</p>
                 </div>
-                <span class="text-sm font-bold text-[#F59E0B]">{{ update.value }}</span>
-              </div>
-            </div>
+                <span class="text-sm font-bold text-[#D4AF37]">
+                  {{ update.value }}
+                </span>
+              </Card>
+          </div>
           </div>
 
           <!-- Jurisdictions -->
-          <div class="rounded-2xl bg-white p-6 text-left shadow-sm transition hover:shadow-md">
+          <div class="rounded-md bg-white p-6 text-left shadow-sm transition hover:shadow-md">
             <div class="mb-6 flex items-center justify-between">
-              <h4 class="text-lg font-bold text-[#1F1F1F]">Jurisdictions</h4>
-              <p class="text-sm text-[#9CA3AF]">{{ jurisdictions.length }} tracked</p>
+              <h4 class="text-lg font-bold">Jurisdictions</h4>
+              <p class="text-sm text-[#6a7282]">{{ jurisdictions.length }} tracked</p>
             </div>
             <div class="flex flex-col gap-3">
-              <div
-                v-for="(jurisdiction, idx) in jurisdictions"
+              <Card
+                v-for="(jurisdiction, idx) in jurisdictions.slice(0, 4)"
                 :key="idx"
-                class="flex items-center justify-between rounded-lg bg-[#F9FAFB] p-4"
+                class="flex flex-row items-center justify-between rounded-md border-0 bg-[#F9FAFB] p-3 shadow-none transition"
               >
                 <div class="flex items-center gap-3">
-                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#F1A75F]">
-                    <img :src="GlobeIcon2" alt="globe" class="h-4 w-4" />
+                  <div class="flex h-7 w-7 items-center justify-center rounded-full bg-[#F1A75F]">
+                    <img :src="GlobeIcon2" alt="globe" />
                   </div>
-                  <h3 class="text-sm font-medium text-[#1F1F1F]">{{ jurisdiction.name }}</h3>
+                  <h3 class="text-sm font-medium text-[#364153]">{{ jurisdiction.name }}</h3>
                 </div>
-                <p class="text-xs text-[#9CA3AF]">{{ jurisdiction.sources }}</p>
-              </div>
+                <p class="text-sm text-gray-500">
+                  {{ jurisdiction.sources }}
+                </p>
+              </Card>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- FOOTER EARLY ACCESS -->
-    <section
-      class="relative z-10 overflow-hidden px-4 py-20 sm:px-6 lg:px-8"
-      style="background: #401903"
-    >
-      <!-- Background Images -->
-      <div
-        class="pointer-events-none absolute top-0 left-0 h-full w-1/2 bg-contain bg-left bg-no-repeat opacity-20"
-        :style="{ backgroundImage: `url(${BackLeft})` }"
-      ></div>
-      <div
-        class="pointer-events-none absolute top-0 right-0 h-full w-1/2 bg-contain bg-right bg-no-repeat opacity-20"
-        :style="{ backgroundImage: `url(${BackRight})` }"
-      ></div>
+    <section id="waitlist-form">
+      <!-- FOOTER EARLY ACCESS -->
+      <section
+        class="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8"
+        :style="{
+          backgroundImage: `url(${earlyAccessBg})`,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+        }"
+      >
+        <!-- <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-10 left-10 h-64 w-64 rounded-full border-4 border-white"></div>
+        <div class="absolute right-10 bottom-10 h-96 w-96 rounded-full border-4 border-white"></div>
+      </div> -->
 
-      <div class="relative z-10 mx-auto max-w-[1400px]">
-        <div class="mx-auto max-w-xl text-center">
-          <h2 class="mb-4 text-4xl font-bold text-white sm:text-5xl">Get Early Access</h2>
-          <p class="mb-10 text-base text-white/80">
-            Join legal and compliance professionals who are transforming how they monitor regulatory
-            changes
+        <div class="relative z-10 mx-auto max-w-xl text-center">
+          <h2 class="mb-4 text-3xl font-bold text-white sm:text-4xl">Get Early Access</h2>
+          <p class="mb-8 text-white/80">
+            Join legalg and compliance professionals who are transforming how they monitor
+            regulatory changes
           </p>
 
-          <Card class="rounded-2xl bg-white p-8 shadow-2xl">
-            <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Card class="rounded-xl bg-white p-6 shadow-xl">
+            <div class="mb-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <!-- Footer Name Input -->
-              <div class="text-left">
-                <label class="mb-2 block text-sm font-medium text-[#374151]"> Full Name </label>
+              <div>
+                <label class="mb-1 block text-left text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
                 <Input
                   v-model="earlyAccessForm.organization_name"
                   type="text"
                   placeholder="John Doe"
-                  class="h-12 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm"
+                  class="w-full rounded-md bg-transparent!"
                 />
-                <p v-if="earlyAccessErrors.organization_name" class="mt-1 text-xs text-red-600">
+               <p v-if="earlyAccessErrors.organization_name" class="mt-1 text-xs text-red-600">
                   {{ earlyAccessErrors.organization_name }}
                 </p>
               </div>
 
               <!-- Footer Email Input -->
-              <div class="text-left">
-                <label class="mb-2 block text-sm font-medium text-[#374151]"> Work Email </label>
+              <div>
+                <label class="mb-1 block text-left text-sm font-medium text-gray-700">
+                  Work Email
+                </label>
                 <Input
                   v-model="earlyAccessForm.organization_email"
                   type="email"
-                  placeholder="name@company.com"
-                  class="h-12 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm"
+                  placeholder="olivia@untitledui.com"
+                  class="w-full rounded-md bg-transparent!"
                 />
                 <p v-if="earlyAccessErrors.organization_email" class="mt-1 text-xs text-red-600">
                   {{ earlyAccessErrors.organization_email }}
@@ -454,34 +495,27 @@ const testimonials = [
               </div>
             </div>
 
+
             <!-- Footer Button -->
             <Button
               @click="handleEarlyAccessSubmit"
               :disabled="isSubmitting"
-              class="h-12 w-full rounded-lg bg-[#401903] text-sm font-medium text-white hover:bg-[#2d1810]"
+              class="flex w-full items-center justify-center gap-2 bg-[#3a1f14] px-6 py-3 text-white cursor-pointer"
             >
               <span v-if="!isSubmitting">Get Early Access →</span>
               <span v-else>Submitting...</span>
             </Button>
-
-            <p
-              v-if="feedback"
-              class="mt-4 text-sm"
-              :class="feedback.type === 'success' ? 'text-green-600' : 'text-red-600'"
-            >
-              {{ feedback.message }}
-            </p>
+            
 
             <p class="mt-4 text-xs text-[#9CA3AF]">
               We respect your privacy. No spam, unsubscribe anytime.
             </p>
           </Card>
         </div>
-      </div>
-    </section>
+      </section>
 
     <!-- TESTIMONIALS -->
-    <section class="bg-[#FFFBF0] px-4 py-20 sm:px-6 lg:px-8">
+    <section class="bg-[#F2AB6D] px-4 py-32 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-6xl text-center">
         <h2 class="mb-16 text-4xl font-bold text-[#1F1F1F] sm:text-5xl">
           Trusted by Compliance Professionals
@@ -517,6 +551,7 @@ const testimonials = [
           </Card>
         </div>
       </div>
+    </section>
     </section>
   </div>
 </template>
