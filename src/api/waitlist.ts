@@ -1,4 +1,5 @@
 export type WaitlistPayload = {
+  organization_name: string
   organization_email: string
 }
 export type earlyAccessPayload = {
