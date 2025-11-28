@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue'
+import { watch, ref } from 'vue'
 
 interface OrganizationOption {
   id: string
@@ -29,10 +29,6 @@ const formState = ref({
 })
 
 const localError = ref<string | null>(null)
-
-const showOrgSelect = computed(
-  () => props.organizations.length > 1 || !props.defaultOrganizationId || !props.organizations.length,
-)
 
 const resetState = () => {
   formState.value = {
@@ -67,11 +63,6 @@ const handleSubmit = () => {
     localError.value = 'Description is required'
     return
   }
-  if (!formState.value.organizationId) {
-    localError.value = 'Select an organization'
-    return
-  }
-
   emit('save', {
     title: formState.value.title.trim(),
     description: formState.value.description.trim(),
@@ -121,23 +112,6 @@ const handleSubmit = () => {
           </div>
 
           <form @submit.prevent="handleSubmit" class="space-y-5">
-            <div v-if="showOrgSelect">
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"> Organization </label>
-              <select
-                v-model="formState.organizationId"
-                required
-                class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              >
-                <option value="" disabled>Select organization</option>
-                <option v-for="org in organizations" :key="org.id" :value="org.id">
-                  {{ org.name }}
-                </option>
-              </select>
-              <p class="mt-1.5 text-xs text-[#717680]">
-                Choose which organization this project belongs to.
-              </p>
-            </div>
-
             <div>
               <label for="projName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
                 Project Name

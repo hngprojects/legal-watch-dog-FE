@@ -77,13 +77,23 @@ const handleCreateJurisdiction = async () => {
     return jurisdictionStore.setError('Description is required')
   }
 
-  const newJurisdiction = await jurisdictionStore.addJurisdiction(projectId, {
-    name: jurisdictionForm.value.name.trim(),
-    description: jurisdictionForm.value.description.trim(),
-  })
+  try {
+    const newJurisdiction = await jurisdictionStore.addJurisdiction(projectId, {
+      name: jurisdictionForm.value.name.trim(),
+      description: jurisdictionForm.value.description.trim(),
+    })
 
-  if (newJurisdiction) {
-    closeAddJurisdictionModal()
+    if (newJurisdiction) {
+      closeAddJurisdictionModal()
+      await Swal.fire('Created', 'Jurisdiction created successfully.', 'success')
+    }
+  } catch (error) {
+    void error
+    await Swal.fire(
+      'Create failed',
+      jurisdictionStore.error || 'Could not create jurisdiction',
+      'error',
+    )
   }
 }
 

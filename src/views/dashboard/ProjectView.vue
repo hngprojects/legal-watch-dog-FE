@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
+import Swal from 'sweetalert2'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -38,6 +39,7 @@ const organizationId = computed(() => {
   const id = route.params.organizationId
   return typeof id === 'string' ? id : ''
 })
+const hasOrganization = computed(() => Boolean(organizationId.value))
 const organizationName = computed(() => {
   const currentId = organizationId.value
   if (!currentId) return ''
@@ -94,26 +96,38 @@ const handleProjectSave = async (payload: {
   }
 
   if (projectModalMode.value === 'edit' && payload.projectId) {
-    await projectStore.updateProject(orgIdToUse, payload.projectId, {
-      title: payload.title,
-      description: payload.description,
-    })
-    closeProjectModal()
+    try {
+      await projectStore.updateProject(orgIdToUse, payload.projectId, {
+        title: payload.title,
+        description: payload.description,
+      })
+      await Swal.fire('Updated', 'Project updated successfully.', 'success')
+      closeProjectModal()
+    } catch (error) {
+      void error
+      await Swal.fire('Update failed', projectStore.error || 'Could not update project', 'error')
+    }
     return
   }
 
-  const newProject = await projectStore.addProject({
-    title: payload.title,
-    description: payload.description,
-    organization_id: orgIdToUse,
-  })
-
-  if (newProject) {
-    closeProjectModal()
-    router.push({
-      name: 'organization-projects',
-      params: { organizationId: orgIdToUse },
+  try {
+    const newProject = await projectStore.addProject({
+      title: payload.title,
+      description: payload.description,
+      organization_id: orgIdToUse,
     })
+
+    if (newProject) {
+      await Swal.fire('Created', 'Project created successfully.', 'success')
+      closeProjectModal()
+      router.push({
+        name: 'organization-projects',
+        params: { organizationId: orgIdToUse },
+      })
+    }
+  } catch (error) {
+    void error
+    await Swal.fire('Create failed', projectStore.error || 'Could not create project', 'error')
   }
 }
 
@@ -224,8 +238,17 @@ watch(
 
             <BreadcrumbSeparator />
 
-            <BreadcrumbItem>
-              <BreadcrumbPage>{{ organizationName || 'Organization' }}</BreadcrumbPage>
+            <BreadcrumbItem v-if="hasOrganization">
+              <BreadcrumbLink as-child>
+                <RouterLink
+                  :to="{ name: 'organization-profile', params: { organizationId } }"
+                >
+                  {{ organizationName || 'Organization' }}
+                </RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem v-else>
+              <BreadcrumbPage>Organization</BreadcrumbPage>
             </BreadcrumbItem>
 
             <BreadcrumbSeparator />
