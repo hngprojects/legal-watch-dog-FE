@@ -1,26 +1,52 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
-import { ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
-import { ArrowLeftIcon, ChevronRight, Plus, Settings } from 'lucide-vue-next'
-import vector from '@/assets/icons/Vector.png'
+import type { Jurisdiction } from '@/api/jurisdiction'
+import { ArrowLeftIcon, Plus, Settings } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 
 const route = useRoute()
 const router = useRouter()
 const projectStore = useProjectStore()
 const jurisdictionStore = useJurisdictionStore()
 const projectId = route.params.id as string
+const organizationId = computed(
+  () => (route.params.organizationId as string) || project.value?.org_id || '',
+)
 const project = ref<Project | null>(null)
 const loading = ref(true)
 const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
 const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
 
+const projectJurisdictions = computed<Jurisdiction[]>(() =>
+  jurisdictionStore.jurisdictions.filter((item) => item.project_id === projectId),
+)
+
+const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
+  projectJurisdictions.value.filter((item) => !item.parent_id),
+)
+
 const goBack = () => {
-  router.push('/dashboard/projects')
+  if (organizationId.value) {
+    router.push({
+      name: 'organization-projects',
+      params: { organizationId: organizationId.value },
+    })
+  } else {
+    router.push({ name: 'organizations' })
+  }
 }
 
 const openAddJurisdictionModal = () => {
@@ -56,7 +82,10 @@ const handleCreateJurisdiction = async () => {
 }
 
 const goToJurisdiction = (jurisdictionId: string) => {
-  router.push(`/dashboard/jurisdictions/${jurisdictionId}`)
+  router.push({
+    path: `/dashboard/jurisdictions/${jurisdictionId}`,
+    query: organizationId.value ? { organizationId: organizationId.value } : undefined,
+  })
 }
 
 onMounted(async () => {
@@ -65,7 +94,11 @@ onMounted(async () => {
   if (existingProject) {
     project.value = existingProject
   } else {
-    await projectStore.fetchProjects()
+    if (organizationId.value) {
+      await projectStore.fetchProjects(organizationId.value)
+    } else {
+      projectStore.setError('Organization context missing. Please navigate from Organizations.')
+    }
     const foundProject = projectStore.projects.find((p) => p.id === projectId)
     project.value = foundProject || null
   }
@@ -106,7 +139,12 @@ const deleteProject = async () => {
 
   if (!confirm.isConfirmed) return
 
-  await projectStore.deleteProject(projectId)
+  if (!organizationId.value) {
+    projectStore.setError('Organization context missing. Please navigate from Organizations.')
+    return
+  }
+
+  await projectStore.deleteProject(projectId, organizationId.value)
 
   await Swal.fire({
     title: 'Deleted!',
@@ -116,7 +154,11 @@ const deleteProject = async () => {
     showConfirmButton: false,
   })
 
-  router.push('/dashboard/projects')
+  if (organizationId.value) {
+    router.push({ name: 'organization-projects', params: { organizationId: organizationId.value } })
+  } else {
+    router.push({ name: 'organizations' })
+  }
 }
 
 const startEdit = () => {
@@ -132,7 +174,8 @@ const startEdit = () => {
 
 const saveEdit = async () => {
   try {
-    const updated = await projectStore.updateProject(projectId, {
+    const orgIdForUpdate = organizationId.value || project.value?.org_id || ''
+    const updated = await projectStore.updateProject(orgIdForUpdate, projectId, {
       title: editForm.value.title,
       description: editForm.value.description,
       master_prompt: editForm.value.master_prompt,
@@ -193,17 +236,36 @@ watch(
 
     <div v-else class="mx-auto max-w-7xl">
       <div class="mb-8 flex items-center justify-between">
-        <nav class="flex items-center gap-2 text-sm">
-          <button
-            @click="goBack"
-            class="flex cursor-pointer items-center gap-2 text-gray-500 transition-colors hover:text-gray-700"
-          >
-            <img :src="vector" alt="Arrow-icon" class="h-3" />
-            <span>Project</span>
-          </button>
-          <ChevronRight :size="18" />
-          <span class="font-medium text-[#C17A3F]">{{ project.title }}</span>
-        </nav>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink
+                  :to="{
+                    name: 'organization-projects',
+                    params: { organizationId: organizationId },
+                  }"
+                >
+                  Projects
+                </RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbPage>{{ project.title }}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         <div class="relative">
           <button
@@ -333,15 +395,16 @@ watch(
           </div>
 
           <div
-            v-else-if="jurisdictionStore.jurisdictions.length === 0"
+            v-else-if="projectJurisdictions.length === 0"
             class="flex flex-col items-center justify-center bg-white py-20"
           >
-            <p class="text-sm text-gray-500">No Jurisdiction found</p>
+            <p class="text-sm text-gray-500">No jurisdictions yet for this project.</p>
+            <p class="mt-2 text-xs text-gray-400">Add one to start monitoring changes.</p>
           </div>
 
           <div v-else class="space-y-3 p-6">
             <article
-              v-for="jurisdiction in jurisdictionStore.jurisdictions"
+              v-for="jurisdiction in topLevelJurisdictions"
               :key="jurisdiction.id"
               @click="goToJurisdiction(jurisdiction.id)"
               class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
@@ -354,7 +417,6 @@ watch(
               <p class="text-sm leading-relaxed text-gray-600">
                 {{ jurisdiction.description }}
               </p>
-              <!-- Creation time -->
               <p class="mt-2 text-xs text-gray-400">
                 {{ new Date(jurisdiction.created_at).toLocaleString() }}
               </p>

@@ -30,8 +30,8 @@ const bearerHeader = (token?: string | null) =>
   token ? { Authorization: `Bearer ${token}` } : undefined
 
 export const authService = {
-  registerOrganisation: (payload: RegisterPayload) =>
-    http.post<RegisterResponse>('/auth/register/', payload),
+  registerUser: (payload: RegisterPayload) =>
+    http.post<RegisterResponse>('/auth/register', payload),
 
   login: (payload: LoginPayload) => http.post<LoginResponse>('/auth/login', payload),
 
@@ -39,10 +39,10 @@ export const authService = {
     http.post<LogoutResponse>('/auth/logout', {}, { headers: bearerHeader(token) }),
 
   verifyOtp: (payload: VerifyOTPPayload) =>
-    http.post<VerifyOtpResponse>('/auth/verify-otp', payload),
+    http.post<VerifyOtpResponse>('/auth/otp/verification', payload),
 
   resendOtp: (payload: ResendOtpPayload) =>
-    http.post<ResendOtpResponse>('/auth/resend-otp', payload),
+    http.post<ResendOtpResponse>('/auth/otp/requests', payload),
 
   requestPasswordReset: (payload: PasswordResetRequestPayload) =>
     http.post<PasswordResetRequestResponse>('/auth/password-reset/request', payload),

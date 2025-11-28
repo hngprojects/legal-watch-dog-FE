@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import AuthLayout from '@/components/authentication/AuthLayout.vue'
@@ -10,7 +10,7 @@ import SocialLogins from '@/components/authentication/SocialLogins.vue'
 
 const authStore = useAuthStore()
 
-const companyName = ref('')
+const name = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
@@ -24,26 +24,6 @@ const isSubmitting = ref(false)
 const router = useRouter()
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const PUBLIC_EMAIL_DENYLIST = new Set([
-  // Todo: Add gmail
-  'yahoo.com',
-  'hotmail.com',
-  'outlook.com',
-  'aol.com',
-  'icloud.com',
-  'mail.com',
-  'protonmail.com',
-  'zoho.com',
-  'gmx.com',
-  'yandex.com',
-  'msn.com',
-  'live.com',
-  'ymail.com',
-  'inbox.com',
-  'me.com',
-  'fastmail.com',
-  'hushmail.com',
-])
 const hasUppercase = /[A-Z]/
 const hasLowercase = /[a-z]/
 const hasNumber = /[0-9]/
@@ -52,8 +32,19 @@ const MIN_PASSWORD_LENGTH = 8
 
 const sanitize = (value: string) => value.trim()
 
+const hydrateFromDraft = () => {
+  if (authStore.signupDraft) {
+    name.value = authStore.signupDraft.name
+    email.value = authStore.signupDraft.email
+    password.value = authStore.signupDraft.password
+    confirmPassword.value = authStore.signupDraft.confirmPassword
+  }
+}
+
+onMounted(hydrateFromDraft)
+
 const resetForm = () => {
-  companyName.value = ''
+  name.value = ''
   email.value = ''
   password.value = ''
   confirmPassword.value = ''
@@ -61,29 +52,23 @@ const resetForm = () => {
   showPassword.value = false
   showConfirmPassword.value = false
   errors.value = []
+  serverError.value = ''
 }
 
 const validateSignupForm = () => {
-  const sanitizedCompany = sanitize(companyName.value)
+  const sanitizedName = sanitize(name.value)
   const sanitizedEmail = sanitize(email.value).toLowerCase()
   const sanitizedPassword = sanitize(password.value)
   const sanitizedConfirm = sanitize(confirmPassword.value)
 
   const validationErrors: string[] = []
 
-  if (!sanitizedCompany) {
-    validationErrors.push('Company name is required.')
+  if (!sanitizedName) {
+    validationErrors.push('Name is required.')
   }
 
   if (!sanitizedEmail || !emailPattern.test(sanitizedEmail)) {
-    validationErrors.push('Enter a valid company email address.')
-  } else {
-    const domain = sanitizedEmail.split('@')[1] ?? ''
-    if (PUBLIC_EMAIL_DENYLIST.has(domain)) {
-      validationErrors.push(
-        'Use your company email address (public email domains are not allowed).',
-      )
-    }
+    validationErrors.push('Enter a valid work email address.')
   }
 
   if (!sanitizedPassword) {
@@ -116,33 +101,62 @@ const validateSignupForm = () => {
   return validationErrors.length === 0
 }
 
+const captureDraft = () => ({
+  name: name.value,
+  email: email.value,
+  password: password.value,
+  confirmPassword: confirmPassword.value,
+})
+
 const handleCreateAccount = async () => {
   if (!validateSignupForm()) return
   serverError.value = ''
   isSubmitting.value = true
+  authStore.setSignupDraft(captureDraft())
 
   const sanitizedEmail = sanitize(email.value).toLowerCase()
 
   try {
     const response = await authStore.register({
-      name: sanitize(companyName.value),
+      name: sanitize(name.value),
       email: sanitizedEmail,
       password: sanitize(password.value),
       confirm_password: sanitize(confirmPassword.value),
-      industry: 'Legal Services',
     })
 
-    if (response && response.status_code === 201) {
-      resetForm()
-      router.push({ name: 'otp' })
-    } else {
-      serverError.value = 'Registration successful but failed to receive OTP instructions.'
+    const statusCode = response?.status_code
+    if (typeof statusCode === 'number' && statusCode >= 400) {
+      serverError.value = response?.message ?? 'Unable to complete registration.'
+      return
     }
+
+    resetForm()
+    router.push({ name: 'otp', query: { flow: 'signup' } })
   } catch (error) {
     if (isAxiosError(error)) {
-      serverError.value =
-        (error.response?.data as { message?: string })?.message ??
-        'An error occurred while creating your account.'
+      const apiMessage = (error.response?.data as { message?: string })?.message
+      const isPendingOtp =
+        typeof apiMessage === 'string' &&
+        apiMessage.toLowerCase().includes('pending otp verification')
+
+      if (isPendingOtp) {
+        try {
+          authStore.setUserEmail(sanitizedEmail)
+          authStore.setOtpPurpose('signup')
+          await authStore.resendOTP(sanitizedEmail)
+          resetForm()
+          router.push({ name: 'otp' })
+          return
+        } catch (resendError) {
+          serverError.value =
+            (isAxiosError(resendError) &&
+              (resendError.response?.data as { message?: string })?.message) ||
+            'We could not resend your OTP. Please try again.'
+          return
+        }
+      }
+
+      serverError.value = apiMessage ?? 'An error occurred while creating your account.'
     } else {
       serverError.value = 'An unexpected error occurred. Please try again.'
     }
@@ -162,12 +176,6 @@ const handleCreateAccount = async () => {
       </template>
       <form @submit.prevent="handleCreateAccount" class="space-y-5">
         <div
-          v-if="serverError"
-          class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
-        >
-          {{ serverError }}
-        </div>
-        <div
           v-if="errors.length"
           class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
         >
@@ -177,18 +185,13 @@ const handleCreateAccount = async () => {
           </ul>
         </div>
 
-        <FormControl
-          v-model="companyName"
-          label="Company Name"
-          placeholder="Enter your company's name"
-          required
-        />
+        <FormControl v-model="name" label="Full Name" placeholder="Enter your full name" required />
 
         <FormControl
           v-model="email"
           type="email"
-          label="Company Email"
-          placeholder="Enter your company's email"
+          label="Work Email"
+          placeholder="Enter your work email"
           required
         />
 
@@ -323,6 +326,13 @@ const handleCreateAccount = async () => {
           <span v-if="!isSubmitting">Signup</span>
           <span v-else>Creating account...</span>
         </button>
+
+        <div
+          v-if="serverError"
+          class="rounded-md border border-red-200 bg-red-50/70 p-4 text-left text-sm text-red-700"
+        >
+          {{ serverError }}
+        </div>
 
         <div class="relative mt-9 py-2">
           <div class="absolute inset-0 flex items-center">

@@ -17,6 +17,7 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
   { name: 'How it Works', to: { path: '/how-it-works' } },
+  { name: 'contact-us', to: { path: '/contact-us' } },
   // { name: 'Features', to: { path: '/coming-soon' } },
 ]
 
@@ -96,7 +97,7 @@ onUnmounted(() => {
         <Button
           v-else
           :as="RouterLink"
-          :to="{ name: 'projects' }"
+          :to="{ name: 'organizations' }"
           variant="secondary"
           size="lg"
           class="hidden px-7 lg:inline-flex"
@@ -189,7 +190,7 @@ onUnmounted(() => {
           <template v-if="isAuthenticated">
             <Button
               :as="RouterLink"
-              :to="{ name: 'projects' }"
+              :to="{ name: 'organizations' }"
               class="w-full text-white"
               @click="closeMenu"
             >

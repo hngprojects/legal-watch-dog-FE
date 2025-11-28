@@ -4,7 +4,7 @@ export interface Project {
   id: string
   title: string
   description: string
-  master_prompt: string
+  master_prompt?: string | null
   org_id: string
   created_at: string
   updated_at: string
@@ -14,7 +14,8 @@ export interface Project {
 export interface CreateProjectPayload {
   title: string
   description: string
-  master_prompt: string
+  master_prompt?: string | null
+  organization_id: string
 }
 
 export interface ProjectErrorResponse {
@@ -25,8 +26,14 @@ export interface ProjectErrorResponse {
         msg: string
         type: string
       }[]
+      message?: string
     }
   }
 }
 
-export type UpdateProjectPayload = Partial<CreateProjectPayload>
+export interface UpdateProjectPayload {
+  title?: string
+  description?: string | null
+  master_prompt?: string | null
+  is_deleted?: boolean
+}

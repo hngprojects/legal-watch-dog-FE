@@ -56,7 +56,7 @@ import SkeletonBlock from '@/components/reusable/SkeletonBlock.vue'
           </div>
 
           <aside
-            class="space-y-6 rounded-[32px] bg-white p-6 shadow-[0_25px_80px_rgba(60,38,16,0.08)]"
+            class="space-y-6 rounded-4xl bg-white p-6 shadow-[0_25px_80px_rgba(60,38,16,0.08)]"
           >
             <SkeletonBlock class="h-12 w-48 rounded-full" />
             <div class="space-y-4">

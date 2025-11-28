@@ -3,10 +3,11 @@ import api from '@/lib/api'
 export interface Jurisdiction {
   id: string
   project_id: string
-  parent_id?: string | null
+  parent_id: string | null
   name: string
   description: string
   prompt?: string | null
+  sources?: string[]
   scrape_output?: Record<string, unknown> | null
   created_at: string
   updated_at: string | null
@@ -33,22 +34,47 @@ interface SingleJurisdictionResponse {
 }
 
 export const jurisdictionApi = {
-  getAll: (projectId?: string) =>
-    api.get<JurisdictionResponse>('/jurisdictions/', {
-      params: projectId ? { project_id: projectId } : undefined,
-    }),
+  getAll: (organizationId: string) =>
+    api.get<JurisdictionResponse>(`/organizations/${organizationId}/jurisdictions/`),
 
-  getOne: (jurisdictionId: string) =>
-    api.get<SingleJurisdictionResponse>(`/jurisdictions/${jurisdictionId}`),
+  getByProject: (organizationId: string, projectId: string) =>
+    api.get<JurisdictionResponse>(
+      `/organizations/${organizationId}/jurisdictions/project/${projectId}`,
+    ),
 
-  create: (data: { project_id: string; name: string; description: string; prompt?: string }) =>
-    api.post<SingleJurisdictionResponse>('/jurisdictions/', data),
+  getOne: (organizationId: string, jurisdictionId: string) =>
+    api.get<SingleJurisdictionResponse>(
+      `/organizations/${organizationId}/jurisdictions/${jurisdictionId}`,
+    ),
 
-  update: (jurisdictionId: string, data: Partial<Jurisdiction>) =>
-    api.patch<SingleJurisdictionResponse>(`/jurisdictions/${jurisdictionId}`, data),
+  create: (
+    organizationId: string,
+    data: {
+      project_id: string
+      name: string
+      description: string
+      prompt?: string | null
+      parent_id?: string | null
+      scrape_output?: Record<string, unknown> | null
+    },
+  ) =>
+    api.post<SingleJurisdictionResponse>(`/organizations/${organizationId}/jurisdictions/`, data),
 
-  delete: (jurisdictionId: string) => api.delete(`/jurisdictions/${jurisdictionId}`),
+  update: (organizationId: string, jurisdictionId: string, data: Partial<Jurisdiction>) =>
+    api.patch<SingleJurisdictionResponse>(
+      `/organizations/${organizationId}/jurisdictions/${jurisdictionId}`,
+      data,
+    ),
 
-  restore: (jurisdictionId: string) =>
-    api.post(`/jurisdictions/jurisdictions/${jurisdictionId}/restoration`),
+  delete: (organizationId: string, jurisdictionId: string) =>
+    api.delete(`/organizations/${organizationId}/jurisdictions/${jurisdictionId}`),
+
+  restore: (organizationId: string, jurisdictionId: string) =>
+    api.post(`/organizations/${organizationId}/jurisdictions/${jurisdictionId}/restoration`),
+
+  deleteByProject: (organizationId: string, projectId: string) =>
+    api.delete(`/organizations/${organizationId}/jurisdictions/project/${projectId}/`),
+
+  restoreByProject: (organizationId: string, projectId: string) =>
+    api.post(`/organizations/${organizationId}/jurisdictions/project/${projectId}/restoration`),
 }
