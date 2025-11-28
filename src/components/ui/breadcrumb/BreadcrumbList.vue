@@ -12,7 +12,7 @@ const props = defineProps<{
     data-slot="breadcrumb-list"
     :class="
       cn(
-        'flex flex-wrap items-center gap-1.5 text-sm break-words text-neutral-500 sm:gap-2.5 dark:text-neutral-400',
+        'flex flex-wrap items-center gap-1.5 text-sm break-words text-[#3a1c0b] sm:gap-2.5',
         props.class,
       )
     "

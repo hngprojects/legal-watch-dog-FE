@@ -13,6 +13,29 @@ interface State {
   error: string | null
 }
 
+const resolveProjects = (payload: unknown): Project[] => {
+  if (!payload || typeof payload !== 'object') return []
+  const dataObj = payload as { projects?: unknown; data?: unknown }
+  if (Array.isArray(dataObj.projects)) return dataObj.projects as Project[]
+  if (dataObj.data && typeof dataObj.data === 'object') {
+    const nested = dataObj.data as { projects?: unknown }
+    if (Array.isArray(nested.projects)) return nested.projects as Project[]
+  }
+  return []
+}
+
+const resolveProject = (payload: unknown): Project | null => {
+  if (!payload || typeof payload !== 'object') return null
+  const dataObj = payload as { project?: unknown; data?: unknown }
+  if (dataObj.project && typeof dataObj.project === 'object') return dataObj.project as Project
+  if (dataObj.data && typeof dataObj.data === 'object') {
+    const nested = dataObj.data as { project?: unknown }
+    if (nested.project && typeof nested.project === 'object') return nested.project as Project
+    if ((dataObj.data as Project).id) return dataObj.data as Project
+  }
+  return null
+}
+
 export const useProjectStore = defineStore('projects', {
   state: (): State => ({
     projects: [],
@@ -34,18 +57,13 @@ export const useProjectStore = defineStore('projects', {
       this.setError(null)
       try {
         const { data } = await projectService.listProjects(organizationId, params)
-        const payload = (data as any)?.data || {}
-        this.projects = payload.projects || []
+        this.projects = resolveProjects(data.data)
       } catch (error) {
         const err = error as ProjectErrorResponse
         if (!err.response) {
           this.setError('Network error: Unable to reach server')
         } else {
-          this.setError(
-            (err.response.data as any)?.message ||
-              (err.response.data as any)?.detail?.[0]?.msg ||
-              'Failed to load projects',
-          )
+          this.setError(err.response.data?.message || err.response.data?.detail?.[0]?.msg || 'Failed to load projects')
         }
       } finally {
         this.loading = false
@@ -60,8 +78,7 @@ export const useProjectStore = defineStore('projects', {
       }
       try {
         const { data } = await projectService.createProject(payload.organization_id, payload)
-        const newProject =
-          (data as any)?.data?.project || (data as any)?.data || (data as any)?.project
+        const newProject = resolveProject(data)
         if (!newProject) {
           this.setError('Failed to create project')
           return null
@@ -73,11 +90,7 @@ export const useProjectStore = defineStore('projects', {
         if (!err.response) {
           this.setError('Network error: Unable to reach server')
         } else {
-          this.setError(
-            (err.response.data as any)?.message ||
-              (err.response.data as any)?.detail?.[0]?.msg ||
-              'Failed to create project',
-          )
+          this.setError(err.response.data?.message || err.response.data?.detail?.[0]?.msg || 'Failed to create project')
         }
         return null
       }
@@ -92,11 +105,7 @@ export const useProjectStore = defineStore('projects', {
         if (!err.response) {
           this.setError('Network error: Unable to reach server')
         } else {
-          this.setError(
-            (err.response.data as any)?.message ||
-              (err.response.data as any)?.detail?.[0]?.msg ||
-              'Failed to delete project',
-          )
+          this.setError(err.response.data?.message || err.response.data?.detail?.[0]?.msg || 'Failed to delete project')
         }
         throw error
       }
@@ -121,8 +130,26 @@ export const useProjectStore = defineStore('projects', {
         }
 
         const { data } = await projectService.updateProject(resolvedOrgId, projectId, payload)
+        const existing = this.projects.find((p) => p.id === projectId)
+        const baseProject: Project = existing || {
+          id: projectId,
+          title: payload.title ?? '',
+          description: payload.description ?? '',
+          master_prompt: payload.master_prompt ?? null,
+          org_id: resolvedOrgId,
+          created_at: '',
+          updated_at: '',
+          assigned_users: [],
+        }
+
         const updatedProject: Project =
-          (data as any)?.data?.project || (data as any)?.data || (data as any)?.project
+          resolveProject(data) || {
+            ...baseProject,
+            title: payload.title ?? baseProject.title,
+            description: payload.description ?? baseProject.description,
+            master_prompt: payload.master_prompt ?? baseProject.master_prompt ?? null,
+            org_id: resolvedOrgId,
+          }
 
         const index = this.projects.findIndex((p) => p.id === projectId)
         if (index !== -1) {
@@ -135,11 +162,7 @@ export const useProjectStore = defineStore('projects', {
         if (!err.response) {
           this.setError('Network error: Unable to reach server')
         } else {
-          this.setError(
-            (err.response.data as any)?.message ||
-              (err.response.data as any)?.detail?.[0]?.msg ||
-              'Failed to update project',
-          )
+          this.setError(err.response.data?.message || err.response.data?.detail?.[0]?.msg || 'Failed to update project')
         }
         throw error
       }

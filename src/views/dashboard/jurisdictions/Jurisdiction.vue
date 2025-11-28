@@ -44,10 +44,24 @@ interface NestedJurisdiction extends Jurisdiction {
 
 const route = useRoute()
 const router = useRouter()
+
 const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
 const orgStore = useOrganizationStore()
 const sourceStore = useSourceStore()
+
+
+const activeOrganizationId = computed<string>(() => {
+  if (typeof route.query.organizationId === 'string') return route.query.organizationId
+  return orgStore.currentOrganizationId || ''
+})
+
+const organizationName = computed(() => {
+  if (!activeOrganizationId.value) return ''
+  return orgStore.organizations.find(
+    (org) => org.id === activeOrganizationId.value
+  )?.name || ''
+})
 
 const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
@@ -60,11 +74,6 @@ const showInlineEdit = ref(false)
 
 const subJurisdictionModalOpen = ref(false)
 const addSourceModalOpen = ref(false)
-
-const activeOrganizationId = computed<string>(() => {
-  if (typeof route.query.organizationId === 'string') return route.query.organizationId
-  return orgStore.currentOrganizationId || ''
-})
 
 const editForm = ref({ name: '', description: '', prompt: '' })
 const subJurisdictionForm = ref({ name: '', description: '', prompt: '' })
@@ -452,6 +461,16 @@ onMounted(() => {
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
                 <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator />
+
+            <BreadcrumbItem>
+              <BreadcrumbLink as-child>
+                <RouterLink :to="{ name: 'organization-projects', params: { organizationId: activeOrganizationId } }">
+                  {{ organizationName || 'Organization' }}
+                </RouterLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
 

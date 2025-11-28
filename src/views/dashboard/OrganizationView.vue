@@ -6,9 +6,12 @@ import Swal from 'sweetalert2'
 import { Input } from '@/components/ui/input'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useInvitationStore } from '@/stores/invitation-store'
 
 const organizationStore = useOrganizationStore()
 const { organizations, loading, error } = storeToRefs(organizationStore)
+const invitationStore = useInvitationStore()
+const { invitations, loading: inviteLoading, error: inviteError } = storeToRefs(invitationStore)
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -17,12 +20,16 @@ const formData = ref({
   name: '',
   industry: '',
 })
+// inviteOrgNames kept for potential future use but not populated here
+// const inviteOrgNames = ref<Record<string, string>>({})
 
 const ensureUserId = async () => {
   if (authStore.user?.id) return authStore.user.id
   const loadedUser = await authStore.loadCurrentUser()
   return loadedUser?.id
 }
+
+const organizationName = () => 'Organization Invitation'
 
 const openCreateModal = () => {
   showCreateModal.value = true
@@ -62,8 +69,27 @@ const handleCreateOrganization = async () => {
   }
 }
 
-const goToProjects = (organizationId: string) => {
-  router.push({ name: 'organization-projects', params: { organizationId } })
+const goToOrganization = (organizationId: string) => {
+  router.push({ name: 'organization-profile', params: { organizationId } })
+}
+
+const refreshInvitations = async () => {
+  await invitationStore.fetchMyInvitations()
+}
+
+const acceptInvite = async (token: string) => {
+  try {
+    const result = await invitationStore.acceptInvitation(token)
+    await Swal.fire('Invitation Accepted', result, 'success')
+    const userId = await ensureUserId()
+    if (userId) {
+      await organizationStore.fetchOrganizations(userId)
+    }
+    await refreshInvitations()
+  } catch (err) {
+    void err
+    await Swal.fire('Could not accept invitation', invitationStore.error || 'Something went wrong', 'error')
+  }
 }
 
 onMounted(async () => {
@@ -72,7 +98,8 @@ onMounted(async () => {
     organizationStore.setError('User information missing. Please re-login.')
     return
   }
-  organizationStore.fetchOrganizations(userId)
+  await organizationStore.fetchOrganizations(userId)
+  await refreshInvitations()
 })
 </script>
 
@@ -89,7 +116,7 @@ onMounted(async () => {
         />
         Projects and jurisdictions are scoped within organizations.
       </p>
-      <button @click="openCreateModal" class="btn btn--primary">
+      <button @click="openCreateModal" class="btn--primary btn--with-icon">
         <svg
           width="20"
           height="20"
@@ -127,7 +154,7 @@ onMounted(async () => {
             Manage your organizations and dive into their projects.
           </p>
         </div>
-        <button @click="openCreateModal" class="btn btn--primary flex items-center gap-1">
+        <button @click="openCreateModal" class="btn--primary btn--with-icon">
           <svg
             width="20"
             height="20"
@@ -152,6 +179,53 @@ onMounted(async () => {
           </svg>
           Create Organization
         </button>
+      </div>
+
+      <div class="mb-8">
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Invitations</p>
+              <p class="text-sm text-gray-600">Organizations you have been invited to join.</p>
+            </div>
+            <button
+              @click="refreshInvitations"
+              class="btn--link"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <div v-if="inviteLoading" class="space-y-3">
+            <div v-for="n in 3" :key="n" class="h-12 animate-pulse rounded-lg bg-gray-100"></div>
+          </div>
+          <div v-else-if="inviteError" class="text-sm text-red-600">
+            {{ inviteError }}
+          </div>
+          <div v-else-if="!invitations.length" class="text-sm text-gray-600">
+            No pending invitations.
+          </div>
+          <div v-else class="space-y-3">
+            <article
+              v-for="invite in invitations"
+              :key="invite.token"
+              class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+            >
+              <div>
+                <p class="text-sm font-semibold text-gray-900">
+                  {{ invite.organization_name || organizationName() }}
+                </p>
+                <p class="text-xs text-gray-500">Role: {{ invite.role_name || invite.role || 'Member' }}</p>
+              </div>
+              <button
+                @click="acceptInvite(invite.token)"
+                class="btn--primary"
+              >
+                Accept
+              </button>
+            </article>
+          </div>
+        </div>
       </div>
 
       <div v-if="loading" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,8 +266,11 @@ onMounted(async () => {
           <div
             class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
           >
-            <button @click="goToProjects(org.id)" class="btn btn--primary flex items-center gap-1">
-              View Projects
+            <button
+              @click="goToOrganization(org.id)"
+              class="btn btn--primary flex items-center gap-1"
+            >
+              View Organization
               <svg
                 class="h-4 w-4"
                 viewBox="0 0 24 24"
