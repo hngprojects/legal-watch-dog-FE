@@ -6,7 +6,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings } from 'lucide-vue-next'
+import { ArrowLeftIcon, Plus, Settings, ChevronDown, X } from 'lucide-vue-next' // Added ChevronDown, X
 import checkmark from '@/assets/Images/checkmark.png'
 import Swal from 'sweetalert2'
 import {
@@ -36,6 +36,32 @@ const loading = ref(true)
 const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
 const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
+const selected = ref('AI')
+
+// --- NEW MODAL STATE & LOGIC START ---
+const showHireSpecialistModal = ref(false)
+const hireForm = ref({
+  companyName: 'Untitled UI',
+  companyEmail: 'olivia@untitledui.com',
+  industry: 'Immigration & Global Mobility',
+  description: 'Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states',
+})
+
+const openHireSpecialistModal = () => {
+  showHireSpecialistModal.value = true
+}
+
+const closeHireSpecialistModal = () => {
+  showHireSpecialistModal.value = false
+}
+
+const submitHireForm = async () => {
+  closeHireSpecialistModal()
+  await Swal.fire('Request Submitted', 'Your specialist request is being reviewed.', 'success')
+  // In a real application, you would emit an event or call an API here
+  // emit('submit', hireForm.value)
+}
+// --- NEW MODAL STATE & LOGIC END ---
 
 const projectJurisdictions = computed<Jurisdiction[]>(() =>
   jurisdictionStore.jurisdictions.filter((item) => item.project_id === projectId),
@@ -232,7 +258,6 @@ watch(
   },
   { deep: true },
 )
-const selected = ref('AI')
 </script>
 
 <template>
@@ -336,6 +361,7 @@ const selected = ref('AI')
 
         <!-- RIGHT BUTTON -->
         <button
+          @click="openHireSpecialistModal"
           class="h-[40px] w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-[44px] sm:w-auto sm:px-6 sm:text-[15px]"
         >
           Hire a Specialist
@@ -490,6 +516,7 @@ const selected = ref('AI')
       </div>
     </div>
 
+    <!-- Existing Add Jurisdiction Modal -->
     <teleport to="body">
       <div
         v-if="showAddJurisdictionModal"
@@ -574,6 +601,131 @@ const selected = ref('AI')
                   class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
                 >
                   Create Jurisdiction
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </teleport>
+
+    <teleport to="body">
+      <div
+        v-if="showHireSpecialistModal"
+        class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity ease-out duration-300"
+        @click.self="closeHireSpecialistModal"
+      >
+        <!-- Modal Content Container -->
+        <div
+          class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full relative transform transition-all ease-out duration-300 sm:scale-100 mobile:scale-95"
+          :class="{
+            'opacity-100 scale-100': showHireSpecialistModal,
+            'opacity-0 scale-95': !showHireSpecialistModal,
+          }"
+        >
+          <!-- Close Button -->
+          <button
+            @click="closeHireSpecialistModal"
+            class="absolute top-6 right-6 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+            aria-label="Close modal"
+          >
+            <X :size="18" />
+          </button>
+
+          <div class="p-6 sm:p-10">
+            <!-- Header -->
+            <div class="mb-8">
+              <!-- Using native elements with classes to mock <TypographyHeading /> -->
+              <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Hire a Specialist</h2>
+              <!-- Using native elements with classes to mock <TypographyText /> -->
+              <p class="text-sm text-gray-600 mt-2 max-w-lg">
+                Monitor changes to EU travel rules, visa requirements, entry conditions, and policy
+                updates across all Schengen and EU member states
+              </p>
+            </div>
+
+            <!-- Form -->
+            <form @submit.prevent="submitHireForm" class="space-y-6">
+              <!-- Company Name -->
+              <div>
+                <label for="companyName" class="mb-2 block text-sm font-semibold text-gray-900">
+                  Company Name
+                </label>
+                <input
+                  v-model="hireForm.companyName"
+                  id="companyName"
+                  type="text"
+                  required
+                  class="w-full border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 transition-colors bg-[#F1F5F9]"
+                />
+              </div>
+
+              <!-- Company Email Address -->
+              <div>
+                <label for="companyEmail" class="mb-2 block text-sm font-semibold text-gray-900">
+                  Company Email Address
+                </label>
+                <input
+                  v-model="hireForm.companyEmail"
+                  id="companyEmail"
+                  type="email"
+                  required
+                  class="w-full border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 transition-colors"
+                />
+              </div>
+
+              <!-- Industry Dropdown -->
+              <div>
+                <label for="industry" class="mb-2 block text-sm font-semibold text-gray-900">
+                  Industry
+                </label>
+                <div class="relative">
+                  <select
+                    v-model="hireForm.industry"
+                    id="industry"
+                    class="w-full appearance-none border border-blue-500 bg-white rounded-xl px-4 py-3 text-sm text-gray-900 focus:ring-0 focus:border-blue-700 cursor-pointer transition-colors"
+                  >
+                    <option value="Immigration & Global Mobility">
+                      Immigration & Global Mobility
+                    </option>
+                    <option value="Finance">Finance</option>
+                    <option value="Healthcare">Healthcare</option>
+                  </select>
+                  <ChevronDown
+                    :size="16"
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+                  />
+                </div>
+              </div>
+
+              <!-- Brief Description -->
+              <div>
+                <label for="description" class="mb-2 block text-sm font-semibold text-gray-900">
+                  Brief Description
+                </label>
+                <textarea
+                  v-model="hireForm.description"
+                  id="description"
+                  rows="3"
+                  required
+                  class="w-full h-24 border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 resize-none transition-colors"
+                />
+              </div>
+
+              <!-- Form Actions -->
+              <div class="flex justify-end gap-2 pt-4">
+                <button
+                  type="button"
+                  @click="closeHireSpecialistModal"
+                  class="px-6 py-3 rounded-xl font-semibold border border-gray-300 text-gray-600 transition-colors hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="px-6 py-3 rounded-xl font-semibold bg-[#5D2D18] text-white transition-colors hover:bg-[#401903]"
+                >
+                  Hire Specialist
                 </button>
               </div>
             </form>
