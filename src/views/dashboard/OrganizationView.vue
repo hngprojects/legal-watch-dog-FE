@@ -4,11 +4,22 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
+import { useInvitationStore } from '@/stores/invitation-store'
+import illustrationImg from '@/assets/Images/dashboardillustration.png'
 
 const organizationStore = useOrganizationStore()
 const { organizations, loading, error } = storeToRefs(organizationStore)
+const invitationStore = useInvitationStore()
+const { invitations, loading: inviteLoading, error: inviteError } = storeToRefs(invitationStore)
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -17,12 +28,16 @@ const formData = ref({
   name: '',
   industry: '',
 })
+// inviteOrgNames kept for potential future use but not populated here
+// const inviteOrgNames = ref<Record<string, string>>({})
 
 const ensureUserId = async () => {
   if (authStore.user?.id) return authStore.user.id
   const loadedUser = await authStore.loadCurrentUser()
   return loadedUser?.id
 }
+
+const organizationName = () => 'Organization Invitation'
 
 const openCreateModal = () => {
   showCreateModal.value = true
@@ -62,8 +77,27 @@ const handleCreateOrganization = async () => {
   }
 }
 
-const goToProjects = (organizationId: string) => {
-  router.push({ name: 'organization-projects', params: { organizationId } })
+const goToOrganization = (organizationId: string) => {
+  router.push({ name: 'organization-profile', params: { organizationId } })
+}
+
+const refreshInvitations = async () => {
+  await invitationStore.fetchMyInvitations()
+}
+
+const acceptInvite = async (token: string) => {
+  try {
+    const result = await invitationStore.acceptInvitation(token)
+    await Swal.fire('Invitation Accepted', result, 'success')
+    const userId = await ensureUserId()
+    if (userId) {
+      await organizationStore.fetchOrganizations(userId)
+    }
+    await refreshInvitations()
+  } catch (err) {
+    void err
+    await Swal.fire('Could not accept invitation', invitationStore.error || 'Something went wrong', 'error')
+  }
 }
 
 onMounted(async () => {
@@ -72,16 +106,18 @@ onMounted(async () => {
     organizationStore.setError('User information missing. Please re-login.')
     return
   }
-  organizationStore.fetchOrganizations(userId)
+  await organizationStore.fetchOrganizations(userId)
+  await refreshInvitations()
 })
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-gray-50 p-6 lg:p-10">
+  <main class="min-h-screen flex-1 bg-gray-50 ">
     <div
       v-if="!loading && organizations.length === 0 && !error"
-      class="mx-auto max-w-4xl py-16 text-center lg:py-24"
+      class="mx-auto max-w-4xl py-16 text-center lg:py-24 flex flex-col items-center justify-center"
     >
+    <img :src="illustrationImg" alt="" srcset="">
       <h1 class="mb-4 text-3xl font-bold text-gray-900 lg:text-4xl">No Organization Yet</h1>
       <p class="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-gray-600">
         Create an organization to start grouping projects and jurisdictions.<br
@@ -89,7 +125,7 @@ onMounted(async () => {
         />
         Projects and jurisdictions are scoped within organizations.
       </p>
-      <button @click="openCreateModal" class="btn btn--primary">
+      <button @click="openCreateModal" class="btn--primary btn--with-icon">
         <svg
           width="20"
           height="20"
@@ -121,13 +157,13 @@ onMounted(async () => {
         class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
       >
         <div>
-          <p class="text-sm tracking-wide text-[#9CA3AF] uppercase">Organization Workspace</p>
-          <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">Organizations</h1>
-          <p class="mt-1 text-sm text-gray-600">
+          <!-- <p class="text-sm tracking-wide text-[#9CA3AF] uppercase">Organization Workspace</p> -->
+          <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Organizations</h1>
+          <!-- <p class="mt-1 text-sm text-gray-600">
             Manage your organizations and dive into their projects.
-          </p>
+          </p> -->
         </div>
-        <button @click="openCreateModal" class="btn btn--primary flex items-center gap-1">
+        <button @click="openCreateModal" class="btn--primary btn--with-icon">
           <svg
             width="20"
             height="20"
@@ -154,6 +190,53 @@ onMounted(async () => {
         </button>
       </div>
 
+      <div class="mb-8 hidden">
+        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Invitations</p>
+              <p class="text-sm text-gray-600">Organizations you have been invited to join.</p>
+            </div>
+            <button
+              @click="refreshInvitations"
+              class="btn--link"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <div v-if="inviteLoading" class="space-y-3">
+            <div v-for="n in 3" :key="n" class="h-12 animate-pulse rounded-lg bg-gray-100"></div>
+          </div>
+          <div v-else-if="inviteError" class="text-sm text-red-600">
+            {{ inviteError }}
+          </div>
+          <div v-else-if="!invitations.length" class="text-sm text-gray-600">
+            No pending invitations.
+          </div>
+          <div v-else class="space-y-3">
+            <article
+              v-for="invite in invitations"
+              :key="invite.token"
+              class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+            >
+              <div>
+                <p class="text-sm font-semibold text-gray-900">
+                  {{ invite.organization_name || organizationName() }}
+                </p>
+                <p class="text-xs text-gray-500">Role: {{ invite.role_name || invite.role || 'Member' }}</p>
+              </div>
+              <button
+                @click="acceptInvite(invite.token)"
+                class="btn--primary"
+              >
+                Accept
+              </button>
+            </article>
+          </div>
+        </div>
+      </div>
+
       <div v-if="loading" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <div v-for="n in 6" :key="n" class="animate-pulse rounded-2xl bg-white p-8 shadow-sm">
           <div class="mb-4 h-6 w-3/4 rounded bg-gray-200"></div>
@@ -163,6 +246,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+  
 
       <div v-else-if="error" class="py-12 text-center">
         <p class="text-red-600">{{ error }}</p>
@@ -178,22 +262,28 @@ onMounted(async () => {
         <article
           v-for="org in organizations"
           :key="org.id"
-          class="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10"
+           @click="goToOrganization(org.id)"
+          class="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10 cursor-pointer"
         >
           <div class="p-8">
-            <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Organization</p>
+            <!-- <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Organization</p> -->
             <h3
-              class="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+              class="mb-2 text-xl font-bold text-[#1F1F1F] transition-colors group-hover:text-[#401903]"
             >
               {{ org.name }}
             </h3>
-            <p class="text-sm text-gray-600">{{ org.industry || 'Industry not specified' }}</p>
+            <p class="text-sm text-[#4B5563]">{{ org.industry || 'Industry not specified' }}</p>
+            <p class="text-sm text-[#4B5563] mt-6">Projects available: <span class="text-black">
+              {{ 0 }}</span></p>
           </div>
           <div
-            class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
+            class="hidden items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
           >
-            <button @click="goToProjects(org.id)" class="btn btn--primary flex items-center gap-1">
-              View Projects
+            <button
+              @click="goToOrganization(org.id)"
+              class="btn btn--primary flex items-center gap-1"
+            >
+              View Organization
               <svg
                 class="h-4 w-4"
                 viewBox="0 0 24 24"
@@ -218,44 +308,30 @@ onMounted(async () => {
         @click.self="closeCreateModal"
       >
         <div class="relative w-full max-w-[540px] rounded-2xl bg-white shadow-xl">
-          <button
-            @click="closeCreateModal"
-            class="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M1 1L13 13M13 1L1 13"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
-
-          <div class="p-8">
+          <div class="p-20">
             <div class="mb-6">
-              <h3 class="mb-2 text-xl font-bold text-[#080808]">Create Organization</h3>
-              <p class="text-sm text-[#6B7280]">Organizations hold projects and jurisdictions.</p>
+              <h3 class="mb-2 text-xl font-bold text-[#080808]">Set up new Organization</h3>
+              <p class="text-sm text-[#6B7280]">
+                <template v-if="formData.name">
+                  Organisation already registered? <span @click="router.push('/login')" class="text-[#401903] cursor-pointer underline hover:no-underline transition-all">Log In</span>
+                </template>
+                <template v-else>
+                  Enter the name and Industry of your Organization.
+                </template>
+              </p>
             </div>
 
             <form @submit.prevent="handleCreateOrganization" class="space-y-5">
               <div class="space-y-2">
                 <label for="orgName" class="block text-sm font-medium text-[#1F1F1F]">
-                  Organization Name
+                  Company Name
                 </label>
                 <Input
                   v-model="formData.name"
                   id="orgName"
-                  placeholder="e.g. Acme Corporation"
+                  placeholder="Name"
                   required
-                  class="h-[52px] border-[#D5D7DA] text-sm focus:border-[#401903]"
+                  class="h-11 border-[#D5D7DA] text-sm focus:border-[#401903] rounded-md w-full"
                 />
               </div>
 
@@ -263,28 +339,35 @@ onMounted(async () => {
                 <label for="orgIndustry" class="block text-sm font-medium text-[#1F1F1F]">
                   Industry
                 </label>
-                <Input
-                  v-model="formData.industry"
-                  id="orgIndustry"
-                  placeholder="e.g. Technology"
-                  required
-                  class="h-[52px] border-[#D5D7DA] text-sm focus:border-[#401903]"
-                />
+                <Select v-model="formData.industry" required>
+                  <SelectTrigger class="h-11! border-[#D5D7DA] rounded-md text-sm focus:border-[#401903] w-full">
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Government, Politics & Public Sector">Government, Politics & Public Sector</SelectItem>
+                    <SelectItem value="Law, Regulation & Compliance">Law, Regulation & Compliance</SelectItem>
+                    <SelectItem value="Business, Finance & Professional Services">Business, Finance & Professional Services</SelectItem>
+                    <SelectItem value="Technology, Media & Telecommunications">Technology, Media & Telecommunications</SelectItem>
+                    <SelectItem value="Health, Science & Education">Health, Science & Education</SelectItem>
+                    <SelectItem value="Energy, Environment & Infrastructure">Energy, Environment & Infrastructure</SelectItem>
+                    <SelectItem value="Manufacturing, Trade & Logistics">Manufacturing, Trade & Logistics</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
                 {{ error }}
               </div>
 
-              <div class="flex justify-end gap-3 pt-2">
+              <div class="flex flex-col justify-center gap-3 pt-8">
+                <button type="submit" class="btn btn--primary py-2.5 min-h-10">Continue</button>
                 <button
                   type="button"
                   @click="closeCreateModal"
-                  class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+                  class="rounded-lg border border-transparent hover:border-[#F1A75F] py-2.5 text-sm font-medium text-black hover:bg-orange-50 min-h-10 cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button type="submit" class="btn btn--primary">Save Organization</button>
               </div>
             </form>
           </div>

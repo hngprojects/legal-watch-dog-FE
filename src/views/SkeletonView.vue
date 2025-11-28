@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import MainHeader from '@/components/landing-page/MainHeader.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
+
 import SkeletonBlock from '@/components/reusable/SkeletonBlock.vue'
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col bg-[#F7F3EF] text-[#3C2610]">
-    <MainHeader />
 
     <main class="flex-1">
       <div class="mx-auto max-w-6xl space-y-10 px-4 py-12 sm:px-8">
@@ -72,7 +70,5 @@ import SkeletonBlock from '@/components/reusable/SkeletonBlock.vue'
         </section>
       </div>
     </main>
-
-    <MainFooter />
   </div>
 </template>

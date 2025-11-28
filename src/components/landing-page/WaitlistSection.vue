@@ -6,17 +6,20 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { submitWaitlist, type WaitlistPayload, type earlyAccessPayload } from '@/api/waitlist'
 import EmailIcon from '@/assets/icons/sms.svg'
+import UserIcon from '@/assets/icons/user.svg'
 import BellIcon from '@/assets/icons/bell2.svg'
 import BrainIcon from '@/assets/icons/brain.svg'
 import CheckedIcon from '@/assets/icons/checked.svg'
 import GlobeIcon from '@/assets/icons/globe.svg'
 import GlobeIcon2 from '@/assets/icons/globe2.svg'
+import Swal from 'sweetalert2'
 // import BackLeft from '@/assets/Images/backleft.png'
 // import BackRight from '@/assets/Images/backright.png'
 import earlyAccessBg from '@/assets/Images/earlyAccess-bg.png'
 
 // Top Waitlist Form
 const form = reactive<WaitlistPayload>({
+  organization_name: '',
   organization_email: '',
 })
 
@@ -28,6 +31,7 @@ const earlyAccessForm = reactive<earlyAccessPayload>({
 
 // Inline error states
 const formErrors = reactive({
+  organization_name: '',
   organization_email: '',
 })
 
@@ -37,37 +41,48 @@ const earlyAccessErrors = reactive({
 })
 
 const isSubmitting = ref(false)
-const feedback = ref<{ type: 'success' | 'error'; message: string } | null>(null)
+
 
 const handleSubmit = async () => {
   if (isSubmitting.value) return
 
-  feedback.value = null
+  formErrors.organization_name = ''
   formErrors.organization_email = ''
+
+  if (!form.organization_name.trim()) {
+    formErrors.organization_name = 'Organization name is required'
+  }
 
   if (!form.organization_email.trim()) {
     formErrors.organization_email = 'Work email is required'
   }
 
-  if (formErrors.organization_email) return
+  if (formErrors.organization_name || formErrors.organization_email) return
 
   isSubmitting.value = true
 
   try {
     const response = await submitWaitlist({ ...form })
 
-    feedback.value = {
-      type: 'success',
-      message: response.message ?? 'You are on the waitlist!',
-    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: response.message ?? 'You are on the waitlist!',
+    })
 
+    form.organization_name = ''
     form.organization_email = ''
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Please try again shortly.'
-    feedback.value = {
-      type: 'error',
-      message: errorMessage,
-    }
+    // feedback.value = {
+    //   type: 'error',
+    //   message: errorMessage,
+    // }
+     Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: errorMessage,
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -76,7 +91,6 @@ const handleSubmit = async () => {
 const handleEarlyAccessSubmit = async () => {
   if (isSubmitting.value) return
 
-  feedback.value = null
   earlyAccessErrors.organization_name = ''
   earlyAccessErrors.organization_email = ''
 
@@ -95,19 +109,21 @@ const handleEarlyAccessSubmit = async () => {
   try {
     const response = await submitWaitlist({ ...earlyAccessForm })
 
-    feedback.value = {
-      type: 'success',
-      message: response.message ?? "You're on the waitlist!",
-    }
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: response.message ?? "You're on the waitlist!",
+    })
 
     earlyAccessForm.organization_name = ''
     earlyAccessForm.organization_email = ''
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unable to submit right now.'
-    feedback.value = {
-      type: 'error',
-      message: errorMessage,
-    }
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: errorMessage,
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -232,7 +248,23 @@ const testimonials = [
         </p>
 
         <!-- TOP FORM -->
-         <div class="mx-auto mb-2 flex h-12 max-w-[496px] max-sm:flex-col justify-center max-sm:gap-3">
+         <div class="mx-auto mb-2 flex max-w-[496px] flex-col justify-center gap-3">
+          <!-- Name Input -->
+          <div class="relative w-full">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <img :src="UserIcon" class="h-5 w-5" alt="user" />
+            </div>
+            <Input
+              v-model="form.organization_name"
+              type="text"
+              placeholder="Enter Full Name"
+              class="h-12 w-full rounded-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
+            />
+            <p v-if="formErrors.organization_name" class="mt-1 text-left text-xs text-red-600">
+              {{ formErrors.organization_name }}
+            </p>
+          </div>
+
           <!-- Email Input -->
           <div class="relative w-full">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -241,8 +273,8 @@ const testimonials = [
             <Input
               v-model="form.organization_email"
               type="email"
-              placeholder="Enter Email"
-              class="h-full w-full rounded-l-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
+              placeholder="Enter Organization Email"
+              class="h-12 w-full rounded-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
             />
             <p v-if="formErrors.organization_email" class="mt-1 text-left text-xs text-red-600">
               {{ formErrors.organization_email }}
@@ -253,21 +285,14 @@ const testimonials = [
           <Button
             @click="handleSubmit"
             :disabled="isSubmitting"
-            class="flex h-full items-center gap-2 rounded-l-none bg-[#3a1f14] px-6 py-3 whitespace-nowrap text-white hover:bg-[#2d1810]"
+            class="flex h-full items-center gap-2 bg-[#3a1f14] px-6 py-3 whitespace-nowrap text-white hover:text-white hover:bg-[#2d1810]"
           >
             <span v-if="!isSubmitting">Join the Waitlist</span>
             <span v-else>Submitting...</span>
           </Button>
         </div>
 
-        <!-- Global feedback -->
-        <p
-          v-if="feedback"
-          class="mb-4 text-sm"
-          :class="feedback.type === 'success' ? 'text-green-600' : 'text-red-600'"
-        >
-          {{ feedback.message }}
-        </p>
+        
 
         <!-- Dashboard Mockup -->
         <div class="mx-auto mt-24 max-w-5xl">
@@ -413,7 +438,7 @@ const testimonials = [
       </div>
     </section>
 
-    <section>
+    <section id="waitlist-form">
       <!-- FOOTER EARLY ACCESS -->
       <section
         class="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8"
@@ -480,13 +505,7 @@ const testimonials = [
               <span v-if="!isSubmitting">Get Early Access →</span>
               <span v-else>Submitting...</span>
             </Button>
-            <p
-              v-if="feedback"
-              class="mb-4 text-sm"
-              :class="feedback.type === 'success' ? 'text-green-600' : 'text-red-600'"
-            >
-              {{ feedback.message }}
-            </p>
+            
 
             <p class="mt-4 text-xs text-[#9CA3AF]">
               We respect your privacy. No spam, unsubscribe anytime.

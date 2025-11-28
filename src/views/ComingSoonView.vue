@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import comingSoonImg from '@/assets/images/coming-soon.webp'
-import MainHeader from '@/components/landing-page/MainHeader.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
 import Button from '@/components/ui/button/Button.vue'
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col bg-white">
-    <MainHeader />
 
     <main class="flex flex-1 flex-col items-center justify-center gap-8 px-4 text-center">
       <img :src="comingSoonImg" alt="Coming Soon Illustration" class="w-11/12 md:w-3/5 lg:w-2/5" />
@@ -24,6 +21,5 @@ import Button from '@/components/ui/button/Button.vue'
       </RouterLink>
     </main>
 
-    <MainFooter />
   </div>
 </template>
