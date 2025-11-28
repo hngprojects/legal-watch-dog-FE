@@ -27,8 +27,8 @@ import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigg
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
 
-type MemberRole = 'Admin' | 'User' | 'Manager' | 'Member'
-type MemberStatus = 'Active' | 'Pending'
+type MemberRole = 'Admin' | 'Manager' | 'Member'
+type MemberStatus = 'Active' | 'Pending' | 'Inactive'
 
 type Member = {
   id: string
@@ -161,7 +161,9 @@ const initials = (name: string) =>
 const statusClass = (status: MemberStatus) =>
   status === 'Active'
     ? 'text-emerald-700 bg-emerald-50 border-emerald-100'
-    : 'text-amber-700 bg-amber-50 border-amber-100'
+    : status === 'Pending'
+      ? 'text-amber-700 bg-amber-50 border-amber-100'
+      : 'text-red-700 bg-red-50 border-red-100'
 
 const roleClass = (role: MemberRole) => {
   switch (role) {
@@ -197,19 +199,69 @@ const mapUserToMember = (user: UserProfile): Member => {
   const fullName = user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
   const orgRole =
     user.organizations?.find((org) => org.organization_id === orgId.value)?.role || user.role || ''
+  const normalizedRole = orgRole?.toLowerCase()
   const role: MemberRole =
-    orgRole?.toLowerCase() === 'admin'
+    normalizedRole === 'admin'
       ? 'Admin'
-      : orgRole?.toLowerCase() === 'manager'
+      : normalizedRole === 'manager'
         ? 'Manager'
-        : 'User'
-  const status: MemberStatus = user.is_active ? 'Active' : 'Pending'
+        : 'Member'
+  const status: MemberStatus =
+    user.is_active === false ? 'Inactive' : user.is_active === true ? 'Active' : 'Pending'
   return {
     id: user.id,
-    name: fullName || 'User',
+    name: fullName || 'Member',
     email: user.email,
     role,
     status,
+  }
+}
+
+const memberActionLoading = ref<string | null>(null)
+
+const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
+  if (!orgId.value || member.role === targetRole) return
+  memberActionLoading.value = `${member.id}-role`
+  try {
+    await organizationService.updateMemberRole(orgId.value, member.id, targetRole)
+    members.value = members.value.map((item) =>
+      item.id === member.id ? { ...item, role: targetRole } : item,
+    )
+    await Swal.fire('Role updated', `${member.name} is now ${targetRole}.`, 'success')
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to update member role'
+    await Swal.fire('Could not update role', message, 'error')
+  } finally {
+    memberActionLoading.value = null
+  }
+}
+
+const toggleMemberStatus = async (member: Member) => {
+  if (!orgId.value) return
+  const targetStatus: MemberStatus = member.status === 'Active' ? 'Inactive' : 'Active'
+  memberActionLoading.value = `${member.id}-status`
+  try {
+    await organizationService.updateMemberStatus(orgId.value, member.id, targetStatus)
+    members.value = members.value.map((item) =>
+      item.id === member.id ? { ...item, status: targetStatus } : item,
+    )
+    const verb = targetStatus === 'Active' ? 'activated' : 'deactivated'
+    await Swal.fire('Status updated', `${member.name} has been ${verb}.`, 'success')
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to update member status'
+    await Swal.fire('Could not update status', message, 'error')
+  } finally {
+    memberActionLoading.value = null
   }
 }
 
@@ -262,7 +314,7 @@ const sendInvitation = async () => {
     inviteOpen.value = false
     await Swal.fire('Invitation sent', inviteMessage.value, 'success')
     inviteForm.value.email = ''
-    inviteForm.value.role = 'User'
+    inviteForm.value.role = 'Member'
   } catch (error) {
     const err = error as OrganizationErrorResponse
     if (!err.response) {
@@ -294,7 +346,7 @@ watch(
     inviteMessage.value = null
     inviteError.value = null
     inviteForm.value.email = ''
-    inviteForm.value.role = 'User'
+    inviteForm.value.role = 'Member'
     await loadProjects()
     await fetchMembers()
   },
@@ -430,8 +482,8 @@ watch(
                     class="h-11 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
                   >
                     <option value="Admin">Admin</option>
-                    <option value="manager">Manager</option>
-                    <option value="user">User</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Member">Member</option>
                   </select>
                 </div>
 
@@ -519,11 +571,42 @@ watch(
                 >
                   {{ member.status }}
                 </Badge>
-                <button
-                  class="rounded-full p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
-                >
-                  <EllipsisVertical :size="18" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <button
+                      @click.stop
+                      class="rounded-full p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                    >
+                      <EllipsisVertical :size="18" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Admin'"
+                      @click.stop="updateMemberRole(member, 'Admin')"
+                    >
+                      Admin
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Manager'"
+                      @click.stop="updateMemberRole(member, 'Manager')"
+                    >
+                      Manager
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Member'"
+                      @click.stop="updateMemberRole(member, 'Member')"
+                    >
+                      Member
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="memberActionLoading === `${member.id}-status`"
+                      @click.stop="toggleMemberStatus(member)"
+                    >
+                      {{ member.status === 'Active' ? 'Deactivate' : 'Activate' }}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </article>
           </template>

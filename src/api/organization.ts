@@ -57,4 +57,8 @@ export const organizationService = {
     api.get<OrganizationUsersResponse>(`/organizations/${organizationId}/users`),
   getOrganizationById: (organizationId: string) =>
     api.get<OrganizationResponse>(`/users/me/organizations/${organizationId}`),
+  updateMemberRole: (organizationId: string, userId: string, role: string) =>
+    api.patch(`/organizations/${organizationId}/members/${userId}/role`, { role }),
+  updateMemberStatus: (organizationId: string, userId: string, status: string) =>
+    api.patch(`/organizations/${organizationId}/members/${userId}/status`, { status }),
 }
