@@ -10,8 +10,6 @@ import sourcesImg from '@/assets/Images/how-it-works/sources.webp'
 import monitoringImg from '@/assets/Images/how-it-works/monitoring.webp'
 import workIcon from '@/assets/icons/workIcon.png'
 import alertsImg from '@/assets/Images/how-it-works/alerts.webp'
-import MainHeader from '@/components/landing-page/MainHeader.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
 
 const steps = [
   {
@@ -44,7 +42,6 @@ const steps = [
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <MainHeader />
     <main
       class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] px-6 py-16 md:px-12 lg:px-24"
     >
@@ -110,8 +107,6 @@ const steps = [
         </div>
       </section>
     </main>
-
-    <MainFooter />
   </div>
 </template>
 

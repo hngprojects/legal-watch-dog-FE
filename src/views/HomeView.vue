@@ -6,13 +6,10 @@ import HeroSection from '@/components/landing-page/HeroSection.vue'
 import HowItWorks from '@/components/landing-page/HowItWorks.vue'
 import Monitor from '@/components/landing-page/Monitor.vue'
 import HomeFrame from '@/components/landing-page/HomeFrame.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
-import MainHeader from '@/components/landing-page/MainHeader.vue'
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <MainHeader />
     <main class="relative mx-auto flex w-full flex-1 flex-col overflow-hidden bg-[#F7F7F7]">
       <div
         class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
@@ -35,6 +32,5 @@ import MainHeader from '@/components/landing-page/MainHeader.vue'
       <Monitor />
       <GlobalStatsSection />
     </main>
-    <MainFooter />
   </div>
 </template>

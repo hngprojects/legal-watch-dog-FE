@@ -1,7 +1,17 @@
-import api from '@/lib/api'
-import type { CreateSourcePayload, Source, UpdateSourcePayload } from '@/types/source'
+// src/api/source.ts
+import api from '@/lib/api' // your axios instance
+import type { Source, CreateSourcePayload, UpdateSourcePayload } from '@/types/source'
 
-type ApiResponse<T> = {
+/**
+ * Backend response envelope (matches your examples)
+ * {
+ *   status: "success",
+ *   status_code: 200,
+ *   message: "Source updated successfully",
+ *   data: { source: {...} }  // or data: { sources: [...], count: 1 }
+ * }
+ */
+type ApiEnvelope<T> = {
   status?: string
   status_code?: number
   message?: string
@@ -10,29 +20,30 @@ type ApiResponse<T> = {
 
 type ListResponse = {
   sources: Source[]
-  total?: number
-  page?: number
-  limit?: number
-  total_pages?: number | null
+  count: number
 }
 
 export const sourceApi = {
-  create: (payload: CreateSourcePayload) => api.post<ApiResponse<Source>>('/sources', payload),
+  create: (payload: CreateSourcePayload) =>
+    api.post<ApiEnvelope<{ source: Source }>>('/sources', payload),
 
   list: (params?: { jurisdiction_id?: string; page?: number; limit?: number }) =>
-    api.get<ApiResponse<ListResponse>>('/sources', { params }),
+    api.get<ApiEnvelope<ListResponse>>('/sources', { params }),
 
-  getOne: (sourceId: string) => api.get<ApiResponse<Source>>(`/sources/${sourceId}`),
+  getOne: (source_id: string) =>
+    api.get<ApiEnvelope<{ source: Source }>>(`/sources/${source_id}`),
 
-  update: (sourceId: string, payload: UpdateSourcePayload) =>
-    api.put<ApiResponse<Source>>(`/sources/${sourceId}`, payload),
+  update: (source_id: string, payload: UpdateSourcePayload) =>
+    api.put<ApiEnvelope<{ source: Source }>>(`/sources/${source_id}`, payload),
 
-  patch: (sourceId: string, payload: UpdateSourcePayload) =>
-    api.patch<ApiResponse<Source>>(`/sources/${sourceId}`, payload),
+  patch: (source_id: string, payload: UpdateSourcePayload) =>
+    api.patch<ApiEnvelope<{ source: Source }>>(`/sources/${source_id}`, payload),
 
-  delete: (sourceId: string) =>
-    api.delete<ApiResponse<{ success?: boolean }>>(`/sources/${sourceId}`),
+  delete: (source_id: string) =>
+    api.delete<ApiEnvelope<{ success?: boolean }>>(`/sources/${source_id}`),
 
-  // Placeholder for future scraping endpoint; call will fail safely until backend is ready.
-  scrape: (sourceId: string) => api.post<ApiResponse<unknown>>(`/sources/${sourceId}/scrape`),
+  scrape: (source_id: string) =>
+    api.post<ApiEnvelope<unknown>>(`/sources/${source_id}/scrapes`),
 }
+
+export default sourceApi

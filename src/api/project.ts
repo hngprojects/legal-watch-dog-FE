@@ -17,19 +17,19 @@ type ProjectsList = {
 }
 
 export const projectService = {
-  listProjects: (organizationId: string, params?: { q?: string; page?: number; limit?: number }) =>
-    api.get<ApiResponse<ProjectsList>>(`/organizations/${organizationId}/projects`, {
+  listProjects: (organization_id: string, params?: { q?: string; page?: number; limit?: number }) =>
+    api.get<ApiResponse<ProjectsList>>(`/organizations/${organization_id}/projects`, {
       params,
     }),
 
-  createProject: (organizationId: string, payload: CreateProjectPayload) =>
-    api.post<ApiResponse<Project>>(`/organizations/${organizationId}/projects`, payload),
+  createProject: (organization_id: string, payload: CreateProjectPayload) =>
+    api.post<ApiResponse<Project>>(`/organizations/${organization_id}/projects`, payload),
 
-  updateProject: (organizationId: string, id: string, payload: UpdateProjectPayload) =>
-    api.patch<ApiResponse<Project>>(`/organizations/${organizationId}/projects/${id}`, payload),
+  updateProject: (organization_id: string, project_id: string, payload: UpdateProjectPayload) =>
+    api.patch<ApiResponse<Project>>(`/organizations/${organization_id}/projects/${project_id}`, payload),
 
-  deleteProject: (organizationId: string, id: string) =>
+  deleteProject: (organization_id: string, project_id: string) =>
     api.delete<ApiResponse<{ success?: boolean }>>(
-      `/organizations/${organizationId}/projects/${id}`,
+      `/organizations/${organization_id}/projects/${project_id}`,
     ),
 }
