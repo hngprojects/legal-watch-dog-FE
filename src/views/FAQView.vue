@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import MainFooter from '@/components/landing-page/MainFooter.vue'
-import MainHeader from '@/components/landing-page/MainHeader.vue'
 import Icon from '@/components/reusable/Icon.vue'
 import { Accordion } from '@/components/ui/accordion'
 import AccordionContent from '@/components/ui/accordion/AccordionContent.vue'
@@ -88,7 +86,6 @@ function copyEmail() {
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <MainHeader />
     <main
       class="relative mx-auto flex w-full flex-1 flex-col items-center overflow-hidden bg-[#F7F7F7] px-6 py-20 text-center md:px-12 lg:px-24"
     >
@@ -151,6 +148,5 @@ function copyEmail() {
         </section>
       </div>
     </main>
-    <MainFooter />
   </div>
 </template>

@@ -9,7 +9,7 @@ import { RouterLink } from 'vue-router'
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger>
-      <slot />
+      <slot/>
     </DropdownMenuTrigger>
     <DropdownMenuContent>
       <DropdownMenuItem asChild>
