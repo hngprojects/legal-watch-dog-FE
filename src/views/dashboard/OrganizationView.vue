@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
 import { Input } from '@/components/ui/input'
+import { DropdownMenu } from '@/components/ui/dropdown-menu'
+import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
+import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
+import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
+import { EllipsisVertical } from 'lucide-vue-next'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useInvitationStore } from '@/stores/invitation-store'
+import type { Organization } from '@/types/organization'
 
 const organizationStore = useOrganizationStore()
 const { organizations, loading, error } = storeToRefs(organizationStore)
@@ -89,6 +95,79 @@ const acceptInvite = async (token: string) => {
   } catch (err) {
     void err
     await Swal.fire('Could not accept invitation', invitationStore.error || 'Something went wrong', 'error')
+  }
+}
+
+const hasMoreOrganizations = computed(() => organizationStore.hasMoreOrganizations)
+
+const loadMoreOrganizations = async () => {
+  const userId = await ensureUserId()
+  if (!userId) {
+    organizationStore.setError('User information missing. Please re-login.')
+    return
+  }
+  await organizationStore.fetchMoreOrganizations(userId)
+}
+
+const openEditOrganization = async (org: Organization) => {
+  const { value: formValues, isConfirmed } = await Swal.fire({
+    title: 'Edit organization',
+    html: `
+      <div class="text-left space-y-2">
+        <label for="swal-org-name" class="text-sm font-semibold text-gray-700">Name</label>
+        <input id="swal-org-name" class="swal2-input" placeholder="Organization name" value="${org.name ?? ''}" />
+        <label for="swal-org-industry" class="text-sm font-semibold text-gray-700 mt-2">Industry</label>
+        <input id="swal-org-industry" class="swal2-input" placeholder="Industry" value="${org.industry ?? ''}" />
+      </div>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Save',
+    preConfirm: () => {
+      const nameInput = (document.getElementById('swal-org-name') as HTMLInputElement | null)?.value.trim() || ''
+      const industryInput =
+        (document.getElementById('swal-org-industry') as HTMLInputElement | null)?.value.trim() ||
+        ''
+      if (!nameInput) {
+        Swal.showValidationMessage('Organization name is required')
+        return false
+      }
+      if (!industryInput) {
+        Swal.showValidationMessage('Industry is required')
+        return false
+      }
+      return { name: nameInput, industry: industryInput }
+    },
+  })
+
+  if (!isConfirmed || !formValues) return
+  const updated = await organizationStore.updateOrganization(org.id, {
+    name: formValues.name,
+    industry: formValues.industry,
+  })
+  if (updated) {
+    await Swal.fire('Updated', 'Organization updated successfully.', 'success')
+  } else if (organizationStore.error) {
+    await Swal.fire('Could not update', organizationStore.error, 'error')
+  }
+}
+
+const confirmDeleteOrganization = async (org: Organization) => {
+  const result = await Swal.fire({
+    title: 'Delete organization?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d33',
+  })
+  if (!result.isConfirmed) return
+  const deleted = await organizationStore.deleteOrganization(org.id)
+  if (deleted) {
+    await Swal.fire('Deleted', 'Organization removed successfully.', 'success')
+  } else if (organizationStore.error) {
+    await Swal.fire('Could not delete', organizationStore.error, 'error')
   }
 }
 
@@ -254,7 +333,25 @@ onMounted(async () => {
           :key="org.id"
           class="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10"
         >
-          <div class="p-8">
+          <div class="relative p-8">
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
+                <button
+                  @click.stop
+                  class="absolute right-4 top-4 rounded-full p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                >
+                  <EllipsisVertical :size="18" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem @click.stop="openEditOrganization(org)">
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem class="text-red-600" @click.stop="confirmDeleteOrganization(org)">
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Organization</p>
             <h3
               class="mb-2 text-xl font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
@@ -285,6 +382,17 @@ onMounted(async () => {
             </button>
           </div>
         </article>
+      </div>
+
+      <div v-if="hasMoreOrganizations" class="mt-8 flex justify-center">
+        <button
+          @click="loadMoreOrganizations"
+          class="btn--primary"
+          :disabled="organizationStore.loadingMore"
+        >
+          <span v-if="organizationStore.loadingMore">Loading...</span>
+          <span v-else>Load more</span>
+        </button>
       </div>
     </div>
 

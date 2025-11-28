@@ -2,6 +2,7 @@ import api from '@/lib/api'
 import type {
   CreateOrganizationPayload,
   InviteMemberPayload,
+  UpdateOrganizationPayload,
   RawOrganization,
 } from '@/types/organization'
 import type { UserProfile } from '@/types/user'
@@ -48,17 +49,27 @@ interface OrganizationUsersResponse {
 }
 
 export const organizationService = {
-  listOrganizations: () => api.get<OrganizationsResponse>(`/users/me/organizations`),
+  listOrganizations: (page?: number, limit?: number) =>
+    api.get<OrganizationsResponse>(`/users/me/organizations`, {
+      params: {
+        page,
+        limit,
+      },
+    }),
   createOrganization: (payload: CreateOrganizationPayload) =>
     api.post<OrganizationResponse>('/organizations', payload),
+  updateOrganization: (organizationId: string, payload: UpdateOrganizationPayload) =>
+    api.patch<OrganizationResponse>(`/organizations/${organizationId}`, payload),
+  deleteOrganization: (organizationId: string) =>
+    api.delete<{ message?: string }>(`/organizations/${organizationId}`),
   inviteMember: (organizationId: string, payload: InviteMemberPayload) =>
     api.post<InviteMemberResponse>(`/organizations/${organizationId}/invitations`, payload),
   listOrganizationUsers: (organizationId: string) =>
     api.get<OrganizationUsersResponse>(`/organizations/${organizationId}/users`),
   getOrganizationById: (organizationId: string) =>
     api.get<OrganizationResponse>(`/users/me/organizations/${organizationId}`),
-  updateMemberRole: (organizationId: string, userId: string, role: string) =>
-    api.patch(`/organizations/${organizationId}/members/${userId}/role`, { role }),
-  updateMemberStatus: (organizationId: string, userId: string, status: string) =>
-    api.patch(`/organizations/${organizationId}/members/${userId}/status`, { status }),
+  updateMemberRole: (organizationId: string, userId: string, roleName: string) =>
+    api.patch(`/organizations/${organizationId}/members/${userId}/role`, { role_name: roleName }),
+  updateMemberStatus: (organizationId: string, userId: string, isActive: boolean) =>
+    api.patch(`/organizations/${organizationId}/members/${userId}/status`, { is_active: isActive }),
 }

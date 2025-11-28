@@ -25,6 +25,12 @@ export interface CreateOrganizationPayload {
   industry: string
 }
 
+export interface UpdateOrganizationPayload {
+  name?: string
+  industry?: string
+  is_active?: boolean
+}
+
 export interface OrganizationErrorResponse {
   response?: {
     data?: {

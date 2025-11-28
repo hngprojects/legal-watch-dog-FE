@@ -197,6 +197,7 @@ const loadProjects = async () => {
 
 const mapUserToMember = (user: UserProfile): Member => {
   const fullName = user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
+  const memberId = user.id || user.user_id || ''
   const orgRole =
     user.organizations?.find((org) => org.organization_id === orgId.value)?.role || user.role || ''
   const normalizedRole = orgRole?.toLowerCase()
@@ -209,7 +210,7 @@ const mapUserToMember = (user: UserProfile): Member => {
   const status: MemberStatus =
     user.is_active === false ? 'Inactive' : user.is_active === true ? 'Active' : 'Pending'
   return {
-    id: user.id,
+    id: memberId,
     name: fullName || 'Member',
     email: user.email,
     role,
@@ -221,6 +222,10 @@ const memberActionLoading = ref<string | null>(null)
 
 const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
   if (!orgId.value || member.role === targetRole) return
+  if (!member.id) {
+    await Swal.fire('Missing user', 'Cannot update role: user ID unavailable.', 'error')
+    return
+  }
   memberActionLoading.value = `${member.id}-role`
   try {
     await organizationService.updateMemberRole(orgId.value, member.id, targetRole)
@@ -243,10 +248,14 @@ const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
 
 const toggleMemberStatus = async (member: Member) => {
   if (!orgId.value) return
+  if (!member.id) {
+    await Swal.fire('Missing user', 'Cannot update status: user ID unavailable.', 'error')
+    return
+  }
   const targetStatus: MemberStatus = member.status === 'Active' ? 'Inactive' : 'Active'
   memberActionLoading.value = `${member.id}-status`
   try {
-    await organizationService.updateMemberStatus(orgId.value, member.id, targetStatus)
+    await organizationService.updateMemberStatus(orgId.value, member.id, targetStatus === 'Active')
     members.value = members.value.map((item) =>
       item.id === member.id ? { ...item, status: targetStatus } : item,
     )
