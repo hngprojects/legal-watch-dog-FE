@@ -7,6 +7,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { organizationService } from '@/api/organization'
 import type { OrganizationErrorResponse } from '@/types/organization'
+import Swal from 'sweetalert2'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -141,6 +142,7 @@ const sendInvitation = async () => {
     const message = data.message || data.data?.message || 'Invitation sent successfully.'
 
     inviteMessage.value = message
+    await Swal.fire('Invitation sent', message, 'success')
     inviteForm.value.email = ''
   } catch (error) {
     const err = error as OrganizationErrorResponse
@@ -152,6 +154,7 @@ const sendInvitation = async () => {
         err.response.data?.message ||
         'Failed to send invitation'
     }
+    await Swal.fire('Could not send invite', inviteError.value, 'error')
   } finally {
     inviteSending.value = false
   }

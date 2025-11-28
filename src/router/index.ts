@@ -23,6 +23,7 @@ import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
+import AcceptInviteView from '@/views/authentication/AcceptInviteView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -117,6 +118,11 @@ const router = createRouter({
       path: '/skeleton',
       name: 'skeleton',
       component: SkeletonView,
+    },
+    {
+      path: '/auth/accept-invite/:token',
+      name: 'accept-invite',
+      component: AcceptInviteView,
     },
     {
       path: '/coming-soon', // Coming Soon page

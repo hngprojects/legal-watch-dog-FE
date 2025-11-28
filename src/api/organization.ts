@@ -55,4 +55,6 @@ export const organizationService = {
     api.post<InviteMemberResponse>(`/organizations/${organizationId}/invitations`, payload),
   listOrganizationUsers: (organizationId: string) =>
     api.get<OrganizationUsersResponse>(`/organizations/${organizationId}/users`),
+  getOrganizationById: (organizationId: string) =>
+    api.get<OrganizationResponse>(`/users/me/organizations/${organizationId}`),
 }

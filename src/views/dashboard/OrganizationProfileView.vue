@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { organizationService } from '@/api/organization'
 import type { OrganizationErrorResponse } from '@/types/organization'
 import type { UserProfile } from '@/types/user'
+import Swal from 'sweetalert2'
 import {
   Dialog,
   DialogClose,
@@ -46,7 +47,7 @@ const orgId = computed(() => {
 })
 
 const inviteOpen = ref(false)
-const inviteForm = ref({ email: '', role: 'User' as MemberRole })
+const inviteForm = ref({ email: '', role: 'Member' as MemberRole })
 const inviteSending = ref(false)
 const inviteMessage = ref<string | null>(null)
 const inviteError = ref<string | null>(null)
@@ -170,6 +171,8 @@ const sendInvitation = async () => {
       role_name: inviteForm.value.role,
     })
     inviteMessage.value = data.message || data.data?.message || 'Invitation sent successfully.'
+    inviteOpen.value = false
+    await Swal.fire('Invitation sent', inviteMessage.value, 'success')
     inviteForm.value.email = ''
     inviteForm.value.role = 'User'
   } catch (error) {
@@ -182,6 +185,8 @@ const sendInvitation = async () => {
         err.response.data?.message ||
         'Failed to send invitation'
     }
+    inviteOpen.value = false
+    await Swal.fire('Could not send invite', inviteError.value, 'error')
   } finally {
     inviteSending.value = false
   }
