@@ -12,15 +12,19 @@ const invitationStore = useInvitationStore()
 
 const accepting = ref(false)
 
-const processInvite = async (token: string) => {
+const processInvite = async (token: string, silent = false) => {
   accepting.value = true
   try {
     const result = await invitationStore.acceptInvitation(token)
-    await Swal.fire('Invitation Accepted', result, 'success')
+    if (!silent) {
+      await Swal.fire('Invitation Accepted', result, 'success')
+    }
     router.replace({ name: 'organizations' })
   } catch (err) {
     void err
-    await Swal.fire('Could not accept invitation', invitationStore.error || 'Something went wrong', 'error')
+    if (!silent) {
+      await Swal.fire('Could not accept invitation', invitationStore.error || 'Something went wrong', 'error')
+    }
   } finally {
     accepting.value = false
   }
@@ -37,7 +41,7 @@ onMounted(async () => {
   invitationStore.setToken(token)
 
   if (authStore.isAuthenticated) {
-    await processInvite(token)
+    await processInvite(token, true)
     return
   }
 
