@@ -257,7 +257,7 @@ const testimonials = [
             <Input
               v-model="form.organization_name"
               type="text"
-              placeholder="Enter Name"
+              placeholder="Enter Full Name"
               class="h-12 w-full rounded-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
             />
             <p v-if="formErrors.organization_name" class="mt-1 text-left text-xs text-red-600">
@@ -273,7 +273,7 @@ const testimonials = [
             <Input
               v-model="form.organization_email"
               type="email"
-              placeholder="Enter Email"
+              placeholder="Enter Organization Email"
               class="h-12 w-full rounded-md border-[#AEB4C2] bg-white! px-4 py-3 pl-10"
             />
             <p v-if="formErrors.organization_email" class="mt-1 text-left text-xs text-red-600">
