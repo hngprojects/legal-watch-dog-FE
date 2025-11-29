@@ -130,13 +130,13 @@ const handleSubmit = () => {
           <button
             type="button"
             @click="handleClose"
-            class="cursor-pointer rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+            class="btn--secondary btn--lg"
           >
             Cancel
           </button>
           <button
             type="submit"
-            class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
+            class="btn--primary btn--lg"
           >
             {{ mode === 'edit' ? 'Save Changes' : 'Save Project' }}
           </button>

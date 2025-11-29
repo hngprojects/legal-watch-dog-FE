@@ -673,7 +673,7 @@ watch(
                   <DialogClose as-child>
                     <button
                       type="button"
-                      class="h-10 rounded-lg border border-gray-200 px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                      class="btn--secondary btn--lg"
                     >
                       Cancel
                     </button>
@@ -681,7 +681,7 @@ watch(
                   <button
                     type="submit"
                     :disabled="inviteSending"
-                    class="h-10 rounded-lg bg-[#401903] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2a1102] disabled:cursor-not-allowed disabled:opacity-70"
+                    class="btn--primary btn--lg disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     <span v-if="inviteSending">Sending...</span>
                     <span v-else>Send Invite</span>

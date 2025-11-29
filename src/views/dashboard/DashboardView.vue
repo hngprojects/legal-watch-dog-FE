@@ -255,13 +255,13 @@ const goToProject = (id: string) => {
             <button
               type="button"
               @click="closeCreateModal"
-              class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+              class="btn--secondary btn--lg"
             >
               Cancel
             </button>
             <button
               type="submit"
-              class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
+              class="btn--primary btn--lg"
             >
               Save Project
             </button>

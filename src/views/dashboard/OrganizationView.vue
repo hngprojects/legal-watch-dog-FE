@@ -400,20 +400,7 @@ onMounted(async () => {
       <DialogScrollContent class="sm:max-w-[540px]">
         <DialogHeader>
           <DialogTitle>Set up new Organization</DialogTitle>
-          <DialogDescription>
-            <template v-if="formData.name">
-              Organisation already registered?
-              <span
-                @click="router.push('/login')"
-                class="cursor-pointer text-[#401903] underline transition-all hover:no-underline"
-              >
-                Log In
-              </span>
-            </template>
-            <template v-else>
-              Enter the name and Industry of your Organization.
-            </template>
-          </DialogDescription>
+          <DialogDescription>Enter the name and industry of your organization.</DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="handleCreateOrganization" class="space-y-5">
@@ -455,11 +442,11 @@ onMounted(async () => {
           </div>
 
           <DialogFooter class="flex flex-col justify-center gap-3 pt-8">
-            <button type="submit" class="btn btn--primary min-h-10 py-2.5">Continue</button>
+            <button type="submit" class="btn--primary btn--lg">Continue</button>
             <button
               type="button"
               @click="closeCreateModal"
-              class="min-h-10 cursor-pointer rounded-lg border border-transparent py-2.5 text-sm font-medium text-black hover:border-[#F1A75F] hover:bg-orange-50"
+              class="btn--secondary btn--lg"
             >
               Cancel
             </button>

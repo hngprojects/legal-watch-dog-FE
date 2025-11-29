@@ -139,6 +139,10 @@
   @apply btn bg-accent-main hover:bg-accent-subtle text-surface;
 }
 
+@utility btn--secondary {
+  @apply btn bg-transparent border border-accent-main hover:bg-accent-main/30;
+}
+
 @utility btn--with-icon {
   @apply flex items-center gap-2;
 }

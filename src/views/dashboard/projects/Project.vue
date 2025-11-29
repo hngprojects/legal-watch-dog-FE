@@ -515,11 +515,11 @@ watch(
 
           <DialogFooter class="flex justify-end gap-2 pt-2">
             <button type="button" @click="closeAddJurisdictionModal"
-              class="cursor-pointer rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] hover:bg-orange-50">
+              class="btn--secondary btn--lg">
               Cancel
             </button>
             <button type="submit"
-              class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]">
+              class="btn--primary btn--lg">
               Create Jurisdiction
             </button>
           </DialogFooter>
@@ -582,11 +582,11 @@ watch(
 
           <DialogFooter class="flex justify-end gap-2 pt-4">
             <button type="button" @click="closeHireSpecialistModal"
-              class="rounded-xl border border-gray-300 px-6 py-3 font-semibold text-gray-600 transition-colors hover:bg-gray-50">
+              class="btn--secondary btn--lg">
               Cancel
             </button>
             <button type="submit"
-              class="rounded-xl bg-[#5D2D18] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#401903]">
+              class="btn--primary btn--lg">
               Hire Specialist
             </button>
           </DialogFooter>

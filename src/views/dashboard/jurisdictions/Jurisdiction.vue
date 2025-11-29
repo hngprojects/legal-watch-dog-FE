@@ -1040,11 +1040,11 @@ onMounted(() => {
 
           <DialogFooter class="flex justify-end gap-3 pt-4">
             <button type="button" @click="closeSubJurisdictionModal"
-              class="btn rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700">
+              class="btn--secondary btn--lg">
               Cancel
             </button>
 
-            <button type="submit" class="btn--primary">Create Sub-Jurisdiction</button>
+            <button type="submit" class="btn--primary btn--lg">Create Sub-Jurisdiction</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>
@@ -1101,14 +1101,14 @@ onMounted(() => {
 
           <DialogFooter class="flex justify-end gap-3 pt-2">
             <button type="button" @click="closeAddSourceModal"
-              class="btn rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700">
+              class="btn--secondary btn--lg">
               Cancel
             </button>
 
             <button
               type="submit"
               :disabled="sourcesLoading"
-              class="btn--primary btn--with-icon btn--lg"
+              class="btn--primary btn--lg btn--with-icon disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span v-if="sourcesLoading">Saving...</span>
               <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
