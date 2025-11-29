@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Plus, Settings, Search } from 'lucide-vue-next'
+import { Plus, Settings, Search, FilePlus } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 
 import aiIcon from '@/assets/icons/ai_icon.png'
@@ -68,11 +68,12 @@ const loading = ref(true)
 const activeTab = ref<'analysis' | 'sources'>('analysis')
 
 const showSettingsMenu = ref(false)
-const showAddSourceMenu = ref(false)
 
-// Toggle for showing Suggested Sources view inside Sources tab
+// Separate states for the two dropdowns to avoid conflicts
+const showHeaderMenu = ref(false)
+const showEmptyStateMenu = ref(false)
+
 const showSuggestedSources = ref(false)
-
 const showInlineEdit = ref(false)
 
 const subJurisdictionModalOpen = ref(false)
@@ -151,25 +152,41 @@ const loadJurisdiction = async (id: string) => {
   loading.value = false
 }
 
-const toggleAddSourceMenu = () => {
-  showAddSourceMenu.value = !showAddSourceMenu.value
+// --- DROPDOWN HANDLERS ---
+
+const closeAllMenus = () => {
+  showHeaderMenu.value = false
+  showEmptyStateMenu.value = false
 }
 
-const closeAddSourceMenu = () => {
-  showAddSourceMenu.value = false
+const toggleHeaderMenu = () => {
+  // Close others to ensure only one is open
+  showEmptyStateMenu.value = false
+  showHeaderMenu.value = !showHeaderMenu.value
+}
+
+const toggleEmptyStateMenu = () => {
+  showHeaderMenu.value = false
+  showEmptyStateMenu.value = !showEmptyStateMenu.value
 }
 
 const handleManualAddSource = () => {
-  closeAddSourceMenu()
+  closeAllMenus()
   openAddSourceModal()
 }
 
 const handleAiSuggestedSource = () => {
-  closeAddSourceMenu()
+  closeAllMenus()
   activeTab.value = 'sources'
   showSuggestedSources.value = true
 }
 
+const handleSearchClick = () => {
+  // Placeholder for search functionality
+  console.log('Search clicked')
+}
+
+// --- SUGGESTIONS ---
 
 const cancelSuggestions = () => {
   showSuggestedSources.value = false
@@ -185,7 +202,7 @@ const handleSuggestionsSaved = (count: number) => {
   Swal.fire('Sources Saved', `${count} sources added successfully.`, 'success')
 }
 
-
+// --- MODALS ---
 
 const openAddSourceModal = () => {
   addSourceModalOpen.value = true
@@ -399,7 +416,7 @@ onMounted(() => {
 
 
 <template>
-  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12" @click="closeAddSourceMenu">
+  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12" @click="closeAllMenus">
     <div v-if="loading" class="mx-auto max-w-6xl">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
@@ -565,7 +582,7 @@ onMounted(() => {
         </div>
       </section>
 
-      <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
+      <section class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
             <button
@@ -611,22 +628,30 @@ onMounted(() => {
 
             <div class="relative">
               <button
-                class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-4 py-2 text-sm font-medium text-white"
-                @click.stop="toggleAddSourceMenu"
+                class="btn--primary btn--with-icon"
+                @click.stop="toggleHeaderMenu"
               >
                 <Plus :size="16" /> Add Source
               </button>
               
               <div
-                v-if="showAddSourceMenu"
+                v-if="showHeaderMenu"
                 class="absolute right-0 top-full mt-2 w-[240px] rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50"
               >
                 <button
-                  @click="handleManualAddSource"
+                  @click="handleSearchClick"
                   class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
                 >
                    <Search :size="18" />
                    Search for sources.
+                </button>
+
+                <button
+                  @click="handleManualAddSource"
+                  class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#1F1F1F] hover:bg-gray-50"
+                >
+                   <FilePlus :size="18" />
+                   Add Source Manually
                 </button>
 
                 <button
@@ -657,22 +682,32 @@ onMounted(() => {
             
             <div class="relative mt-4 inline-block">
                <button
-                  class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
-                  @click.stop="toggleAddSourceMenu"
+                  class="btn--primary btn--with-icon"
+                  @click.stop="toggleEmptyStateMenu"
                 >
                   <Plus :size="16" /> Add Source
                 </button>
+                
                 <div
-                  v-if="showAddSourceMenu"
+                  v-if="showEmptyStateMenu"
                   class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[240px] rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50 text-left"
                 >
                   <button
-                    @click="handleManualAddSource"
+                    @click="handleSearchClick"
                     class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
                   >
                       <Search :size="18" />
                       Search for sources.
                   </button>
+
+                  <button
+                    @click="handleManualAddSource"
+                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#1F1F1F] hover:bg-gray-50"
+                  >
+                      <FilePlus :size="18" />
+                      Add Source Manually
+                  </button>
+
                   <button
                     @click="handleAiSuggestedSource"
                     class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
@@ -813,7 +848,7 @@ onMounted(() => {
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
           <button
-            class="flex items-center gap-2 rounded-full bg-[#401903] px-4 py-2 text-sm font-medium text-white"
+            class="btn--primary btn--with-icon"
             @click="openSubJurisdictionModal"
           >
             <Plus :size="16" /> Add Sub-jurisdiction
@@ -919,7 +954,7 @@ onMounted(() => {
 
               <button
                 type="submit"
-                class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white"
+                class="btn--primary"
               >
                 Create Sub-Jurisdiction
               </button>
@@ -1009,7 +1044,7 @@ onMounted(() => {
               <button
                 type="submit"
                 :disabled="sourcesLoading"
-                class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
+                class="btn--primary btn--with-icon disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <span v-if="sourcesLoading">Saving...</span>
                 <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
