@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import AuthLayout from '@/components/authentication/AuthLayout.vue'
 import { useAuthStore } from '@/stores/auth-store'
 
 type StatusType = 'success' | 'error'
@@ -101,62 +100,60 @@ const isSuccess = computed(() => statusType.value === 'success')
 </script>
 
 <template>
-  <AuthLayout container-class="p-6 lg:p-12">
-    <div class="flex min-h-[80vh] flex-col justify-center">
-      <div class="w-full max-w-xl space-y-5">
-        <div class="flex">
-          <div
-            class="flex h-16 w-16 items-center justify-center rounded-full"
-            :class="isSuccess ? 'bg-green-400' : 'bg-red-100'"
+  <div class="flex min-h-[80vh] flex-col justify-center">
+    <div class="w-full max-w-xl space-y-5">
+      <div class="flex">
+        <div
+          class="flex h-16 w-16 items-center justify-center rounded-full"
+          :class="isSuccess ? 'bg-green-400' : 'bg-red-100'"
+        >
+          <svg
+            v-if="isSuccess"
+            class="h-8 w-8 text-gray-100"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
-            <svg
-              v-if="isSuccess"
-              class="h-8 w-8 text-gray-100"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-            <svg
-              v-else
-              class="h-8 w-8 text-red-600"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M18 6 6 18" />
-              <path d="m6 6 12 12" />
-            </svg>
-          </div>
-        </div>
-
-        <div class="space-y-3">
-          <h1 class="text-3xl leading-tight font-semibold text-gray-900 lg:text-[40px]">
-            {{ statusCopy.title }}
-          </h1>
-          <p class="text-base font-medium text-gray-500 lg:text-lg">
-            {{ statusCopy.subtitle }}
-          </p>
-        </div>
-
-        <div class="space-y-3">
-          <button
-            type="button"
-            @click="handleRedirect"
-            class="btn btn--primary w-full"
-            :disabled="isNavigating"
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          <svg
+            v-else
+            class="h-8 w-8 text-red-600"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
-            <span>{{ isNavigating ? 'Redirecting...' : statusCopy.cta }}</span>
-          </button>
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
         </div>
       </div>
+
+      <div class="space-y-3">
+        <h1 class="text-3xl leading-tight font-semibold text-gray-900 lg:text-[40px]">
+          {{ statusCopy.title }}
+        </h1>
+        <p class="text-base font-medium text-gray-500 lg:text-lg">
+          {{ statusCopy.subtitle }}
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        <button
+          type="button"
+          @click="handleRedirect"
+          class="btn btn--primary w-full"
+          :disabled="isNavigating"
+        >
+          <span>{{ isNavigating ? 'Redirecting...' : statusCopy.cta }}</span>
+        </button>
+      </div>
     </div>
-  </AuthLayout>
+  </div>
 </template>

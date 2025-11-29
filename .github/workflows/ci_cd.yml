@@ -19,7 +19,7 @@ jobs:
   # ------------------------
   build:
     name: Build Frontend
-    runs-on: [self-hosted]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
@@ -63,7 +63,14 @@ jobs:
         run: npm run build
 
       - name: Archive build output
-        run: tar -czf build.tar.gz dist
+        run: |
+          if [ -f .env ]; then
+            tar -czf build.tar.gz dist .env
+            echo "Archived dist and .env"
+          else
+            tar -czf build.tar.gz dist
+            echo "Archived dist only (no .env for dev branch)"
+          fi
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -76,7 +83,7 @@ jobs:
   # -------------------------
   deploy_staging:
     name: CD - Frontend Deploy (Staging)
-    runs-on: [self-hosted]
+    runs-on: ubuntu-latest
     needs: build
     # Only deploy to staging when:
     # 1. PR from dev to staging is merged, OR
@@ -96,6 +103,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
+
+      - name: Extract artifact
+        run: tar -xzf build.tar.gz
 
       - name: Set up SSH and Deploy
         env:
@@ -151,7 +161,7 @@ jobs:
   # ------------------------
   deploy_production:
     name: CD - Frontend Deploy (Production)
-    runs-on: [self-hosted]
+    runs-on: ubuntu-latest
     needs: build
     # Only deploy to production when:
     # 1. PR from staging to main is merged, OR
@@ -171,6 +181,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
+
+      
+      - name: Extract artifact
+        run: tar -xzf build.tar.gz
 
       - name: Set up SSH and Deploy
         env:
@@ -225,7 +239,7 @@ jobs:
   # -------------------------
   notify_slack:
     name: Notify Slack
-    runs-on: [self-hosted]
+    runs-on: ubuntu-latest
     needs:
       - build
       - deploy_staging
