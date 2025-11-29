@@ -360,9 +360,13 @@ const deleteJurisdiction = async () => {
   if (!confirm.isConfirmed) return
 
   await jurisdictionStore.deleteJurisdiction(jurisdictionId.value, activeOrganizationId.value)
-
+  
+  // Wait a moment and check the store
+  setTimeout(() => {
+    console.log('🕒 After deletion - Archived:', jurisdictionStore.archivedJurisdictions)
+  }, 1000)
+  
   Swal.fire('Deleted!', '', 'success')
-
   goBack()
 }
 
@@ -546,11 +550,6 @@ onMounted(() => {
             <button @click="deleteJurisdiction" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
               Delete Jurisdiction
             </button>
-            <button @click="router.push('/dashboard/jurisdictions/archive')"
-              class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
-              View Archive
-            </button>
-
           </div>
         </div>
       </header>

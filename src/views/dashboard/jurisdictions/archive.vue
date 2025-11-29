@@ -10,12 +10,14 @@ const jurisdictionStore = useJurisdictionStore()
 const orgStore = useOrganizationStore()
 
 const orgId: string | undefined = orgStore.currentOrganizationId || undefined
-
 onMounted(() => {
-  if (orgId) {
-    jurisdictionStore.fetchJurisdictions(undefined, orgId)
-  }
+  console.log('🏢 Archived component mounted, orgId:', orgId)
+
+  jurisdictionStore.fetchArchived(undefined, orgId)
+
+  console.log('📊 Archived items from store:', jurisdictionStore.archivedJurisdictions)
 })
+
 
 const restoreItem = async (id: string) => {
   const confirm = await Swal.fire({
@@ -41,15 +43,34 @@ const restoreItem = async (id: string) => {
 
 <template>
   <main class="p-8">
-    <h1 class="mb-6 text-2xl font-bold">Archived Jurisdictions</h1>
+    <!-- Page Title + Go Back -->
+    <div class="mb-6 flex items-center justify-between">
+      <h1 class="text-2xl font-bold">Archived Jurisdictions</h1>
 
-    <div
-      v-if="jurisdictionStore.archivedJurisdictions.length === 0"
-      class="rounded-lg border border-dashed p-6 text-center text-gray-500"
-    >
-      No archived jurisdictions.
+      <button
+        class="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+        @click="router.back()"
+      >
+        ← Go Back
+      </button>
     </div>
 
+    <!-- EMPTY STATE -->
+    <div
+      v-if="jurisdictionStore.archivedJurisdictions.length === 0"
+      class="flex flex-col items-center justify-center rounded-lg border border-dashed p-10 text-center text-gray-500"
+    >
+      <p class="mb-4 text-lg">No archived jurisdictions.</p>
+
+      <button
+        class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-black"
+        @click="router.back()"
+      >
+        ← Go Back
+      </button>
+    </div>
+
+    <!-- LIST STATE -->
     <div v-else class="space-y-4">
       <div
         v-for="j in jurisdictionStore.archivedJurisdictions"
@@ -73,6 +94,16 @@ const restoreItem = async (id: string) => {
             Restore
           </button>
         </div>
+      </div>
+
+      <!-- Go Back below the list -->
+      <div class="pt-4">
+        <button
+          class="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          @click="router.back()"
+        >
+          ← Go Back
+        </button>
       </div>
     </div>
   </main>
