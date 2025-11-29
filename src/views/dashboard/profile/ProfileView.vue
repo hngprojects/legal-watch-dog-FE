@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import Swal from 'sweetalert2'
 import { Input } from '@/components/ui/input'
-import { userService } from '@/api/user'
+import { userService, type UpdateProfilePayload } from '@/api/user'
 import { useAuthStore } from '@/stores/auth-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
@@ -34,6 +34,10 @@ const editForm = ref({
   role: '',
   email: '',
 })
+
+const fileInputRef = ref<HTMLInputElement | null>(null)
+const uploadingImage = ref(false)
+const isSaving = ref(false)
 
 const fallbackNameFromEmail = computed(() => {
   const email = userProfile.value?.email || ''
@@ -191,26 +195,159 @@ watch(
 
 const openEditModal = () => {
   showEditModal.value = true
-  // Swal.fire({
-  //   icon: 'info',
-  //   title: 'Profile editing unavailable',
-  //   text: 'Profile updates are temporarily disabled. Please check back soon.',
-  //   confirmButtonColor: '#401903',
-  // })
+}
+
+// const triggerFileInput = () => {
+//   fileInputRef.value?.click()
+// }
+
+const handleImageUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (!file) return
+  isSaving.value = true
+
+  // Validate file type
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  if (!validTypes.includes(file.type)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid File Type',
+      text: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP).',
+      confirmButtonColor: '#401903',
+    })
+    isSaving.value = false
+    return
+  }
+
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    Swal.fire({
+      icon: 'error',
+      title: 'File Too Large',
+      text: 'Image size must be less than 5MB.',
+      confirmButtonColor: '#401903',
+    })
+    isSaving.value = false
+    return
+  }
+
+  try {
+    uploadingImage.value = true
+    
+    // Upload image to server
+    const response = await userService.uploadProfilePicture(file)
+    
+    // Get the uploaded image URL
+    const uploadedUrl = response.data?.data?.profile_picture_url
+    
+    if (uploadedUrl && userProfile.value) {
+      // Update local profile preview
+      userProfile.value = {
+        ...userProfile.value,
+        avatar_url: uploadedUrl,
+      }
+      
+      // Update auth store
+      if (authStore.user) {
+        authStore.user = {
+          ...authStore.user,
+          avatar_url: uploadedUrl,
+        }
+      }
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Profile Picture Updated',
+        text: 'Your profile picture has been successfully uploaded.',
+        confirmButtonColor: '#401903',
+      })
+    }
+  } catch (error) {
+    console.error('Image upload error:', error)
+    const err = error as { response?: { data?: { message?: string; error?: string } } }
+    const errorMessage = err?.response?.data?.message || 
+                        err?.response?.data?.error ||
+                        'Failed to upload profile picture. Please try again.'
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Upload Failed',
+      text: errorMessage,
+      confirmButtonColor: '#401903',
+    })
+  } finally {
+    uploadingImage.value = false
+    isSaving.value = false
+    // Reset file input
+    if (target) target.value = ''
+  }
 }
 
 const closeEditModal = () => {
   showEditModal.value = false
 }
 
-const saveEdits = () => {
-  Swal.fire({
-    icon: 'info',
-    title: 'Profile editing unavailable',
-    text: 'Profile updates are temporarily disabled. Please check back soon.',
-    confirmButtonColor: '#401903',
-  })
-  closeEditModal()
+const saveEdits = async () => {
+  try {
+    if (!editForm.value.name.trim()) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Name is required.',
+        confirmButtonColor: '#401903',
+      })
+      return
+    }
+
+    isSaving.value = true
+
+    const payload: UpdateProfilePayload = {
+      name: editForm.value.name.trim(),
+    }
+
+    const response = await userService.updateProfile(payload)
+
+    // console.log(response)
+
+    if (response.data?.data) {
+      userProfile.value = {
+        ...userProfile.value,
+        ...response.data.data,
+      }
+
+      if (authStore.user) {
+        authStore.user = {
+          ...authStore.user,
+          name: response.data.data.name,
+        }
+      }
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Profile Updated',
+      text: 'Your profile has been successfully updated.',
+      confirmButtonColor: '#401903',
+    })
+
+    closeEditModal()
+  } catch (error) {
+    const err = error as { response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } } }    
+    
+    const errorMessage = err?.response?.data?.message || err?.response?.data?.error || 'Failed to update profile. Please try again.'
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Update Failed',
+      text: errorMessage,
+      confirmButtonColor: '#401903',
+    })
+  } finally {
+    isSaving.value = false
+  }
 }
 </script>
 
@@ -245,11 +382,19 @@ const saveEdits = () => {
               <div
                 class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
               >
-                {{ avatarInitials }}
+                <img v-if="userProfile?.avatar_url" :src="userProfile.avatar_url" alt="Profile" class="h-full w-full rounded-full object-cover" />
+                <span v-else>{{ avatarInitials }}</span>
                 <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" @click="openEditModal">
                   <img :src="editIcon" alt="Edit Icon">
                 </div>
               </div>
+              <!-- <input
+                ref="fileInputRef"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="handleImageUpload"
+              /> -->
               <!-- <div class="space-y-3"> -->
                 <div class="flex flex-col items-center gap-2">
                   <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
@@ -365,12 +510,28 @@ const saveEdits = () => {
              <div
                 class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
               >
-                {{ avatarInitials }}
-                <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" @click="saveEdits">
-                  <img :src="editIcon" alt="Edit Icon">
+                <img v-if="userProfile?.avatar_url" :src="userProfile.avatar_url" alt="Profile" class="h-full w-full rounded-full object-cover" />
+                <span v-else>{{ avatarInitials }}</span>
+                <div 
+                  class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" 
+                  :class="{ 'opacity-50 cursor-not-allowed': uploadingImage }"
+                  >
+                  <!-- @click="uploadingImage ? null : triggerFileInput()" -->
+                  <svg v-if="uploadingImage" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <img v-else :src="editIcon" alt="Edit Icon">
                 </div>
               </div>
           </div>
+          <input
+            ref="fileInputRef"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            @change="handleImageUpload"
+          />
 
           <form class="space-y-5" @submit.prevent="saveEdits">
             <div class="space-y-3">
@@ -404,8 +565,9 @@ const saveEdits = () => {
                 id="edit-email"
                 v-model="editForm.email"
                 type="email"
+                readonly
                 placeholder="you@example.com"
-                class="h-12 rounded-md border-[#E5E7EB] text-sm text-[#111827] mt-1.5"
+                class="h-12 rounded-md outline-none focus-visible:ring-0 focus-visible:border-input text-sm text-[#111827] mt-1.5 cursor-not-allowed"
               />
             </div>
             <div class="flex items-center justify-end gap-3 pt-4">
@@ -419,8 +581,10 @@ const saveEdits = () => {
               <button
                 type="submit"
                 class="cursor-pointer rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
+                :disabled="isSaving"
               >
-                Save
+              <span v-if="isSaving">Saving...</span>
+              <span v-else>Save</span>
               </button>
             </div>
           </form>
