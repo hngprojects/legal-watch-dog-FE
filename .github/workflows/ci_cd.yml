@@ -97,6 +97,9 @@ jobs:
         with:
           name: frontend-build
 
+      - name: Extract artifact
+        run: tar -xzf build.tar.gz
+
       - name: Set up SSH and Deploy
         env:
           SERVER_PASS: ${{ secrets.STAGING_PASS }}
@@ -171,6 +174,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
+
+      
+      - name: Extract artifact
+        run: tar -xzf build.tar.gz
 
       - name: Set up SSH and Deploy
         env:
