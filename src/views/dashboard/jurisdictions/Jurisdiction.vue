@@ -41,7 +41,6 @@ const projectStore = useProjectStore()
 const orgStore = useOrganizationStore()
 const sourceStore = useSourceStore()
 
-
 const activeOrganizationId = computed<string>(() => {
   if (typeof route.query.organizationId === 'string') return route.query.organizationId
   return orgStore.currentOrganizationId || ''
@@ -49,9 +48,7 @@ const activeOrganizationId = computed<string>(() => {
 
 const organizationName = computed(() => {
   if (!activeOrganizationId.value) return ''
-  return orgStore.organizations.find(
-    (org) => org.id === activeOrganizationId.value
-  )?.name || ''
+  return orgStore.organizations.find((org) => org.id === activeOrganizationId.value)?.name || ''
 })
 
 const jurisdictionId = computed(() => route.params.id as string)
@@ -235,14 +232,12 @@ const cancelSuggestions = () => {
   showSuggestedSources.value = false
 }
 
-const handleSuggestionsSaved = (count: number) => {
-  if (count === 0) {
-     showSuggestedSources.value = false
-     return
-  }
-
+const handleSuggestionsSaved = async (count: number) => {
   showSuggestedSources.value = false
-  Swal.fire('Sources Saved', `${count} sources added successfully.`, 'success')
+  if (count > 0) {
+    await sourceStore.fetchSources(jurisdiction.value!.id)
+    Swal.fire('Success', `${count} source${count > 1 ? 's' : ''} added successfully!`, 'success')
+  }
 }
 
 // --- MODALS ---
@@ -332,9 +327,11 @@ const deleteSource = async (src: Source) => {
   if (ok) Swal.fire('Deleted', '', 'success')
 }
 
-
 const goBack = () => {
-  router.push({ name: 'organization-projects', params: { organizationId: activeOrganizationId.value } })
+  router.push({
+    name: 'organization-projects',
+    params: { organizationId: activeOrganizationId.value },
+  })
 }
 
 const startEdit = () => {
@@ -448,8 +445,6 @@ onMounted(() => {
 })
 </script>
 
-
-
 <template>
   <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12" @click="closeAllMenus">
     <div v-if="loading" class="mx-auto max-w-6xl">
@@ -460,7 +455,10 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-else-if="!jurisdiction" class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm">
+    <div
+      v-else-if="!jurisdiction"
+      class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm"
+    >
       <h1 class="text-2xl font-semibold text-gray-900">Jurisdiction not found</h1>
       <button @click="goBack" class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline">
         Back to Projects
@@ -481,7 +479,12 @@ onMounted(() => {
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organization-projects', params: { organizationId: activeOrganizationId } }">
+                <RouterLink
+                  :to="{
+                    name: 'organization-projects',
+                    params: { organizationId: activeOrganizationId },
+                  }"
+                >
                   {{ organizationName || 'Organization' }}
                 </RouterLink>
               </BreadcrumbLink>
@@ -534,10 +537,7 @@ onMounted(() => {
 
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button
-              type="button"
-              class="btn--primary btn--sm"
-            >
+            <button type="button" class="btn--primary btn--sm">
               <Settings :size="18" />
             </button>
           </DropdownMenuTrigger>
@@ -566,9 +566,20 @@ onMounted(() => {
             </div>
 
             <div>
+<<<<<<< Updated upstream
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Monitoring Instructions</label>
               <textarea v-model="editForm.prompt" rows="3"
                 class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+=======
+              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"
+                >Monitoring Instructions</label
+              >
+              <textarea
+                v-model="editForm.prompt"
+                rows="3"
+                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
+>>>>>>> Stashed changes
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
@@ -591,21 +602,29 @@ onMounted(() => {
           <p v-if="jurisdiction.description" class="text-base leading-relaxed text-[#4B5563]">
             {{ jurisdiction.description }}
           </p>
-          <p v-if="lastUpdatedText" class="text-sm text-gray-400">
-            Updated {{ lastUpdatedText }}
-          </p>
+          <p v-if="lastUpdatedText" class="text-sm text-gray-400">Updated {{ lastUpdatedText }}</p>
         </div>
       </section>
 
       <section class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
+<<<<<<< Updated upstream
             <button @click="activeTab = 'analysis'" :class="[
               'relative pb-4 text-sm font-semibold transition-colors',
               activeTab === 'analysis'
                 ? 'text-[#1F1F1F]'
                 : 'text-gray-500 hover:text-[#1F1F1F]',
             ]">
+=======
+            <button
+              @click="activeTab = 'analysis'"
+              :class="[
+                'relative pb-4 text-sm font-semibold transition-colors',
+                activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
+              ]"
+            >
+>>>>>>> Stashed changes
               Analysis
               <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
             </button>
@@ -614,9 +633,7 @@ onMounted(() => {
               @click="activeTab = 'sources'"
               :class="[
                 'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'sources'
-                  ? 'text-[#1F1F1F]'
-                  : 'text-gray-500 hover:text-[#1F1F1F]',
+                activeTab === 'sources' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
               ]"
             >
               Sources
@@ -633,16 +650,13 @@ onMounted(() => {
             </div>
 
             <div class="relative">
-              <button
-                class="btn--lg btn--primary btn--with-icon"
-                @click.stop="toggleHeaderMenu"
-              >
+              <button class="btn--lg btn--primary btn--with-icon" @click.stop="toggleHeaderMenu">
                 <Plus :size="16" /> Add Source
               </button>
 
               <div
                 v-if="showHeaderMenu"
-                class="absolute right-0 top-full mt-2 w-60 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50"
+                class="absolute top-full right-0 z-50 mt-2 w-60 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5"
               >
                 <!-- <button
                   @click="handleSearchClick"
@@ -652,20 +666,14 @@ onMounted(() => {
                    Search for sources.
                 </button> -->
 
-                <button
-                  @click="handleManualAddSource"
-                  class="btn btn--lg btn--with-icon"
-                >
-                   <FilePlus :size="18" />
-                   Add Source Manually
+                <button @click="handleManualAddSource" class="btn btn--lg btn--with-icon">
+                  <FilePlus :size="18" />
+                  Add Source Manually
                 </button>
 
-                <button
-                  @click="handleAiSuggestedSource"
-                  class="btn btn--md btn--with-icon"
-                >
-                   <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-                   AI Suggested sources
+                <button @click="handleAiSuggestedSource" class="btn btn--md btn--with-icon">
+                  <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
+                  AI Suggested sources
                 </button>
               </div>
             </div>
@@ -691,18 +699,18 @@ onMounted(() => {
               <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
 
               <div class="relative mt-4 inline-block">
-                 <button
-                    class="btn--sm btn--primary btn--with-icon"
-                    @click.stop="toggleEmptyStateMenu"
-                  >
-                    <Plus :size="16" /> Add Source
-                  </button>
+                <button
+                  class="btn--sm btn--primary btn--with-icon"
+                  @click.stop="toggleEmptyStateMenu"
+                >
+                  <Plus :size="16" /> Add Source
+                </button>
 
-                  <div
-                    v-if="showEmptyStateMenu"
-                    class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-60 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50 text-left"
-                  >
-                    <!-- <button
+                <div
+                  v-if="showEmptyStateMenu"
+                  class="absolute top-full left-1/2 z-50 mt-2 w-60 -translate-x-1/2 rounded-xl bg-white p-1 text-left shadow-lg ring-1 ring-black/5"
+                >
+                  <!-- <button
                       @click="handleSearchClick"
                       class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
                     >
@@ -710,26 +718,24 @@ onMounted(() => {
                         Search for sources.
                     </button> -->
 
-                    <button
-                      @click="handleManualAddSource"
-                      class="btn btn--sm btn--with-icon"
-                    >
-                        <FilePlus :size="18" />
-                        Add Source Manually
-                    </button>
+                  <button @click="handleManualAddSource" class="btn btn--sm btn--with-icon">
+                    <FilePlus :size="18" />
+                    Add Source Manually
+                  </button>
 
-                    <button
-                      @click="handleAiSuggestedSource"
-                      class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
-                    >
-                        <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-                        AI Suggested sources
-                    </button>
-                  </div>
-               </div>
+                  <button
+                    @click="handleAiSuggestedSource"
+                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
+                  >
+                    <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
+                    AI Suggested sources
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div v-else class="space-y-3">
+<<<<<<< Updated upstream
             <div
               v-for="source in sources"
               :key="source.id"
@@ -775,131 +781,199 @@ onMounted(() => {
                 </div>
               </div>
 
+=======
+>>>>>>> Stashed changes
               <div
-                v-if="scrapeErrors[source.id]"
-                class="mt-2 text-xs text-red-600"
+                v-for="source in sources"
+                :key="source.id"
+                class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm"
               >
-                {{ scrapeErrors[source.id] }}
-              </div>
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
+                    <p class="text-xs text-gray-500">{{ source.url }}</p>
+                    <p class="text-[11px] tracking-wide text-gray-400 uppercase">
+                      {{ source.source_type }} • {{ source.scrape_frequency }}
+                    </p>
+                  </div>
 
-              <div
-                v-if="expandedSources[source.id]"
-                class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
-              >
-                <div v-if="revisionsLoading[source.id]" class="text-sm text-gray-600">
-                  Loading revisions...
+                  <div class="flex flex-wrap items-center justify-end gap-2">
+                    <button
+                      class="btn--sm btn--primary"
+                      :disabled="scraping[source.id]"
+                      @click="triggerScrape(source)"
+                    >
+                      <span v-if="scraping[source.id]">Scraping...</span>
+                      <span v-else>Scrape Now</span>
+                    </button>
+
+                    <button
+                      class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      @click="toggleSourceExpansion(source.id)"
+                    >
+                      {{ expandedSources[source.id] ? 'Hide History' : 'View History' }}
+                    </button>
+
+                    <button
+                      class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      @click="startEditSource(source)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                      @click="deleteSource(source)"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
 
-                <div v-else-if="revisionsError[source.id]" class="text-sm text-red-600">
-                  {{ revisionsError[source.id] }}
+                <div v-if="scrapeErrors[source.id]" class="mt-2 text-xs text-red-600">
+                  {{ scrapeErrors[source.id] }}
                 </div>
 
-                <div v-else-if="revisions[source.id]?.length" class="space-y-2">
-                  <div
-                    v-for="rev in revisions[source.id]"
-                    :key="rev.id"
-                    class="rounded-lg border border-gray-200 bg-white px-3 py-2"
-                  >
-                    <div class="flex items-start justify-between gap-3">
-                      <div class="space-y-1">
-                        <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                          Scraped {{ new Date(rev.scraped_at).toLocaleString() }}
-                        </p>
-                        <p class="text-sm font-semibold text-gray-900">
-                          {{ rev.ai_summary || rev.extracted_data?.title || 'No summary available' }}
-                        </p>
-                        <p
-                          v-if="rev.ai_confidence_score !== undefined && rev.ai_confidence_score !== null"
-                          class="text-[11px] text-gray-500"
+                <div
+                  v-if="expandedSources[source.id]"
+                  class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
+                >
+                  <div v-if="revisionsLoading[source.id]" class="text-sm text-gray-600">
+                    Loading revisions...
+                  </div>
+
+                  <div v-else-if="revisionsError[source.id]" class="text-sm text-red-600">
+                    {{ revisionsError[source.id] }}
+                  </div>
+
+                  <div v-else-if="revisions[source.id]?.length" class="space-y-2">
+                    <div
+                      v-for="rev in revisions[source.id]"
+                      :key="rev.id"
+                      class="rounded-lg border border-gray-200 bg-white px-3 py-2"
+                    >
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="space-y-1">
+                          <p
+                            class="text-[11px] font-semibold tracking-wide text-gray-500 uppercase"
+                          >
+                            Scraped {{ new Date(rev.scraped_at).toLocaleString() }}
+                          </p>
+                          <p class="text-sm font-semibold text-gray-900">
+                            {{
+                              rev.ai_summary || rev.extracted_data?.title || 'No summary available'
+                            }}
+                          </p>
+                          <p
+                            v-if="
+                              rev.ai_confidence_score !== undefined &&
+                              rev.ai_confidence_score !== null
+                            "
+                            class="text-[11px] text-gray-500"
+                          >
+                            Confidence: {{ Math.round(rev.ai_confidence_score * 100) }}%
+                          </p>
+                        </div>
+
+                        <span
+                          class="rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide uppercase"
+                          :class="
+                            rev.was_change_detected
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-600'
+                          "
                         >
-                          Confidence: {{ Math.round(rev.ai_confidence_score * 100) }}%
-                        </p>
+                          {{ rev.was_change_detected ? 'Change Detected' : 'No Change' }}
+                        </span>
                       </div>
 
-                      <span
-                        class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide"
-                        :class="rev.was_change_detected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                      <div
+                        v-if="rev.ai_markdown_summary || rev.ai_summary"
+                        class="mt-2 text-[12px] whitespace-pre-line text-gray-700"
                       >
-                        {{ rev.was_change_detected ? 'Change Detected' : 'No Change' }}
-                      </span>
-                    </div>
+                        {{ rev.ai_markdown_summary || rev.ai_summary }}
+                      </div>
 
-                    <div v-if="rev.ai_markdown_summary || rev.ai_summary" class="mt-2 text-[12px] text-gray-700 whitespace-pre-line">
-                      {{ rev.ai_markdown_summary || rev.ai_summary }}
+                      <div
+                        v-if="rev.extracted_data"
+                        class="mt-2 rounded-lg bg-gray-50 p-2 text-[11px] text-gray-700"
+                      >
+                        <div
+                          class="text-[10px] font-semibold tracking-wide text-gray-500 uppercase"
+                        >
+                          Extracted Data
+                        </div>
+                        <pre class="leading-5 whitespace-pre-wrap">{{
+                          formatExtractedData(rev.extracted_data)
+                        }}</pre>
+                      </div>
                     </div>
 
                     <div
-                      v-if="rev.extracted_data"
-                      class="mt-2 rounded-lg bg-gray-50 p-2 text-[11px] text-gray-700"
+                      v-if="getPaginationForSource(source.id)"
+                      class="flex items-center justify-between border-t border-gray-200 pt-2 text-[12px] text-gray-600"
                     >
-                      <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                        Extracted Data
+                      <span>
+                        Page {{ getPaginationForSource(source.id)?.page }} of
+                        {{ getPaginationForSource(source.id)?.total_pages }}
+                      </span>
+
+                      <div class="flex items-center gap-2">
+                        <button
+                          class="rounded border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          :disabled="
+                            revisionsLoading[source.id] ||
+                            (getPaginationForSource(source.id)?.page ?? 1) <= 1
+                          "
+                          @click="
+                            fetchRevisionsForSource(
+                              source.id,
+                              (getPaginationForSource(source.id)?.page ?? 1) - 1,
+                            )
+                          "
+                        >
+                          Previous
+                        </button>
+
+                        <button
+                          class="rounded border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          :disabled="
+                            revisionsLoading[source.id] ||
+                            (getPaginationForSource(source.id)?.page ?? 1) >=
+                              (getPaginationForSource(source.id)?.total_pages ?? 1)
+                          "
+                          @click="
+                            fetchRevisionsForSource(
+                              source.id,
+                              (getPaginationForSource(source.id)?.page ?? 1) + 1,
+                            )
+                          "
+                        >
+                          Next
+                        </button>
                       </div>
-                      <pre class="whitespace-pre-wrap leading-5">{{ formatExtractedData(rev.extracted_data) }}</pre>
                     </div>
                   </div>
 
-                  <div
-                    v-if="getPaginationForSource(source.id)"
-                    class="flex items-center justify-between border-t border-gray-200 pt-2 text-[12px] text-gray-600"
-                  >
-                    <span>
-                      Page {{ getPaginationForSource(source.id)?.page }} of
-                      {{ getPaginationForSource(source.id)?.total_pages }}
-                    </span>
-
-                    <div class="flex items-center gap-2">
-                      <button
-                        class="rounded border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-                        :disabled="
-                          revisionsLoading[source.id] || (getPaginationForSource(source.id)?.page ?? 1) <= 1
-                        "
-                        @click="
-                          fetchRevisionsForSource(
-                            source.id,
-                            (getPaginationForSource(source.id)?.page ?? 1) - 1,
-                          )
-                        "
-                      >
-                        Previous
-                      </button>
-
-                      <button
-                        class="rounded border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-                        :disabled="
-                          revisionsLoading[source.id] ||
-                          (getPaginationForSource(source.id)?.page ?? 1) >=
-                            (getPaginationForSource(source.id)?.total_pages ?? 1)
-                        "
-                        @click="
-                          fetchRevisionsForSource(
-                            source.id,
-                            (getPaginationForSource(source.id)?.page ?? 1) + 1,
-                          )
-                        "
-                      >
-                        Next
-                      </button>
-                    </div>
+                  <div v-else class="text-sm text-gray-600">
+                    No revisions found for this source yet.
                   </div>
-                </div>
-
-                <div v-else class="text-sm text-gray-600">
-                  No revisions found for this source yet.
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        </div>
-
         <div v-else class="p-6">
-
           <div v-if="showSuggestedSources">
             <SuggestedSources
+              :jurisdiction-id="jurisdiction?.id || ''"
+              :jurisdiction-name="jurisdiction?.name || ''"
+              :jurisdiction-description="jurisdiction?.description || ''"
+              :project-description="projectName"
               @cancel="cancelSuggestions"
               @save="handleSuggestionsSaved"
+              @sources-added="sourceStore.fetchSources(jurisdiction?.id || '')"
             />
           </div>
 
@@ -907,11 +981,18 @@ onMounted(() => {
             <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Data Sources</h3>
 
             <div v-if="sourcesLoading" class="space-y-2">
-              <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
+              <div
+                v-for="n in 3"
+                :key="n"
+                class="h-12 w-full animate-pulse rounded-lg bg-gray-100"
+              />
             </div>
 
             <div v-else>
-              <div v-if="sourcesError" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div
+                v-if="sourcesError"
+                class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+              >
                 {{ sourcesError }}
               </div>
 
@@ -963,10 +1044,7 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between gap-4">
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
-          <button
-            class="btn--primary btn--with-icon btn--lg"
-            @click="openSubJurisdictionModal"
-          >
+          <button class="btn--primary btn--with-icon btn--lg" @click="openSubJurisdictionModal">
             <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>
@@ -1038,12 +1116,7 @@ onMounted(() => {
                 Cancel
               </button>
 
-              <button
-                type="submit"
-                class="btn--primary"
-              >
-                Create Sub-Jurisdiction
-              </button>
+              <button type="submit" class="btn--primary">Create Sub-Jurisdiction</button>
             </div>
           </form>
         </div>

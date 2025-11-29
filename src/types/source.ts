@@ -68,3 +68,21 @@ export type UpdateSourcePayload = Partial<
     | 'scraping_rules'
   >
 >
+
+export interface SuggestedSource {
+  title: string
+  url: string
+  snippet: string
+  confidence_reason: string
+  is_official: boolean
+}
+
+export interface SuggestSourcesRequest {
+  jurisdiction_name: string
+  jurisdiction_description: string  
+  project_description: string 
+}
+
+export interface SuggestSourcesResponse {
+  sources: SuggestedSource[]
+}
