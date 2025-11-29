@@ -64,6 +64,14 @@ const organizationName = computed(() => {
 const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
 
+// FIX: Removed '|| project?.name' because the type definition only has 'title'
+const projectName = computed(() => {
+  const projId = jurisdiction.value?.project_id
+  if (!projId) return ''
+  const project = projectStore.projects.find((p) => p.id === projId)
+  return project?.title || ''
+})
+
 const loading = ref(true)
 const activeTab = ref<'analysis' | 'sources'>('analysis')
 
@@ -471,6 +479,21 @@ onMounted(() => {
             </BreadcrumbItem>
 
             <BreadcrumbSeparator />
+
+            <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
+              <BreadcrumbLink as-child>
+                <RouterLink
+                  :to="{
+                    name: 'project-detail',
+                    params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
+                  }"
+                >
+                  {{ projectName }}
+                </RouterLink>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+
+            <BreadcrumbSeparator v-if="jurisdiction.project_id && projectName" />
 
             <template v-if="parentJurisdiction">
               <BreadcrumbItem>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import Swal from 'sweetalert2'
@@ -11,10 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DropdownMenu } from '@/components/ui/dropdown-menu'
+import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
+import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
+import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
+import { EllipsisVertical } from 'lucide-vue-next'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useInvitationStore } from '@/stores/invitation-store'
+import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
 import illustrationImg from '@/assets/Images/dashboardillustration.png'
+import type { Organization } from '@/types/organization'
 
 const organizationStore = useOrganizationStore()
 const { organizations, loading, error } = storeToRefs(organizationStore)
@@ -28,13 +35,18 @@ const formData = ref({
   name: '',
   industry: '',
 })
+const editDialogOpen = ref(false)
+const editingOrg = ref<Organization | null>(null)
+const editSaving = ref(false)
+const editError = ref<string | null>(null)
 // inviteOrgNames kept for potential future use but not populated here
 // const inviteOrgNames = ref<Record<string, string>>({})
 
 const ensureUserId = async () => {
-  if (authStore.user?.id) return authStore.user.id
+  const immediateId = authStore.user?.id || authStore.user?.user_id
+  if (immediateId) return immediateId
   const loadedUser = await authStore.loadCurrentUser()
-  return loadedUser?.id
+  return loadedUser?.id || (loadedUser as { user_id?: string } | null)?.user_id || null
 }
 
 const organizationName = () => 'Organization Invitation'
@@ -100,6 +112,56 @@ const acceptInvite = async (token: string) => {
   }
 }
 
+const hasMoreOrganizations = computed(() => organizationStore.hasMoreOrganizations)
+
+const loadMoreOrganizations = async () => {
+  const userId = await ensureUserId()
+  if (!userId) {
+    organizationStore.setError('User information missing. Please re-login.')
+    return
+  }
+  await organizationStore.fetchMoreOrganizations(userId)
+}
+
+const openEditOrganization = (org: Organization) => {
+  editingOrg.value = org
+  editError.value = null
+  editDialogOpen.value = true
+}
+
+const handleEditSave = async (payload: { name: string; industry: string }) => {
+  if (!editingOrg.value) return
+  editSaving.value = true
+  editError.value = null
+  const updated = await organizationStore.updateOrganization(editingOrg.value.id, payload)
+  if (updated) {
+    editDialogOpen.value = false
+    await Swal.fire('Updated', 'Organization updated successfully.', 'success')
+  } else if (organizationStore.error) {
+    editError.value = organizationStore.error
+  }
+  editSaving.value = false
+}
+
+const confirmDeleteOrganization = async (org: Organization) => {
+  const result = await Swal.fire({
+    title: 'Delete organization?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d33',
+  })
+  if (!result.isConfirmed) return
+  const deleted = await organizationStore.deleteOrganization(org.id)
+  if (deleted) {
+    await Swal.fire('Deleted', 'Organization removed successfully.', 'success')
+  } else if (organizationStore.error) {
+    await Swal.fire('Could not delete', organizationStore.error, 'error')
+  }
+}
+
 onMounted(async () => {
   const userId = await ensureUserId()
   if (!userId) {
@@ -114,10 +176,59 @@ onMounted(async () => {
 <template>
   <main class="min-h-screen flex-1 bg-gray-50 ">
     <div
+      v-if="inviteLoading || inviteError || invitations.length"
+      class="mb-8"
+    >
+      <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Invitations</p>
+            <p class="text-sm text-gray-600">Organizations you have been invited to join.</p>
+          </div>
+          <button
+            @click="refreshInvitations"
+            class="btn--link"
+          >
+            Refresh
+          </button>
+        </div>
+
+        <div v-if="inviteLoading" class="space-y-3">
+          <div v-for="n in 3" :key="n" class="h-12 animate-pulse rounded-lg bg-gray-100"></div>
+        </div>
+        <div v-else-if="inviteError" class="text-sm text-red-600">
+          {{ inviteError }}
+        </div>
+        <div v-else-if="!invitations.length" class="text-sm text-gray-600">
+          No pending invitations.
+        </div>
+        <div v-else class="space-y-3">
+          <article
+            v-for="invite in invitations"
+            :key="invite.token"
+            class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+          >
+            <div>
+              <p class="text-sm font-semibold text-gray-900">
+                {{ invite.organization_name || organizationName() }}
+              </p>
+              <p class="text-xs text-gray-500">Role: {{ invite.role_name || invite.role || 'Member' }}</p>
+            </div>
+            <button
+              @click="acceptInvite(invite.token)"
+              class="btn--primary btn--lg"
+            >
+              Accept
+            </button>
+          </article>
+        </div>
+      </div>
+    </div>
+    <div
       v-if="!loading && organizations.length === 0 && !error"
       class="mx-auto max-w-4xl py-16 text-center lg:py-24 flex flex-col items-center justify-center"
     >
-    <img :src="illustrationImg" alt="" srcset="">
+      <img :src="illustrationImg" alt="" srcset="">
       <h1 class="mb-4 text-3xl font-bold text-gray-900 lg:text-4xl">No Organization Yet</h1>
       <p class="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-gray-600">
         Create an organization to start grouping projects and jurisdictions.<br
@@ -125,7 +236,7 @@ onMounted(async () => {
         />
         Projects and jurisdictions are scoped within organizations.
       </p>
-      <button @click="openCreateModal" class="btn--primary btn--with-icon">
+      <button @click="openCreateModal" class="btn--primary btn--lg btn--with-icon">
         <svg
           width="20"
           height="20"
@@ -157,13 +268,9 @@ onMounted(async () => {
         class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
       >
         <div>
-          <!-- <p class="text-sm tracking-wide text-[#9CA3AF] uppercase">Organization Workspace</p> -->
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Organizations</h1>
-          <!-- <p class="mt-1 text-sm text-gray-600">
-            Manage your organizations and dive into their projects.
-          </p> -->
         </div>
-        <button @click="openCreateModal" class="btn--primary btn--with-icon">
+        <button @click="openCreateModal" class="btn--primary btn--lg btn--with-icon">
           <svg
             width="20"
             height="20"
@@ -190,53 +297,6 @@ onMounted(async () => {
         </button>
       </div>
 
-      <div class="mb-8 hidden">
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
-          <div class="mb-4 flex items-center justify-between">
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Invitations</p>
-              <p class="text-sm text-gray-600">Organizations you have been invited to join.</p>
-            </div>
-            <button
-              @click="refreshInvitations"
-              class="btn--link"
-            >
-              Refresh
-            </button>
-          </div>
-
-          <div v-if="inviteLoading" class="space-y-3">
-            <div v-for="n in 3" :key="n" class="h-12 animate-pulse rounded-lg bg-gray-100"></div>
-          </div>
-          <div v-else-if="inviteError" class="text-sm text-red-600">
-            {{ inviteError }}
-          </div>
-          <div v-else-if="!invitations.length" class="text-sm text-gray-600">
-            No pending invitations.
-          </div>
-          <div v-else class="space-y-3">
-            <article
-              v-for="invite in invitations"
-              :key="invite.token"
-              class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
-            >
-              <div>
-                <p class="text-sm font-semibold text-gray-900">
-                  {{ invite.organization_name || organizationName() }}
-                </p>
-                <p class="text-xs text-gray-500">Role: {{ invite.role_name || invite.role || 'Member' }}</p>
-              </div>
-              <button
-                @click="acceptInvite(invite.token)"
-                class="btn--primary"
-              >
-                Accept
-              </button>
-            </article>
-          </div>
-        </div>
-      </div>
-
       <div v-if="loading" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <div v-for="n in 6" :key="n" class="animate-pulse rounded-2xl bg-white p-8 shadow-sm">
           <div class="mb-4 h-6 w-3/4 rounded bg-gray-200"></div>
@@ -246,7 +306,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-  
+
 
       <div v-else-if="error" class="py-12 text-center">
         <p class="text-red-600">{{ error }}</p>
@@ -265,23 +325,38 @@ onMounted(async () => {
            @click="goToOrganization(org.id)"
           class="group flex h-full flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10 cursor-pointer"
         >
-          <div class="p-8">
-            <!-- <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Organization</p> -->
+          <div class="relative p-8">
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
+                <button
+                  @click.stop
+                  class="absolute right-4 top-6 btn--primary btn--sm"
+                >
+                  <EllipsisVertical :size="18" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem @click.stop="openEditOrganization(org)">
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem class="text-red-600" @click.stop="confirmDeleteOrganization(org)">
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <h3
               class="mb-2 text-xl font-bold text-[#1F1F1F] transition-colors group-hover:text-[#401903]"
             >
               {{ org.name }}
             </h3>
             <p class="text-sm text-[#4B5563]">{{ org.industry || 'Industry not specified' }}</p>
-            <p class="text-sm text-[#4B5563] mt-6">Projects available: <span class="text-black">
-              {{ 0 }}</span></p>
           </div>
           <div
             class="hidden items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
           >
             <button
               @click="goToOrganization(org.id)"
-              class="btn btn--primary flex items-center gap-1"
+              class="btn--primary flex items-center gap-1"
             >
               View Organization
               <svg
@@ -298,6 +373,17 @@ onMounted(async () => {
             </button>
           </div>
         </article>
+      </div>
+
+      <div v-if="hasMoreOrganizations" class="mt-8 flex justify-center">
+        <button
+          @click="loadMoreOrganizations"
+          class="btn--primary btn--lg"
+          :disabled="organizationStore.loadingMore"
+        >
+          <span v-if="organizationStore.loadingMore">Loading...</span>
+          <span v-else>Load more</span>
+        </button>
       </div>
     </div>
 
@@ -374,5 +460,17 @@ onMounted(async () => {
         </div>
       </div>
     </teleport>
+
+    <OrganizationFormDialog
+      v-if="editingOrg"
+      v-model:open="editDialogOpen"
+      :initial-name="editingOrg.name"
+      :initial-industry="editingOrg.industry || ''"
+      title="Edit organization"
+      submit-label="Save changes"
+      :loading="editSaving"
+      :error="editError"
+      @save="handleEditSave"
+    />
   </main>
 </template>

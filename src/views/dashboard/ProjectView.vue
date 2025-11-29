@@ -220,7 +220,7 @@ watch(
       <div class="mt-6 flex justify-center">
         <RouterLink
           to="/dashboard/organizations"
-          class="btn--primary"
+          class="btn--primary btn--lg"
         >
           Go to Organizations
         </RouterLink>
@@ -328,7 +328,7 @@ watch(
               </p>
               <button
                 @click="openCreateModal"
-                class="btn--primary btn--with-icon"
+                class="btn--primary btn--lg btn--with-icon"
               >
                 <svg
                   width="16"
