@@ -259,7 +259,7 @@ onMounted(async () => {
             stroke-linejoin="round"
           />
         </svg>
-        Create Organization
+        Add Organization
       </button>
     </div>
 

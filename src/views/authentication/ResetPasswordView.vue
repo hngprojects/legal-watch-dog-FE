@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watchEffect } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
-import AuthLayout from '@/components/authentication/AuthLayout.vue'
 import AuthCard from '@/components/authentication/AuthCard.vue'
 import FormControl from '@/components/composables/FormControl.vue'
 import { useAuthStore } from '@/stores/auth-store'
@@ -127,8 +126,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <AuthLayout container-class="p-4 lg:p-10">
-    <AuthCard header-text="New Password">
+  <AuthCard header-text="New Password">
       <template #desc>
         <p class="text-gray-600">Choose a strong password that you haven't used before.</p>
       </template>
@@ -242,5 +240,4 @@ const handleSubmit = async () => {
         </div>
       </div>
     </AuthCard>
-  </AuthLayout>
 </template>

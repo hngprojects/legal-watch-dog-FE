@@ -5,6 +5,8 @@ import type {
   Source,
   CreateSourcePayload,
   UpdateSourcePayload,
+  SourceRevision,
+  RevisionsResponse,
 } from '@/types/source'
 
 interface ApiError {
@@ -20,6 +22,10 @@ export const useSourceStore = defineStore('source', () => {
   const sources = ref<Source[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const revisions = ref<Record<string, SourceRevision[]>>({})
+  const revisionsLoading = ref<Record<string, boolean>>({})
+  const revisionsError = ref<Record<string, string | null>>({})
+  const revisionsPagination = ref<Record<string, RevisionsResponse['pagination']>>({})
 
   const getErrorMessage = (err: unknown, fallback: string) => {
     const apiErr = err as ApiError
@@ -106,6 +112,35 @@ export const useSourceStore = defineStore('source', () => {
     }
   }
 
+  const fetchRevisions = async (
+    sourceId: string,
+    params?: { skip?: number; limit?: number },
+  ) => {
+    revisionsLoading.value[sourceId] = true
+    revisionsError.value[sourceId] = null
+
+    try {
+      const res = await sourceApi.getRevisions(sourceId, params)
+      const data = res?.data?.data
+
+      if (data?.revisions) {
+        revisions.value[sourceId] = data.revisions
+      }
+
+      if (data?.pagination) {
+        revisionsPagination.value[sourceId] = data.pagination
+      }
+
+      return data
+    } catch (err) {
+      const msg = getErrorMessage(err, 'Failed to load revisions')
+      revisionsError.value[sourceId] = msg
+      throw err
+    } finally {
+      revisionsLoading.value[sourceId] = false
+    }
+  }
+
   const setError = (msg: string | null) => {
     error.value = msg
   }
@@ -114,12 +149,17 @@ export const useSourceStore = defineStore('source', () => {
     sources,
     loading,
     error,
+    revisions,
+    revisionsLoading,
+    revisionsError,
+    revisionsPagination,
 
     fetchSources,
     createSource,
     updateSource,
     deleteSource,
     scrapeSource,
+    fetchRevisions,
 
     setError,
   }

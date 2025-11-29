@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
-import AuthLayout from '@/components/authentication/AuthLayout.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import AuthCard from '@/components/authentication/AuthCard.vue'
 import FormControl from '@/components/composables/FormControl.vue'
@@ -167,8 +166,7 @@ const handleCreateAccount = async () => {
 </script>
 
 <template>
-  <AuthLayout container-class="p-6 lg:p-12">
-    <AuthCard header-text="Create an account">
+  <AuthCard header-text="Create an account">
       <template v-slot:desc>
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p>
@@ -348,5 +346,4 @@ const handleCreateAccount = async () => {
         <SocialLogins />
       </form>
     </AuthCard>
-  </AuthLayout>
 </template>

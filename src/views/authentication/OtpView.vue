@@ -2,7 +2,6 @@
 import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
-import AuthLayout from '@/components/authentication/AuthLayout.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import AuthCard from '@/components/authentication/AuthCard.vue'
 import { ArrowLeftIcon } from 'lucide-vue-next'
@@ -255,8 +254,7 @@ const handleResend = async () => {
 </script>
 
 <template>
-  <AuthLayout wrapper-class="bg-white" main-class="bg-white" container-class="p-4 lg:p-10">
-    <AuthCard :header-text="headingText">
+  <AuthCard :header-text="headingText">
       <template v-slot:desc>
         <p class="text-base text-gray-500">
           {{ subtitle }}
@@ -333,5 +331,4 @@ const handleResend = async () => {
         </div>
       </div>
     </AuthCard>
-  </AuthLayout>
 </template>
