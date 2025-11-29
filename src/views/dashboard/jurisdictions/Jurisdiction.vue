@@ -2,6 +2,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Plus, Settings, /* Search, */ FilePlus } from 'lucide-vue-next'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import Swal from 'sweetalert2'
 
 import aiIcon from '@/assets/icons/ai_icon.png'
@@ -182,13 +184,14 @@ const triggerScrape = async (source: Source) => {
   }
 }
 
-const formatExtractedData = (data: Record<string, unknown> | null) => {
-  if (!data) return ''
+const renderSummary = (summary?: string | null) => {
+  if (!summary) return ''
 
   try {
-    return JSON.stringify(data, null, 2)
+    const html = marked.parse(summary, { breaks: true }) as string
+    return DOMPurify.sanitize(html)
   } catch (err) {
-    console.error('Failed to format extracted data', err)
+    console.error('Failed to render markdown summary', err)
     return ''
   }
 }
@@ -824,19 +827,11 @@ onMounted(() => {
                       </span>
                     </div>
 
-                    <div v-if="rev.ai_markdown_summary || rev.ai_summary" class="mt-2 text-[12px] text-gray-700 whitespace-pre-line">
-                      {{ rev.ai_markdown_summary || rev.ai_summary }}
-                    </div>
-
                     <div
-                      v-if="rev.extracted_data"
-                      class="mt-2 rounded-lg bg-gray-50 p-2 text-[11px] text-gray-700"
-                    >
-                      <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                        Extracted Data
-                      </div>
-                      <pre class="whitespace-pre-wrap leading-5">{{ formatExtractedData(rev.extracted_data) }}</pre>
-                    </div>
+                      v-if="rev.ai_markdown_summary || rev.ai_summary"
+                      class="mt-2 text-[12px] leading-5 text-gray-700"
+                      v-html="renderSummary(rev.ai_markdown_summary || rev.ai_summary)"
+                    />
                   </div>
 
                   <div
