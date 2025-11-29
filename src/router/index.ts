@@ -2,18 +2,18 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // Layouts
 import LandingLayout from '@/layout/LandingLayout.vue'
-import EmptyLayout from '@/layout/EmptyLayout.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
+import AuthLayout from '@/layout/AuthLayout.vue'
 
 // Landing pages
 import HomeView from '@/views/HomeView.vue'
 import AboutUsView from '@/views/AboutUsView.vue'
-import Contact from '@/views/Contact.vue'
-import Career from '@/views/Career.vue'
-import Terms from '@/views/Terms.vue'
-import HelpCenter from '@/views/HelpCenter.vue'
-import Features from '@/views/Features.vue'
-import Blogs from '@/views/Blogs.vue'
+import Contact from '@/views/ContactView.vue'
+import Careers from '@/views/CareersView.vue'
+import Terms from '@/views/TermsView.vue'
+import HelpCenter from '@/views/HelpCenterView.vue'
+import Features from '@/views/FeaturesView.vue'
+import BlogView from '@/views/BlogView.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
@@ -47,10 +47,10 @@ const router = createRouter({
         { path: '', name: 'home', component: HomeView },
         { path: 'about-us', name: 'about-us', component: AboutUsView },
         { path: 'contact-us', name: 'contact-us', component: Contact },
-        { path: 'career', name: 'career', component: Career },
-        { path: 'helpcenter', name: 'helpcenter', component: HelpCenter },
+        { path: 'careers', name: 'careers', component: Careers },
+        { path: 'help-center', name: 'help-center', component: HelpCenter },
         { path: 'terms', name: 'terms', component: Terms },
-        { path: 'blogs', name: 'blogs', component: Blogs },
+        { path: 'blog', name: 'blog', component: BlogView },
         { path: 'features', name: 'features', component: Features },
         { path: 'waitlist', name: 'waitlist', component: WaitlistView },
         {
@@ -81,15 +81,47 @@ const router = createRouter({
 
     {
       path: '/',
-      component: EmptyLayout,
+      component: AuthLayout,
       children: [
         { path: 'login', name: 'login', component: LoginView },
-        { path: 'signup', name: 'signup', component: SignupView },
+        {
+          path: 'signup',
+          name: 'signup',
+          component: SignupView,
+          meta: { authLayoutProps: { containerClass: 'p-6 lg:p-12' } },
+        },
         { path: 'forgot-password', name: 'forgot-password', component: ForgotPasswordView },
-        { path: 'reset-password', name: 'reset-password', component: ResetPasswordView },
-        { path: 'otp', name: 'otp', component: OtpView },
-        { path: 'auth-status', name: 'auth-status', component: AuthStatusView, alias: '/success' },
+        {
+          path: 'reset-password',
+          name: 'reset-password',
+          component: ResetPasswordView,
+          meta: { authLayoutProps: { containerClass: 'p-4 lg:p-10' } },
+        },
+        {
+          path: 'otp',
+          name: 'otp',
+          component: OtpView,
+          meta: {
+            authLayoutProps: {
+              wrapperClass: 'bg-white',
+              mainClass: 'bg-white',
+              containerClass: 'p-4 lg:p-10',
+            },
+          },
+        },
+        {
+          path: 'auth-status',
+          name: 'auth-status',
+          component: AuthStatusView,
+          alias: '/success',
+          meta: { authLayoutProps: { containerClass: 'p-6 lg:p-12' } },
+        },
         { path: 'auth/accept-invite/:token', name: 'accept-invite', component: AcceptInviteView },
+        {
+          path: 'auth/invitations/:token?/accept',
+          name: 'accept-org-invite',
+          component: () => import('@/views/authentication/InvitationAcceptView.vue'),
+        },
       ],
     },
     {
@@ -171,7 +203,6 @@ const router = createRouter({
 
   scrollBehavior: () => ({ top: 0 }),
 })
-
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore()

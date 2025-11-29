@@ -1,6 +1,11 @@
 // src/api/source.ts
 import api from '@/lib/api' // your axios instance
-import type { Source, CreateSourcePayload, UpdateSourcePayload } from '@/types/source'
+import type {
+  Source,
+  CreateSourcePayload,
+  UpdateSourcePayload,
+  RevisionsResponse,
+} from '@/types/source'
 
 /**
  * Backend response envelope (matches your examples)
@@ -44,6 +49,11 @@ export const sourceApi = {
 
   scrape: (source_id: string) =>
     api.post<ApiEnvelope<unknown>>(`/sources/${source_id}/scrapes`),
+
+  getRevisions: (source_id: string, params?: { skip?: number; limit?: number }) =>
+    api.get<ApiEnvelope<RevisionsResponse>>(`/sources/${source_id}/revisions`, {
+      params,
+    }),
 }
 
 export default sourceApi

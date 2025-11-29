@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import Navbar from '../components/dashboard/Navbar.vue'
+import MainHeader from '@/components/landing-page/MainHeader.vue'
 </script>
 
 <template>
-  <div class="flex h-screen overflow-hidden bg-gray-50">
-    <div class="flex min-w-0 flex-1 flex-col overflow-hidden">
-      <Navbar />
-      <main class="flex-1 overflow-y-auto p-6">
-        <router-view />
-      </main>
-    </div>
+  <div class="container--wide flex flex-col bg-gray-50 min-h-screen">
+    <MainHeader />
+    <main class="flex-1 overflow-y-auto p-6">
+      <router-view />
+    </main>
   </div>
 </template>

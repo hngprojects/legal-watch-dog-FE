@@ -2,7 +2,6 @@
 import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
-import AuthLayout from '@/components/authentication/AuthLayout.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import AuthCard from '@/components/authentication/AuthCard.vue'
 import { ArrowLeftIcon } from 'lucide-vue-next'
@@ -50,7 +49,7 @@ const backRoute = computed(() =>
 const isPasswordResetFlow = computed(() => otpPurpose.value === 'password-reset')
 const backText = computed(() => (isPasswordResetFlow.value ? 'Back to login' : 'Back to sign up'))
 const isComplete = computed(() => otpDigits.value.join('').length === DIGIT_COUNT)
-const timerDuration = computed(() => (isPasswordResetFlow.value ? 0.3 * 60 : 0.2 * 60))
+const timerDuration = computed(() => (isPasswordResetFlow.value ? 5 * 60 : 5 * 60))
 
 const startTimer = (seconds?: number) => {
   timer.value = typeof seconds === 'number' ? seconds : timerDuration.value
@@ -255,8 +254,7 @@ const handleResend = async () => {
 </script>
 
 <template>
-  <AuthLayout wrapper-class="bg-white" main-class="bg-white" container-class="p-4 lg:p-10">
-    <AuthCard :header-text="headingText">
+  <AuthCard :header-text="headingText">
       <template v-slot:desc>
         <p class="text-base text-gray-500">
           {{ subtitle }}
@@ -289,7 +287,7 @@ const handleResend = async () => {
               type="button"
               @click="handleContinue"
               :disabled="isVerifying || !isComplete"
-              class="btn--primary disabled:btn--disabled w-full"
+              class="btn--primary btn--lg disabled:btn--disabled w-full"
             >
               <span v-if="!isVerifying">Continue</span>
               <span v-else>Verifying...</span>
@@ -333,5 +331,4 @@ const handleResend = async () => {
         </div>
       </div>
     </AuthCard>
-  </AuthLayout>
 </template>

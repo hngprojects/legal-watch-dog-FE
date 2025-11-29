@@ -2,8 +2,10 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { jurisdictionApi, type Jurisdiction } from '@/api/jurisdiction'
 import { useOrganizationStore } from '@/stores/organization-store'
+import { useProjectStore } from '@/stores/project-store'
 
 const orgStore = useOrganizationStore()
+const projectStore = useProjectStore()
 
 interface ApiError {
   response?: {
@@ -20,16 +22,19 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
   const error = ref<string | null>(null)
 
   // Fixed: typed return + proper error handling
-  const getOrgId = (): string => {
-    const id = orgStore.currentOrganizationId
-    if (!id) {
-      throw new Error('No active organization selected')
+  const getOrgId = (explicitOrgId?: string, projectId?: string): string => {
+    if (explicitOrgId) return explicitOrgId
+    const current = orgStore.currentOrganizationId
+    if (current) return current
+    if (projectId) {
+      const project = projectStore.projects.find((p) => p.id === projectId)
+      if (project?.org_id) return project.org_id
     }
-    return id
+    throw new Error('No active organization selected')
   }
 
-  const fetchJurisdictions = async (projectId?: string) => {
-    const orgId = getOrgId()
+  const fetchJurisdictions = async (projectId?: string, organizationId?: string) => {
+    const orgId = getOrgId(organizationId, projectId)
     loading.value = true
     error.value = null
     try {
@@ -48,8 +53,8 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     }
   }
 
-  const fetchOne = async (jurisdictionId: string) => {
-    const orgId = getOrgId()
+  const fetchOne = async (jurisdictionId: string, organizationId?: string) => {
+    const orgId = getOrgId(organizationId)
     loading.value = true
     error.value = null
     try {
@@ -81,8 +86,9 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
       parent_id?: string | null
       prompt?: string | null
     },
+    organizationId?: string,
   ) => {
-    const orgId = getOrgId()
+    const orgId = getOrgId(organizationId, projectId)
     try {
       // Fixed: project_id is required by new API
       const response = await jurisdictionApi.create(orgId, {
@@ -102,8 +108,9 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
   const updateJurisdiction = async (
     jurisdictionId: string,
     data: { name?: string; description?: string; prompt?: string | null },
+    organizationId?: string,
   ) => {
-    const orgId = getOrgId()
+    const orgId = getOrgId(organizationId)
     try {
       const response = await jurisdictionApi.update(orgId, jurisdictionId, data) // Fixed
       const updatedJurisdiction = response.data.data.jurisdiction
@@ -121,8 +128,8 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     }
   }
 
-  const deleteJurisdiction = async (jurisdictionId: string) => {
-    const orgId = getOrgId()
+  const deleteJurisdiction = async (jurisdictionId: string, organizationId?: string) => {
+    const orgId = getOrgId(organizationId)
     try {
       await jurisdictionApi.delete(orgId, jurisdictionId) // Fixed
       jurisdictions.value = jurisdictions.value.filter((j) => j.id !== jurisdictionId)
