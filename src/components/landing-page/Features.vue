@@ -12,12 +12,15 @@
 
         <TypographyHeading
           level="h1"
-          class="mb-6 text-4xl leading-tight font-extrabold text-white sm:text-5xl md:text-6xl"
+          class="mb-6 text-4xl leading-tight font-extrabold text-white sm:text-5xl md:text-6xl text-center"
         >
           Never Miss a Legal Update Again
         </TypographyHeading>
 
-        <TypographyText class="mx-auto mb-10 max-w-3xl text-lg text-gray-300 md:text-xl">
+        <!-- FIXED: Centered on desktop (removed md:text-left) -->
+        <TypographyText
+          class="mx-auto mb-10 max-w-3xl text-lg text-gray-300 text-center md:text-xl"
+        >
           Stay ahead of legal change by automating the monitoring process and saving hours of manual
           research every week.
         </TypographyText>
@@ -45,16 +48,18 @@
             <TypographyHeading level="h3" class="mb-4 text-2xl font-bold text-gray-900 md:text-3xl">
               Real-Time Legislative Alerts
             </TypographyHeading>
-            <TypographyText class="text-lg text-gray-600">
+
+            <TypographyText class="text-lg text-gray-600 text-center md:text-left">
               Receive instant updates whenever relevant laws or regulations change. Never miss a
               critical compliance deadline.
             </TypographyText>
           </div>
+
           <div class="relative order-1 md:order-2">
             <div class="overflow-hidden rounded-3xl p-6 md:p-10">
               <img :src="feature1" alt="Dashboard" class="w-full rounded-2xl shadow-xl" />
             </div>
-            <!-- Bell floating at bottom-right -->
+
             <img
               :src="featureChild1"
               alt="Notification Bell"
@@ -69,18 +74,23 @@
             <div class="overflow-hidden p-6 md:p-10">
               <img :src="feature2" alt="Jurisdiction Modal" class="w-full" />
             </div>
-            <!-- AI Toolkit floating at bottom-left -->
+
             <img
               :src="featureChild2"
               alt="AI Toolkit"
               class="absolute bottom-0 left-0 z-10 h-28 w-32 translate-x-[410px] -translate-y-6 rounded-2xl object-cover md:h-40 md:w-40"
             />
           </div>
+
           <div class="order-2">
-            <TypographyHeading level="h3" class="mb-4 text-2xl font-bold text-gray-900 md:text-3xl">
+            <TypographyHeading
+              level="h3"
+              class="mb-4 text-2xl text-center md:text-left font-bold text-gray-900 md:text-3xl"
+            >
               Customizable Watchlists
             </TypographyHeading>
-            <TypographyText class="text-lg text-gray-600">
+
+            <TypographyText class="text-lg text-gray-600 text-center md:text-left">
               Track only the projects, areas, or jurisdictions that matter to you. Your updates,
               your focus.
             </TypographyText>
@@ -93,16 +103,18 @@
             <TypographyHeading level="h3" class="mb-4 text-2xl font-bold text-gray-900 md:text-3xl">
               AI-Powered Legal Insights
             </TypographyHeading>
-            <TypographyText class="text-lg text-gray-600">
+
+            <TypographyText class="text-lg text-gray-600 text-center md:text-left">
               AI helps you quickly summarize regulations, flags critical changes, and identifies
               cross-jurisdictional risks so you stay compliant with minimal effort.
             </TypographyText>
           </div>
+
           <div class="relative order-1 md:order-2">
             <div class="overflow-hidden p-6 md:p-10">
               <img :src="feature3" alt="AI Summary" class="w-full rounded-2xl shadow-xl" />
             </div>
-            <!-- AI Brain floating at bottom-center-ish -->
+
             <img
               :src="featureChild3"
               alt="AI Brain"
@@ -117,18 +129,20 @@
             <div class="overflow-hidden p-6 md:p-10">
               <img :src="feature4" alt="Team Invite" class="w-full rounded-2xl" />
             </div>
-            <!-- Tickets floating at bottom-left -->
+
             <img
               :src="featureChild4"
               alt="Tickets"
               class="absolute bottom-0 left-0 z-10 h-28 w-28 translate-x-[400px] -translate-y-6 md:h-40 md:w-40"
             />
           </div>
+
           <div class="order-2">
             <TypographyHeading level="h3" class="mb-4 text-2xl font-bold text-gray-900 md:text-3xl">
               Task Management & Ticketing
             </TypographyHeading>
-            <TypographyText class="text-lg text-gray-600">
+
+            <TypographyText class="text-lg text-gray-600 text-center md:text-left">
               Create actionable tickets for each legal update, keeping your team informed and
               accountable.
             </TypographyText>
@@ -147,7 +161,7 @@
           Turn <span class="text-[#F2AB6D]"> Legal Changes </span>Into Clear Actions
         </TypographyHeading>
 
-        <TypographyText class="mb-10 text-center text-lg text-gray-600 md:text-xl">
+        <TypographyText class="mb-10 text-center text-lg text-gray-600 md:text-xl md:text-center">
           Stay informed. Stay compliant. Stay ahead.
         </TypographyText>
 
@@ -165,7 +179,6 @@
 import { TypographyHeading, TypographyText } from '../ui/typography'
 
 import starIcon from '@/assets/icons/star.png'
-
 import feature1 from '@/assets/Images/Feature1.png'
 import feature2 from '@/assets/Images/Feature2.png'
 import feature3 from '@/assets/Images/Feature3.png'
@@ -176,7 +189,3 @@ import featureChild2 from '@/assets/Images/Featurechild2.png'
 import featureChild3 from '@/assets/Images/Featurechild3.png'
 import featureChild4 from '@/assets/Images/Featurechild4.png'
 </script>
-
-<style scoped>
-/* All magic is done with Tailwind + precise absolute positioning */
-</style>

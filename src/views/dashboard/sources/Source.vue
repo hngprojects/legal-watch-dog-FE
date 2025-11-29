@@ -46,12 +46,12 @@ const frequencies = [
 const loadJurisdiction = async (id: string) => {
   loading.value = true
   const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id) || null
-  jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
+  jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id, organizationId.value))
   if (!projectStore.projects.length && organizationId.value) {
     await projectStore.fetchProjects(organizationId.value)
   }
   if (jurisdiction.value?.project_id) {
-    await jurisdictionStore.fetchJurisdictions(jurisdiction.value.project_id)
+    await jurisdictionStore.fetchJurisdictions(jurisdiction.value.project_id, organizationId.value)
   }
   loading.value = false
 }

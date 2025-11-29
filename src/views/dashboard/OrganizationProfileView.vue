@@ -6,7 +6,9 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { organizationService } from '@/api/organization'
+import { invitationService } from '@/api/invitation'
 import type { OrganizationErrorResponse } from '@/types/organization'
+import type { Invitation } from '@/types/invitation'
 import type { UserProfile } from '@/types/user'
 import Swal from 'sweetalert2'
 import {
@@ -26,9 +28,11 @@ import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
+import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
+import { Settings } from 'lucide-vue-next'
 
-type MemberRole = 'Admin' | 'User' | 'Manager' | 'Member'
-type MemberStatus = 'Active' | 'Pending'
+type MemberRole = 'Admin' | 'Manager' | 'Member'
+type MemberStatus = 'Active' | 'Pending' | 'Inactive'
 
 type Member = {
   id: string
@@ -56,6 +60,9 @@ const inviteForm = ref({ email: '', role: 'Member' as MemberRole })
 const inviteSending = ref(false)
 const inviteMessage = ref<string | null>(null)
 const inviteError = ref<string | null>(null)
+const orgInvitations = ref<Invitation[]>([])
+const orgInvitationsLoading = ref(false)
+const orgInvitationsError = ref<string | null>(null)
 
 const members = ref<Member[]>([])
 const membersLoading = ref(false)
@@ -71,6 +78,9 @@ const editingProject = ref<{ id?: string; title?: string; description?: string }
 const organizationOptions = computed(() =>
   orgId.value && organization.value ? [{ id: orgId.value, name: organization.value.name }] : [],
 )
+const orgEditDialogOpen = ref(false)
+const orgEditSaving = ref(false)
+const orgEditError = ref<string | null>(null)
 
 const goToProject = (projectId: string) => {
   if (!orgId.value) return
@@ -150,6 +160,47 @@ const deleteProject = async (projectId?: string) => {
   await loadProjects()
 }
 
+const openEditOrganization = () => {
+  if (!organization.value) return
+  orgEditError.value = null
+  orgEditDialogOpen.value = true
+}
+
+const handleOrgSave = async (payload: { name: string; industry: string }) => {
+  if (!orgId.value) return
+  orgEditSaving.value = true
+  orgEditError.value = null
+  const updated = await organizationStore.updateOrganization(orgId.value, payload)
+  if (updated) {
+    await Swal.fire('Updated', 'Organization updated successfully.', 'success')
+    orgEditDialogOpen.value = false
+  } else if (organizationStore.error) {
+    orgEditError.value = organizationStore.error
+  }
+  orgEditSaving.value = false
+}
+
+const confirmDeleteOrganization = async () => {
+  if (!orgId.value || !organization.value) return
+  const result = await Swal.fire({
+    title: 'Delete organization?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d33',
+  })
+  if (!result.isConfirmed) return
+  const deleted = await organizationStore.deleteOrganization(orgId.value)
+  if (deleted) {
+    await Swal.fire('Deleted', 'Organization removed successfully.', 'success')
+    router.push({ name: 'organizations' })
+  } else if (organizationStore.error) {
+    await Swal.fire('Could not delete', organizationStore.error, 'error')
+  }
+}
+
 const initials = (name: string) =>
   name
     .split(' ')
@@ -161,7 +212,9 @@ const initials = (name: string) =>
 const statusClass = (status: MemberStatus) =>
   status === 'Active'
     ? 'text-emerald-700 bg-emerald-50 border-emerald-100'
-    : 'text-amber-700 bg-amber-50 border-amber-100'
+    : status === 'Pending'
+      ? 'text-amber-700 bg-amber-50 border-amber-100'
+      : 'text-red-700 bg-red-50 border-red-100'
 
 const roleClass = (role: MemberRole) => {
   switch (role) {
@@ -193,23 +246,136 @@ const loadProjects = async () => {
   await projectStore.fetchProjects(orgId.value)
 }
 
+const normalizeOrgInvitations = (payload: unknown): Invitation[] => {
+  if (Array.isArray(payload)) {
+    return payload
+      .map((item) => ({
+        id: (item as Invitation)?.id,
+        token: (item as Invitation)?.token,
+        organization_id: (item as Invitation)?.organization_id || orgId.value,
+        organization_name: (item as Invitation)?.organization_name,
+        role: (item as Invitation)?.role || (item as Invitation)?.role_name,
+        role_name: (item as Invitation)?.role_name,
+        status: (item as Invitation)?.status,
+      }))
+      .filter((item) => item.token && item.organization_id)
+  }
+
+  if (payload && typeof payload === 'object') {
+    const obj = payload as { invitations?: unknown; data?: unknown }
+    const list = obj.invitations || obj.data
+    if (Array.isArray(list)) return normalizeOrgInvitations(list)
+  }
+
+  return []
+}
+
+const loadOrganizationInvitations = async () => {
+  if (!orgId.value) return
+  orgInvitationsLoading.value = true
+  orgInvitationsError.value = null
+  try {
+    const { data } = await invitationService.listMyInvitations()
+    const payload = data?.data ?? data
+    const allInvites = normalizeOrgInvitations(payload)
+    orgInvitations.value = allInvites.filter(
+      (invite) => invite.organization_id === orgId.value,
+    )
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+    if (!err.response) {
+      orgInvitationsError.value = 'Network error: Unable to reach server'
+    } else {
+      orgInvitationsError.value =
+        err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to load invitations'
+    }
+  } finally {
+    orgInvitationsLoading.value = false
+  }
+}
+
 const mapUserToMember = (user: UserProfile): Member => {
   const fullName = user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
-  const orgRole =
-    user.organizations?.find((org) => org.organization_id === orgId.value)?.role || user.role || ''
+  const memberId = user.id || user.user_id || ''
+  const orgRecord = user.organizations?.find((org) => org.organization_id === orgId.value)
+  const orgRole = orgRecord?.role || user.role || ''
+  const normalizedRole = orgRole?.toLowerCase()
   const role: MemberRole =
-    orgRole?.toLowerCase() === 'admin'
+    normalizedRole === 'admin'
       ? 'Admin'
-      : orgRole?.toLowerCase() === 'manager'
+      : normalizedRole === 'manager'
         ? 'Manager'
-        : 'User'
-  const status: MemberStatus = user.is_active ? 'Active' : 'Pending'
+        : 'Member'
+  const orgActive = user.organizations?.find((org) => org.organization_id === orgId.value)
+  const effectiveActive =
+    orgActive?.is_active ??
+    (typeof orgActive?.is_active === 'undefined' ? user.is_active : orgActive?.is_active)
+  const status: MemberStatus =
+    effectiveActive === false ? 'Inactive' : effectiveActive === true ? 'Active' : 'Pending'
   return {
-    id: user.id,
-    name: fullName || 'User',
+    id: memberId,
+    name: fullName || 'Member',
     email: user.email,
     role,
     status,
+  }
+}
+
+const memberActionLoading = ref<string | null>(null)
+
+const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
+  if (!orgId.value || member.role === targetRole) return
+  if (!member.id) {
+    await Swal.fire('Missing user', 'Cannot update role: user ID unavailable.', 'error')
+    return
+  }
+  memberActionLoading.value = `${member.id}-role`
+  try {
+    await organizationService.updateMemberRole(orgId.value, member.id, targetRole)
+    members.value = members.value.map((item) =>
+      item.id === member.id ? { ...item, role: targetRole } : item,
+    )
+    await Swal.fire('Role updated', `${member.name} is now ${targetRole}.`, 'success')
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to update member role'
+    await Swal.fire('Could not update role', message, 'error')
+  } finally {
+    memberActionLoading.value = null
+  }
+}
+
+const toggleMemberStatus = async (member: Member) => {
+  if (!orgId.value) return
+  if (!member.id) {
+    await Swal.fire('Missing user', 'Cannot update status: user ID unavailable.', 'error')
+    return
+  }
+  const targetStatus: MemberStatus = member.status === 'Active' ? 'Inactive' : 'Active'
+  memberActionLoading.value = `${member.id}-status`
+  try {
+    await organizationService.updateMemberStatus(orgId.value, member.id, targetStatus === 'Active')
+    members.value = members.value.map((item) =>
+      item.id === member.id ? { ...item, status: targetStatus } : item,
+    )
+    const verb = targetStatus === 'Active' ? 'activated' : 'deactivated'
+    await Swal.fire('Status updated', `${member.name} has been ${verb}.`, 'success')
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to update member status'
+    await Swal.fire('Could not update status', message, 'error')
+  } finally {
+    memberActionLoading.value = null
   }
 }
 
@@ -260,9 +426,10 @@ const sendInvitation = async () => {
     })
     inviteMessage.value = data.message || data.data?.message || 'Invitation sent successfully.'
     inviteOpen.value = false
+    await loadOrganizationInvitations()
     await Swal.fire('Invitation sent', inviteMessage.value, 'success')
     inviteForm.value.email = ''
-    inviteForm.value.role = 'User'
+    inviteForm.value.role = 'Member'
   } catch (error) {
     const err = error as OrganizationErrorResponse
     if (!err.response) {
@@ -284,6 +451,7 @@ onMounted(async () => {
   await ensureOrganizations()
   await loadProjects()
   await fetchMembers()
+  await loadOrganizationInvitations()
 })
 
 watch(
@@ -294,9 +462,10 @@ watch(
     inviteMessage.value = null
     inviteError.value = null
     inviteForm.value.email = ''
-    inviteForm.value.role = 'User'
+    inviteForm.value.role = 'Member'
     await loadProjects()
     await fetchMembers()
+    await loadOrganizationInvitations()
   },
 )
 </script>
@@ -335,6 +504,22 @@ watch(
               </p>
             </div>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <button
+                class="btn--primary btn--lg btn--with-icon"
+              >
+                <Settings :size="18" />
+                Manage
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @click="openEditOrganization">Edit organization</DropdownMenuItem>
+              <DropdownMenuItem class="text-red-600" @click="confirmDeleteOrganization">
+                Delete organization
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </section>
 
@@ -344,7 +529,7 @@ watch(
             <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Projects ({{ projects.length}})</p>
           </div>
           <div class="flex items-center gap-3">
-            <button @click="openCreateProject" class="btn--primary">Add Project</button>
+            <button @click="openCreateProject" class="btn--primary btn--lg">Add Project</button>
             <button @click="openProjects" class="btn--link">View all</button>
           </div>
         </div>
@@ -355,7 +540,7 @@ watch(
         <div v-else-if="!projects.length" class="space-y-4 rounded-xl border border-dashed border-gray-200 p-6 text-center">
           <p class="text-sm text-gray-600">No projects yet. Create one to start tracking changes.</p>
           <div class="flex justify-center">
-            <button class="btn--primary" @click="openCreateProject">Add Project</button>
+            <button class="btn--primary btn--lg" @click="openCreateProject">Add Project</button>
           </div>
         </div>
         <div v-else class="space-y-3">
@@ -398,7 +583,7 @@ watch(
           <Dialog v-model:open="inviteOpen">
             <DialogTrigger as-child>
               <button
-                class="btn--primary"
+                class="btn--primary btn--lg"
               >
                 Invite Member
               </button>
@@ -430,8 +615,8 @@ watch(
                     class="h-11 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
                   >
                     <option value="Admin">Admin</option>
-                    <option value="manager">Manager</option>
-                    <option value="user">User</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Member">Member</option>
                   </select>
                 </div>
 
@@ -519,14 +704,85 @@ watch(
                 >
                   {{ member.status }}
                 </Badge>
-                <button
-                  class="rounded-full p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
-                >
-                  <EllipsisVertical :size="18" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <button
+                      @click.stop
+                      class="rounded-full p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                    >
+                      <EllipsisVertical :size="18" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Admin'"
+                      @click.stop="updateMemberRole(member, 'Admin')"
+                    >
+                      Admin
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Manager'"
+                      @click.stop="updateMemberRole(member, 'Manager')"
+                    >
+                      Manager
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Member'"
+                      @click.stop="updateMemberRole(member, 'Member')"
+                    >
+                      Member
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="memberActionLoading === `${member.id}-status`"
+                      @click.stop="toggleMemberStatus(member)"
+                    >
+                      {{ member.status === 'Active' ? 'Deactivate' : 'Activate' }}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </article>
           </template>
+        </div>
+
+        <div class="mt-8 rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
+                Pending invitations
+              </p>
+              <p class="text-sm text-gray-600">Invites sent for this organization.</p>
+            </div>
+          </div>
+          <div v-if="orgInvitationsLoading" class="space-y-2">
+            <div v-for="n in 3" :key="n" class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm">
+              <div class="h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+              <div class="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+            </div>
+          </div>
+          <div v-else-if="orgInvitationsError" class="text-sm text-red-600">
+            {{ orgInvitationsError }}
+          </div>
+          <div v-else-if="!orgInvitations.length" class="text-sm text-gray-600">
+            No pending invitations.
+          </div>
+          <div v-else class="space-y-2">
+            <div
+              v-for="invite in orgInvitations"
+              :key="invite.token"
+              class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm"
+            >
+              <div>
+                <p class="text-sm font-semibold text-gray-900">
+                  {{ invite.organization_name || organization?.name || 'Organization' }}
+                </p>
+                <p class="text-xs text-gray-500">Token: {{ invite.token }}</p>
+              </div>
+              <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                {{ invite.role_name || invite.role || 'Member' }}
+              </span>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -541,6 +797,18 @@ watch(
         Go back
       </RouterLink>
     </div>
+
+    <OrganizationFormDialog
+      v-if="organization"
+      v-model:open="orgEditDialogOpen"
+      :initial-name="organization.name"
+      :initial-industry="organization.industry || ''"
+      title="Edit organization"
+      submit-label="Save changes"
+      :loading="orgEditSaving"
+      :error="orgEditError"
+      @save="handleOrgSave"
+    />
   </main>
 
   <ProjectFormModal

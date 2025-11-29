@@ -10,9 +10,9 @@ defineProps<{
 
 <template>
   <div :class="['flex min-h-screen flex-col bg-white', wrapperClass]">
-    <main :class="['relative flex flex-1', mainClass]">
+    <main :class="['relative flex flex-1 gap-8', mainClass]">
       <AuthBranding />
-      <div :class="['flex w-full items-center justify-center p-4', containerClass]">
+      <div :class="['container--wide flex items-center justify-center p-4', containerClass]">
         <div class="max-w-[600px]">
           <slot />
         </div>
