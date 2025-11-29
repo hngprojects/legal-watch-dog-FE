@@ -15,7 +15,7 @@ export const blogPosts = [
         intro: "Policymakers around the world are revisiting several core areas due to economic shifts, new technologies, and changing consumer expectations. Current focus areas include:",
         items: {
           "AI Regulations": "AI is becoming more regulated globally...",
-          "Data Protection": "New privacy rules go into effect..."
+          "Data Protection": "New privacy rules go into effect."
         }
       },
       impact: {
