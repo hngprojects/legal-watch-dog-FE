@@ -76,16 +76,17 @@ const handleCreateOrganization = async () => {
   })
 
   if (created) {
-    const userId = await ensureUserId()
-    if (userId) {
-      organizationStore.fetchOrganizations(userId)
-    }
     closeCreateModal()
     await Swal.fire(
       'Organization created',
       'You can now add projects under this organization.',
       'success',
     )
+
+    const userId = await ensureUserId()
+    if (userId) {
+      await organizationStore.fetchOrganizations(userId)
+    }
   }
 }
 
