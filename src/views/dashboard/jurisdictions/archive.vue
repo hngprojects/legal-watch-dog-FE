@@ -9,15 +9,18 @@ const router = useRouter()
 const jurisdictionStore = useJurisdictionStore()
 const orgStore = useOrganizationStore()
 
-const orgId = orgStore.currentOrganizationId
+const orgId: string | undefined = orgStore.currentOrganizationId || undefined
 
 onMounted(() => {
-  jurisdictionStore.fetchJurisdictions(undefined, orgId)
+  if (orgId) {
+    jurisdictionStore.fetchJurisdictions(undefined, orgId)
+  }
 })
 
 const restoreItem = async (id: string) => {
   const confirm = await Swal.fire({
     title: 'Restore?',
+    icon: 'warning',
     showCancelButton: true,
   })
 
@@ -25,7 +28,14 @@ const restoreItem = async (id: string) => {
 
   await jurisdictionStore.restoreJurisdiction(id, orgId)
 
-  Swal.fire('Restored!', '', 'success')
+  await jurisdictionStore.fetchJurisdictions(undefined, orgId)
+
+  Swal.fire({
+    title: 'Restored!',
+    icon: 'success',
+  }).then(() => {
+    router.push({ name: 'jurisdictions' })
+  })
 }
 </script>
 
@@ -40,7 +50,7 @@ const restoreItem = async (id: string) => {
       No archived jurisdictions.
     </div>
 
-    <div class="space-y-4">
+    <div v-else class="space-y-4">
       <div
         v-for="j in jurisdictionStore.archivedJurisdictions"
         :key="j.id"
@@ -49,8 +59,9 @@ const restoreItem = async (id: string) => {
         <div>
           <p class="text-lg font-semibold text-gray-900">{{ j.name }}</p>
           <p class="text-sm text-gray-500">{{ j.description }}</p>
-          <p class="mt-1 text-xs text-gray-400">
-            Deleted: {{ new Date(j.deleted_at!).toLocaleString() }}
+
+          <p class="mt-1 text-xs text-gray-400" v-if="j.deleted_at">
+            Deleted: {{ new Date(j.deleted_at).toLocaleString() }}
           </p>
         </div>
 

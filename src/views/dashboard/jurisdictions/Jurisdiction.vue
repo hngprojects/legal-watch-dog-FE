@@ -69,7 +69,7 @@ const projectName = computed(() => {
   const projId = jurisdiction.value?.project_id
   if (!projId) return ''
   const project = projectStore.projects.find((p) => p.id === projId)
-  return project?.title || project?.name || ''
+  return project?.title || ''
 })
 
 const loading = ref(true)

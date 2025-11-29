@@ -74,9 +74,12 @@ const handleLogin = async () => {
   <AuthLayout>
     <AuthCard header-text="Welcome Back">
       <template v-slot:desc>
-        <p>
-          Don't have an account? <RouterLink to="/signup" class="btn--link">Sign up</RouterLink>
-        </p>
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            Don't have an account? <RouterLink to="/signup" class="btn--link">Sign up</RouterLink>
+          </p>
+          <RouterLink to="/" class="btn--link text-sm">← Go Home</RouterLink>
+        </div>
       </template>
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div
