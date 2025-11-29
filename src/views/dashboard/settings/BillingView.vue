@@ -1,11 +1,33 @@
 <script setup lang="ts">
+import CancelSubscriptionModal from '@/components/pricing/CancelSubscriptionModal.vue'
 import Icon from '@/components/reusable/Icon.vue'
-import Button from '@/components/ui/button/Button.vue'
+import { useAuthStore } from '@/stores/auth-store'
+import { useBillingStore } from '@/stores/billing-store'
+import { useOrganizationStore } from '@/stores/organization-store'
 import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const hasHistory = ref(false)
+const isFreeTrial = ref(false)
+
+const { user } = useAuthStore()
+const { fetchOrganizations, hasOrganizations, currentOrganizationId } = useOrganizationStore()
+const { hasBillingAccount, createBillingAccount } = useBillingStore()
+
+onMounted(async () => {
+  if (!user) return
+
+  await fetchOrganizations(user.id)
+
+  if (!hasOrganizations) return
+
+  const [hasAccount] = await Promise.all([hasBillingAccount(currentOrganizationId!)])
+
+  if (!hasAccount) {
+    createBillingAccount(currentOrganizationId!)
+  }
+})
 </script>
 
 <template>
@@ -21,16 +43,29 @@ const hasHistory = ref(false)
         </div>
       </div>
 
-      <h3 class="mb-4 text-3xl font-semibold">Free Trial</h3>
-      <p class="mb-10 text-gray-600">
-        You're currently on a free trial. No charges until your trial ends.
-      </p>
+      <template v-if="isFreeTrial">
+        <h3 class="mb-4 text-3xl font-semibold">Free Trial</h3>
+        <p class="mb-10 text-gray-600">
+          You're currently on a free trial. No charges until your trial ends.
+        </p>
+      </template>
+      <template v-else>
+        <h3 class="mb-4 text-3xl font-semibold">Professional</h3>
+        <p class="mb-10 text-gray-600">For growing teams</p>
+      </template>
 
       <div class="flex flex-col gap-x-6 gap-y-4 *:flex-1 md:flex-row">
-        <Button asChild class="text-white">
-          <RouterLink :to="{ name: 'payment-plan' }"> Upgrade Plan </RouterLink>
-        </Button>
-        <Button variant="outline"> Cancel Subscription </Button>
+        <RouterLink
+          :to="{ name: 'payment-plan' }"
+          class="btn--md btn--primary flex items-center justify-center text-center"
+        >
+          Upgrade Plan
+        </RouterLink>
+        <CancelSubscriptionModal :organizationId="currentOrganizationId!">
+          <button class="btn--md btn--outline border-accent-main border text-center">
+            Cancel Subscription
+          </button>
+        </CancelSubscriptionModal>
       </div>
     </article>
 
@@ -42,11 +77,12 @@ const hasHistory = ref(false)
       </p>
 
       <AddPaymentModal>
-        <Button asChild variant="outline">
-          <RouterLink :to="{ name: 'payment-method', params: { plan: 'professional' } }">
-            Add Payment Method
-          </RouterLink></Button
+        <RouterLink
+          :to="{ name: 'payment-method', params: { plan: 'professional' } }"
+          class="btn--md btn--outline block w-fit text-center"
         >
+          Add Payment Method
+        </RouterLink>
       </AddPaymentModal>
     </article>
   </section>

@@ -27,6 +27,7 @@ import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 import AcceptInviteView from '@/views/authentication/AcceptInviteView.vue'
+import GoogleCallbackView from '@/views/authentication/GoogleCallbackView.vue'
 
 // Dashboard pages
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
@@ -51,6 +52,12 @@ const router = createRouter({
         { path: 'help-center', name: 'help-center', component: HelpCenter },
         { path: 'terms', name: 'terms', component: Terms },
         { path: 'blog', name: 'blog', component: BlogView },
+        {
+          path: 'blog/:id',
+          name: 'blog-detail',
+          component: () => import('@/views/BlogDetailView.vue'),
+          props: true,
+        },
         { path: 'features', name: 'features', component: Features },
         { path: 'waitlist', name: 'waitlist', component: WaitlistView },
         {
@@ -116,6 +123,12 @@ const router = createRouter({
           alias: '/success',
           meta: { authLayoutProps: { containerClass: 'p-6 lg:p-12' } },
         },
+        {
+          path: 'auth/google/callback',
+          name: 'google-callback',
+          component: GoogleCallbackView,
+          meta: { authLayoutProps: { containerClass: 'p-6 lg:p-12' } },
+        },
         { path: 'auth/accept-invite/:token', name: 'accept-invite', component: AcceptInviteView },
         {
           path: 'auth/invitations/:token?/accept',
@@ -172,6 +185,11 @@ const router = createRouter({
           component: () => import('@/views/dashboard/jurisdictions/Jurisdiction.vue'),
         },
         {
+          path: 'jurisdictions/archive',
+          name: 'jurisdictions-archive',
+          component: () => import('@/views/dashboard/jurisdictions/archive.vue'),
+        },
+        {
           path: 'jurisdictions/:id/sources',
           name: 'jurisdiction-sources',
           component: () => import('@/views/dashboard/sources/Source.vue'),
@@ -196,7 +214,7 @@ const router = createRouter({
 
     {
       path: '/:pathMatch(.*)*',
-      name: 'not-found',
+      name: 'coming-soon',
       component: () => import('@/views/NotFoundView.vue'),
     },
   ],
