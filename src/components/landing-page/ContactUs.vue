@@ -63,7 +63,7 @@ const validateForm = () => {
     errors.phoneNumber = 'Phone number can only contain numbers and special characters'
     isValid = false
   }
-  
+
   if (!form.email.trim()) {
     errors.email = 'Email is required'
     isValid = false
@@ -85,12 +85,12 @@ const validateForm = () => {
   return isValid
 }
 
-const handleSubmit = async () => { 
+const handleSubmit = async () => {
   if (!validateForm()) {
     console.log('Form validation failed')
     return
   }
-  
+
   if (isSubmitting.value) {
     console.log('Already submitting')
     return
@@ -106,7 +106,7 @@ const handleSubmit = async () => {
       email: form.email,
       message: form.message,
     }
-    
+
     const response = await submitContactForm(payload)
     console.log('Form submitted successfully:', response.data)
 
@@ -133,21 +133,21 @@ const handleSubmit = async () => {
 
     if(axiosError.response?.data?.errors?.phone_number) {
       errorMessages.push(...axiosError.response.data.errors.phone_number)
-    } 
+    }
     if(axiosError.response?.data?.errors?.email) {
       errorMessages.push(...axiosError.response.data.errors.email)
-    } 
+    }
     if(axiosError.response?.data?.errors?.message) {
-      const messageErrors = axiosError.response.data.errors.message.map(err => 
+      const messageErrors = axiosError.response.data.errors.message.map(err =>
         err.replace(/string/gi, 'Message')
       )
       errorMessages.push(...messageErrors)
-    } 
-    
-    const errorMessage = errorMessages.length > 0 
-      ? errorMessages.join("<br>") 
+    }
+
+    const errorMessage = errorMessages.length > 0
+      ? errorMessages.join("<br>")
       : 'An error occurred while submitting the form. Please try again later.'
-    
+
      Swal.fire({
       icon: 'error',
       title: 'Oops...',
@@ -245,24 +245,6 @@ const handleSubmit = async () => {
                 Phone Number
               </label>
               <div class="relative">
-                <div class="absolute top-1/2 left-4 flex -translate-y-1/2 items-center gap-2">
-                  <span class="text-sm text-[#6B7280]">US</span>
-                  <svg
-                    width="12"
-                    height="8"
-                    viewBox="0 0 12 8"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M1 1.5L6 6.5L11 1.5"
-                      stroke="#6B7280"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </div>
                 <Input
                   id="phoneNumber"
                   v-model="form.phoneNumber"

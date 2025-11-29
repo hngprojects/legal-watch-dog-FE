@@ -47,10 +47,10 @@ const handleCancelSubscription = async () => {
 
       <DialogFooter class="flex w-full flex-row items-center justify-center! gap-4 text-center">
         <DialogClose>
-          <button class="btn--outline btn--md">Keep My Plan</button>
+          <button class="btn--secondary btn--lg">Keep My Plan</button>
         </DialogClose>
         <button
-          class="btn--outline btn--md bg-red-main hover:bg-red-main/80 text-white"
+          class="btn--primary btn--lg"
           @click="handleCancelSubscription"
         >
           Cancel Subscription

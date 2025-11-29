@@ -17,6 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogScrollContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const authStore = useAuthStore()
 const projectStore = useProjectStore()
@@ -494,102 +502,96 @@ const saveEdits = async () => {
       </template>
     </div>
 
-    <teleport to="body">
-      <div
-        v-if="showEditModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
-        @click.self="closeEditModal"
-      >
-        <div class="w-full max-w-xl rounded-2xl bg-white px-12 py-14 shadow-2xl">
-          <div class="mb-14">
-            <h3 class="text-2xl font-semibold text-[#0F172A]">Edit Profile</h3>
-            <!-- <p class="text-sm text-[#6B7280]">Update your profile details.</p> -->
-          </div>
+    <Dialog :open="showEditModal" @update:open="(value) => !value && closeEditModal()">
+      <DialogScrollContent class="sm:max-w-xl">
+        <DialogHeader class="mb-6">
+          <DialogTitle class="text-2xl font-semibold text-[#0F172A]">Edit Profile</DialogTitle>
+          <DialogDescription class="hidden">Update your profile details.</DialogDescription>
+        </DialogHeader>
 
-          <div class="flex justify-center mb-6">
-             <div
-                class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
-              >
-                <img v-if="userProfile?.avatar_url" :src="userProfile.avatar_url" alt="Profile" class="h-full w-full rounded-full object-cover" />
-                <span v-else>{{ avatarInitials }}</span>
-                <div 
-                  class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" 
-                  :class="{ 'opacity-50 cursor-not-allowed': uploadingImage }"
-                  >
-                  <!-- @click="uploadingImage ? null : triggerFileInput()" -->
-                  <svg v-if="uploadingImage" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <img v-else :src="editIcon" alt="Edit Icon">
-                </div>
-              </div>
+        <div class="mb-6 flex justify-center">
+          <div
+            class="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md"
+          >
+            <img v-if="userProfile?.avatar_url" :src="userProfile.avatar_url" alt="Profile" class="h-full w-full rounded-full object-cover" />
+            <span v-else>{{ avatarInitials }}</span>
+            <div 
+              class="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#401903]" 
+              :class="{ 'opacity-50 cursor-not-allowed': uploadingImage }"
+            >
+              <!-- @click="uploadingImage ? null : triggerFileInput()" -->
+              <svg v-if="uploadingImage" class="h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <img v-else :src="editIcon" alt="Edit Icon">
+            </div>
           </div>
-          <input
-            ref="fileInputRef"
-            type="file"
-            accept="image/*"
-            class="hidden"
-            @change="handleImageUpload"
-          />
-
-          <form class="space-y-5" @submit.prevent="saveEdits">
-            <div class="space-y-3">
-              <label class="text-sm font-semibold text-[#0F172A]" for="name">Name</label>
-              <Input
-                id="name"
-                v-model="editForm.name"
-                placeholder="Your full name"
-                class="h-12 rounded-md border-[#E5E7EB] text-sm text-[#111827] mt-1.5"
-              />
-            </div>
-            <div class="space-y-3">
-              <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
-              <Select v-model="editForm.role" required>
-                  <SelectTrigger class="h-12 border-[#D5D7DA] rounded-md text-sm focus:border-[#401903] w-full">
-                    <SelectValue placeholder="Select Role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Admin">Admin</SelectItem>
-                    <!-- <SelectItem value="Member">Member</SelectItem> -->
-                    <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
-                    <!-- <SelectItem value="Editor">Editor</SelectItem> -->
-                  </SelectContent>
-                </Select>
-            </div>
-            <div class="space-y-3">
-              <label class="text-sm font-semibold text-[#0F172A]" for="edit-email"
-                >Email Address</label
-              >
-              <Input
-                id="edit-email"
-                v-model="editForm.email"
-                type="email"
-                readonly
-                placeholder="you@example.com"
-                class="h-12 rounded-md outline-none focus-visible:ring-0 focus-visible:border-input text-sm text-[#111827] mt-1.5 cursor-not-allowed"
-              />
-            </div>
-            <div class="flex items-center justify-end gap-3 pt-4">
-              <button
-                type="button"
-                class="cursor-pointer rounded-md border border-[#401903] py-4 px-12 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
-                @click="closeEditModal"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="cursor-pointer rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
-                :disabled="isSaving"
-              >
-              <span v-if="isSaving">Saving...</span>
-              <span v-else>Save</span>
-              </button>
-            </div>
-          </form>
         </div>
-      </div>
-    </teleport>
+        <input
+          ref="fileInputRef"
+          type="file"
+          accept="image/*"
+          class="hidden"
+          @change="handleImageUpload"
+        />
+
+        <form class="space-y-5" @submit.prevent="saveEdits">
+          <div class="space-y-3">
+            <label class="text-sm font-semibold text-[#0F172A]" for="name">Name</label>
+            <Input
+              id="name"
+              v-model="editForm.name"
+              placeholder="Your full name"
+              class="mt-1.5 h-12 rounded-md border-[#E5E7EB] text-sm text-[#111827]"
+            />
+          </div>
+          <div class="space-y-3">
+            <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
+            <Select v-model="editForm.role" required>
+                <SelectTrigger class="h-12 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]">
+                  <SelectValue placeholder="Select Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Admin">Admin</SelectItem>
+                  <!-- <SelectItem value="Member">Member</SelectItem> -->
+                  <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
+                  <!-- <SelectItem value="Editor">Editor</SelectItem> -->
+                </SelectContent>
+              </Select>
+          </div>
+          <div class="space-y-3">
+            <label class="text-sm font-semibold text-[#0F172A]" for="edit-email"
+              >Email Address</label
+            >
+            <Input
+              id="edit-email"
+              v-model="editForm.email"
+              type="email"
+              readonly
+              placeholder="you@example.com"
+              class="mt-1.5 h-12 cursor-not-allowed rounded-md border-input text-sm text-[#111827] outline-none focus-visible:border-input focus-visible:ring-0"
+            />
+          </div>
+          <DialogFooter class="flex items-center justify-end gap-3 pt-4">
+            <button
+              type="button"
+              class="cursor-pointer rounded-md border border-[#401903] py-4 px-12 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
+              @click="closeEditModal"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="cursor-pointer rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
+              :disabled="isSaving"
+            >
+            <span v-if="isSaving">Saving...</span>
+            <span v-else>Save</span>
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogScrollContent>
+    </Dialog>
   </main>
 </template>
