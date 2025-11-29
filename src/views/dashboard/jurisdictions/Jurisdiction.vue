@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Plus, Settings, Search, FilePlus } from 'lucide-vue-next'
+import { Plus, Settings, /* Search, */ FilePlus } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 
 import aiIcon from '@/assets/icons/ai_icon.png'
@@ -19,22 +19,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { DropdownMenu } from '@/components/ui/dropdown-menu'
+import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
+import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
+import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
 
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useSourceStore } from '@/stores/source-store'
-
-interface StoredScrapeResult {
-  id: string
-  jurisdictionId: string
-  sourceId: string
-  sourceName: string
-  status: string
-  fetchedAt: string
-  summary: string
-  payload?: unknown
-}
 
 interface NestedJurisdiction extends Jurisdiction {
   depth: number
@@ -75,8 +68,6 @@ const projectName = computed(() => {
 const loading = ref(true)
 const activeTab = ref<'analysis' | 'sources'>('analysis')
 
-const showSettingsMenu = ref(false)
-
 // Separate states for the two dropdowns to avoid conflicts
 const showHeaderMenu = ref(false)
 const showEmptyStateMenu = ref(false)
@@ -110,38 +101,15 @@ const sources = computed(() => sourceStore.sources)
 const sourcesLoading = computed(() => sourceStore.loading)
 const sourcesError = computed(() => sourceStore.error)
 const editingSourceId = ref<string | null>(null)
-
-const scrapeResults = ref<Record<string, StoredScrapeResult>>({})
 const scrapeErrors = ref<Record<string, string>>({})
-
-const storedScrapeResults = ref<StoredScrapeResult[]>([])
+const scraping = ref<Record<string, boolean>>({})
 const expandedSources = ref<Record<string, boolean>>({})
 
-const STORAGE_KEY = 'lawdog-scrape-results'
-
-const loadStoredScrapeResults = () => {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return
-
-  const parsed: StoredScrapeResult[] = JSON.parse(raw)
-  storedScrapeResults.value = parsed.filter(
-    (item) => item.jurisdictionId === jurisdictionId.value,
-  )
-
-  const latest: Record<string, StoredScrapeResult> = {}
-
-  for (const item of storedScrapeResults.value) {
-    const existing = latest[item.sourceId]
-    if (
-      !existing ||
-      new Date(item.fetchedAt).getTime() > new Date(existing.fetchedAt).getTime()
-    ) {
-      latest[item.sourceId] = item
-    }
-  }
-
-  scrapeResults.value = latest
-}
+const revisionLimit = 5
+const revisions = computed(() => sourceStore.revisions)
+const revisionsLoading = computed(() => sourceStore.revisionsLoading)
+const revisionsError = computed(() => sourceStore.revisionsError)
+const revisionsPagination = computed(() => sourceStore.revisionsPagination)
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
@@ -159,6 +127,73 @@ const loadJurisdiction = async (id: string) => {
 
   loading.value = false
 }
+
+const parseApiError = (err: unknown, fallback: string) => {
+  const apiErr = err as {
+    response?: { data?: { message?: string; detail?: string | Array<{ msg?: string }> } }
+    message?: string
+  }
+
+  const detail = apiErr.response?.data?.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg
+  if (apiErr.response?.data?.message) return apiErr.response.data.message
+  if (apiErr.message) return apiErr.message
+  return fallback
+}
+
+const fetchRevisionsForSource = async (sourceId: string, page = 1) => {
+  const skip = (page - 1) * revisionLimit
+
+  try {
+    await sourceStore.fetchRevisions(sourceId, { skip, limit: revisionLimit })
+  } catch (err) {
+    console.error('Failed to load revisions', err)
+  }
+}
+
+const toggleSourceExpansion = async (sourceId: string) => {
+  expandedSources.value[sourceId] = !expandedSources.value[sourceId]
+
+  if (expandedSources.value[sourceId]) {
+    await fetchRevisionsForSource(sourceId)
+  }
+}
+
+const triggerScrape = async (source: Source) => {
+  if (scraping.value[source.id]) return
+
+  scraping.value[source.id] = true
+  scrapeErrors.value[source.id] = ''
+
+  try {
+    const res = await sourceStore.scrapeSource(source.id)
+    const message = (res as { message?: string })?.message ?? 'Scrape completed successfully.'
+
+    Swal.fire('Scrape Complete', message, 'success')
+    expandedSources.value[source.id] = true
+    await fetchRevisionsForSource(source.id)
+  } catch (err) {
+    const msg = sourceStore.error || parseApiError(err, 'Failed to trigger scrape')
+    scrapeErrors.value[source.id] = msg
+    Swal.fire('Scrape Failed', msg, 'error')
+  } finally {
+    scraping.value[source.id] = false
+  }
+}
+
+const formatExtractedData = (data: Record<string, unknown> | null) => {
+  if (!data) return ''
+
+  try {
+    return JSON.stringify(data, null, 2)
+  } catch (err) {
+    console.error('Failed to format extracted data', err)
+    return ''
+  }
+}
+
+const getPaginationForSource = (sourceId: string) => revisionsPagination.value[sourceId]
 
 // --- DROPDOWN HANDLERS ---
 
@@ -189,10 +224,10 @@ const handleAiSuggestedSource = () => {
   showSuggestedSources.value = true
 }
 
-const handleSearchClick = () => {
-  // Placeholder for search functionality
-  console.log('Search clicked')
-}
+// const handleSearchClick = () => {
+//   // Placeholder for search functionality
+//   console.log('Search clicked')
+// }
 
 // --- SUGGESTIONS ---
 
@@ -205,7 +240,7 @@ const handleSuggestionsSaved = (count: number) => {
      showSuggestedSources.value = false
      return
   }
-  
+
   showSuggestedSources.value = false
   Swal.fire('Sources Saved', `${count} sources added successfully.`, 'success')
 }
@@ -260,7 +295,7 @@ const startEditSource = (src: Source) => {
     url: src.url,
     source_type: src.source_type,
     scrape_frequency: src.scrape_frequency,
-    is_active: src.is_active ?? true, 
+    is_active: src.is_active ?? true,
   }
 }
 
@@ -302,9 +337,6 @@ const goBack = () => {
   router.push({ name: 'organization-projects', params: { organizationId: activeOrganizationId.value } })
 }
 
-const toggleSettingsMenu = () => (showSettingsMenu.value = !showSettingsMenu.value)
-const closeSettingsMenu = () => (showSettingsMenu.value = false)
-
 const startEdit = () => {
   editForm.value = {
     name: jurisdiction.value?.name ?? '',
@@ -312,7 +344,6 @@ const startEdit = () => {
     prompt: jurisdiction.value?.prompt ?? '',
   }
   showInlineEdit.value = true
-  closeSettingsMenu()
 }
 
 const saveEdit = async () => {
@@ -332,8 +363,6 @@ const saveEdit = async () => {
 }
 
 const deleteJurisdiction = async () => {
-  closeSettingsMenu()
-
   const confirm = await Swal.fire({
     title: 'Delete?',
     showCancelButton: true,
@@ -417,7 +446,6 @@ watch(
 
 onMounted(() => {
   loadJurisdiction(jurisdictionId.value)
-  loadStoredScrapeResults()
 })
 </script>
 
@@ -512,33 +540,22 @@ onMounted(() => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div class="relative">
-          <button
-            @click.stop="toggleSettingsMenu"
-            class="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-gray-600 shadow-sm hover:bg-gray-50"
-          >
-            <Settings :size="18" />
-          </button>
-
-          <div
-            v-if="showSettingsMenu"
-            @click.stop
-            class="absolute right-0 z-50 mt-2 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black/5"
-          >
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
             <button
-              @click="startEdit"
-              class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+              type="button"
+              class="btn--primary btn--sm"
             >
-              Edit Jurisdiction
+              <Settings :size="18" />
             </button>
-            <button
-              @click="deleteJurisdiction"
-              class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-            >
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="w-48">
+            <DropdownMenuItem @click="startEdit">Edit Jurisdiction</DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" @click="deleteJurisdiction">
               Delete Jurisdiction
-            </button>
-          </div>
-        </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
@@ -651,27 +668,27 @@ onMounted(() => {
 
             <div class="relative">
               <button
-                class="btn--primary btn--with-icon"
+                class="btn--lg btn--primary btn--with-icon"
                 @click.stop="toggleHeaderMenu"
               >
                 <Plus :size="16" /> Add Source
               </button>
-              
+
               <div
                 v-if="showHeaderMenu"
-                class="absolute right-0 top-full mt-2 w-[240px] rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50"
+                class="absolute right-0 top-full mt-2 w-60 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50"
               >
-                <button
+                <!-- <button
                   @click="handleSearchClick"
                   class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
                 >
                    <Search :size="18" />
                    Search for sources.
-                </button>
+                </button> -->
 
                 <button
                   @click="handleManualAddSource"
-                  class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#1F1F1F] hover:bg-gray-50"
+                  class="btn btn--lg btn--with-icon"
                 >
                    <FilePlus :size="18" />
                    Add Source Manually
@@ -679,7 +696,7 @@ onMounted(() => {
 
                 <button
                   @click="handleAiSuggestedSource"
-                  class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
+                  class="btn btn--md btn--with-icon"
                 >
                    <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
                    AI Suggested sources
@@ -692,63 +709,67 @@ onMounted(() => {
             <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
           </div>
 
-          <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {{ sourcesError }}
-          </div>
+          <div v-else>
+            <div
+              v-if="sourcesError"
+              class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+            >
+              {{ sourcesError }}
+            </div>
 
-          <div
-            v-else-if="sources.length === 0"
-            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-          >
-            <p class="text-sm text-gray-500">No sources added yet.</p>
-            <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
-            
-            <div class="relative mt-4 inline-block">
-               <button
-                  class="btn--primary btn--with-icon"
-                  @click.stop="toggleEmptyStateMenu"
-                >
-                  <Plus :size="16" /> Add Source
-                </button>
-                
-                <div
-                  v-if="showEmptyStateMenu"
-                  class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[240px] rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50 text-left"
-                >
-                  <button
-                    @click="handleSearchClick"
-                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
+            <div
+              v-if="sources.length === 0"
+              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+            >
+              <p class="text-sm text-gray-500">No sources added yet.</p>
+              <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
+
+              <div class="relative mt-4 inline-block">
+                 <button
+                    class="btn--sm btn--primary btn--with-icon"
+                    @click.stop="toggleEmptyStateMenu"
                   >
-                      <Search :size="18" />
-                      Search for sources.
+                    <Plus :size="16" /> Add Source
                   </button>
 
-                  <button
-                    @click="handleManualAddSource"
-                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#1F1F1F] hover:bg-gray-50"
+                  <div
+                    v-if="showEmptyStateMenu"
+                    class="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-60 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 z-50 text-left"
                   >
-                      <FilePlus :size="18" />
-                      Add Source Manually
-                  </button>
+                    <!-- <button
+                      @click="handleSearchClick"
+                      class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
+                    >
+                        <Search :size="18" />
+                        Search for sources.
+                    </button> -->
 
-                  <button
-                    @click="handleAiSuggestedSource"
-                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
-                  >
-                      <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-                      AI Suggested sources
-                  </button>
-                </div>
-             </div>
-          </div>
+                    <button
+                      @click="handleManualAddSource"
+                      class="btn btn--sm btn--with-icon"
+                    >
+                        <FilePlus :size="18" />
+                        Add Source Manually
+                    </button>
 
-          <div v-else class="space-y-3">
+                    <button
+                      @click="handleAiSuggestedSource"
+                      class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
+                    >
+                        <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
+                        AI Suggested sources
+                    </button>
+                  </div>
+               </div>
+            </div>
+
+            <div v-else class="space-y-3">
             <div
               v-for="source in sources"
               :key="source.id"
               class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm"
             >
-              <div class="flex items-center justify-between gap-3">
+              <div class="flex items-start justify-between gap-3">
                 <div>
                   <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
                   <p class="text-xs text-gray-500">{{ source.url }}</p>
@@ -757,19 +778,28 @@ onMounted(() => {
                   </p>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    class="btn--sm btn--primary"
+                    :disabled="scraping[source.id]"
+                    @click="triggerScrape(source)"
+                  >
+                    <span v-if="scraping[source.id]">Scraping...</span>
+                    <span v-else>Scrape Now</span>
+                  </button>
+
+                  <button
+                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                    @click="toggleSourceExpansion(source.id)"
+                  >
+                    {{ expandedSources[source.id] ? 'Hide History' : 'View History' }}
+                  </button>
+
                   <button
                     class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
                     @click="startEditSource(source)"
                   >
                     Edit
-                  </button>
-
-                  <button
-                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    @click="expandedSources[source.id] = !expandedSources[source.id]"
-                  >
-                    {{ expandedSources[source.id] ? 'Hide Result' : 'View Result' }}
                   </button>
 
                   <button
@@ -789,26 +819,123 @@ onMounted(() => {
               </div>
 
               <div
-                v-if="expandedSources[source.id] && scrapeResults[source.id]"
+                v-if="expandedSources[source.id]"
                 class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
               >
-                <div class="mb-1 text-[11px] font-semibold text-gray-500 uppercase">
-                  Most Recent Result
+                <div v-if="revisionsLoading[source.id]" class="text-sm text-gray-600">
+                  Loading revisions...
                 </div>
-                <pre class="text-[11px] leading-5 whitespace-pre-wrap">
-{{ JSON.stringify(scrapeResults[source.id], null, 2) }}
-                </pre>
+
+                <div v-else-if="revisionsError[source.id]" class="text-sm text-red-600">
+                  {{ revisionsError[source.id] }}
+                </div>
+
+                <div v-else-if="revisions[source.id]?.length" class="space-y-2">
+                  <div
+                    v-for="rev in revisions[source.id]"
+                    :key="rev.id"
+                    class="rounded-lg border border-gray-200 bg-white px-3 py-2"
+                  >
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="space-y-1">
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                          Scraped {{ new Date(rev.scraped_at).toLocaleString() }}
+                        </p>
+                        <p class="text-sm font-semibold text-gray-900">
+                          {{ rev.ai_summary || rev.extracted_data?.title || 'No summary available' }}
+                        </p>
+                        <p
+                          v-if="rev.ai_confidence_score !== undefined && rev.ai_confidence_score !== null"
+                          class="text-[11px] text-gray-500"
+                        >
+                          Confidence: {{ Math.round(rev.ai_confidence_score * 100) }}%
+                        </p>
+                      </div>
+
+                      <span
+                        class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide"
+                        :class="rev.was_change_detected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'"
+                      >
+                        {{ rev.was_change_detected ? 'Change Detected' : 'No Change' }}
+                      </span>
+                    </div>
+
+                    <div v-if="rev.ai_markdown_summary || rev.ai_summary" class="mt-2 text-[12px] text-gray-700 whitespace-pre-line">
+                      {{ rev.ai_markdown_summary || rev.ai_summary }}
+                    </div>
+
+                    <div
+                      v-if="rev.extracted_data"
+                      class="mt-2 rounded-lg bg-gray-50 p-2 text-[11px] text-gray-700"
+                    >
+                      <div class="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        Extracted Data
+                      </div>
+                      <pre class="whitespace-pre-wrap leading-5">{{ formatExtractedData(rev.extracted_data) }}</pre>
+                    </div>
+                  </div>
+
+                  <div
+                    v-if="getPaginationForSource(source.id)"
+                    class="flex items-center justify-between border-t border-gray-200 pt-2 text-[12px] text-gray-600"
+                  >
+                    <span>
+                      Page {{ getPaginationForSource(source.id)?.page }} of
+                      {{ getPaginationForSource(source.id)?.total_pages }}
+                    </span>
+
+                    <div class="flex items-center gap-2">
+                      <button
+                        class="rounded border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        :disabled="
+                          revisionsLoading[source.id] || (getPaginationForSource(source.id)?.page ?? 1) <= 1
+                        "
+                        @click="
+                          fetchRevisionsForSource(
+                            source.id,
+                            (getPaginationForSource(source.id)?.page ?? 1) - 1,
+                          )
+                        "
+                      >
+                        Previous
+                      </button>
+
+                      <button
+                        class="rounded border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        :disabled="
+                          revisionsLoading[source.id] ||
+                          (getPaginationForSource(source.id)?.page ?? 1) >=
+                            (getPaginationForSource(source.id)?.total_pages ?? 1)
+                        "
+                        @click="
+                          fetchRevisionsForSource(
+                            source.id,
+                            (getPaginationForSource(source.id)?.page ?? 1) + 1,
+                          )
+                        "
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="text-sm text-gray-600">
+                  No revisions found for this source yet.
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        </div>
+
         <div v-else class="p-6">
-          
+
           <div v-if="showSuggestedSources">
-            <SuggestedSources 
-              @cancel="cancelSuggestions" 
-              @save="handleSuggestionsSaved" 
+            <SuggestedSources
+              @cancel="cancelSuggestions"
+              @save="handleSuggestionsSaved"
             />
           </div>
 
@@ -819,48 +946,50 @@ onMounted(() => {
               <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
             </div>
 
-            <div v-else-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-              {{ sourcesError }}
-            </div>
+            <div v-else>
+              <div v-if="sourcesError" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+                {{ sourcesError }}
+              </div>
 
-            <ul v-else-if="sources.length" class="space-y-2">
-              <li
-                v-for="source in sources"
-                :key="source.id"
-                class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
+              <ul v-if="sources.length" class="space-y-2">
+                <li
+                  v-for="source in sources"
+                  :key="source.id"
+                  class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
+                >
+                  <div>
+                    <p class="font-semibold text-gray-900">{{ source.name }}</p>
+                    <p class="text-xs text-gray-500">{{ source.url }}</p>
+                    <p class="text-[11px] tracking-wide text-gray-400 uppercase">
+                      {{ source.source_type }} • {{ source.scrape_frequency }}
+                    </p>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <button
+                      class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                      @click="startEditSource(source)"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+                      @click="deleteSource(source)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              </ul>
+
+              <div
+                v-else
+                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
               >
-                <div>
-                  <p class="font-semibold text-gray-900">{{ source.name }}</p>
-                  <p class="text-xs text-gray-500">{{ source.url }}</p>
-                  <p class="text-[11px] tracking-wide text-gray-400 uppercase">
-                    {{ source.source_type }} • {{ source.scrape_frequency }}
-                  </p>
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <button
-                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    @click="startEditSource(source)"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                    @click="deleteSource(source)"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            </ul>
-
-            <div
-              v-else
-              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-            >
-              <p class="text-sm text-gray-500">No sources available.</p>
-              <p class="text-xs text-gray-400">Add one to start monitoring.</p>
+                <p class="text-sm text-gray-500">No sources available.</p>
+                <p class="text-xs text-gray-400">Add one to start monitoring.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -871,7 +1000,7 @@ onMounted(() => {
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
           <button
-            class="btn--primary btn--with-icon"
+            class="btn--primary btn--with-icon btn--lg"
             @click="openSubJurisdictionModal"
           >
             <Plus :size="16" /> Add Sub-jurisdiction
