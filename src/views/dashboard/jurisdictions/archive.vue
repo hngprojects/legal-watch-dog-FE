@@ -1,4 +1,3 @@
-<!-- pages/ArchivedJurisdictions.vue -->
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -72,16 +71,16 @@ const restoreJurisdiction = async (jurisdictionId: string) => {
   }
 }
 
-const viewJurisdiction = (jurisdictionId: string) => {
-  router.push({
-    name: 'jurisdiction-detail',
-    params: { id: jurisdictionId },
-    query: { 
-      organizationId: orgId.value,
-      fromArchive: 'true' 
-    }
-  })
-}
+// const viewJurisdiction = (jurisdictionId: string) => {
+//   router.push({
+//     name: 'jurisdiction-detail',
+//     params: { id: jurisdictionId },
+//     query: { 
+//       organizationId: orgId.value,
+//       fromArchive: 'true' 
+//     }
+//   })
+// }
 
 const permanentDelete = async (jurisdictionId: string) => {
   const confirm = await Swal.fire({
@@ -209,12 +208,6 @@ const permanentDelete = async (jurisdictionId: string) => {
             </div>
 
             <div class="flex items-center space-x-2 ml-6">
-              <button
-                @click="viewJurisdiction(jurisdiction.id)"
-                class="px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                View
-              </button>
               <button
                 @click="restoreJurisdiction(jurisdiction.id)"
                 class="px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
