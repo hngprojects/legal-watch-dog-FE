@@ -570,7 +570,7 @@ onMounted(() => {
 
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"
-                >Monitoring Instructions</label
+                >Instructions</label
               >
               <textarea
                 v-model="editForm.prompt"
