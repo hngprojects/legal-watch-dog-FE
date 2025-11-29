@@ -39,6 +39,30 @@ export const useBillingStore = defineStore('billing', {
       return false
     },
 
+    async createBillingAccount(organizationId: string) {
+      try {
+        const res = await billingService.createOrganizationBillingAccount(organizationId)
+
+        if (res.status === 200) return true
+      } catch (error) {
+        this.setError('Failed to create billing account.')
+      }
+
+      return false
+    },
+
+    async getSubscriptionStatus(organizationId: string) {
+      try {
+        const res = await billingService.getOrganizationSubscriptionStatus(organizationId)
+
+        if (res.status === 200) {
+          this.hasSubscribed = res.data.data.has_subscribed
+        }
+      } catch (error) {
+        this.setError('Failed to get subscription status.')
+      }
+    },
+
     async getBillingPlans(organizationId: string) {
       try {
         const res = await billingService.getOrganizationBillingPlans(organizationId)

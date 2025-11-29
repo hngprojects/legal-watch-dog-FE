@@ -45,7 +45,7 @@
 }
 
 @utility container--wide {
-  @apply max-w-[1200px] w-full m-auto;
+  @apply m-auto w-full max-w-[1200px];
 }
 
 @utility text-preset-display-lg {
@@ -136,7 +136,11 @@
 }
 
 @utility btn--with-icon {
-  @apply flex gap-2 items-center;
+  @apply flex items-center gap-2;
+}
+
+@utility btn--outline {
+  @apply btn border-accent-main text-accent-main border hover:bg-gray-100;
 }
 
 @utility btn--link {

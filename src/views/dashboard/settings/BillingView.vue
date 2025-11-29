@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import CancelSubscriptionModal from '@/components/pricing/CancelSubscriptionModal.vue'
 import Icon from '@/components/reusable/Icon.vue'
-import Button from '@/components/ui/button/Button.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import { useBillingStore } from '@/stores/billing-store'
 import { useOrganizationStore } from '@/stores/organization-store'
@@ -14,7 +13,7 @@ const isFreeTrial = ref(false)
 
 const { user } = useAuthStore()
 const { fetchOrganizations, hasOrganizations, currentOrganizationId } = useOrganizationStore()
-const { hasBillingAccount } = useBillingStore()
+const { hasBillingAccount, createBillingAccount } = useBillingStore()
 
 onMounted(async () => {
   if (!user) return
@@ -25,9 +24,8 @@ onMounted(async () => {
 
   const [hasAccount] = await Promise.all([hasBillingAccount(currentOrganizationId!)])
 
-  if (hasAccount) {
-    isFreeTrial.value = true
-    hasHistory.value = false
+  if (!hasAccount) {
+    createBillingAccount(currentOrganizationId!)
   }
 })
 </script>
@@ -57,11 +55,13 @@ onMounted(async () => {
       </template>
 
       <div class="flex flex-col gap-x-6 gap-y-4 *:flex-1 md:flex-row">
-        <Button asChild class="text-white">
-          <RouterLink :to="{ name: 'payment-plan' }"> Upgrade Plan </RouterLink>
-        </Button>
+        <RouterLink :to="{ name: 'payment-plan' }" class="btn--md btn--primary block text-center">
+          Upgrade Plan
+        </RouterLink>
         <CancelSubscriptionModal :organizationId="currentOrganizationId!">
-          <Button variant="outline"> Cancel Subscription </Button>
+          <button class="btn--md btn--outline border-accent-main border text-center">
+            Cancel Subscription
+          </button>
         </CancelSubscriptionModal>
       </div>
     </article>
@@ -74,11 +74,12 @@ onMounted(async () => {
       </p>
 
       <AddPaymentModal>
-        <Button asChild variant="outline">
-          <RouterLink :to="{ name: 'payment-method', params: { plan: 'professional' } }">
-            Add Payment Method
-          </RouterLink></Button
+        <RouterLink
+          :to="{ name: 'payment-method', params: { plan: 'professional' } }"
+          class="btn--md btn--outline block w-fit text-center"
         >
+          Add Payment Method
+        </RouterLink>
       </AddPaymentModal>
     </article>
   </section>

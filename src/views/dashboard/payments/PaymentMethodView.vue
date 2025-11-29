@@ -3,7 +3,6 @@ import PricingCard from '@/components/pricing/PricingCard.vue'
 import { useRoute } from 'vue-router'
 import { PRICINGS } from '@/api/billing'
 import { onMounted, ref } from 'vue'
-import Button from '@/components/ui/button/Button.vue'
 import { useBillingStore } from '@/stores/billing-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -48,7 +47,9 @@ const handlePay = async () => {
             <input id="stripe" type="radio" value="stripe" v-model="paymentMethod" />
             <label for="stripe"> Stripe </label>
           </div>
-          <Button v-if="paymentMethod" @click="handlePay" class="mt-6 w-full">Pay now</Button>
+          <button v-if="paymentMethod" @click="handlePay" class="btn--md btn--primary mt-6 w-full">
+            Pay now
+          </button>
         </div>
       </div>
     </section>

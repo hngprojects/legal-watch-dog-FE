@@ -57,6 +57,11 @@ export const billingService = {
   getOrganizationBillingAccount: async (organizationId: string) =>
     api.get(`/organizations/${organizationId}/billing`),
 
+  createOrganizationBillingAccount: async (organizationId: string) =>
+    api.post(`/organizations/${organizationId}/billing/accounts`, {
+      currency: 'USD',
+    }),
+
   checkout: async (organizationId: string, plan: string) =>
     api.post(`/organizations/${organizationId}/billing/checkout`, {
       plan,

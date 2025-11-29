@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from '../ui/button/Button.vue'
 import Dialog from '../ui/dialog/Dialog.vue'
 import DialogClose from '../ui/dialog/DialogClose.vue'
 import DialogContent from '../ui/dialog/DialogContent.vue'
@@ -8,7 +7,7 @@ import DialogFooter from '../ui/dialog/DialogFooter.vue'
 import DialogHeader from '../ui/dialog/DialogHeader.vue'
 import DialogTitle from '../ui/dialog/DialogTitle.vue'
 import DialogTrigger from '../ui/dialog/DialogTrigger.vue'
-import { XCircleIcon } from 'lucide-vue-next'
+import XIcon from '@/assets/icons/checkmark-circle-2.svg'
 
 const {} = defineProps<{
   organizationId: string
@@ -26,7 +25,7 @@ const handleCancelSubscription = async () => {
     </DialogTrigger>
     <DialogContent>
       <DialogHeader class="text-center">
-        <XCircleIcon class="mx-auto" :size="118" color="var(--red-main)" />
+        <img :src="XIcon" class="mx-auto size-[118px]" alt="" />
 
         <DialogTitle> Cancel your subscription? </DialogTitle>
         <DialogDescription class="py-4">
@@ -49,9 +48,14 @@ const handleCancelSubscription = async () => {
 
       <DialogFooter class="flex w-full flex-row items-center justify-center! gap-4 text-center">
         <DialogClose>
-          <Button variant="outline">Keep My Plan</Button>
+          <button class="btn--outline btn--md">Keep My Plan</button>
         </DialogClose>
-        <Button class="bg-red-main" @click="handleCancelSubscription">Cancel Subscription</Button>
+        <button
+          class="btn--outline btn--md bg-red-main hover:bg-red-main/80 text-white"
+          @click="handleCancelSubscription"
+        >
+          Cancel Subscription
+        </button>
       </DialogFooter>
 
       <p class="text-center text-xs">You can re-subscribe at any time</p>
