@@ -125,8 +125,6 @@ const handleSubmit = async () => {
     })
   } catch (error: unknown) {
     const axiosError = error as { response?: { data?: { message?: string, errors?: { [key: string]: string[] } } }; message?: string }
-    console.error('Form submission error:', error)
-    console.error('Error response:', axiosError?.message)
     const errorMessages: string[] = []
 
     if(axiosError?.message){
