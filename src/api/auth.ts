@@ -12,13 +12,16 @@ import type {
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
+  AppleSignInPayload,
+  AppleSignInResponse,
+  MicrosoftOAuthLoginResponse,
   ResendOtpPayload,
   ResendOtpResponse,
   VerifyOTPPayload,
   VerifyOtpResponse,
 } from '@/types/auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.minamoto.emerj.net/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.staging.legalwatch.dog/api/v1'
 
 const http = axios.create({
   baseURL: API_BASE_URL,
@@ -30,8 +33,8 @@ const bearerHeader = (token?: string | null) =>
   token ? { Authorization: `Bearer ${token}` } : undefined
 
 export const authService = {
-  registerOrganisation: (payload: RegisterPayload) =>
-    http.post<RegisterResponse>('/auth/register/', payload),
+  registerUser: (payload: RegisterPayload) =>
+    http.post<RegisterResponse>('/auth/register', payload),
 
   login: (payload: LoginPayload) => http.post<LoginResponse>('/auth/login', payload),
 
@@ -39,19 +42,27 @@ export const authService = {
     http.post<LogoutResponse>('/auth/logout', {}, { headers: bearerHeader(token) }),
 
   verifyOtp: (payload: VerifyOTPPayload) =>
-    http.post<VerifyOtpResponse>('/auth/verify-otp', payload),
+    http.post<VerifyOtpResponse>('/auth/otp/verification', payload),
 
   resendOtp: (payload: ResendOtpPayload) =>
-    http.post<ResendOtpResponse>('/auth/resend-otp', payload),
+    http.post<ResendOtpResponse>('/auth/otp/requests', payload),
 
   requestPasswordReset: (payload: PasswordResetRequestPayload) =>
-    http.post<PasswordResetRequestResponse>('/auth/password-reset/request', payload),
+    http.post<PasswordResetRequestResponse>('/auth/password/resets', payload),
 
   verifyPasswordReset: (payload: PasswordResetVerifyPayload) =>
-    http.post<PasswordResetVerifyResponse>('/auth/password-reset/verify', payload),
+    http.post<PasswordResetVerifyResponse>('/auth/password/resets/verification', payload),
 
   confirmPasswordReset: (payload: PasswordResetConfirmPayload) =>
-    http.post<PasswordResetConfirmResponse>('/auth/password-reset/confirm', payload),
+    http.post<PasswordResetConfirmResponse>('/auth/password/resets/confirmation', payload),
 
-  refreshToken: () => http.post<RefreshTokenResponse>('/auth/refresh', {}),
+  refreshToken: () => http.post<RefreshTokenResponse>('/auth/token/refresh', {}),
+
+  getMicrosoftLoginUrl: (redirectUri?: string | null) =>
+    http.get<MicrosoftOAuthLoginResponse>('/oauth/microsoft/login', {
+      params: redirectUri ? { redirect_uri: redirectUri } : undefined,
+    }),
+
+  appleSignIn: (payload: AppleSignInPayload) =>
+    http.post<AppleSignInResponse>('/auth/apple/signin', payload),
 }

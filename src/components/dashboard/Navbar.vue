@@ -2,9 +2,27 @@
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth-store'
 import BrandLogo from '../reusable/BrandLogo.vue'
+import UserDropdown from '@/views/dashboard/UserDropdown.vue'
+import UserAvatar from '@/components/dashboard/UserAvatar.vue'
+import { computed, onMounted } from 'vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+
+const displayName = computed(() => {
+  const user = authStore.user
+  if (!user) return 'User'
+  const fullName = user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
+  if (fullName) return fullName
+  if (user.email) return user.email.split('@')[0] || 'User'
+  return 'User'
+})
+
+onMounted(async () => {
+  if (!authStore.user && authStore.accessToken) {
+    await authStore.loadCurrentUser()
+  }
+})
 
 const handleLogout = async () => {
   await authStore.logout()
@@ -46,11 +64,14 @@ const handleLogout = async () => {
           />
         </svg>
       </button>
-      <div
-        class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-600"
-      >
-        U
-      </div>
+      <UserDropdown>
+        <button class="btn btn--with-icon">
+          <UserAvatar :name="displayName" :size="40" />
+          <span class="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
+            {{ displayName }}
+          </span>
+        </button>
+      </UserDropdown>
     </div>
   </nav>
 </template>

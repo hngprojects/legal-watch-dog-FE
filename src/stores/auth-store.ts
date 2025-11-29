@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/api/auth'
+import { userService } from '@/api/user'
 import type {
   LoginPayload,
   RegisterPayload,
+  RegisterResponse,
   ResendOtpPayload,
   VerifyOTPPayload,
   PasswordResetRequestPayload,
@@ -10,7 +12,9 @@ import type {
   PasswordResetConfirmPayload,
   PasswordResetVerifyResponse,
   PasswordResetConfirmResponse,
+  VerifyOtpResponse,
 } from '@/types/auth'
+import type { UserProfile } from '@/types/user'
 
 interface Organisation {
   id: string
@@ -18,13 +22,8 @@ interface Organisation {
   created_at: string
 }
 
-interface User {
-  id: string
-  first_name: string
-  last_name: string
-  email: string
-  role: string
-  organisation_id: string
+type User = UserProfile & {
+  organisation_id?: string
 }
 
 interface State {
@@ -34,6 +33,8 @@ interface State {
   organisation: Organisation | null
   otpPurpose: 'signup' | 'password-reset' | null
   resetToken: string | null
+  signupDraft: SignupDraft | null
+  resetPasswordDraft: ResetPasswordDraft | null
 }
 
 interface ApiTokenData {
@@ -44,27 +45,11 @@ interface ApiTokenData {
   user?: User
 }
 
-interface RegisterApiResponse {
-  status: string
-  status_code: number
-  message: string
-  data: {
-    email: string
-  }
-}
-
 interface LoginApiResponse {
   status: string
   status_code: number
   message: string
   data: ApiTokenData
-}
-
-interface VerifyOtpApiResponse {
-  status?: string
-  message?: string
-  login_data?: ApiTokenData
-  data?: ApiTokenData
 }
 
 interface ResendOtpApiResponse {
@@ -73,17 +58,43 @@ interface ResendOtpApiResponse {
   status_code?: number
 }
 
+interface SignupDraft {
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
+}
+
+interface ResetPasswordDraft {
+  newPassword: string
+  confirmPassword: string
+}
+
 const TOKEN_KEY = 'lwd_access_token'
 const EMAIL_KEY = 'lwd_user_email'
 
+const getStoredValue = (key: string) => localStorage.getItem(key) ?? sessionStorage.getItem(key)
+
+const clearStoredValue = (key: string) => {
+  localStorage.removeItem(key)
+  sessionStorage.removeItem(key)
+}
+
+const setStoredValue = (key: string, value: string, persist: boolean) => {
+  clearStoredValue(key)
+  ;(persist ? localStorage : sessionStorage).setItem(key, value)
+}
+
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
-    accessToken: localStorage.getItem(TOKEN_KEY),
+    accessToken: getStoredValue(TOKEN_KEY),
     user: null,
-    email: localStorage.getItem(EMAIL_KEY),
+    email: getStoredValue(EMAIL_KEY),
     organisation: null,
     otpPurpose: null,
     resetToken: null,
+    signupDraft: null,
+    resetPasswordDraft: null,
   }),
 
   getters: {
@@ -91,21 +102,21 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setAccessToken(token: string | null) {
+    setAccessToken(token: string | null, rememberMe = true) {
       this.accessToken = token
       if (token) {
-        localStorage.setItem(TOKEN_KEY, token)
+        setStoredValue(TOKEN_KEY, token, rememberMe)
       } else {
-        localStorage.removeItem(TOKEN_KEY)
+        clearStoredValue(TOKEN_KEY)
       }
     },
 
-    setUserEmail(email: string | null) {
+    setUserEmail(email: string | null, rememberMe = true) {
       this.email = email
       if (email) {
-        localStorage.setItem(EMAIL_KEY, email)
+        setStoredValue(EMAIL_KEY, email, rememberMe)
       } else {
-        localStorage.removeItem(EMAIL_KEY)
+        clearStoredValue(EMAIL_KEY)
       }
     },
 
@@ -117,6 +128,22 @@ export const useAuthStore = defineStore('auth', {
       this.resetToken = token
     },
 
+    setSignupDraft(draft: SignupDraft | null) {
+      this.signupDraft = draft
+    },
+
+    clearSignupDraft() {
+      this.signupDraft = null
+    },
+
+    setResetPasswordDraft(draft: ResetPasswordDraft | null) {
+      this.resetPasswordDraft = draft
+    },
+
+    clearResetPasswordDraft() {
+      this.resetPasswordDraft = null
+    },
+
     clearAuthState() {
       this.email = null
       this.user = null
@@ -124,27 +151,29 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null
       this.otpPurpose = null
       this.resetToken = null
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(EMAIL_KEY)
+      this.signupDraft = null
+      this.resetPasswordDraft = null
+      clearStoredValue(TOKEN_KEY)
+      clearStoredValue(EMAIL_KEY)
     },
 
-    handleLoginSuccess(token: string, user?: User) {
-      this.setAccessToken(token)
+    handleLoginSuccess(token: string, rememberMe: boolean, user?: User) {
+      this.setAccessToken(token, rememberMe)
       if (user) {
         this.user = user
       }
     },
 
     async register(payload: RegisterPayload) {
-      const response = await authService.registerOrganisation(payload)
-      const responseBody = response.data as unknown as RegisterApiResponse
-      const registeredEmail = responseBody.data?.email || payload.email
+      const response = await authService.registerUser(payload)
+      const responseBody = response.data as RegisterResponse
+      const registeredEmail = responseBody?.data?.email || payload.email
       this.setUserEmail(registeredEmail)
       this.setOtpPurpose('signup')
       this.setResetToken(null)
       return responseBody
     },
-    async login(payload: LoginPayload) {
+    async login(payload: LoginPayload, rememberMe = false) {
       const response = await authService.login(payload)
       const responseBody = response.data as unknown as LoginApiResponse
       const authData = responseBody.data
@@ -153,26 +182,35 @@ export const useAuthStore = defineStore('auth', {
         throw new Error('Login response missing access token.')
       }
 
-      this.handleLoginSuccess(authData.access_token)
-      this.setUserEmail(payload.email)
+      this.handleLoginSuccess(authData.access_token, rememberMe, authData.user)
+      this.setUserEmail(payload.email, rememberMe)
 
       return true
     },
 
     async verifyOTP(payload: VerifyOTPPayload) {
-      const response = await authService.verifyOtp(payload)
-      const responseBody = response.data as unknown as VerifyOtpApiResponse
-      const userData = responseBody.data
+      const response = await authService.verifyOtp({
+        ...payload,
+        otp_purpose: payload.otp_purpose ?? this.otpPurpose ?? 'signup',
+      })
+      const responseBody = response.data as VerifyOtpResponse
+      const authData = responseBody.data ?? responseBody.login_data
 
-      if (userData) {
-        this.user = null
-        this.setOtpPurpose(null)
-        return { ...responseBody, next: 'login' }
+      this.setUserEmail(payload.email)
+
+      if (authData?.access_token) {
+        this.handleLoginSuccess(authData.access_token, true, authData.user as User | undefined)
       }
+
+      this.setOtpPurpose(null)
+      return responseBody
     },
 
     async resendOTP(email: string) {
-      const payload: ResendOtpPayload = { email }
+      const payload: ResendOtpPayload = {
+        email,
+        otp_purpose: this.otpPurpose ?? 'signup',
+      }
       const response = await authService.resendOtp(payload)
       const responseBody = response.data as unknown as ResendOtpApiResponse
       this.setUserEmail(email)
@@ -202,6 +240,28 @@ export const useAuthStore = defineStore('auth', {
       const responseBody = response.data as PasswordResetConfirmResponse
       this.clearAuthState()
       return responseBody
+    },
+
+    async loadCurrentUser(): Promise<UserProfile | null> {
+      if (!this.accessToken) return null
+      try {
+        const response = await userService.getCurrentUser()
+        const payload = response.data?.data
+        const apiUser =
+          (payload && typeof payload === 'object' && 'user' in payload
+            ? (payload as { user?: UserProfile }).user
+            : (payload as UserProfile | undefined)) ?? null
+        if (apiUser) {
+          this.user = apiUser as User
+          return apiUser
+        }
+      } catch (error) {
+        const status = (error as { response?: { status?: number } })?.response?.status
+        if (status === 401) {
+          this.clearAuthState()
+        }
+      }
+      return null
     },
 
     async logout() {

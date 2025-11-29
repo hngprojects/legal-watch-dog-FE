@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import MainHeader from '@/components/landing-page/MainHeader.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TypographyHeading, TypographyText } from '@/components/ui/typography'
@@ -13,8 +11,8 @@ import trustIcon from '@/assets/icons/trust.png'
 import team1 from '@/assets/Images/meet_team_1.png'
 import team2 from '@/assets/Images/meet_team_2.png'
 import team3 from '@/assets/Images/meet_team_3.png'
-import stratBgLeft from '@/assets/Images/strategic_advantage_bg_left.png'
-import stratBgRight from '@/assets/Images/strategic_advantage_bg_right.png'
+import stratBgLeft from '@/assets/Images/backleft.png'
+import stratBgRight from '@/assets/Images/backright.png'
 
 const coreValues = [
   {
@@ -63,7 +61,6 @@ const teamMembers = [
 
 <template>
   <div class="flex min-h-screen flex-col">
-    <MainHeader />
     <main class="relative mx-auto flex w-full flex-1 flex-col overflow-hidden bg-[#F7F7F7]">
       <div
         class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
@@ -180,7 +177,7 @@ const teamMembers = [
                   class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                 />
               </div>
-              <p class="mb-[10px] text-xl leading-relaxed font-normal text-[#1F1F1F]">
+              <p class="mb-2.5 text-xl leading-relaxed font-normal text-[#1F1F1F]">
                 {{ member.description }}
               </p>
               <p class="font-medium">
@@ -219,6 +216,5 @@ const teamMembers = [
         </div>
       </section>
     </main>
-    <MainFooter />
   </div>
 </template>

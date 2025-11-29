@@ -1,0 +1,6 @@
+export interface ContactUsApiPayload {
+  full_name: string
+  phone_number: string
+  email: string
+  message: string
+}

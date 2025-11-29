@@ -1,30 +1,35 @@
 import api from '@/lib/api'
 import type { CreateProjectPayload, Project, UpdateProjectPayload } from '@/types/project'
 
-interface ProjectsResponse {
-  status: string
-  status_code: number
-  message: string
-  data: {
-    projects: Project[]
-    total: number
-    page: number
-    limit: number
-    total_pages: number
-  }
+type ApiResponse<T> = {
+  status?: string
+  status_code?: number
+  message?: string
+  data: T
 }
-interface CreateProjectResponse {
-  status: string
-  status_code: number
-  message: string
-  data: Project
+
+type ProjectsList = {
+  projects: Project[]
+  total: number
+  page: number
+  limit: number
+  total_pages: number | null
 }
 
 export const projectService = {
-  listProjects: () => api.get<ProjectsResponse>('/projects'),
-  createProject: (payload: CreateProjectPayload) =>
-    api.post<CreateProjectResponse>('/projects', payload),
-  updateProject: (id: string, payload: UpdateProjectPayload) =>
-    api.patch<Project>(`/projects/${id}`, payload),
-  deleteProject: (id: string) => api.delete<{ success: boolean }>(`/projects/${id}`),
+  listProjects: (organization_id: string, params?: { q?: string; page?: number; limit?: number }) =>
+    api.get<ApiResponse<ProjectsList>>(`/organizations/${organization_id}/projects`, {
+      params,
+    }),
+
+  createProject: (organization_id: string, payload: CreateProjectPayload) =>
+    api.post<ApiResponse<Project>>(`/organizations/${organization_id}/projects`, payload),
+
+  updateProject: (organization_id: string, project_id: string, payload: UpdateProjectPayload) =>
+    api.patch<ApiResponse<Project>>(`/organizations/${organization_id}/projects/${project_id}`, payload),
+
+  deleteProject: (organization_id: string, project_id: string) =>
+    api.delete<ApiResponse<{ success?: boolean }>>(
+      `/organizations/${organization_id}/projects/${project_id}`,
+    ),
 }

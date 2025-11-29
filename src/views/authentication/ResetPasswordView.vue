@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
-import AuthLayout from '@/components/authentication/AuthLayout.vue'
 import AuthCard from '@/components/authentication/AuthCard.vue'
 import FormControl from '@/components/composables/FormControl.vue'
 import { useAuthStore } from '@/stores/auth-store'
-import { ArrowLeftIcon } from 'lucide-vue-next'
+import { ArrowLeftIcon, EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -33,6 +32,15 @@ const strengthScore = computed(
 )
 
 const sanitize = (value: string) => value.trim()
+
+const hydrateFromDraft = () => {
+  if (authStore.resetPasswordDraft) {
+    newPassword.value = authStore.resetPasswordDraft.newPassword
+    confirmPassword.value = authStore.resetPasswordDraft.confirmPassword
+  }
+}
+
+onMounted(hydrateFromDraft)
 
 watchEffect(() => {
   if (!resetToken.value && !successMessage.value) {
@@ -70,6 +78,10 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   serverError.value = ''
   successMessage.value = ''
+  authStore.setResetPasswordDraft({
+    newPassword: newPassword.value,
+    confirmPassword: confirmPassword.value,
+  })
 
   try {
     const payload = {
@@ -79,7 +91,17 @@ const handleSubmit = async () => {
     }
     const response = await authStore.confirmPasswordReset(payload)
     successMessage.value = response?.message ?? 'Password updated successfully.'
-    router.replace({ name: 'login' })
+    newPassword.value = ''
+    confirmPassword.value = ''
+    authStore.clearResetPasswordDraft()
+    router.replace({
+      name: 'auth-status',
+      query: {
+        status: 'success',
+        context: 'reset-password',
+        message: successMessage.value,
+      },
+    })
   } catch (error) {
     if (isAxiosError(error)) {
       serverError.value =
@@ -88,6 +110,15 @@ const handleSubmit = async () => {
     } else {
       serverError.value = 'An unexpected error occurred. Please try again.'
     }
+
+    router.push({
+      name: 'auth-status',
+      query: {
+        status: 'error',
+        context: 'reset-password',
+        message: serverError.value,
+      },
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -95,8 +126,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <AuthLayout container-class="p-4 lg:p-10">
-    <AuthCard header-text="New Password">
+  <AuthCard header-text="New Password">
       <template #desc>
         <p class="text-gray-600">Choose a strong password that you haven't used before.</p>
       </template>
@@ -137,10 +167,11 @@ const handleSubmit = async () => {
               <button
                 type="button"
                 @click="showPassword = !showPassword"
-                class="px-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+                class="cursor-pointer px-3 text-gray-500 hover:text-gray-700 focus:outline-none"
               >
-                <span v-if="showPassword">Hide</span>
-                <span v-else>Show</span>
+                <EyeOffIcon v-if="showPassword" :size="18" aria-hidden="true" />
+                <EyeIcon v-else :size="18" aria-hidden="true" />
+                <span class="sr-only">{{ showPassword ? 'Hide password' : 'Show password' }}</span>
               </button>
             </template>
           </FormControl>
@@ -170,10 +201,13 @@ const handleSubmit = async () => {
               <button
                 type="button"
                 @click="showConfirmPassword = !showConfirmPassword"
-                class="px-3 text-gray-500 hover:text-gray-700 focus:outline-none"
+                class="cursor-pointer px-3 text-gray-500 hover:text-gray-700 focus:outline-none"
               >
-                <span v-if="showConfirmPassword">Hide</span>
-                <span v-else>Show</span>
+                <EyeOffIcon v-if="showConfirmPassword" :size="18" aria-hidden="true" />
+                <EyeIcon v-else :size="18" aria-hidden="true" />
+                <span class="sr-only">
+                  {{ showConfirmPassword ? 'Hide password' : 'Show password' }}
+                </span>
               </button>
             </template>
           </FormControl>
@@ -206,5 +240,4 @@ const handleSubmit = async () => {
         </div>
       </div>
     </AuthCard>
-  </AuthLayout>
 </template>

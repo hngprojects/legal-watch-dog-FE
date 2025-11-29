@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import MainHeader from '@/components/landing-page/MainHeader.vue'
-import MainFooter from '@/components/landing-page/MainFooter.vue'
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col bg-[#F8F4F0]">
-    <MainHeader />
     <main class="flex flex-1 items-center justify-center px-6 py-12">
       <div class="max-w-2xl rounded-2xl bg-white p-10 text-center shadow-xl">
         <p class="text-xs font-semibold tracking-[0.2em] text-[#C27A3F] uppercase">Onboarding</p>
@@ -37,6 +34,5 @@ import MainFooter from '@/components/landing-page/MainFooter.vue'
         </button>
       </div>
     </main>
-    <MainFooter />
   </div>
 </template>
