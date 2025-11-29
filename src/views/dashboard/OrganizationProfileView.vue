@@ -28,6 +28,8 @@ import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
+import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
+import { Settings } from 'lucide-vue-next'
 
 type MemberRole = 'Admin' | 'Manager' | 'Member'
 type MemberStatus = 'Active' | 'Pending' | 'Inactive'
@@ -76,6 +78,9 @@ const editingProject = ref<{ id?: string; title?: string; description?: string }
 const organizationOptions = computed(() =>
   orgId.value && organization.value ? [{ id: orgId.value, name: organization.value.name }] : [],
 )
+const orgEditDialogOpen = ref(false)
+const orgEditSaving = ref(false)
+const orgEditError = ref<string | null>(null)
 
 const goToProject = (projectId: string) => {
   if (!orgId.value) return
@@ -153,6 +158,47 @@ const deleteProject = async (projectId?: string) => {
   await projectStore.deleteProject(projectId, orgId.value)
   await Swal.fire('Deleted', 'Project successfully deleted.', 'success')
   await loadProjects()
+}
+
+const openEditOrganization = () => {
+  if (!organization.value) return
+  orgEditError.value = null
+  orgEditDialogOpen.value = true
+}
+
+const handleOrgSave = async (payload: { name: string; industry: string }) => {
+  if (!orgId.value) return
+  orgEditSaving.value = true
+  orgEditError.value = null
+  const updated = await organizationStore.updateOrganization(orgId.value, payload)
+  if (updated) {
+    await Swal.fire('Updated', 'Organization updated successfully.', 'success')
+    orgEditDialogOpen.value = false
+  } else if (organizationStore.error) {
+    orgEditError.value = organizationStore.error
+  }
+  orgEditSaving.value = false
+}
+
+const confirmDeleteOrganization = async () => {
+  if (!orgId.value || !organization.value) return
+  const result = await Swal.fire({
+    title: 'Delete organization?',
+    text: 'This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#d33',
+  })
+  if (!result.isConfirmed) return
+  const deleted = await organizationStore.deleteOrganization(orgId.value)
+  if (deleted) {
+    await Swal.fire('Deleted', 'Organization removed successfully.', 'success')
+    router.push({ name: 'organizations' })
+  } else if (organizationStore.error) {
+    await Swal.fire('Could not delete', organizationStore.error, 'error')
+  }
 }
 
 const initials = (name: string) =>
@@ -458,6 +504,22 @@ watch(
               </p>
             </div>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <button
+                class="btn--primary btn--lg btn--with-icon"
+              >
+                <Settings :size="18" />
+                Manage
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @click="openEditOrganization">Edit organization</DropdownMenuItem>
+              <DropdownMenuItem class="text-red-600" @click="confirmDeleteOrganization">
+                Delete organization
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </section>
 
@@ -467,7 +529,7 @@ watch(
             <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Projects ({{ projects.length}})</p>
           </div>
           <div class="flex items-center gap-3">
-            <button @click="openCreateProject" class="btn--primary">Add Project</button>
+            <button @click="openCreateProject" class="btn--primary btn--lg">Add Project</button>
             <button @click="openProjects" class="btn--link">View all</button>
           </div>
         </div>
@@ -478,7 +540,7 @@ watch(
         <div v-else-if="!projects.length" class="space-y-4 rounded-xl border border-dashed border-gray-200 p-6 text-center">
           <p class="text-sm text-gray-600">No projects yet. Create one to start tracking changes.</p>
           <div class="flex justify-center">
-            <button class="btn--primary" @click="openCreateProject">Add Project</button>
+            <button class="btn--primary btn--lg" @click="openCreateProject">Add Project</button>
           </div>
         </div>
         <div v-else class="space-y-3">
@@ -521,7 +583,7 @@ watch(
           <Dialog v-model:open="inviteOpen">
             <DialogTrigger as-child>
               <button
-                class="btn--primary"
+                class="btn--primary btn--lg"
               >
                 Invite Member
               </button>
@@ -735,6 +797,18 @@ watch(
         Go back
       </RouterLink>
     </div>
+
+    <OrganizationFormDialog
+      v-if="organization"
+      v-model:open="orgEditDialogOpen"
+      :initial-name="organization.name"
+      :initial-industry="organization.industry || ''"
+      title="Edit organization"
+      submit-label="Save changes"
+      :loading="orgEditSaving"
+      :error="orgEditError"
+      @save="handleOrgSave"
+    />
   </main>
 
   <ProjectFormModal

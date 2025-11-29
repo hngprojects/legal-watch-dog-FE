@@ -19,6 +19,7 @@ import { EllipsisVertical } from 'lucide-vue-next'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { useInvitationStore } from '@/stores/invitation-store'
+import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
 import illustrationImg from '@/assets/Images/dashboardillustration.png'
 import type { Organization } from '@/types/organization'
 
@@ -34,6 +35,10 @@ const formData = ref({
   name: '',
   industry: '',
 })
+const editDialogOpen = ref(false)
+const editingOrg = ref<Organization | null>(null)
+const editSaving = ref(false)
+const editError = ref<string | null>(null)
 // inviteOrgNames kept for potential future use but not populated here
 // const inviteOrgNames = ref<Record<string, string>>({})
 
@@ -118,47 +123,24 @@ const loadMoreOrganizations = async () => {
   await organizationStore.fetchMoreOrganizations(userId)
 }
 
-const openEditOrganization = async (org: Organization) => {
-  const { value: formValues, isConfirmed } = await Swal.fire({
-    title: 'Edit organization',
-    html: `
-      <div class="text-left space-y-2">
-        <label for="swal-org-name" class="text-sm font-semibold text-gray-700">Name</label>
-        <input id="swal-org-name" class="swal2-input" placeholder="Organization name" value="${org.name ?? ''}" />
-        <label for="swal-org-industry" class="text-sm font-semibold text-gray-700 mt-2">Industry</label>
-        <input id="swal-org-industry" class="swal2-input" placeholder="Industry" value="${org.industry ?? ''}" />
-      </div>
-    `,
-    focusConfirm: false,
-    showCancelButton: true,
-    confirmButtonText: 'Save',
-    preConfirm: () => {
-      const nameInput = (document.getElementById('swal-org-name') as HTMLInputElement | null)?.value.trim() || ''
-      const industryInput =
-        (document.getElementById('swal-org-industry') as HTMLInputElement | null)?.value.trim() ||
-        ''
-      if (!nameInput) {
-        Swal.showValidationMessage('Organization name is required')
-        return false
-      }
-      if (!industryInput) {
-        Swal.showValidationMessage('Industry is required')
-        return false
-      }
-      return { name: nameInput, industry: industryInput }
-    },
-  })
+const openEditOrganization = (org: Organization) => {
+  editingOrg.value = org
+  editError.value = null
+  editDialogOpen.value = true
+}
 
-  if (!isConfirmed || !formValues) return
-  const updated = await organizationStore.updateOrganization(org.id, {
-    name: formValues.name,
-    industry: formValues.industry,
-  })
+const handleEditSave = async (payload: { name: string; industry: string }) => {
+  if (!editingOrg.value) return
+  editSaving.value = true
+  editError.value = null
+  const updated = await organizationStore.updateOrganization(editingOrg.value.id, payload)
   if (updated) {
+    editDialogOpen.value = false
     await Swal.fire('Updated', 'Organization updated successfully.', 'success')
   } else if (organizationStore.error) {
-    await Swal.fire('Could not update', organizationStore.error, 'error')
+    editError.value = organizationStore.error
   }
+  editSaving.value = false
 }
 
 const confirmDeleteOrganization = async (org: Organization) => {
@@ -234,7 +216,7 @@ onMounted(async () => {
             </div>
             <button
               @click="acceptInvite(invite.token)"
-              class="btn--primary"
+              class="btn--primary btn--lg"
             >
               Accept
             </button>
@@ -254,7 +236,7 @@ onMounted(async () => {
         />
         Projects and jurisdictions are scoped within organizations.
       </p>
-      <button @click="openCreateModal" class="btn--primary btn--with-icon">
+      <button @click="openCreateModal" class="btn--primary btn--lg btn--with-icon">
         <svg
           width="20"
           height="20"
@@ -288,7 +270,7 @@ onMounted(async () => {
         <div>
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Organizations</h1>
         </div>
-        <button @click="openCreateModal" class="btn--primary btn--with-icon">
+        <button @click="openCreateModal" class="btn--primary btn--lg btn--with-icon">
           <svg
             width="20"
             height="20"
@@ -348,7 +330,7 @@ onMounted(async () => {
               <DropdownMenuTrigger as-child>
                 <button
                   @click.stop
-                  class="btn absolute right-4 top-6 rounded-full p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                  class="absolute right-4 top-6 btn--primary btn--sm"
                 >
                   <EllipsisVertical :size="18" />
                 </button>
@@ -374,7 +356,7 @@ onMounted(async () => {
           >
             <button
               @click="goToOrganization(org.id)"
-              class="btn btn--primary flex items-center gap-1"
+              class="btn--primary flex items-center gap-1"
             >
               View Organization
               <svg
@@ -396,7 +378,7 @@ onMounted(async () => {
       <div v-if="hasMoreOrganizations" class="mt-8 flex justify-center">
         <button
           @click="loadMoreOrganizations"
-          class="btn--primary"
+          class="btn--primary btn--lg"
           :disabled="organizationStore.loadingMore"
         >
           <span v-if="organizationStore.loadingMore">Loading...</span>
@@ -478,5 +460,17 @@ onMounted(async () => {
         </div>
       </div>
     </teleport>
+
+    <OrganizationFormDialog
+      v-if="editingOrg"
+      v-model:open="editDialogOpen"
+      :initial-name="editingOrg.name"
+      :initial-industry="editingOrg.industry || ''"
+      title="Edit organization"
+      submit-label="Save changes"
+      :loading="editSaving"
+      :error="editError"
+      @save="handleEditSave"
+    />
   </main>
 </template>
