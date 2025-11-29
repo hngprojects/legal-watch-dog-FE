@@ -2,6 +2,26 @@ export type SourceType = 'web' | 'api' | 'pdf'
 
 export type ScrapeFrequency = 'HOURLY' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
 
+export interface PaginationMeta {
+  total: number
+  page: number
+  limit: number
+  total_pages: number
+}
+
+export interface SourceRevision {
+  id: string
+  source_id: string
+  minio_object_key: string
+  content_hash?: string | null
+  extracted_data: Record<string, unknown> | null
+  ai_summary: string | null
+  ai_markdown_summary?: string | null
+  ai_confidence_score?: number | null
+  scraped_at: string
+  was_change_detected: boolean
+}
+
 export interface Source {
   id: string
   jurisdiction_id: string
@@ -18,6 +38,11 @@ export interface Source {
 
   // Optional field
   scraping_rules?: Record<string, unknown> | null
+}
+
+export interface RevisionsResponse {
+  revisions: SourceRevision[]
+  pagination: PaginationMeta
 }
 export type CreateSourcePayload = {
   jurisdiction_id: string
