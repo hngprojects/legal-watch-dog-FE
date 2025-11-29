@@ -21,6 +21,21 @@ const uniqById = (arr: Jurisdiction[]) => {
 
 const cloneJurisdiction = (j: Jurisdiction) => ({ ...j })
 
+const LOCAL_ARCHIVE_KEY = 'archived_jurisdiction_ids'
+
+const loadArchivedIds = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_ARCHIVE_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+const saveArchivedIds = (ids: string[]) => {
+  localStorage.setItem(LOCAL_ARCHIVE_KEY, JSON.stringify(ids))
+}
+
+
 export const useJurisdictionStore = defineStore('jurisdiction', () => {
   const orgStore = useOrganizationStore()
   const projectStore = useProjectStore()
@@ -226,27 +241,76 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     }
   }
 
-  const deleteJurisdiction = async (jurisdictionId: string, organizationId?: string) => {
-    const orgId = getOrgId(organizationId)
+ // In your store, update the deleteJurisdiction method:
+const deleteJurisdiction = async (jurisdictionId: string, organizationId?: string) => {
+  const orgId = getOrgId(organizationId)
 
-    try {
-      await jurisdictionApi.delete(orgId, jurisdictionId)
+  try {
+    // 1. Find the item before deleting
+    const itemToArchive = jurisdictions.value.find(j => j.id === jurisdictionId)
+    
+    // 2. Call backend soft delete route
+    await jurisdictionApi.delete(orgId, jurisdictionId)
 
-      const item = jurisdictions.value.find((j) => j.id === jurisdictionId)
-
-      if (item) {
-        jurisdictions.value = jurisdictions.value.filter((j) => j.id !== jurisdictionId)
-
-        archivedJurisdictions.value = uniqById([
-          ...archivedJurisdictions.value,
-          { ...item, is_deleted: true, deleted_at: new Date().toISOString() },
-        ])
+    // 3. Update local state immediately
+    jurisdictions.value = jurisdictions.value.filter((j) => j.id !== jurisdictionId)
+    
+    if (itemToArchive) {
+      // Add to archived jurisdictions with deleted flag
+      const archivedItem = {
+        ...itemToArchive,
+        is_deleted: true,
+        deleted_at: new Date().toISOString(),
       }
-    } catch (err) {
-      console.error('Delete failed:', err)
-      throw err
+      archivedJurisdictions.value = uniqById([
+        ...archivedJurisdictions.value,
+        cloneJurisdiction(archivedItem),
+      ])
     }
+
+    // 4. Backup to localStorage
+    const ids = loadArchivedIds()
+    if (!ids.includes(jurisdictionId)) {
+      ids.push(jurisdictionId)
+      saveArchivedIds(ids)
+    }
+
+    console.log("✅ Jurisdiction archived locally:", jurisdictionId)
+
+  } catch (err) {
+    console.error('❌ Delete failed:', err)
+    throw err
   }
+}
+
+// Add this method to sync archived items on page load
+const syncArchivedFromLocalStorage = async (organizationId?: string) => {
+  const orgId = getOrgId(organizationId)
+  const locallyArchivedIds = loadArchivedIds()
+  
+  if (locallyArchivedIds.length === 0) return
+
+  console.log("🔄 Syncing archived items from localStorage:", locallyArchivedIds)
+
+  try {
+    // Fetch all jurisdictions to find our archived ones
+    const response = await jurisdictionApi.getAll(orgId)
+    const allJurisdictions = response.data?.data?.jurisdictions ?? []
+    
+    // Find jurisdictions that are locally archived
+    const archivedItems = allJurisdictions.filter(j => 
+      locallyArchivedIds.includes(j.id) || j.is_deleted
+    )
+    
+    archivedJurisdictions.value = uniqById(archivedItems.map(cloneJurisdiction))
+    
+    console.log("✅ Synced archived items:", archivedJurisdictions.value.length)
+  } catch (err) {
+    console.error("❌ Failed to sync archived items:", err)
+  }
+}
+
+
 
   const restoreJurisdiction = async (jurisdictionId: string, organizationId?: string) => {
     const orgId = getOrgId(organizationId)
@@ -278,7 +342,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     archivedJurisdictions,
     loading,
     error,
-
+syncArchivedFromLocalStorage,
     fetchJurisdictions,
     fetchArchived,
     fetchOne,
