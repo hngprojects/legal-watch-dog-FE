@@ -11,11 +11,8 @@ const jurisdictionStore = useJurisdictionStore()
 const orgStore = useOrganizationStore()
 
 const loading = ref(false)
-
-// Handle null orgId safely
 const orgId = computed(() => orgStore.currentOrganizationId || undefined)
 
-// Use the store's archivedJurisdictions directly
 const archivedJurisdictions = computed(() => {
   return jurisdictionStore.archivedJurisdictions
 })
@@ -24,7 +21,6 @@ onMounted(async () => {
   if (orgId.value) {
     loading.value = true
     try {
-      // Sync from localStorage and API
       await jurisdictionStore.syncArchivedFromLocalStorage(orgId.value)
     } catch (error) {
       console.error('Failed to load archived jurisdictions:', error)
@@ -33,7 +29,6 @@ onMounted(async () => {
     }
   } else {
     console.warn('No organization ID available')
-    // You could show a message to the user or redirect
   }
 })
 
@@ -102,12 +97,10 @@ const permanentDelete = async (jurisdictionId: string) => {
   if (!confirm.isConfirmed) return
 
   try {
-    // Remove from store
     jurisdictionStore.archivedJurisdictions = jurisdictionStore.archivedJurisdictions.filter(
       j => j.id !== jurisdictionId
     )
-    
-    // Remove from localStorage
+
     const ids = JSON.parse(localStorage.getItem('archived_jurisdiction_ids') || '[]')
     const updatedIds = ids.filter((id: string) => id !== jurisdictionId)
     localStorage.setItem('archived_jurisdiction_ids', JSON.stringify(updatedIds))
@@ -138,7 +131,6 @@ const permanentDelete = async (jurisdictionId: string) => {
         </div>
       </div>
 
-      <!-- No Organization Warning -->
       <div v-if="!orgId" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
         <div class="flex items-center">
           <svg class="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +143,6 @@ const permanentDelete = async (jurisdictionId: string) => {
         </div>
       </div>
 
-      <!-- Loading State -->
       <div v-else-if="loading" class="flex justify-center items-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
@@ -176,7 +167,6 @@ const permanentDelete = async (jurisdictionId: string) => {
         </div>
       </div>
 
-      <!-- Archived List -->
       <div v-else class="space-y-4">
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div class="flex items-center">

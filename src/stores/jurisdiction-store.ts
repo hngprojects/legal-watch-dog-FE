@@ -241,22 +241,17 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     }
   }
 
- // In your store, update the deleteJurisdiction method:
 const deleteJurisdiction = async (jurisdictionId: string, organizationId?: string) => {
   const orgId = getOrgId(organizationId)
 
   try {
-    // 1. Find the item before deleting
     const itemToArchive = jurisdictions.value.find(j => j.id === jurisdictionId)
     
-    // 2. Call backend soft delete route
     await jurisdictionApi.delete(orgId, jurisdictionId)
 
-    // 3. Update local state immediately
     jurisdictions.value = jurisdictions.value.filter((j) => j.id !== jurisdictionId)
     
     if (itemToArchive) {
-      // Add to archived jurisdictions with deleted flag
       const archivedItem = {
         ...itemToArchive,
         is_deleted: true,
@@ -268,22 +263,20 @@ const deleteJurisdiction = async (jurisdictionId: string, organizationId?: strin
       ])
     }
 
-    // 4. Backup to localStorage
     const ids = loadArchivedIds()
     if (!ids.includes(jurisdictionId)) {
       ids.push(jurisdictionId)
       saveArchivedIds(ids)
     }
 
-    console.log("✅ Jurisdiction archived locally:", jurisdictionId)
+    console.log("Jurisdiction archived locally:", jurisdictionId)
 
   } catch (err) {
-    console.error('❌ Delete failed:', err)
+    console.error(' Delete failed:', err)
     throw err
   }
 }
 
-// Add this method to sync archived items on page load
 const syncArchivedFromLocalStorage = async (organizationId?: string) => {
   const orgId = getOrgId(organizationId)
   const locallyArchivedIds = loadArchivedIds()
@@ -293,20 +286,18 @@ const syncArchivedFromLocalStorage = async (organizationId?: string) => {
   console.log("🔄 Syncing archived items from localStorage:", locallyArchivedIds)
 
   try {
-    // Fetch all jurisdictions to find our archived ones
     const response = await jurisdictionApi.getAll(orgId)
     const allJurisdictions = response.data?.data?.jurisdictions ?? []
     
-    // Find jurisdictions that are locally archived
     const archivedItems = allJurisdictions.filter(j => 
       locallyArchivedIds.includes(j.id) || j.is_deleted
     )
     
     archivedJurisdictions.value = uniqById(archivedItems.map(cloneJurisdiction))
     
-    console.log("✅ Synced archived items:", archivedJurisdictions.value.length)
+    console.log("Synced archived items:", archivedJurisdictions.value.length)
   } catch (err) {
-    console.error("❌ Failed to sync archived items:", err)
+    console.error("Failed to sync archived items:", err)
   }
 }
 
