@@ -411,14 +411,14 @@ const saveEdits = () => {
             <div class="flex items-center justify-end gap-3 pt-4">
               <button
                 type="button"
-                class="rounded-md border border-[#401903] py-4 px-12 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
+                class="cursor-pointer rounded-md border border-[#401903] py-4 px-12 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
                 @click="closeEditModal"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
+                class="cursor-pointer rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
               >
                 Save
               </button>
