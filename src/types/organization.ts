@@ -11,6 +11,7 @@ export interface Organization {
 
 export interface RawOrganization {
   organization_id?: string
+  organizationId?: string
   id?: string
   name: string
   industry?: string

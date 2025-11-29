@@ -14,7 +14,7 @@
     ></div>
 
     <!-- CAREER PAGE CONTENT -->
-    <section class="relative z-10 bg-transparent px-4 py-16 text-center md:py-20">
+    <section class="relative z-10 bg-transparent px-4 py-16 text-center md:py-20 ">
       <h1 class="mb-4 text-3xl font-extrabold text-gray-900 md:text-4xl lg:text-5xl">
         Build Your Future In Regulatory
       </h1>
@@ -24,7 +24,7 @@
     </section>
 
     <!-- CAREERS GRID -->
-    <section class="relative z-10 mx-auto max-w-7xl bg-transparent px-4 py-12 md:py-20 lg:px-6">
+    <section class="relative z-10 mx-auto bg-transparent px-4 py-12 md:py-20 lg:px-6 app-container">
       <!-- UNIFORM RESPONSIVE GRID -->
       <div class="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <!-- WRAPPER (keeps alignment and responsiveness) -->
@@ -142,7 +142,7 @@
       </div>
 
       <!-- BENEFIT PACKAGE -->
-      <div class="flex flex-col items-center gap-10 lg:flex-row lg:gap-20">
+      <div class="flex flex-col items-center gap-10 lg:flex-row lg:gap-20 app-container">
         <div class="flex-1">
           <img :src="why2" class="h-auto w-full rounded-2xl object-cover" />
         </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="container--wide">
+  <div class="">
     <MainHeader />
 
     <main>

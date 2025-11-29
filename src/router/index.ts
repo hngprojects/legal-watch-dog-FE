@@ -51,6 +51,12 @@ const router = createRouter({
         { path: 'help-center', name: 'help-center', component: HelpCenter },
         { path: 'terms', name: 'terms', component: Terms },
         { path: 'blog', name: 'blog', component: BlogView },
+        {
+          path: 'blog/:id',
+          name: 'blog-detail',
+          component: () => import('@/views/BlogDetailView.vue'),
+          props: true,
+        },
         { path: 'features', name: 'features', component: Features },
         { path: 'waitlist', name: 'waitlist', component: WaitlistView },
         {
@@ -172,6 +178,11 @@ const router = createRouter({
           component: () => import('@/views/dashboard/jurisdictions/Jurisdiction.vue'),
         },
         {
+          path: 'jurisdictions/archive',
+          name: 'jurisdictions-archive',
+          component: () => import('@/views/dashboard/jurisdictions/archive.vue'),
+        },
+        {
           path: 'jurisdictions/:id/sources',
           name: 'jurisdiction-sources',
           component: () => import('@/views/dashboard/sources/Source.vue'),
@@ -196,7 +207,7 @@ const router = createRouter({
 
     {
       path: '/:pathMatch(.*)*',
-      name: 'not-found',
+      name: 'coming-soon',
       component: () => import('@/views/NotFoundView.vue'),
     },
   ],
