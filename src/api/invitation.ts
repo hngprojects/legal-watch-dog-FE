@@ -18,5 +18,5 @@ type InvitationsPayload = {
 export const invitationService = {
   listMyInvitations: () => api.get<ApiResponse<InvitationsPayload>>('/users/me/invitations'),
   acceptInvitation: (token: string) =>
-    api.get<ApiResponse<{ message?: string }>>(`/auth/invitations/${token}/accept`),
+    api.post<ApiResponse<{ message?: string }>>(`/auth/invitations/${token}/accept`),
 }

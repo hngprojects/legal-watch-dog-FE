@@ -1,23 +1,24 @@
 <script setup lang="ts">
 import { authService } from '@/api/auth'
-import { useAuthStore } from '@/stores/auth-store'
+// import { useAuthStore } from '@/stores/auth-store'
 import { isAxiosError } from 'axios'
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+// import { useRouter } from 'vue-router'
 
 const baseButtonClass =
   'flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 shadow-[0_1px_0_rgba(16,24,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-sm sm:w-auto sm:min-w-[180px] cursor-pointer'
 
-const microsoftRedirectUri = import.meta.env.VITE_MICROSOFT_REDIRECT_URI
-const appleClientId = import.meta.env.VITE_APPLE_CLIENT_ID
-const appleRedirectUri = import.meta.env.VITE_APPLE_REDIRECT_URI
+// const microsoftRedirectUri = import.meta.env.VITE_MICROSOFT_REDIRECT_URI
+// const appleClientId = import.meta.env.VITE_APPLE_CLIENT_ID
+// const appleRedirectUri = import.meta.env.VITE_APPLE_REDIRECT_URI
 
-const isMicrosoftLoading = ref(false)
-const isAppleLoading = ref(false)
+const isGoogleLoading = ref(false)
+// const isMicrosoftLoading = ref(false)
+// const isAppleLoading = ref(false)
 const socialError = ref('')
 
-const router = useRouter()
-const authStore = useAuthStore()
+// const router = useRouter()
+// const authStore = useAuthStore()
 
 declare global {
   interface Window {
@@ -38,16 +39,15 @@ declare global {
   }
 }
 
-const handleMicrosoftLogin = async () => {
-  if (isMicrosoftLoading.value) return
+const handleGoogleLogin = async () => {
+  if (isGoogleLoading.value) return
 
   socialError.value = ''
-  isMicrosoftLoading.value = true
-  const defaultError = 'Unable to start Microsoft login. Please try again.'
+  isGoogleLoading.value = true
+  const defaultError = 'Unable to start Google login. Please try again.'
 
   try {
-    const { data } = await authService.getMicrosoftLoginUrl(microsoftRedirectUri)
-    const authorizationUrl = data?.authorization_url
+    const authorizationUrl = authService.getGoogleLoginUrl()
 
     if (!authorizationUrl) {
       throw new Error('Authorization URL missing from response.')
@@ -67,104 +67,137 @@ const handleMicrosoftLogin = async () => {
       socialError.value = defaultError
     }
   } finally {
-    isMicrosoftLoading.value = false
+    isGoogleLoading.value = false
   }
 }
 
-const loadAppleScript = () =>
-  new Promise<void>((resolve, reject) => {
-    if (document.getElementById('apple-signin')) {
-      resolve()
-      return
-    }
-    const script = document.createElement('script')
-    script.id = 'apple-signin'
-    script.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js'
-    script.onload = () => resolve()
-    script.onerror = () => {
-      script.remove()
-      reject(new Error('Failed to load Apple Sign In'))
-    }
-    document.head.appendChild(script)
-  })
+// const handleMicrosoftLogin = async () => {
+//   if (isMicrosoftLoading.value) return
 
-const handleAppleLogin = async () => {
-  if (isAppleLoading.value) return
+//   socialError.value = ''
+//   isMicrosoftLoading.value = true
+//   const defaultError = 'Unable to start Microsoft login. Please try again.'
 
-  socialError.value = ''
-  isAppleLoading.value = true
+//   try {
+//     const { data } = await authService.getMicrosoftLoginUrl(microsoftRedirectUri)
+//     const authorizationUrl = data?.authorization_url
 
-  const missingConfig = !appleClientId || !appleRedirectUri
-  if (missingConfig) {
-    socialError.value = 'Apple login is not available right now. Please try again later.'
-    isAppleLoading.value = false
-    return
-  }
+//     if (!authorizationUrl) {
+//       throw new Error('Authorization URL missing from response.')
+//     }
 
-  try {
-    await loadAppleScript()
+//     window.location.href = authorizationUrl
+//   } catch (error) {
+//     if (isAxiosError(error)) {
+//       const responseData = (error.response?.data ?? {}) as {
+//         message?: string
+//         detail?: string
+//         error?: string
+//       }
+//       socialError.value =
+//         responseData.message || responseData.detail || responseData.error || defaultError
+//     } else {
+//       socialError.value = defaultError
+//     }
+//   } finally {
+//     isMicrosoftLoading.value = false
+//   }
+// }
 
-    const apple = window.AppleID
-    if (!apple?.auth) throw new Error('Apple Sign In not available.')
+// const loadAppleScript = () =>
+//   new Promise<void>((resolve, reject) => {
+//     if (document.getElementById('apple-signin')) {
+//       resolve()
+//       return
+//     }
+//     const script = document.createElement('script')
+//     script.id = 'apple-signin'
+//     script.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js'
+//     script.onload = () => resolve()
+//     script.onerror = () => {
+//       script.remove()
+//       reject(new Error('Failed to load Apple Sign In'))
+//     }
+//     document.head.appendChild(script)
+//   })
 
-    apple.auth.init({
-      clientId: appleClientId,
-      scope: 'name email',
-      redirectURI: appleRedirectUri,
-      usePopup: true,
-    })
+// const handleAppleLogin = async () => {
+//   if (isAppleLoading.value) return
 
-    const response = await apple.auth.signIn()
-    const auth = response?.authorization
-    const user = response?.user
+//   socialError.value = ''
+//   isAppleLoading.value = true
 
-    if (!auth?.code || !auth?.id_token) {
-      throw new Error('Apple Sign In did not return a valid authorization code.')
-    }
+//   const missingConfig = !appleClientId || !appleRedirectUri
+//   if (missingConfig) {
+//     socialError.value = 'Apple login is not available right now. Please try again later.'
+//     isAppleLoading.value = false
+//     return
+//   }
 
-    const name =
-      user?.name?.firstName || user?.name?.lastName
-        ? `${user?.name?.firstName ?? ''} ${user?.name?.lastName ?? ''}`.trim()
-        : undefined
+//   try {
+//     await loadAppleScript()
 
-    const apiResponse = await authService.appleSignIn({
-      code: auth.code,
-      id_token: auth.id_token,
-      email: user?.email,
-      name,
-      redirect_uri: appleRedirectUri,
-    })
+//     const apple = window.AppleID
+//     if (!apple?.auth) throw new Error('Apple Sign In not available.')
 
-    const payload = apiResponse.data as {
-      data?: { access_token?: string; user?: unknown }
-      access_token?: string
-      user?: unknown
-    }
-    const accessToken = payload.data?.access_token ?? payload.access_token
-    const userData = payload.data?.user ?? payload.user
+//     apple.auth.init({
+//       clientId: appleClientId,
+//       scope: 'name email',
+//       redirectURI: appleRedirectUri,
+//       usePopup: true,
+//     })
 
-    if (accessToken) {
-      authStore.handleLoginSuccess(accessToken, true, userData as never)
-      router.push({ name: 'organizations' })
-    } else {
-      router.push({ name: 'auth-status', query: { status: 'success', context: 'signup' } })
-    }
-  } catch (error) {
-    if (isAxiosError(error)) {
-      const responseData = (error.response?.data ?? {}) as {
-        message?: string
-        detail?: string
-        error?: string
-      }
-      socialError.value =
-        responseData.message || responseData.detail || responseData.error || 'Apple login failed.'
-    } else {
-      socialError.value = (error as Error)?.message || 'Apple login failed.'
-    }
-  } finally {
-    isAppleLoading.value = false
-  }
-}
+//     const response = await apple.auth.signIn()
+//     const auth = response?.authorization
+//     const user = response?.user
+
+//     if (!auth?.code || !auth?.id_token) {
+//       throw new Error('Apple Sign In did not return a valid authorization code.')
+//     }
+
+//     const name =
+//       user?.name?.firstName || user?.name?.lastName
+//         ? `${user?.name?.firstName ?? ''} ${user?.name?.lastName ?? ''}`.trim()
+//         : undefined
+
+//     const apiResponse = await authService.appleSignIn({
+//       code: auth.code,
+//       id_token: auth.id_token,
+//       email: user?.email,
+//       name,
+//       redirect_uri: appleRedirectUri,
+//     })
+
+//     const payload = apiResponse.data as {
+//       data?: { access_token?: string; user?: unknown }
+//       access_token?: string
+//       user?: unknown
+//     }
+//     const accessToken = payload.data?.access_token ?? payload.access_token
+//     const userData = payload.data?.user ?? payload.user
+
+//     if (accessToken) {
+//       authStore.handleLoginSuccess(accessToken, true, userData as never)
+//       router.push({ name: 'organizations' })
+//     } else {
+//       router.push({ name: 'auth-status', query: { status: 'success', context: 'signup' } })
+//     }
+//   } catch (error) {
+//     if (isAxiosError(error)) {
+//       const responseData = (error.response?.data ?? {}) as {
+//         message?: string
+//         detail?: string
+//         error?: string
+//       }
+//       socialError.value =
+//         responseData.message || responseData.detail || responseData.error || 'Apple login failed.'
+//     } else {
+//       socialError.value = (error as Error)?.message || 'Apple login failed.'
+//     }
+//   } finally {
+//     isAppleLoading.value = false
+//   }
+// }
 </script>
 
 <template>
@@ -172,13 +205,15 @@ const handleAppleLogin = async () => {
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <button
         type="button"
-        :class="baseButtonClass"
+        :class="[baseButtonClass, { 'cursor-not-allowed opacity-60': isGoogleLoading }]"
+        :disabled="isGoogleLoading"
+        @click="handleGoogleLogin"
       >
         <img src="/images/google.png" alt="Google" class="h-5 w-5" />
-        <span>Google</span>
+        <span>{{ isGoogleLoading ? 'Connecting...' : 'Google' }}</span>
       </button>
 
-      <button
+      <!-- <button
         type="button"
         :class="[baseButtonClass, { 'cursor-not-allowed opacity-60': isAppleLoading }]"
         :disabled="isAppleLoading"
@@ -196,7 +231,7 @@ const handleAppleLogin = async () => {
       >
         <img src="/images/microsoft.png" alt="Microsoft" class="h-5 w-5" />
         <span>{{ isMicrosoftLoading ? 'Connecting...' : 'Microsoft' }}</span>
-      </button>
+      </button> -->
     </div>
 
     <p v-if="socialError" class="text-sm text-red-600 mt-4 text-center">

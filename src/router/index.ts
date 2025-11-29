@@ -27,6 +27,7 @@ import ForgotPasswordView from '@/views/authentication/ForgotPasswordView.vue'
 import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 import AcceptInviteView from '@/views/authentication/AcceptInviteView.vue'
+import GoogleCallbackView from '@/views/authentication/GoogleCallbackView.vue'
 
 // Dashboard pages
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
@@ -120,6 +121,12 @@ const router = createRouter({
           name: 'auth-status',
           component: AuthStatusView,
           alias: '/success',
+          meta: { authLayoutProps: { containerClass: 'p-6 lg:p-12' } },
+        },
+        {
+          path: 'auth/google/callback',
+          name: 'google-callback',
+          component: GoogleCallbackView,
           meta: { authLayoutProps: { containerClass: 'p-6 lg:p-12' } },
         },
         { path: 'auth/accept-invite/:token', name: 'accept-invite', component: AcceptInviteView },
