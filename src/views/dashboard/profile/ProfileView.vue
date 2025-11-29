@@ -5,13 +5,24 @@ import Swal from 'sweetalert2'
 import { Input } from '@/components/ui/input'
 import { userService } from '@/api/user'
 import { useAuthStore } from '@/stores/auth-store'
+import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import type { Organization } from '@/types/organization'
 import type { UserProfile } from '@/types/user'
+import editIcon from '@/assets/icons/editIcon.svg'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const authStore = useAuthStore()
+const projectStore = useProjectStore()
 const organizationStore = useOrganizationStore()
 const { organizations, loading: orgLoading, error: orgError } = storeToRefs(organizationStore)
+const { projects, loading: projectsLoading, error: projectError } = storeToRefs(projectStore)
 
 const profileLoading = ref(true)
 const profileError = ref<string | null>(null)
@@ -53,6 +64,34 @@ const primaryRole = computed(() => {
     'Member'
   )
 })
+
+const primaryOrg = computed(() => {
+  return (
+    organizations.value[0]?.name ||
+    userProfile.value?.organizations?.[0]?.name ||
+    'Member'
+  )
+})
+
+const userEmail = computed(() => {
+  return (
+    userProfile.value?.email ||
+    authStore.user?.email ||''
+  )
+})
+
+const loadAllProjects = async () => {
+  if (organizations.value.length === 0) return
+  
+  // Fetch projects for all organizations
+  for (const org of organizations.value) {
+    try {
+      await projectStore.fetchProjects(org.id)
+    } catch (error) {
+      console.error(`Failed to load projects for organization ${org.name}:`, error)
+    }
+  }
+}
 
 const avatarInitials = computed(() => {
   const name = fullName.value.trim()
@@ -127,7 +166,8 @@ onMounted(async () => {
   await fetchProfile()
   const userId = await ensureUserId()
   if (userId) {
-    organizationStore.fetchOrganizations(userId)
+    await organizationStore.fetchOrganizations(userId)
+    await loadAllProjects()
   }
 })
 
@@ -150,12 +190,13 @@ watch(
 )
 
 const openEditModal = () => {
-  Swal.fire({
-    icon: 'info',
-    title: 'Profile editing unavailable',
-    text: 'Profile updates are temporarily disabled. Please check back soon.',
-    confirmButtonColor: '#401903',
-  })
+  showEditModal.value = true
+  // Swal.fire({
+  //   icon: 'info',
+  //   title: 'Profile editing unavailable',
+  //   text: 'Profile updates are temporarily disabled. Please check back soon.',
+  //   confirmButtonColor: '#401903',
+  // })
 }
 
 const closeEditModal = () => {
@@ -178,7 +219,7 @@ const saveEdits = () => {
     <div class="mx-auto flex max-w-6xl flex-col gap-6">
       <div class="flex items-start justify-between">
         <div>
-          <p class="text-sm font-semibold tracking-wide text-[#9CA3AF] uppercase">Profile</p>
+          <!-- <p class="text-sm font-semibold tracking-wide text-[#9CA3AF] uppercase">Profile</p> -->
           <h1 class="text-3xl font-bold text-[#0F172A]">Profile Information</h1>
         </div>
       </div>
@@ -198,28 +239,29 @@ const saveEdits = () => {
       </div>
 
       <template v-else>
-        <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:p-8">
-          <div class="flex flex-col items-start justify-between gap-6 md:flex-row md:gap-10">
-            <div class="flex flex-col gap-6">
+        <section class="rounded-2xl border border-gray-100 bg-[#F5F5F5] p-5 shadow-sm h-[270px] flex items-center justify-center">
+          <div class="flex flex-col items-center justify-center ">
+            <div class="flex flex-col gap-6 items-center">
               <div
-                class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md"
+                class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
               >
                 {{ avatarInitials }}
-              </div>
-              <div class="space-y-3">
-                <div class="space-y-2">
-                  <p class="text-2xl font-semibold text-[#0F172A]">{{ fullName }}</p>
-                  <p class="text-sm text-[#6B7280]">{{ primaryRole }}</p>
+                <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" @click="openEditModal">
+                  <img :src="editIcon" alt="Edit Icon">
                 </div>
               </div>
+              <!-- <div class="space-y-3"> -->
+                <div class="flex flex-col items-center gap-2">
+                  <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
+                  <p class="text-xl text-[#1F1F1F]">{{ primaryRole }} - {{ primaryOrg }}</p>
+                  <p class="text-lg text-[#6B7280]">{{ userEmail }}</p>
+                </div>
+              <!-- </div> -->
             </div>
-            <button type="button" class="btn btn--primary" @click="openEditModal">
-              Edit Profile
-            </button>
           </div>
         </section>
 
-        <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:p-8">
+        <!-- <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:p-8">
           <div class="mb-6 flex items-center justify-between">
             <div>
               <h2 class="text-lg font-semibold text-[#0F172A]">Contact Information</h2>
@@ -243,24 +285,24 @@ const saveEdits = () => {
               />
             </div>
           </div>
-        </section>
+        </section> -->
 
         <section class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:p-8">
           <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 class="text-lg font-semibold text-[#0F172A]">Organizations</h2>
-              <p class="text-sm text-[#6B7280]">Organizations you belong to and your roles.</p>
+              <!-- <p class="text-sm text-[#6B7280]">Organizations you belong to and your roles.</p> -->
             </div>
-            <button
+            <!-- <button
               type="button"
               class="btn btn--link"
               @click="authStore.user?.id && organizationStore.fetchOrganizations(authStore.user.id)"
             >
               Refresh
-            </button>
+            </button> -->
           </div>
 
-          <div v-if="orgLoading" class="grid gap-4">
+          <div v-if="orgLoading && projectsLoading" class="grid gap-4">
             <div
               v-for="skeleton in 3"
               :key="skeleton"
@@ -268,7 +310,7 @@ const saveEdits = () => {
             />
           </div>
 
-          <div v-else-if="orgError" class="rounded-xl border border-red-100 bg-red-50 p-4">
+          <div v-else-if="orgError && projectError" class="rounded-xl border border-red-100 bg-red-50 p-4">
             <p class="text-sm font-medium text-red-700">{{ orgError }}</p>
           </div>
 
@@ -283,12 +325,15 @@ const saveEdits = () => {
             <article
               v-for="org in organizationList"
               :key="org.id"
-              class="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white px-4 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+              class="flex flex-col gap-3 rounded-xl border border-[#EDEDED] bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div class="space-y-1">
                 <p class="text-lg font-semibold text-[#0F172A]">{{ org.name }}</p>
                 <p class="text-sm text-[#6B7280]">
                   {{ org.industry || 'No industry specified' }}
+                </p>
+                <p class="text-sm text-[#6B7280]">
+                  Projects available: <span class="text-black">{{ projects.filter(p => p.org_id === org.id).length }}</span>
                 </p>
               </div>
               <div class="flex flex-col items-start gap-2 sm:items-end">
@@ -310,32 +355,48 @@ const saveEdits = () => {
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
         @click.self="closeEditModal"
       >
-        <div class="w-full max-w-xl rounded-2xl bg-white p-8 shadow-2xl">
-          <div class="mb-6">
+        <div class="w-full max-w-xl rounded-2xl bg-white px-12 py-14 shadow-2xl">
+          <div class="mb-14">
             <h3 class="text-2xl font-semibold text-[#0F172A]">Edit Profile</h3>
-            <p class="text-sm text-[#6B7280]">Update your profile details.</p>
+            <!-- <p class="text-sm text-[#6B7280]">Update your profile details.</p> -->
+          </div>
+
+          <div class="flex justify-center mb-6">
+             <div
+                class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
+              >
+                {{ avatarInitials }}
+                <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" @click="saveEdits">
+                  <img :src="editIcon" alt="Edit Icon">
+                </div>
+              </div>
           </div>
 
           <form class="space-y-5" @submit.prevent="saveEdits">
-            <div class="space-y-2">
+            <div class="space-y-3">
               <label class="text-sm font-semibold text-[#0F172A]" for="name">Name</label>
               <Input
                 id="name"
                 v-model="editForm.name"
                 placeholder="Your full name"
-                class="h-12 rounded-xl border-[#E5E7EB] text-sm text-[#111827]"
+                class="h-12 rounded-md border-[#E5E7EB] text-sm text-[#111827] mt-1.5"
               />
             </div>
-            <div class="space-y-2">
+            <div class="space-y-3">
               <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
-              <Input
-                id="role"
-                v-model="editForm.role"
-                placeholder="Your role"
-                class="h-12 rounded-xl border-[#E5E7EB] text-sm text-[#111827]"
-              />
+              <Select v-model="editForm.role" required>
+                  <SelectTrigger class="h-12 border-[#D5D7DA] rounded-md text-sm focus:border-[#401903] w-full">
+                    <SelectValue placeholder="Select Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Admin">Admin</SelectItem>
+                    <!-- <SelectItem value="Member">Member</SelectItem> -->
+                    <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
+                    <!-- <SelectItem value="Editor">Editor</SelectItem> -->
+                  </SelectContent>
+                </Select>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-3">
               <label class="text-sm font-semibold text-[#0F172A]" for="edit-email"
                 >Email Address</label
               >
@@ -344,20 +405,20 @@ const saveEdits = () => {
                 v-model="editForm.email"
                 type="email"
                 placeholder="you@example.com"
-                class="h-12 rounded-xl border-[#E5E7EB] text-sm text-[#111827]"
+                class="h-12 rounded-md border-[#E5E7EB] text-sm text-[#111827] mt-1.5"
               />
             </div>
-            <div class="flex items-center justify-between gap-3 pt-4">
+            <div class="flex items-center justify-end gap-3 pt-4">
               <button
                 type="button"
-                class="rounded-full border border-[#401903] px-5 py-2 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
+                class="cursor-pointer rounded-md border border-[#401903] py-4 px-12 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
                 @click="closeEditModal"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="rounded-full bg-[#401903] px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
+                class="cursor-pointer rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
               >
                 Save
               </button>

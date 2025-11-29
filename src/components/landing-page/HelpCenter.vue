@@ -16,7 +16,7 @@
       </div>
 
       <!-- Hero Section (3 Action Cards) -->
-      <div class="mx-auto mb-24 max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto mb-24 app-container px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 gap-8 text-center md:grid-cols-3">
           <!-- Card 1 -->
           <div
@@ -77,7 +77,7 @@
       </div>
 
       <!-- Need Help Section Title -->
-      <div class="mb-16 px-4 text-center sm:px-6 lg:px-8">
+      <div class="mb-16 px-4 text-center sm:px-6 lg:px-0 app-container">
         <TypographyHeading
           level="h2"
           class="mb-3 text-center text-4xl font-extrabold text-gray-900 md:text-5xl"
@@ -91,7 +91,7 @@
       </div>
 
       <!-- Features Grid -->
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-0 app-container">
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3">
           <div
             v-for="feature in helpFeatures"
