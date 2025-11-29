@@ -1,5 +1,5 @@
 <template>
-  <footer class="border-t border-gray-100 bg-[#F9FAFB] text-gray-800">
+  <footer class="border-t border-gray-100 bg-[#F9FAFB] text-gray-800 container--wide">
     <div class="mx-auto max-w-7xl px-6 pt-16 pb-6 lg:px-8">
       <div class="mb-12">
         <div class="flex items-center gap-3">
@@ -21,7 +21,7 @@
       <div class="mb-12 border-t border-gray-300"></div>
 
       <nav aria-label="Footer navigation">
-        <div class="grid grid-cols-2 gap-y-10 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
+        <div class="grid grid-cols-2 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-8">
           <!-- PRODUCT -->
           <div>
             <h3 class="mb-5 text-base font-bold text-[#401903]">Product</h3>
@@ -71,7 +71,7 @@
           </div>
 
           <!-- SUBSCRIBE (now LAST on mobile) -->
-          <div class="order-5 col-span-2 md:order-5 lg:col-span-1">
+          <!-- <div class="order-5 col-span-2 md:order-5 lg:col-span-1">
             <h3 class="mb-5 text-base font-bold text-[#401903]">Subscribe to our newsletter</h3>
             <TypographyText class="mb-4 text-sm text-gray-600">
               Join our newsletter to get early alerts on regulation updates, price fluctuations, and
@@ -92,7 +92,7 @@
                 Subscribe
               </button>
             </form>
-          </div>
+          </div> -->
         </div>
       </nav>
 
@@ -137,30 +137,25 @@ import { RouterLink } from 'vue-router'
 
 const products = [
   { label: 'Features', path: '/features' },
-  { label: 'Pricing', path: '/pricing' },
-  { label: 'Case studies', path: '/case-studies' },
-  { label: 'Reviews', path: '/reviews' },
-  { label: 'Updates', path: '/updates' },
+  { label: 'Pricing', path: '/pricing' }
 ]
 
 const companies = [
   { label: 'About', path: '/about-us' },
   { label: 'Contact us', path: '/contact-us' },
-  { label: 'Careers', path: '/career' },
+  { label: 'Careers', path: '/careers' },
   { label: 'FAQ', path: '/faq' },
-  { label: 'Blog', path: '/blogs' },
+  { label: 'Blog', path: '/blog' },
 ]
 
 const supports = [
-  { label: 'Getting started', path: '/help/getting-started' },
-  { label: 'Help center', path: '/helpcenter' },
-  { label: 'Server status', path: '/status' },
-  { label: 'Report a bug', path: '/report' },
-  { label: 'Chat support', path: '/chat' },
+  { label: 'Getting started', path: '/how-it-works' },
+  { label: 'Help center', path: '/help-center' },
+  { label: 'Contact support', path: '/contact-us' },
 ]
 
 const privacys = [
-  { label: 'Copyright', path: '/copyright' },
+  { label: 'Privacy Policy', path: '/privacy-policy' },
   { label: 'Terms of Service', path: '/terms' },
 ]
 </script>

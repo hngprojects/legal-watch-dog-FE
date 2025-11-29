@@ -65,6 +65,12 @@ const organizationName = computed(() => {
 
 const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
+const projectName = computed(() => {
+  const projId = jurisdiction.value?.project_id
+  if (!projId) return ''
+  const project = projectStore.projects.find((p) => p.id === projId)
+  return project?.title || project?.name || ''
+})
 
 const loading = ref(true)
 const activeTab = ref<'analysis' | 'sources' | 'output'>('analysis')
@@ -94,10 +100,10 @@ const sourceForm = ref<{
   is_active: true,
 })
 
-interface ScrapeResponseData {
-  summary?: string
-  payload?: unknown
-}
+// interface ScrapeResponseData {
+//   summary?: string
+//   payload?: unknown
+// }
 
 
 const sources = computed(() => sourceStore.sources)
@@ -105,7 +111,7 @@ const sourcesLoading = computed(() => sourceStore.loading)
 const sourcesError = computed(() => sourceStore.error)
 const editingSourceId = ref<string | null>(null)
 
-const scrapingState = ref<Record<string, boolean>>({})
+// const scrapingState = ref<Record<string, boolean>>({})
 const scrapeResults = ref<Record<string, StoredScrapeResult>>({})
 const scrapeErrors = ref<Record<string, string>>({})
 
@@ -138,17 +144,18 @@ const loadStoredScrapeResults = () => {
   scrapeResults.value = latest
 }
 
-const persistScrapeResult = (result: StoredScrapeResult) => {
-  const next = [result, ...storedScrapeResults.value]
-  storedScrapeResults.value = next
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-}
+// const persistScrapeResult = (result: StoredScrapeResult) => {
+//   const next = [result, ...storedScrapeResults.value]
+//   storedScrapeResults.value = next
+//   localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+// }
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
 
   const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id)
-  jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
+  jurisdiction.value =
+    existing || (await jurisdictionStore.fetchOne(id, activeOrganizationId.value))
 
   if (!projectStore.projects.length) {
     await projectStore.fetchProjects(activeOrganizationId.value)
@@ -209,7 +216,7 @@ const startEditSource = (src: Source) => {
     url: src.url,
     source_type: src.source_type,
     scrape_frequency: src.scrape_frequency,
-    is_active: src.is_active ?? true, 
+    is_active: src.is_active ?? true,
   }
 }
 
@@ -329,7 +336,11 @@ const saveEdit = async () => {
     prompt: editForm.value.prompt,
   }
 
-  const updated = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, payload)
+  const updated = await jurisdictionStore.updateJurisdiction(
+    jurisdictionId.value,
+    payload,
+    activeOrganizationId.value,
+  )
 
   if (updated) {
     jurisdiction.value = updated
@@ -348,7 +359,7 @@ const deleteJurisdiction = async () => {
 
   if (!confirm.isConfirmed) return
 
-  await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
+  await jurisdictionStore.deleteJurisdiction(jurisdictionId.value, activeOrganizationId.value)
 
   Swal.fire('Deleted!', '', 'success')
 
@@ -386,12 +397,16 @@ const createSubJurisdiction = async () => {
   if (!subJurisdictionForm.value.name.trim()) return
   if (!subJurisdictionForm.value.description.trim()) return
 
-  const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
-    name: subJurisdictionForm.value.name.trim(),
-    description: subJurisdictionForm.value.description.trim(),
-    prompt: subJurisdictionForm.value.prompt.trim() || null,
-    parent_id: jurisdiction.value.id,
-  })
+  const created = await jurisdictionStore.addJurisdiction(
+    jurisdiction.value.project_id,
+    {
+      name: subJurisdictionForm.value.name.trim(),
+      description: subJurisdictionForm.value.description.trim(),
+      prompt: subJurisdictionForm.value.prompt.trim() || null,
+      parent_id: jurisdiction.value.id,
+    },
+    activeOrganizationId.value,
+  )
 
   if (created) closeSubJurisdictionModal()
 }
@@ -491,7 +506,7 @@ onMounted(() => {
 
             <BreadcrumbSeparator />
 
-            <!-- <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
+            <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
                 <RouterLink
                   :to="{
@@ -502,9 +517,9 @@ onMounted(() => {
                   {{ projectName }}
                 </RouterLink>
               </BreadcrumbLink>
-            </BreadcrumbItem> -->
+            </BreadcrumbItem>
 
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator v-if="jurisdiction.project_id && projectName" />
 
             <template v-if="parentJurisdiction">
               <BreadcrumbItem>

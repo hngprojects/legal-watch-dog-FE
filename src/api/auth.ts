@@ -45,13 +45,13 @@ export const authService = {
     http.post<ResendOtpResponse>('/auth/otp/requests', payload),
 
   requestPasswordReset: (payload: PasswordResetRequestPayload) =>
-    http.post<PasswordResetRequestResponse>('/auth/password-reset/request', payload),
+    http.post<PasswordResetRequestResponse>('/auth/password/resets', payload),
 
   verifyPasswordReset: (payload: PasswordResetVerifyPayload) =>
-    http.post<PasswordResetVerifyResponse>('/auth/password-reset/verify', payload),
+    http.post<PasswordResetVerifyResponse>('/auth/password/resets/verification', payload),
 
   confirmPasswordReset: (payload: PasswordResetConfirmPayload) =>
-    http.post<PasswordResetConfirmResponse>('/auth/password-reset/confirm', payload),
+    http.post<PasswordResetConfirmResponse>('/auth/password/resets/confirmation', payload),
 
-  refreshToken: () => http.post<RefreshTokenResponse>('/auth/refresh', {}),
+  refreshToken: () => http.post<RefreshTokenResponse>('/auth/token/refresh', {}),
 }

@@ -4,6 +4,7 @@ export interface Organization {
   industry?: string
   is_active?: boolean
   user_role?: string
+  project_count?: number
   created_at?: string
   updated_at?: string
 }
@@ -16,6 +17,9 @@ export interface RawOrganization {
   is_active?: boolean
   user_role?: string
   role?: string
+  project_count?: number
+  projects_count?: number
+  projects?: unknown[]
   created_at?: string
   updated_at?: string
 }
@@ -23,6 +27,12 @@ export interface RawOrganization {
 export interface CreateOrganizationPayload {
   name: string
   industry: string
+}
+
+export interface UpdateOrganizationPayload {
+  name?: string
+  industry?: string
+  is_active?: boolean
 }
 
 export interface OrganizationErrorResponse {
