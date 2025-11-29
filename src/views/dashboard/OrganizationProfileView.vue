@@ -472,7 +472,7 @@ watch(
 
 <template>
   <main class="min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-0 app-container lg:py-14">
-    <div class="mx-auto flex max-w-6xl flex-col gap-8">
+    <div class="mx-auto flex flex-col gap-8">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-sm font-medium uppercase tracking-wide text-[#9CA3AF]">
