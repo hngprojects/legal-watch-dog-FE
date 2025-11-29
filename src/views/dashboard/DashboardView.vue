@@ -258,7 +258,7 @@ const goToProject = (id: string) => {
                     for="prompt"
                     class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:scale-75 peer-focus:text-[#401903]"
                   >
-                    Master Prompt
+                    Instructions
                   </label>
                 </div>
               </div>
