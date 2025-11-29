@@ -63,7 +63,7 @@ jobs:
         run: npm run build
 
       - name: Archive build output
-        run: tar -czf build.tar.gz dist
+        run: tar -czf build.tar.gz dist .env
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
