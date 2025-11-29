@@ -2,8 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // Layouts
 import LandingLayout from '@/layout/LandingLayout.vue'
-import EmptyLayout from '@/layout/EmptyLayout.vue'
 import DashboardLayout from '@/layout/DashboardLayout.vue'
+import AuthLayout from '@/layout/AuthLayout.vue'
 
 // Landing pages
 import HomeView from '@/views/HomeView.vue'
@@ -81,14 +81,41 @@ const router = createRouter({
 
     {
       path: '/',
-      component: EmptyLayout,
+      component: AuthLayout,
       children: [
         { path: 'login', name: 'login', component: LoginView },
-        { path: 'signup', name: 'signup', component: SignupView },
+        {
+          path: 'signup',
+          name: 'signup',
+          component: SignupView,
+          meta: { authLayoutProps: { containerClass: 'p-6 lg:p-12' } },
+        },
         { path: 'forgot-password', name: 'forgot-password', component: ForgotPasswordView },
-        { path: 'reset-password', name: 'reset-password', component: ResetPasswordView },
-        { path: 'otp', name: 'otp', component: OtpView },
-        { path: 'auth-status', name: 'auth-status', component: AuthStatusView, alias: '/success' },
+        {
+          path: 'reset-password',
+          name: 'reset-password',
+          component: ResetPasswordView,
+          meta: { authLayoutProps: { containerClass: 'p-4 lg:p-10' } },
+        },
+        {
+          path: 'otp',
+          name: 'otp',
+          component: OtpView,
+          meta: {
+            authLayoutProps: {
+              wrapperClass: 'bg-white',
+              mainClass: 'bg-white',
+              containerClass: 'p-4 lg:p-10',
+            },
+          },
+        },
+        {
+          path: 'auth-status',
+          name: 'auth-status',
+          component: AuthStatusView,
+          alias: '/success',
+          meta: { authLayoutProps: { containerClass: 'p-6 lg:p-12' } },
+        },
         { path: 'auth/accept-invite/:token', name: 'accept-invite', component: AcceptInviteView },
         {
           path: 'auth/invitations/:token?/accept',
