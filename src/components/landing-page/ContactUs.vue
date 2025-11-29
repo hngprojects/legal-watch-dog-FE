@@ -125,9 +125,11 @@ const handleSubmit = async () => {
     })
   } catch (error: unknown) {
     const axiosError = error as { response?: { data?: { message?: string, errors?: { [key: string]: string[] } } }; message?: string }
-    console.error('Form submission error:', error)
-    console.error('Error response:', axiosError.response?.data?.errors)
     const errorMessages: string[] = []
+
+    if(axiosError?.message){
+      errorMessages.push(axiosError.message)
+    }
 
     if(axiosError.response?.data?.errors?.phone_number) {
       errorMessages.push(...axiosError.response.data.errors.phone_number)
@@ -135,15 +137,21 @@ const handleSubmit = async () => {
     if(axiosError.response?.data?.errors?.email) {
       errorMessages.push(...axiosError.response.data.errors.email)
     } 
+    if(axiosError.response?.data?.errors?.message) {
+      const messageErrors = axiosError.response.data.errors.message.map(err => 
+        err.replace(/string/gi, 'Message')
+      )
+      errorMessages.push(...messageErrors)
+    } 
     
     const errorMessage = errorMessages.length > 0 
-      ? errorMessages.join('. ') 
+      ? errorMessages.join("<br>") 
       : 'An error occurred while submitting the form. Please try again later.'
     
      Swal.fire({
       icon: 'error',
       title: 'Oops...',
-      text: errorMessage,
+      html: `${errorMessage}.`,
     })
   } finally {
     isSubmitting.value = false
