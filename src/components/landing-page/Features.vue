@@ -34,8 +34,8 @@
     </section>
 
     <!-- Main Features -->
-    <main class="bg-gray-50 pt-20 pb-16">
-      <div class="mx-auto max-w-7xl px-6">
+    <main class="bg-gray-50 pt-20 pb-16 app-container">
+      <div class="mx-auto">
         <div class="mx-auto flex justify-center text-center">
           <TypographyHeading level="h2" class="text-3xl font-bold text-gray-900 md:text-4xl">
             Exploring the <span class="text-[#F2AB6D]">Uniqueness</span> of our Product

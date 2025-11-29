@@ -373,7 +373,6 @@ const deleteJurisdiction = async () => {
   await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
 
   Swal.fire('Deleted!', '', 'success')
-
   goBack()
 }
 
@@ -463,10 +462,7 @@ onMounted(() => {
 
     <div v-else-if="!jurisdiction" class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm">
       <h1 class="text-2xl font-semibold text-gray-900">Jurisdiction not found</h1>
-      <button
-        @click="goBack"
-        class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline"
-      >
+      <button @click="goBack" class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline">
         Back to Projects
       </button>
     </div>
@@ -495,12 +491,10 @@ onMounted(() => {
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'organization-projects',
-                    params: { organizationId: activeOrganizationId },
-                  }"
-                >
+                <RouterLink :to="{
+                  name: 'organization-projects',
+                  params: { organizationId: activeOrganizationId },
+                }">
                   Projects
                 </RouterLink>
               </BreadcrumbLink>
@@ -510,12 +504,10 @@ onMounted(() => {
 
             <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'project-detail',
-                    params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
-                  }"
-                >
+                <RouterLink :to="{
+                  name: 'project-detail',
+                  params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
+                }">
                   {{ projectName }}
                 </RouterLink>
               </BreadcrumbLink>
@@ -563,42 +555,28 @@ onMounted(() => {
           <form @submit.prevent="saveEdit" class="space-y-4">
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Name</label>
-              <input
-                v-model="editForm.name"
-                class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
+              <input v-model="editForm.name"
+                class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
             </div>
 
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
-              <textarea
-                v-model="editForm.description"
-                rows="3"
-                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
+              <textarea v-model="editForm.description" rows="3"
+                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
             </div>
 
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Monitoring Instructions</label>
-              <textarea
-                v-model="editForm.prompt"
-                rows="3"
-                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
+              <textarea v-model="editForm.prompt" rows="3"
+                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                @click="showInlineEdit = false"
-                class="rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]"
-              >
+              <button type="button" @click="showInlineEdit = false"
+                class="rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]">
                 Cancel
               </button>
-              <button
-                type="submit"
-                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
-              >
+              <button type="submit" class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white">
                 Save Changes
               </button>
             </div>
@@ -610,10 +588,7 @@ onMounted(() => {
             Jurisdiction
           </p>
           <h1 class="text-3xl font-bold text-[#1F1F1F]">{{ jurisdiction.name }}</h1>
-          <p
-            v-if="jurisdiction.description"
-            class="text-base leading-relaxed text-[#4B5563]"
-          >
+          <p v-if="jurisdiction.description" class="text-base leading-relaxed text-[#4B5563]">
             {{ jurisdiction.description }}
           </p>
           <p v-if="lastUpdatedText" class="text-sm text-gray-400">
@@ -625,20 +600,14 @@ onMounted(() => {
       <section class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
-            <button
-              @click="activeTab = 'analysis'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'analysis'
-                  ? 'text-[#1F1F1F]'
-                  : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
-            >
+            <button @click="activeTab = 'analysis'" :class="[
+              'relative pb-4 text-sm font-semibold transition-colors',
+              activeTab === 'analysis'
+                ? 'text-[#1F1F1F]'
+                : 'text-gray-500 hover:text-[#1F1F1F]',
+            ]">
               Analysis
-              <span
-                v-if="activeTab === 'analysis'"
-                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
-              ></span>
+              <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
             </button>
 
             <button
@@ -651,10 +620,7 @@ onMounted(() => {
               ]"
             >
               Sources
-              <span
-                v-if="activeTab === 'sources'"
-                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
-              ></span>
+              <span v-if="activeTab === 'sources'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
             </button>
           </div>
         </div>
@@ -797,15 +763,13 @@ onMounted(() => {
 
                   <button
                     class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    @click="startEditSource(source)"
-                  >
+                    @click="startEditSource(source)">
                     Edit
                   </button>
 
                   <button
                     class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                    @click="deleteSource(source)"
-                  >
+                    @click="deleteSource(source)">
                     Delete
                   </button>
                 </div>
@@ -1012,19 +976,10 @@ onMounted(() => {
           class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center"
         >
           <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-7 w-7 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
           </div>
 
@@ -1033,16 +988,10 @@ onMounted(() => {
         </div>
 
         <div v-else class="space-y-3">
-          <article
-            v-for="node in subJurisdictions"
-            :key="node.id"
-            @click="goToJurisdiction(node.id)"
+          <article v-for="node in subJurisdictions" :key="node.id" @click="goToJurisdiction(node.id)"
             class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
-            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }"
-          >
-            <h4
-              class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
-            >
+            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }">
+            <h4 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]">
               {{ node.name }}
             </h4>
 
@@ -1062,8 +1011,7 @@ onMounted(() => {
       <div
         v-if="subJurisdictionModalOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
-        @click.self="closeSubJurisdictionModal"
-      >
+        @click.self="closeSubJurisdictionModal">
         <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
           <h3 class="mb-2 text-2xl font-bold text-gray-900">Define your Sub-Jurisdiction</h3>
           <p class="mb-6 text-sm text-gray-600">
@@ -1072,35 +1020,21 @@ onMounted(() => {
 
           <form @submit.prevent="createSubJurisdiction" class="space-y-5">
             <div>
-              <label class="mb-2 block text-sm font-medium text-gray-900"
-                >Sub-Jurisdiction Name</label
-              >
-              <input
-                v-model="subJurisdictionForm.name"
-                type="text"
-                required
-                placeholder="e.g Global Visa Monitoring"
-                class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
+              <label class="mb-2 block text-sm font-medium text-gray-900">Sub-Jurisdiction Name</label>
+              <input v-model="subJurisdictionForm.name" type="text" required placeholder="e.g Global Visa Monitoring"
+                class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
             </div>
 
             <div>
               <label class="mb-2 block text-sm font-medium text-gray-900">Description</label>
-              <textarea
-                v-model="subJurisdictionForm.description"
-                rows="4"
-                required
+              <textarea v-model="subJurisdictionForm.description" rows="4" required
                 placeholder="What legal areas will you monitor?"
-                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              ></textarea>
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"></textarea>
             </div>
 
             <div class="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                @click="closeSubJurisdictionModal"
-                class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700"
-              >
+              <button type="button" @click="closeSubJurisdictionModal"
+                class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700">
                 Cancel
               </button>
 
@@ -1118,8 +1052,7 @@ onMounted(() => {
       <div
         v-if="addSourceModalOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
-        @click.self="closeAddSourceModal"
-      >
+        @click.self="closeAddSourceModal">
         <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
           <h3 class="mb-2 text-2xl font-bold text-gray-900">
             {{ editingSourceId ? 'Edit Source' : 'Add Source' }}
@@ -1128,38 +1061,26 @@ onMounted(() => {
             Attach a source to monitor for this jurisdiction.
           </p>
 
-          <form
-            @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()"
-            class="space-y-4"
-          >
+          <form @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()" class="space-y-4">
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-800">Name</label>
-              <input
-                v-model="sourceForm.name"
-                required
+              <input v-model="sourceForm.name" required
                 class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="e.g. Supreme Court Opinions"
-              />
+                placeholder="e.g. Supreme Court Opinions" />
             </div>
 
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-800">URL</label>
-              <input
-                v-model="sourceForm.url"
-                type="url"
-                required
+              <input v-model="sourceForm.url" type="url" required
                 class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="https://example.com"
-              />
+                placeholder="https://example.com" />
             </div>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-800">Source Type</label>
-                <select
-                  v-model="sourceForm.source_type"
-                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                >
+                <select v-model="sourceForm.source_type"
+                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
                   <option value="web">Web</option>
                   <option value="api">API</option>
                   <option value="pdf">PDF</option>
@@ -1168,10 +1089,8 @@ onMounted(() => {
 
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-800">Scrape Frequency</label>
-                <select
-                  v-model="sourceForm.scrape_frequency"
-                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                >
+                <select v-model="sourceForm.scrape_frequency"
+                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
                   <option value="HOURLY">Hourly</option>
                   <option value="DAILY">Daily</option>
                   <option value="WEEKLY">Weekly</option>
@@ -1185,11 +1104,8 @@ onMounted(() => {
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                @click="closeAddSourceModal"
-                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
-              >
+              <button type="button" @click="closeAddSourceModal"
+                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700">
                 Cancel
               </button>
 

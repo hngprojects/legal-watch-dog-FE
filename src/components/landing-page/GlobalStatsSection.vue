@@ -5,7 +5,7 @@ import backright from '@/assets/Images/backright.png'
 </script>
 
 <template>
-  <section class="space-y-12 px-16 py-12">
+  <section class="space-y-12 app-container">
     <!-- Top White Card Section -->
     <div class="rounded-2xl bg-white p-10 shadow-xl">
       <div class="mx-auto max-w-3xl space-y-4 text-center">
