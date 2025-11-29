@@ -63,7 +63,14 @@ jobs:
         run: npm run build
 
       - name: Archive build output
-        run: tar -czf build.tar.gz dist .env
+        run: |
+          if [ -f .env ]; then
+            tar -czf build.tar.gz dist .env
+            echo "Archived dist and .env"
+          else
+            tar -czf build.tar.gz dist
+            echo "Archived dist only (no .env for dev branch)"
+          fi
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
