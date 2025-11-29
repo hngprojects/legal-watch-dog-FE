@@ -105,10 +105,14 @@ const handleCreateJurisdiction = async () => {
   }
 
   try {
-    const newJurisdiction = await jurisdictionStore.addJurisdiction(projectId, {
-      name: jurisdictionForm.value.name.trim(),
-      description: jurisdictionForm.value.description.trim(),
-    })
+    const newJurisdiction = await jurisdictionStore.addJurisdiction(
+      projectId,
+      {
+        name: jurisdictionForm.value.name.trim(),
+        description: jurisdictionForm.value.description.trim(),
+      },
+      organizationId.value,
+    )
 
     if (newJurisdiction) {
       closeAddJurisdictionModal()
@@ -146,7 +150,7 @@ onMounted(async () => {
     project.value = foundProject || null
   }
 
-  await jurisdictionStore.fetchJurisdictions(projectId)
+  await jurisdictionStore.fetchJurisdictions(projectId, organizationId.value)
   loading.value = false
 })
 
