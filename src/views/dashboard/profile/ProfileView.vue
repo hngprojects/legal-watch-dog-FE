@@ -337,9 +337,9 @@ const saveEdits = async () => {
     }
 
     // Only include avatar if we have a new compressed image that's within limits
-    if (selectedImageFile.value && selectedImageFile.value.length <= 500) {
-      payload.avatar_url = selectedImageFile.value
-    }
+    // if (selectedImageFile.value && selectedImageFile.value.length <= 500) {
+    //   payload.avatar_url = selectedImageFile.value
+    // }
 
     const response = await userService.updateProfile(payload)
 
@@ -388,7 +388,7 @@ const saveEdits = async () => {
           userProfile.value = {
             ...userProfile.value,
             ...response.data.data,
-            avatar_url: undefined, // Clear invalid avatar
+            // avatar_url: undefined, // Clear invalid avatar
           }
 
           if (authStore.user) {
