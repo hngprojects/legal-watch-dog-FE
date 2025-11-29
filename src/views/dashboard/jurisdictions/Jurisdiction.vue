@@ -459,10 +459,7 @@ onMounted(() => {
     <!-- No jurisdiction -->
     <div v-else-if="!jurisdiction" class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm">
       <h1 class="text-2xl font-semibold text-gray-900">Jurisdiction not found</h1>
-      <button
-        @click="goBack"
-        class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline"
-      >
+      <button @click="goBack" class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline">
         Back to Projects
       </button>
     </div>
@@ -493,12 +490,10 @@ onMounted(() => {
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'organization-projects',
-                    params: { organizationId: activeOrganizationId },
-                  }"
-                >
+                <RouterLink :to="{
+                  name: 'organization-projects',
+                  params: { organizationId: activeOrganizationId },
+                }">
                   Projects
                 </RouterLink>
               </BreadcrumbLink>
@@ -508,12 +503,10 @@ onMounted(() => {
 
             <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'project-detail',
-                    params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
-                  }"
-                >
+                <RouterLink :to="{
+                  name: 'project-detail',
+                  params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
+                }">
                   {{ projectName }}
                 </RouterLink>
               </BreadcrumbLink>
@@ -540,30 +533,24 @@ onMounted(() => {
 
         <!-- Settings dropdown -->
         <div class="relative">
-          <button
-            @click.stop="toggleSettingsMenu"
-            class="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-gray-600 shadow-sm hover:bg-gray-50"
-          >
+          <button @click.stop="toggleSettingsMenu"
+            class="flex h-10 w-10 items-center justify-center rounded-lg border bg-white text-gray-600 shadow-sm hover:bg-gray-50">
             <Settings :size="18" />
           </button>
 
-          <div
-            v-if="showSettingsMenu"
-            @click.stop
-            class="absolute right-0 z-50 mt-2 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black/5"
-          >
-            <button
-              @click="startEdit"
-              class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-            >
+          <div v-if="showSettingsMenu" @click.stop
+            class="absolute right-0 z-50 mt-2 w-48 rounded-xl bg-white shadow-lg ring-1 ring-black/5">
+            <button @click="startEdit" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
               Edit Jurisdiction
             </button>
-            <button
-              @click="deleteJurisdiction"
-              class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-            >
+            <button @click="deleteJurisdiction" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
               Delete Jurisdiction
             </button>
+            <button @click="router.push('/dashboard/jurisdictions/archive')"
+              class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
+              View Archive
+            </button>
+
           </div>
         </div>
       </header>
@@ -575,42 +562,28 @@ onMounted(() => {
           <form @submit.prevent="saveEdit" class="space-y-4">
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Name</label>
-              <input
-                v-model="editForm.name"
-                class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
+              <input v-model="editForm.name"
+                class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
             </div>
 
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
-              <textarea
-                v-model="editForm.description"
-                rows="3"
-                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
+              <textarea v-model="editForm.description" rows="3"
+                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
             </div>
 
             <div>
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Monitoring Instructions</label>
-              <textarea
-                v-model="editForm.prompt"
-                rows="3"
-                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
+              <textarea v-model="editForm.prompt" rows="3"
+                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                @click="showInlineEdit = false"
-                class="rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]"
-              >
+              <button type="button" @click="showInlineEdit = false"
+                class="rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]">
                 Cancel
               </button>
-              <button
-                type="submit"
-                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
-              >
+              <button type="submit" class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white">
                 Save Changes
               </button>
             </div>
@@ -623,10 +596,7 @@ onMounted(() => {
             Jurisdiction
           </p>
           <h1 class="text-3xl font-bold text-[#1F1F1F]">{{ jurisdiction.name }}</h1>
-          <p
-            v-if="jurisdiction.description"
-            class="text-base leading-relaxed text-[#4B5563]"
-          >
+          <p v-if="jurisdiction.description" class="text-base leading-relaxed text-[#4B5563]">
             {{ jurisdiction.description }}
           </p>
           <p v-if="lastUpdatedText" class="text-sm text-gray-400">
@@ -640,52 +610,34 @@ onMounted(() => {
         <!-- TAB HEADERS -->
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
-            <button
-              @click="activeTab = 'analysis'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'analysis'
-                  ? 'text-[#1F1F1F]'
-                  : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
-            >
+            <button @click="activeTab = 'analysis'" :class="[
+              'relative pb-4 text-sm font-semibold transition-colors',
+              activeTab === 'analysis'
+                ? 'text-[#1F1F1F]'
+                : 'text-gray-500 hover:text-[#1F1F1F]',
+            ]">
               Analysis
-              <span
-                v-if="activeTab === 'analysis'"
-                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
-              ></span>
+              <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
             </button>
 
-            <button
-              @click="activeTab = 'output'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'output'
-                  ? 'text-[#1F1F1F]'
-                  : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
-            >
+            <button @click="activeTab = 'output'" :class="[
+              'relative pb-4 text-sm font-semibold transition-colors',
+              activeTab === 'output'
+                ? 'text-[#1F1F1F]'
+                : 'text-gray-500 hover:text-[#1F1F1F]',
+            ]">
               Output
-              <span
-                v-if="activeTab === 'output'"
-                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
-              ></span>
+              <span v-if="activeTab === 'output'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
             </button>
 
-            <button
-              @click="activeTab = 'sources'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'sources'
-                  ? 'text-[#1F1F1F]'
-                  : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
-            >
+            <button @click="activeTab = 'sources'" :class="[
+              'relative pb-4 text-sm font-semibold transition-colors',
+              activeTab === 'sources'
+                ? 'text-[#1F1F1F]'
+                : 'text-gray-500 hover:text-[#1F1F1F]',
+            ]">
               Sources
-              <span
-                v-if="activeTab === 'sources'"
-                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
-              ></span>
+              <span v-if="activeTab === 'sources'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
             </button>
           </div>
         </div>
@@ -701,8 +653,7 @@ onMounted(() => {
 
             <button
               class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-4 py-2 text-sm font-medium text-white"
-              @click="openAddSourceModal"
-            >
+              @click="openAddSourceModal">
               <Plus :size="16" /> Add Source
             </button>
           </div>
@@ -718,27 +669,21 @@ onMounted(() => {
           </div>
 
           <!-- Empty -->
-          <div
-            v-else-if="sources.length === 0"
-            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-          >
+          <div v-else-if="sources.length === 0"
+            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
             <p class="text-sm text-gray-500">No sources added yet.</p>
             <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
             <button
               class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
-              @click="openAddSourceModal"
-            >
+              @click="openAddSourceModal">
               <Plus :size="16" /> Add Source
             </button>
           </div>
 
           <!-- Sources list -->
           <div v-else class="space-y-3">
-            <div
-              v-for="source in sources"
-              :key="source.id"
-              class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm"
-            >
+            <div v-for="source in sources" :key="source.id"
+              class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm">
               <div class="flex items-center justify-between gap-3">
                 <div>
                   <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
@@ -751,8 +696,7 @@ onMounted(() => {
                 <div class="flex items-center gap-2">
                   <button
                     class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    @click="startEditSource(source)"
-                  >
+                    @click="startEditSource(source)">
                     Edit
                   </button>
 
@@ -766,39 +710,32 @@ onMounted(() => {
 
                   <button
                     class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    @click="expandedSources[source.id] = !expandedSources[source.id]"
-                  >
+                    @click="expandedSources[source.id] = !expandedSources[source.id]">
                     {{ expandedSources[source.id] ? 'Hide Result' : 'View Result' }}
                   </button>
 
                   <button
                     class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                    @click="deleteSource(source)"
-                  >
+                    @click="deleteSource(source)">
                     Delete
                   </button>
                 </div>
               </div>
 
               <!-- Scrape error -->
-              <div
-                v-if="scrapeErrors[source.id]"
-                class="mt-2 text-xs text-red-600"
-              >
+              <div v-if="scrapeErrors[source.id]" class="mt-2 text-xs text-red-600">
                 {{ scrapeErrors[source.id] }}
               </div>
 
               <!-- Scrape result -->
-              <div
-                v-if="expandedSources[source.id] && scrapeResults[source.id]"
-                class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
-              >
+              <div v-if="expandedSources[source.id] && scrapeResults[source.id]"
+                class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800">
                 <div class="mb-1 text-[11px] font-semibold text-gray-500 uppercase">
                   Most Recent Result
                 </div>
                 <pre class="text-[11px] leading-5 whitespace-pre-wrap">
-{{ JSON.stringify(scrapeResults[source.id], null, 2) }}
-                </pre>
+            {{ JSON.stringify(scrapeResults[source.id], null, 2) }}
+          </pre>
               </div>
             </div>
           </div>
@@ -811,11 +748,8 @@ onMounted(() => {
 
             <!-- Stored results -->
             <div v-if="storedScrapeResults.length" class="space-y-3">
-              <article
-                v-for="(item, index) in storedScrapeResults"
-                :key="index"
-                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
-              >
+              <article v-for="(item, index) in storedScrapeResults" :key="index"
+                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4">
                 <div class="flex items-center justify-between gap-2">
                   <p class="text-sm font-semibold text-[#3C2610]">{{ item.sourceName }}</p>
                   <span class="text-[11px] tracking-wide text-[#9CA3AF] uppercase">
@@ -827,20 +761,15 @@ onMounted(() => {
                   {{ item.summary }}
                 </p>
 
-                <pre
-                  v-if="item.payload"
-                  class="mt-3 text-xs leading-5 whitespace-pre-wrap text-[#374151]"
-                >
-{{ typeof item.payload === 'string' ? item.payload : JSON.stringify(item.payload, null, 2) }}
-                </pre>
+                <pre v-if="item.payload" class="mt-3 text-xs leading-5 whitespace-pre-wrap text-[#374151]">
+            {{ typeof item.payload === 'string' ? item.payload : JSON.stringify(item.payload, null, 2) }}
+          </pre>
               </article>
             </div>
 
             <!-- No results -->
-            <div
-              v-else
-              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-            >
+            <div v-else
+              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
               <p class="text-sm text-gray-500">No scrape results yet.</p>
               <p class="text-xs text-gray-400">Trigger a scrape from the Analysis tab.</p>
             </div>
@@ -851,25 +780,17 @@ onMounted(() => {
             <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">What Changed</h3>
 
             <div v-if="outputItems.length" class="space-y-3">
-              <article
-                v-for="(item, index) in outputItems"
-                :key="index"
-                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4"
-              >
+              <article v-for="(item, index) in outputItems" :key="index"
+                class="rounded-xl border border-[#F3E7DC] bg-[#FDF8F3] p-4">
                 <p class="text-sm font-semibold text-[#3C2610]">{{ item.title }}</p>
-                <p
-                  v-if="item.detail"
-                  class="mt-2 text-sm leading-relaxed whitespace-pre-line text-[#4B5563]"
-                >
+                <p v-if="item.detail" class="mt-2 text-sm leading-relaxed whitespace-pre-line text-[#4B5563]">
                   {{ item.detail }}
                 </p>
               </article>
             </div>
 
-            <div
-              v-else
-              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-            >
+            <div v-else
+              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
               <p class="text-sm text-gray-500">No output generated.</p>
               <p class="text-xs text-gray-400">Add sources or monitoring instructions.</p>
             </div>
@@ -892,11 +813,8 @@ onMounted(() => {
 
           <!-- List -->
           <ul v-else-if="sources.length" class="space-y-2">
-            <li
-              v-for="source in sources"
-              :key="source.id"
-              class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
-            >
+            <li v-for="source in sources" :key="source.id"
+              class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]">
               <div>
                 <p class="font-semibold text-gray-900">{{ source.name }}</p>
                 <p class="text-xs text-gray-500">{{ source.url }}</p>
@@ -908,15 +826,13 @@ onMounted(() => {
               <div class="flex items-center gap-2">
                 <button
                   class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                  @click="startEditSource(source)"
-                >
+                  @click="startEditSource(source)">
                   Edit
                 </button>
 
                 <button
                   class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                  @click="deleteSource(source)"
-                >
+                  @click="deleteSource(source)">
                   Delete
                 </button>
               </div>
@@ -924,10 +840,8 @@ onMounted(() => {
           </ul>
 
           <!-- Empty -->
-          <div
-            v-else
-            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-          >
+          <div v-else
+            class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
             <p class="text-sm text-gray-500">No sources available.</p>
             <p class="text-xs text-gray-400">Add one to start monitoring.</p>
           </div>
@@ -939,33 +853,20 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between gap-4">
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
-          <button
-            class="flex items-center gap-2 rounded-full bg-[#401903] px-4 py-2 text-sm font-medium text-white"
-            @click="openSubJurisdictionModal"
-          >
+          <button class="flex items-center gap-2 rounded-full bg-[#401903] px-4 py-2 text-sm font-medium text-white"
+            @click="openSubJurisdictionModal">
             <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>
 
         <!-- Empty -->
-        <div
-          v-if="subJurisdictions.length === 0"
-          class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center"
-        >
+        <div v-if="subJurisdictions.length === 0"
+          class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center">
           <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-7 w-7 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
           </div>
 
@@ -975,16 +876,10 @@ onMounted(() => {
 
         <!-- List -->
         <div v-else class="space-y-3">
-          <article
-            v-for="node in subJurisdictions"
-            :key="node.id"
-            @click="goToJurisdiction(node.id)"
+          <article v-for="node in subJurisdictions" :key="node.id" @click="goToJurisdiction(node.id)"
             class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
-            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }"
-          >
-            <h4
-              class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
-            >
+            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }">
+            <h4 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]">
               {{ node.name }}
             </h4>
 
@@ -1003,11 +898,9 @@ onMounted(() => {
     <!-- MODALS -->
     <teleport to="body">
       <!-- SUB-JURISDICTION MODAL -->
-      <div
-        v-if="subJurisdictionModalOpen"
+      <div v-if="subJurisdictionModalOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
-        @click.self="closeSubJurisdictionModal"
-      >
+        @click.self="closeSubJurisdictionModal">
         <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
           <h3 class="mb-2 text-2xl font-bold text-gray-900">Define your Sub-Jurisdiction</h3>
           <p class="mb-6 text-sm text-gray-600">
@@ -1016,42 +909,25 @@ onMounted(() => {
 
           <form @submit.prevent="createSubJurisdiction" class="space-y-5">
             <div>
-              <label class="mb-2 block text-sm font-medium text-gray-900"
-                >Sub-Jurisdiction Name</label
-              >
-              <input
-                v-model="subJurisdictionForm.name"
-                type="text"
-                required
-                placeholder="e.g Global Visa Monitoring"
-                class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
+              <label class="mb-2 block text-sm font-medium text-gray-900">Sub-Jurisdiction Name</label>
+              <input v-model="subJurisdictionForm.name" type="text" required placeholder="e.g Global Visa Monitoring"
+                class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
             </div>
 
             <div>
               <label class="mb-2 block text-sm font-medium text-gray-900">Description</label>
-              <textarea
-                v-model="subJurisdictionForm.description"
-                rows="4"
-                required
+              <textarea v-model="subJurisdictionForm.description" rows="4" required
                 placeholder="What legal areas will you monitor?"
-                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              ></textarea>
+                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"></textarea>
             </div>
 
             <div class="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                @click="closeSubJurisdictionModal"
-                class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700"
-              >
+              <button type="button" @click="closeSubJurisdictionModal"
+                class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700">
                 Cancel
               </button>
 
-              <button
-                type="submit"
-                class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white"
-              >
+              <button type="submit" class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white">
                 Create Sub-Jurisdiction
               </button>
             </div>
@@ -1060,11 +936,9 @@ onMounted(() => {
       </div>
 
       <!-- SOURCE MODAL -->
-      <div
-        v-if="addSourceModalOpen"
+      <div v-if="addSourceModalOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
-        @click.self="closeAddSourceModal"
-      >
+        @click.self="closeAddSourceModal">
         <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
           <h3 class="mb-2 text-2xl font-bold text-gray-900">
             {{ editingSourceId ? 'Edit Source' : 'Add Source' }}
@@ -1073,38 +947,26 @@ onMounted(() => {
             Attach a source to monitor for this jurisdiction.
           </p>
 
-          <form
-            @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()"
-            class="space-y-4"
-          >
+          <form @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()" class="space-y-4">
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-800">Name</label>
-              <input
-                v-model="sourceForm.name"
-                required
+              <input v-model="sourceForm.name" required
                 class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="e.g. Supreme Court Opinions"
-              />
+                placeholder="e.g. Supreme Court Opinions" />
             </div>
 
             <div>
               <label class="mb-1 block text-sm font-medium text-gray-800">URL</label>
-              <input
-                v-model="sourceForm.url"
-                type="url"
-                required
+              <input v-model="sourceForm.url" type="url" required
                 class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="https://example.com"
-              />
+                placeholder="https://example.com" />
             </div>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-800">Source Type</label>
-                <select
-                  v-model="sourceForm.source_type"
-                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                >
+                <select v-model="sourceForm.source_type"
+                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
                   <option value="web">Web</option>
                   <option value="api">API</option>
                   <option value="pdf">PDF</option>
@@ -1113,10 +975,8 @@ onMounted(() => {
 
               <div>
                 <label class="mb-1 block text-sm font-medium text-gray-800">Scrape Frequency</label>
-                <select
-                  v-model="sourceForm.scrape_frequency"
-                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                >
+                <select v-model="sourceForm.scrape_frequency"
+                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
                   <option value="HOURLY">Hourly</option>
                   <option value="DAILY">Daily</option>
                   <option value="WEEKLY">Weekly</option>
@@ -1130,19 +990,13 @@ onMounted(() => {
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                @click="closeAddSourceModal"
-                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700"
-              >
+              <button type="button" @click="closeAddSourceModal"
+                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700">
                 Cancel
               </button>
 
-              <button
-                type="submit"
-                :disabled="sourcesLoading"
-                class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70"
-              >
+              <button type="submit" :disabled="sourcesLoading"
+                class="inline-flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70">
                 <span v-if="sourcesLoading">Saving...</span>
                 <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
               </button>
