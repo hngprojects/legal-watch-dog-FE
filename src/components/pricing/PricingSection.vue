@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PRICINGS } from '@/api/pricing'
+import { PRICINGS } from '@/api/billing'
 import { ref } from 'vue'
 import PricingCard from './PricingCard.vue'
 
