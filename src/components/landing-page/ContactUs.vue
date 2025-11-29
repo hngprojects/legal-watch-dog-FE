@@ -126,8 +126,12 @@ const handleSubmit = async () => {
   } catch (error: unknown) {
     const axiosError = error as { response?: { data?: { message?: string, errors?: { [key: string]: string[] } } }; message?: string }
     console.error('Form submission error:', error)
-    console.error('Error response:', axiosError.response?.data?.errors)
+    console.error('Error response:', axiosError?.message)
     const errorMessages: string[] = []
+
+    if(axiosError?.message){
+      errorMessages.push(axiosError.message)
+    }
 
     if(axiosError.response?.data?.errors?.phone_number) {
       errorMessages.push(...axiosError.response.data.errors.phone_number)
