@@ -90,6 +90,11 @@ const router = createRouter({
         { path: 'otp', name: 'otp', component: OtpView },
         { path: 'auth-status', name: 'auth-status', component: AuthStatusView, alias: '/success' },
         { path: 'auth/accept-invite/:token', name: 'accept-invite', component: AcceptInviteView },
+        {
+          path: 'auth/invitations/:token?/accept',
+          name: 'accept-org-invite',
+          component: () => import('@/views/authentication/InvitationAcceptView.vue'),
+        },
       ],
     },
     {

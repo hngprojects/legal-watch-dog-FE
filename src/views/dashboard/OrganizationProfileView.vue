@@ -253,8 +253,8 @@ const loadOrganizationInvitations = async () => {
 const mapUserToMember = (user: UserProfile): Member => {
   const fullName = user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
   const memberId = user.id || user.user_id || ''
-  const orgRole =
-    user.organizations?.find((org) => org.organization_id === orgId.value)?.role || user.role || ''
+  const orgRecord = user.organizations?.find((org) => org.organization_id === orgId.value)
+  const orgRole = orgRecord?.role || user.role || ''
   const normalizedRole = orgRole?.toLowerCase()
   const role: MemberRole =
     normalizedRole === 'admin'
@@ -262,8 +262,12 @@ const mapUserToMember = (user: UserProfile): Member => {
       : normalizedRole === 'manager'
         ? 'Manager'
         : 'Member'
+  const orgActive = user.organizations?.find((org) => org.organization_id === orgId.value)
+  const effectiveActive =
+    orgActive?.is_active ??
+    (typeof orgActive?.is_active === 'undefined' ? user.is_active : orgActive?.is_active)
   const status: MemberStatus =
-    user.is_active === false ? 'Inactive' : user.is_active === true ? 'Active' : 'Pending'
+    effectiveActive === false ? 'Inactive' : effectiveActive === true ? 'Active' : 'Pending'
   return {
     id: memberId,
     name: fullName || 'Member',
