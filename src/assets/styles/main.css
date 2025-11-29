@@ -49,9 +49,8 @@
 } */
 
 .app-container {
-  @apply max-w-[1200px] w-full mx-auto px-4;
+  @apply mx-auto w-full max-w-[1200px] px-4;
 }
-
 
 @utility text-preset-display-lg {
   @apply font-sans text-[48px] leading-[1.3] font-semibold tracking-normal;
@@ -141,7 +140,11 @@
 }
 
 @utility btn--with-icon {
-  @apply flex gap-2 items-center;
+  @apply flex items-center gap-2;
+}
+
+@utility btn--outline {
+  @apply btn border-accent-main text-accent-main border hover:bg-gray-100;
 }
 
 @utility btn--link {

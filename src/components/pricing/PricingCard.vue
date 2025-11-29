@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Icon from '@/components/reusable/Icon.vue'
-import Button from '@/components/ui/button/Button.vue'
 import { CheckmarkSquare02Icon } from '@hugeicons/core-free-icons'
 import { RouterLink } from 'vue-router'
 
@@ -20,7 +19,7 @@ const { i, activeBillingCycle, plan } = defineProps<{
 
 <template>
   <article
-    class="card-gradient relative w-sm space-y-8 overflow-hidden rounded-4xl bg-white px-6 pt-10 pb-4 shadow-md"
+    class="card-gradient relative w-auto max-w-sm min-w-3xs space-y-8 overflow-hidden rounded-4xl bg-white px-6 pt-10 pb-4 shadow-md"
     :class="[i === 1 && 'card-gradient--popular lg:py-12']"
   >
     <div class="text flex items-center justify-between">
@@ -44,17 +43,17 @@ const { i, activeBillingCycle, plan } = defineProps<{
       </span>
     </p>
 
-    <Button asChild :variant="i == 1 ? 'default' : 'outline'" class="w-full">
-      <RouterLink
-        :to="{
-          name: 'payment-method',
-          params: { plan: plan.title.toLowerCase() },
-          query: { cycle: activeBillingCycle },
-        }"
-      >
-        {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
-      </RouterLink>
-    </Button>
+    <RouterLink
+      :to="{
+        name: 'payment-method',
+        params: { plan: plan.title.toLowerCase() },
+        query: { cycle: activeBillingCycle },
+      }"
+      class="btn--outline btn--xl block w-full border text-center"
+      :class="[i == 1 && 'btn--primary']"
+    >
+      {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
+    </RouterLink>
 
     <ul class="space-y-5 pt-4">
       <li :key="i" v-for="(benefit, i) in plan.benefits" class="flex items-center gap-2">
