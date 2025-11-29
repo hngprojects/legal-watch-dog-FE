@@ -153,11 +153,13 @@
                 Clear breakdown of newly issued regulations, showing what changes are expected, and
                 what organizations must do next.
               </TypographyText>
+               <div class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600">
 
-              <RouterLink :to="`/blog/${2}`">
-                <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
-              </RouterLink>
+                 <RouterLink :to="`/blog/${2}`">
+                   <span>Learn More</span>
+                   <span class="text-[#F79009]">→</span>
+                 </RouterLink>
+               </div>
             </div>
           </div>
 
@@ -321,7 +323,7 @@
               class="focus-visible:ring-brand-primary mb-4 border-gray-300 bg-white py-6 text-center focus-visible:ring-offset-0"
             />
             <Button
-              class="w-full rounded-lg bg-[#3F1A0F] py-6 text-white transition duration-200 hover:bg-[#3f1a0fab]"
+              class="w-full rounded-lg bg-[#3F1A0F] py-4 text-white transition duration-200 hover:bg-[#3f1a0fab]"
             >
               Subscribe
             </Button>
