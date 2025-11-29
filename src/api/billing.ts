@@ -1,3 +1,4 @@
+import api from '@/lib/api'
 import { Briefcase01Icon, Building03Icon, Target01Icon } from '@hugeicons/core-free-icons'
 
 export const PRICINGS = [
@@ -48,3 +49,28 @@ export const PRICINGS = [
     ],
   },
 ]
+
+export const billingService = {
+  getOrganizationSubscriptionStatus: async (organizationId: string) =>
+    api.get(`/organizations/${organizationId}/billing/subscription`),
+
+  getOrganizationBillingAccount: async (organizationId: string) =>
+    api.get(`/organizations/${organizationId}/billing`),
+
+  checkout: async (organizationId: string, plan: string) =>
+    api.post(`/organizations/${organizationId}/billing/checkout`, {
+      plan,
+      description: `Subscription for ${organizationId}`,
+    }),
+
+  addPaymentMethod: async (organizationId: string, paymentMethodId: string) =>
+    api.post(`/organizations/${organizationId}/billing/payment-methods/${paymentMethodId}`),
+
+  getOrganizationBillingPlans: async (organizationId: string) =>
+    api.get(`/organizations/${organizationId}/billing/plans`),
+
+  cancelOrganizationSubscription: async (organizationId: string) =>
+    api.post(`/organizations/${organizationId}/billing/subscription/cancel`, {
+      cancel_at_period_end: true,
+    }),
+}
