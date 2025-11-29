@@ -12,6 +12,7 @@ import type {
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
+  MicrosoftOAuthLoginResponse,
   ResendOtpPayload,
   ResendOtpResponse,
   VerifyOTPPayload,
@@ -54,4 +55,9 @@ export const authService = {
     http.post<PasswordResetConfirmResponse>('/auth/password/resets/confirmation', payload),
 
   refreshToken: () => http.post<RefreshTokenResponse>('/auth/token/refresh', {}),
+
+  getMicrosoftLoginUrl: (redirectUri?: string | null) =>
+    http.get<MicrosoftOAuthLoginResponse>('/oauth/microsoft/login', {
+      params: redirectUri ? { redirect_uri: redirectUri } : undefined,
+    }),
 }

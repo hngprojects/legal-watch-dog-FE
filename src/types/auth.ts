@@ -107,6 +107,11 @@ export interface PasswordResetConfirmResponse {
   status_code?: number
 }
 
+export interface MicrosoftOAuthLoginResponse {
+  authorization_url: string
+  state: string
+}
+
 export interface AuthError {
   detail: {
     loc: (string | number)[]
