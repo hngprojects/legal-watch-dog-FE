@@ -35,7 +35,7 @@ const handlePay = async () => {
 
 <template>
   <div
-    class="flex min-h-screen flex-col *:flex-1 md:flex-row md:items-center md:justify-center lg:gap-12"
+    class="flex min-h-screen flex-col gap-12 *:flex-1 md:flex-row md:items-center md:justify-center"
   >
     <section>
       <div class="mx-auto max-w-md">
