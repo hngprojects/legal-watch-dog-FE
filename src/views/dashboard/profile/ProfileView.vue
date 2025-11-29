@@ -35,9 +35,9 @@ const editForm = ref({
   email: '',
 })
 
-// const fileInputRef = ref<HTMLInputElement | null>(null)
-// const uploadingImage = ref(false)
-const selectedImageFile = ref<string | null>(null)
+const fileInputRef = ref<HTMLInputElement | null>(null)
+const uploadingImage = ref(false)
+const isSaving = ref(false)
 
 const fallbackNameFromEmail = computed(() => {
   const email = userProfile.value?.email || ''
@@ -195,125 +195,96 @@ watch(
 
 const openEditModal = () => {
   showEditModal.value = true
-  // Swal.fire({
-  //   icon: 'info',
-  //   title: 'Profile editing unavailable',
-  //   text: 'Profile updates are temporarily disabled. Please check back soon.',
-  //   confirmButtonColor: '#401903',
-  // })
 }
 
 // const triggerFileInput = () => {
 //   fileInputRef.value?.click()
 // }
 
-// const compressImage = (file: File): Promise<string> => {
-//   return new Promise((resolve, reject) => {
-//     const reader = new FileReader()
-//     reader.readAsDataURL(file)
-//     reader.onload = (event) => {
-//       const img = new Image()
-//       img.src = event.target?.result as string
-//       img.onload = () => {
-//         const canvas = document.createElement('canvas')
-//         const ctx = canvas.getContext('2d')
-//         if (!ctx) {
-//           reject(new Error('Failed to get canvas context'))
-//           return
-//         }
-
-//         // Calculate new dimensions (max 200x200 for profile picture)
-//         let width = img.width
-//         let height = img.height
-//         const maxSize = 200
-
-//         if (width > height) {
-//           if (width > maxSize) {
-//             height = (height * maxSize) / width
-//             width = maxSize
-//           }
-//         } else {
-//           if (height > maxSize) {
-//             width = (width * maxSize) / height
-//             height = maxSize
-//           }
-//         }
-
-//         canvas.width = width
-//         canvas.height = height
-
-//         // Draw and compress
-//         ctx.drawImage(img, 0, 0, width, height)
-        
-//         // Convert to base64 with compression (quality 0.6 for smaller size)
-//         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6)
-//         resolve(compressedBase64)
-//       }
-//       img.onerror = () => reject(new Error('Failed to load image'))
-//     }
-//     reader.onerror = () => reject(new Error('Failed to read file'))
-//   })
-// }
-
-// const handleImageUpload = async (event: Event) => {
-//   const target = event.target as HTMLInputElement
-//   const file = target.files?.[0]
+const handleImageUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   
-//   if (!file) return
+  if (!file) return
+  isSaving.value = true
 
-//   // Validate file type
-//   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-//   if (!validTypes.includes(file.type)) {
-//     Swal.fire({
-//       icon: 'error',
-//       title: 'Invalid File Type',
-//       text: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP).',
-//       confirmButtonColor: '#401903',
-//     })
-//     return
-//   }
+  // Validate file type
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  if (!validTypes.includes(file.type)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid File Type',
+      text: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP).',
+      confirmButtonColor: '#401903',
+    })
+    isSaving.value = false
+    return
+  }
 
-//   // Validate file size (max 5MB)
-//   const maxSize = 5 * 1024 * 1024 // 5MB
-//   if (file.size > maxSize) {
-//     Swal.fire({
-//       icon: 'error',
-//       title: 'File Too Large',
-//       text: 'Image size must be less than 5MB.',
-//       confirmButtonColor: '#401903',
-//     })
-//     return
-//   }
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    Swal.fire({
+      icon: 'error',
+      title: 'File Too Large',
+      text: 'Image size must be less than 5MB.',
+      confirmButtonColor: '#401903',
+    })
+    isSaving.value = false
+    return
+  }
 
-//   try {
-//     uploadingImage.value = true
+  try {
+    uploadingImage.value = true
     
-//     // Compress the image
-//     const compressedImage = await compressImage(file)
+    // Upload image to server
+    const response = await userService.uploadProfilePicture(file)
     
-//     // Store compressed image
-//     selectedImageFile.value = compressedImage
+    // Get the uploaded image URL
+    const uploadedUrl = response.data?.data?.profile_picture_url
     
-//     // Update local profile preview
-//     if (userProfile.value) {
-//       userProfile.value = {
-//         ...userProfile.value,
-//         avatar_url: compressedImage,
-//       }
-//     }
-
-//     uploadingImage.value = false
-//   } catch (error) {
-//     console.error('Image upload error:', error)
-//     Swal.fire({
-//       icon: 'error',
-//       title: 'Upload Failed',
-//       text: 'Failed to process the image file. Please try again.',
-//       confirmButtonColor: '#401903',
-//     })
-//     uploadingImage.value = false
-//   }
-// }
+    if (uploadedUrl && userProfile.value) {
+      // Update local profile preview
+      userProfile.value = {
+        ...userProfile.value,
+        avatar_url: uploadedUrl,
+      }
+      
+      // Update auth store
+      if (authStore.user) {
+        authStore.user = {
+          ...authStore.user,
+          avatar_url: uploadedUrl,
+        }
+      }
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Profile Picture Updated',
+        text: 'Your profile picture has been successfully uploaded.',
+        confirmButtonColor: '#401903',
+      })
+    }
+  } catch (error) {
+    console.error('Image upload error:', error)
+    const err = error as { response?: { data?: { message?: string; error?: string } } }
+    const errorMessage = err?.response?.data?.message || 
+                        err?.response?.data?.error ||
+                        'Failed to upload profile picture. Please try again.'
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Upload Failed',
+      text: errorMessage,
+      confirmButtonColor: '#401903',
+    })
+  } finally {
+    uploadingImage.value = false
+    isSaving.value = false
+    // Reset file input
+    if (target) target.value = ''
+  }
+}
 
 const closeEditModal = () => {
   showEditModal.value = false
@@ -330,16 +301,12 @@ const saveEdits = async () => {
       })
       return
     }
-    console.log("first")
+
+    isSaving.value = true
 
     const payload: UpdateProfilePayload = {
       name: editForm.value.name.trim(),
     }
-
-    // Only include avatar if we have a new compressed image that's within limits
-    // if (selectedImageFile.value && selectedImageFile.value.length <= 500) {
-    //   payload.avatar_url = selectedImageFile.value
-    // }
 
     const response = await userService.updateProfile(payload)
 
@@ -359,9 +326,6 @@ const saveEdits = async () => {
       }
     }
 
-    // Clear selected image after save
-    selectedImageFile.value = null
-
     Swal.fire({
       icon: 'success',
       title: 'Profile Updated',
@@ -371,49 +335,7 @@ const saveEdits = async () => {
 
     closeEditModal()
   } catch (error) {
-    const err = error as { response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } } }
-    
-    // Check specifically for avatar_url validation error
-    const avatarError = err?.response?.data?.errors?.avatar_url
-    if (avatarError) {
-      // Silently retry without avatar_url
-      try {
-        const retryPayload: UpdateProfilePayload = {
-          name: editForm.value.name.trim(),
-        }
-        
-        const response = await userService.updateProfile(retryPayload)
-        
-        if (response.data?.data) {
-          userProfile.value = {
-            ...userProfile.value,
-            ...response.data.data,
-            // avatar_url: undefined, // Clear invalid avatar
-          }
-
-          if (authStore.user) {
-            authStore.user = {
-              ...authStore.user,
-              name: response.data.data.name,
-            }
-          }
-        }
-        
-        selectedImageFile.value = null
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Profile Updated',
-          text: 'Your name has been updated successfully.',
-          confirmButtonColor: '#401903',
-        })
-        
-        closeEditModal()
-        return
-      } catch (retryError) {
-        console.error('Retry failed:', retryError)
-      }
-    }
+    const err = error as { response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } } }    
     
     const errorMessage = err?.response?.data?.message || err?.response?.data?.error || 'Failed to update profile. Please try again.'
     
@@ -423,6 +345,8 @@ const saveEdits = async () => {
       text: errorMessage,
       confirmButtonColor: '#401903',
     })
+  } finally {
+    isSaving.value = false
   }
 }
 </script>
@@ -586,14 +510,28 @@ const saveEdits = async () => {
              <div
                 class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
               >
-                {{ avatarInitials }}
-                <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" 
-                >
-                <!-- @click="saveEdits" -->
-                <img :src="editIcon" alt="Edit Icon">
-              </div>
+                <img v-if="userProfile?.avatar_url" :src="userProfile.avatar_url" alt="Profile" class="h-full w-full rounded-full object-cover" />
+                <span v-else>{{ avatarInitials }}</span>
+                <div 
+                  class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" 
+                  :class="{ 'opacity-50 cursor-not-allowed': uploadingImage }"
+                  >
+                  <!-- @click="uploadingImage ? null : triggerFileInput()" -->
+                  <svg v-if="uploadingImage" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <img v-else :src="editIcon" alt="Edit Icon">
+                </div>
               </div>
           </div>
+          <input
+            ref="fileInputRef"
+            type="file"
+            accept="image/*"
+            class="hidden"
+            @change="handleImageUpload"
+          />
 
           <form class="space-y-5" @submit.prevent="saveEdits">
             <div class="space-y-3">
@@ -643,8 +581,10 @@ const saveEdits = async () => {
               <button
                 type="submit"
                 class="cursor-pointer rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
+                :disabled="isSaving"
               >
-                Save
+              <span v-if="isSaving">Saving...</span>
+              <span v-else>Save</span>
               </button>
             </div>
           </form>
