@@ -35,6 +35,7 @@ const parseOauthParams = () => {
     expiresIn: getParam('expires_in'),
     idToken: getParam('id_token'),
     state: getParam('state'),
+    isNewUser: getParam('is_new_user'),
     error: getParam('error'),
     errorDescription:
       getParam('error_description') ?? getParam('message') ?? getParam('detail'),
@@ -93,7 +94,15 @@ const finishGoogleLogin = async () => {
       await authStore.loadCurrentUser()
     }
 
-    await router.replace({ name: 'organizations' })
+    const isNewUser = params.isNewUser === 'true'
+    if (isNewUser) {
+      await router.replace({
+        name: 'auth-status',
+        query: { status: 'success', context: 'signup', redirect: 'organizations' },
+      })
+    } else {
+      await router.replace({ name: 'organizations' })
+    }
   } catch (error) {
     status.value = 'error'
     errorMessage.value = 'We could not finish signing you in with Google.'
