@@ -434,10 +434,10 @@ watch(
         </div>
 
         <div class="flex items-center gap-3 mb-3">
-          <button @click="router.push({ name: 'jurisdictions-archive', query: { organizationId: organizationId } })"
+          <!-- <button @click="router.push({ name: 'jurisdictions-archive', query: { organizationId: organizationId } })"
             class="flex items-center gap-2 rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] shadow-sm transition-all hover:bg-orange-50">
             View Archive
-          </button>
+          </button> -->
 
           <button @click="openAddJurisdictionModal"
             class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#592304]">

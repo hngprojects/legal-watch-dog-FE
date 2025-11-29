@@ -152,8 +152,8 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#FBF8F3] px-4 py-12 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-7xl">
+  <div class="min-h-screen bg-[#FBF8F3]  py-12 sm:px-0 lg:px-0">
+    <div class="mx-auto ">
       <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
         <!-- Left Column - Contact Info -->
         <div class="flex flex-col">

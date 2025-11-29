@@ -43,7 +43,7 @@ const steps = [
 <template>
   <div class="flex min-h-screen flex-col">
     <main
-      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] px-6 py-16 md:px-12 lg:px-24"
+      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] py-16"
     >
       <div
         class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"

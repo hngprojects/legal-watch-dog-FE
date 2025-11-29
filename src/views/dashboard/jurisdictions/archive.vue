@@ -16,19 +16,13 @@ const archivedJurisdictions = computed(() => {
   return jurisdictionStore.archivedJurisdictions
 })
 
-onMounted(async () => {
-  if (orgId.value) {
-    loading.value = true
-    try {
-      await jurisdictionStore.syncArchivedFromLocalStorage(orgId.value)
-    } catch (error) {
-      console.error('Failed to load archived jurisdictions:', error)
-    } finally {
-      loading.value = false
-    }
-  } else {
-    console.warn('No organization ID available')
-  }
+onMounted(() => {
+  console.log('🏢 Archived component mounted')
+  
+  // Use initializeArchived instead of syncArchivedFromLocalStorage
+  jurisdictionStore.initializeArchived()
+  
+  console.log('📊 Archived items:', jurisdictionStore.archivedJurisdictions)
 })
 
 const restoreJurisdiction = async (jurisdictionId: string) => {
@@ -52,11 +46,6 @@ const restoreJurisdiction = async (jurisdictionId: string) => {
     
     await jurisdictionStore.restoreJurisdiction(jurisdictionId, orgId.value)
     
-    // Remove from localStorage backup
-    const ids = JSON.parse(localStorage.getItem('archived_jurisdiction_ids') || '[]')
-    const updatedIds = ids.filter((id: string) => id !== jurisdictionId)
-    localStorage.setItem('archived_jurisdiction_ids', JSON.stringify(updatedIds))
-    
     Swal.fire({
       title: 'Restored!', 
       text: 'Jurisdiction has been restored.',
@@ -71,24 +60,13 @@ const restoreJurisdiction = async (jurisdictionId: string) => {
   }
 }
 
-// const viewJurisdiction = (jurisdictionId: string) => {
-//   router.push({
-//     name: 'jurisdiction-detail',
-//     params: { id: jurisdictionId },
-//     query: { 
-//       organizationId: orgId.value,
-//       fromArchive: 'true' 
-//     }
-//   })
-// }
-
 const permanentDelete = async (jurisdictionId: string) => {
   const confirm = await Swal.fire({
-    title: 'Permanently Delete?',
-    text: 'This will remove the jurisdiction from your archived list. The jurisdiction will still exist in the database but will no longer appear here.',
+    title: 'Remove from Archive?',
+    text: 'This will remove the jurisdiction from your archived list.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Yes, remove from archive',
+    confirmButtonText: 'Yes, remove it',
     cancelButtonText: 'Cancel',
     confirmButtonColor: '#dc2626'
   })
@@ -96,13 +74,16 @@ const permanentDelete = async (jurisdictionId: string) => {
   if (!confirm.isConfirmed) return
 
   try {
+    // Remove from store
     jurisdictionStore.archivedJurisdictions = jurisdictionStore.archivedJurisdictions.filter(
       j => j.id !== jurisdictionId
     )
-
+    
+    // Remove from localStorage
     const ids = JSON.parse(localStorage.getItem('archived_jurisdiction_ids') || '[]')
     const updatedIds = ids.filter((id: string) => id !== jurisdictionId)
     localStorage.setItem('archived_jurisdiction_ids', JSON.stringify(updatedIds))
+    localStorage.removeItem(`archived_jurisdiction_${jurisdictionId}`)
     
     Swal.fire('Removed!', 'Jurisdiction has been removed from archived list.', 'success')
   } catch (error) {
@@ -159,7 +140,7 @@ const permanentDelete = async (jurisdictionId: string) => {
           <p class="text-gray-500 mb-6">Jurisdictions you delete will appear here for restoration.</p>
           <button 
             @click="$router.back()"
-            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
           >
             Return to Active Jurisdictions
           </button>
@@ -210,7 +191,7 @@ const permanentDelete = async (jurisdictionId: string) => {
             <div class="flex items-center space-x-2 ml-6">
               <button
                 @click="restoreJurisdiction(jurisdiction.id)"
-                class="px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
               >
                 Restore
               </button>

@@ -4,7 +4,7 @@ import FeaturesSection from '@/components/landing-page/FeaturesSection.vue'
 import GlobalStatsSection from '@/components/landing-page/GlobalStatsSection.vue'
 import HeroSection from '@/components/landing-page/HeroSection.vue'
 import HowItWorks from '@/components/landing-page/HowItWorks.vue'
-import Monitor from '@/components/landing-page/Monitor.vue'
+// import Monitor from '@/components/landing-page/Monitor.vue'
 import HomeFrame from '@/components/landing-page/HomeFrame.vue'
 </script>
 
