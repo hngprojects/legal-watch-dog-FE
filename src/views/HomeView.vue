@@ -23,13 +23,12 @@ import HomeFrame from '@/components/landing-page/HomeFrame.vue'
           );
         "
       ></div>
-
       <HeroSection />
       <DashboardPreview />
       <HowItWorks />
       <HomeFrame />
       <FeaturesSection />
-      <Monitor />
+      <!-- <Monitor /> -->
       <GlobalStatsSection />
     </main>
   </div>
