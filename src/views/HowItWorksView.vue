@@ -57,7 +57,7 @@ const steps = [
           );
         "
       ></div>
-      <section class="relative z-10 mb-24 space-y-11 text-center">
+      <section class="relative z-10 mb-24 space-y-11 text-center app-container">
         <PillTag>
           <span class="font-normal text-gray-600">AI-Powered Regulatory Intelligence</span>
         </PillTag>
