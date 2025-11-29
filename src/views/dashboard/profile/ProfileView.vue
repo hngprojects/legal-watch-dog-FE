@@ -10,6 +10,13 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import type { Organization } from '@/types/organization'
 import type { UserProfile } from '@/types/user'
 import editIcon from '@/assets/icons/editIcon.svg'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const authStore = useAuthStore()
 const projectStore = useProjectStore()
@@ -183,12 +190,13 @@ watch(
 )
 
 const openEditModal = () => {
-  Swal.fire({
-    icon: 'info',
-    title: 'Profile editing unavailable',
-    text: 'Profile updates are temporarily disabled. Please check back soon.',
-    confirmButtonColor: '#401903',
-  })
+  showEditModal.value = true
+  // Swal.fire({
+  //   icon: 'info',
+  //   title: 'Profile editing unavailable',
+  //   text: 'Profile updates are temporarily disabled. Please check back soon.',
+  //   confirmButtonColor: '#401903',
+  // })
 }
 
 const closeEditModal = () => {
@@ -347,32 +355,48 @@ const saveEdits = () => {
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
         @click.self="closeEditModal"
       >
-        <div class="w-full max-w-xl rounded-2xl bg-white p-8 shadow-2xl">
-          <div class="mb-6">
+        <div class="w-full max-w-xl rounded-2xl bg-white px-12 py-14 shadow-2xl">
+          <div class="mb-14">
             <h3 class="text-2xl font-semibold text-[#0F172A]">Edit Profile</h3>
-            <p class="text-sm text-[#6B7280]">Update your profile details.</p>
+            <!-- <p class="text-sm text-[#6B7280]">Update your profile details.</p> -->
+          </div>
+
+          <div class="flex justify-center mb-6">
+             <div
+                class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
+              >
+                {{ avatarInitials }}
+                <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" @click="saveEdits">
+                  <img :src="editIcon" alt="Edit Icon">
+                </div>
+              </div>
           </div>
 
           <form class="space-y-5" @submit.prevent="saveEdits">
-            <div class="space-y-2">
+            <div class="space-y-3">
               <label class="text-sm font-semibold text-[#0F172A]" for="name">Name</label>
               <Input
                 id="name"
                 v-model="editForm.name"
                 placeholder="Your full name"
-                class="h-12 rounded-xl border-[#E5E7EB] text-sm text-[#111827]"
+                class="h-12 rounded-md border-[#E5E7EB] text-sm text-[#111827] mt-1.5"
               />
             </div>
-            <div class="space-y-2">
+            <div class="space-y-3">
               <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
-              <Input
-                id="role"
-                v-model="editForm.role"
-                placeholder="Your role"
-                class="h-12 rounded-xl border-[#E5E7EB] text-sm text-[#111827]"
-              />
+              <Select v-model="editForm.role" required>
+                  <SelectTrigger class="h-12 border-[#D5D7DA] rounded-md text-sm focus:border-[#401903] w-full">
+                    <SelectValue placeholder="Select Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Admin">Admin</SelectItem>
+                    <!-- <SelectItem value="Member">Member</SelectItem> -->
+                    <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
+                    <!-- <SelectItem value="Editor">Editor</SelectItem> -->
+                  </SelectContent>
+                </Select>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-3">
               <label class="text-sm font-semibold text-[#0F172A]" for="edit-email"
                 >Email Address</label
               >
@@ -381,20 +405,20 @@ const saveEdits = () => {
                 v-model="editForm.email"
                 type="email"
                 placeholder="you@example.com"
-                class="h-12 rounded-xl border-[#E5E7EB] text-sm text-[#111827]"
+                class="h-12 rounded-md border-[#E5E7EB] text-sm text-[#111827] mt-1.5"
               />
             </div>
-            <div class="flex items-center justify-between gap-3 pt-4">
+            <div class="flex items-center justify-end gap-3 pt-4">
               <button
                 type="button"
-                class="rounded-full border border-[#401903] px-5 py-2 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
+                class="rounded-md border border-[#401903] py-4 px-12 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
                 @click="closeEditModal"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="rounded-full bg-[#401903] px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
+                class="rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
               >
                 Save
               </button>
