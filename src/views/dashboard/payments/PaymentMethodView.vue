@@ -1,34 +1,26 @@
 <script setup lang="ts">
 import PricingCard from '@/components/pricing/PricingCard.vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { PRICINGS } from '@/api/billing'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useBillingStore } from '@/stores/billing-store'
-import { useOrganizationStore } from '@/stores/organization-store'
-import { useAuthStore } from '@/stores/auth-store'
 
 const route = useRoute()
+const router = useRouter()
 const paymentMethod = ref<'stripe' | null>(null)
 const plan = PRICINGS.find((plan) => plan.title.toLowerCase() === route.params.plan)!
 const cycle = route.query.cycle as 'monthly' | 'yearly'
 const { checkoutPlan } = useBillingStore()
 
-const { user } = useAuthStore()
-const { fetchOrganizations, hasOrganizations, currentOrganizationId } = useOrganizationStore()
-
-onMounted(async () => {
-  if (!user) return
-
-  await fetchOrganizations(user.id)
-
-  if (!hasOrganizations) return
-})
-
 const handlePay = async () => {
   if (!paymentMethod.value) return
 
   if (paymentMethod.value === 'stripe') {
-    checkoutPlan(currentOrganizationId!, 'monthly')
+    const checkoutUrl = await checkoutPlan('yearly')
+
+    console.log(checkoutUrl)
+
+    if (checkoutUrl) window.location.replace(checkoutUrl)
   }
 }
 </script>
