@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import Swal from 'sweetalert2'
 import { Input } from '@/components/ui/input'
-import { userService } from '@/api/user'
+import { userService, type UpdateProfilePayload } from '@/api/user'
 import { useAuthStore } from '@/stores/auth-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
@@ -34,6 +34,10 @@ const editForm = ref({
   role: '',
   email: '',
 })
+
+// const fileInputRef = ref<HTMLInputElement | null>(null)
+// const uploadingImage = ref(false)
+const selectedImageFile = ref<string | null>(null)
 
 const fallbackNameFromEmail = computed(() => {
   const email = userProfile.value?.email || ''
@@ -199,18 +203,227 @@ const openEditModal = () => {
   // })
 }
 
+// const triggerFileInput = () => {
+//   fileInputRef.value?.click()
+// }
+
+// const compressImage = (file: File): Promise<string> => {
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader()
+//     reader.readAsDataURL(file)
+//     reader.onload = (event) => {
+//       const img = new Image()
+//       img.src = event.target?.result as string
+//       img.onload = () => {
+//         const canvas = document.createElement('canvas')
+//         const ctx = canvas.getContext('2d')
+//         if (!ctx) {
+//           reject(new Error('Failed to get canvas context'))
+//           return
+//         }
+
+//         // Calculate new dimensions (max 200x200 for profile picture)
+//         let width = img.width
+//         let height = img.height
+//         const maxSize = 200
+
+//         if (width > height) {
+//           if (width > maxSize) {
+//             height = (height * maxSize) / width
+//             width = maxSize
+//           }
+//         } else {
+//           if (height > maxSize) {
+//             width = (width * maxSize) / height
+//             height = maxSize
+//           }
+//         }
+
+//         canvas.width = width
+//         canvas.height = height
+
+//         // Draw and compress
+//         ctx.drawImage(img, 0, 0, width, height)
+        
+//         // Convert to base64 with compression (quality 0.6 for smaller size)
+//         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6)
+//         resolve(compressedBase64)
+//       }
+//       img.onerror = () => reject(new Error('Failed to load image'))
+//     }
+//     reader.onerror = () => reject(new Error('Failed to read file'))
+//   })
+// }
+
+// const handleImageUpload = async (event: Event) => {
+//   const target = event.target as HTMLInputElement
+//   const file = target.files?.[0]
+  
+//   if (!file) return
+
+//   // Validate file type
+//   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+//   if (!validTypes.includes(file.type)) {
+//     Swal.fire({
+//       icon: 'error',
+//       title: 'Invalid File Type',
+//       text: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP).',
+//       confirmButtonColor: '#401903',
+//     })
+//     return
+//   }
+
+//   // Validate file size (max 5MB)
+//   const maxSize = 5 * 1024 * 1024 // 5MB
+//   if (file.size > maxSize) {
+//     Swal.fire({
+//       icon: 'error',
+//       title: 'File Too Large',
+//       text: 'Image size must be less than 5MB.',
+//       confirmButtonColor: '#401903',
+//     })
+//     return
+//   }
+
+//   try {
+//     uploadingImage.value = true
+    
+//     // Compress the image
+//     const compressedImage = await compressImage(file)
+    
+//     // Store compressed image
+//     selectedImageFile.value = compressedImage
+    
+//     // Update local profile preview
+//     if (userProfile.value) {
+//       userProfile.value = {
+//         ...userProfile.value,
+//         avatar_url: compressedImage,
+//       }
+//     }
+
+//     uploadingImage.value = false
+//   } catch (error) {
+//     console.error('Image upload error:', error)
+//     Swal.fire({
+//       icon: 'error',
+//       title: 'Upload Failed',
+//       text: 'Failed to process the image file. Please try again.',
+//       confirmButtonColor: '#401903',
+//     })
+//     uploadingImage.value = false
+//   }
+// }
+
 const closeEditModal = () => {
   showEditModal.value = false
 }
 
-const saveEdits = () => {
-  Swal.fire({
-    icon: 'info',
-    title: 'Profile editing unavailable',
-    text: 'Profile updates are temporarily disabled. Please check back soon.',
-    confirmButtonColor: '#401903',
-  })
-  closeEditModal()
+const saveEdits = async () => {
+  try {
+    if (!editForm.value.name.trim()) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Name is required.',
+        confirmButtonColor: '#401903',
+      })
+      return
+    }
+    console.log("first")
+
+    const payload: UpdateProfilePayload = {
+      name: editForm.value.name.trim(),
+    }
+
+    // Only include avatar if we have a new compressed image that's within limits
+    if (selectedImageFile.value && selectedImageFile.value.length <= 500) {
+      payload.avatar_url = selectedImageFile.value
+    }
+
+    const response = await userService.updateProfile(payload)
+
+    // console.log(response)
+
+    if (response.data?.data) {
+      userProfile.value = {
+        ...userProfile.value,
+        ...response.data.data,
+      }
+
+      if (authStore.user) {
+        authStore.user = {
+          ...authStore.user,
+          name: response.data.data.name,
+        }
+      }
+    }
+
+    // Clear selected image after save
+    selectedImageFile.value = null
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Profile Updated',
+      text: 'Your profile has been successfully updated.',
+      confirmButtonColor: '#401903',
+    })
+
+    closeEditModal()
+  } catch (error) {
+    const err = error as { response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } } }
+    
+    // Check specifically for avatar_url validation error
+    const avatarError = err?.response?.data?.errors?.avatar_url
+    if (avatarError) {
+      // Silently retry without avatar_url
+      try {
+        const retryPayload: UpdateProfilePayload = {
+          name: editForm.value.name.trim(),
+        }
+        
+        const response = await userService.updateProfile(retryPayload)
+        
+        if (response.data?.data) {
+          userProfile.value = {
+            ...userProfile.value,
+            ...response.data.data,
+            avatar_url: undefined, // Clear invalid avatar
+          }
+
+          if (authStore.user) {
+            authStore.user = {
+              ...authStore.user,
+              name: response.data.data.name,
+            }
+          }
+        }
+        
+        selectedImageFile.value = null
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Profile Updated',
+          text: 'Your name has been updated successfully.',
+          confirmButtonColor: '#401903',
+        })
+        
+        closeEditModal()
+        return
+      } catch (retryError) {
+        console.error('Retry failed:', retryError)
+      }
+    }
+    
+    const errorMessage = err?.response?.data?.message || err?.response?.data?.error || 'Failed to update profile. Please try again.'
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Update Failed',
+      text: errorMessage,
+      confirmButtonColor: '#401903',
+    })
+  }
 }
 </script>
 
@@ -245,11 +458,19 @@ const saveEdits = () => {
               <div
                 class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
               >
-                {{ avatarInitials }}
+                <img v-if="userProfile?.avatar_url" :src="userProfile.avatar_url" alt="Profile" class="h-full w-full rounded-full object-cover" />
+                <span v-else>{{ avatarInitials }}</span>
                 <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" @click="openEditModal">
                   <img :src="editIcon" alt="Edit Icon">
                 </div>
               </div>
+              <!-- <input
+                ref="fileInputRef"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="handleImageUpload"
+              /> -->
               <!-- <div class="space-y-3"> -->
                 <div class="flex flex-col items-center gap-2">
                   <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
@@ -366,9 +587,11 @@ const saveEdits = () => {
                 class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
               >
                 {{ avatarInitials }}
-                <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" @click="saveEdits">
-                  <img :src="editIcon" alt="Edit Icon">
-                </div>
+                <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" 
+                >
+                <!-- @click="saveEdits" -->
+                <img :src="editIcon" alt="Edit Icon">
+              </div>
               </div>
           </div>
 
@@ -404,8 +627,9 @@ const saveEdits = () => {
                 id="edit-email"
                 v-model="editForm.email"
                 type="email"
+                readonly
                 placeholder="you@example.com"
-                class="h-12 rounded-md border-[#E5E7EB] text-sm text-[#111827] mt-1.5"
+                class="h-12 rounded-md outline-none focus-visible:ring-0 focus-visible:border-input text-sm text-[#111827] mt-1.5 cursor-not-allowed"
               />
             </div>
             <div class="flex items-center justify-end gap-3 pt-4">
