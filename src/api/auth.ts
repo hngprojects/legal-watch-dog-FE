@@ -12,6 +12,8 @@ import type {
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
+  AppleSignInPayload,
+  AppleSignInResponse,
   MicrosoftOAuthLoginResponse,
   ResendOtpPayload,
   ResendOtpResponse,
@@ -60,4 +62,7 @@ export const authService = {
     http.get<MicrosoftOAuthLoginResponse>('/oauth/microsoft/login', {
       params: redirectUri ? { redirect_uri: redirectUri } : undefined,
     }),
+
+  appleSignIn: (payload: AppleSignInPayload) =>
+    http.post<AppleSignInResponse>('/auth/apple/signin', payload),
 }
