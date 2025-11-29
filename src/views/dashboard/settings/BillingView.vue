@@ -55,7 +55,10 @@ onMounted(async () => {
       </template>
 
       <div class="flex flex-col gap-x-6 gap-y-4 *:flex-1 md:flex-row">
-        <RouterLink :to="{ name: 'payment-plan' }" class="btn--md btn--primary block text-center">
+        <RouterLink
+          :to="{ name: 'payment-plan' }"
+          class="btn--md btn--primary flex items-center justify-center text-center"
+        >
           Upgrade Plan
         </RouterLink>
         <CancelSubscriptionModal :organizationId="currentOrganizationId!">
