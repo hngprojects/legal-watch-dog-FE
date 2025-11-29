@@ -333,13 +333,8 @@ watch(
         </div>
       </div>
       <div
-<<<<<<< Updated upstream
-        class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5">
-        <!-- LEFT SECTION -->
-=======
         class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5"
       >
->>>>>>> Stashed changes
         <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
           <div
             class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-12 sm:w-12">
@@ -351,17 +346,10 @@ watch(
             <span class="cursor-pointer underline">learn more about a specialist</span>
           </p>
         </div>
-
-<<<<<<< Updated upstream
-        <!-- RIGHT BUTTON -->
-        <button @click="openHireSpecialistModal"
-          class="h-10 w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-11 sm:w-auto sm:px-6 sm:text-[15px]">
-=======
         <button
           @click="openHireSpecialistModal"
           class="h-10 w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-11 sm:w-auto sm:px-6 sm:text-[15px]"
         >
->>>>>>> Stashed changes
           Hire a Specialist
         </button>
       </div>
@@ -413,12 +401,6 @@ watch(
                 <option value="Manual">Manual</option>
                 <option value="Hybrid">Hybrid</option>
               </select>
-
-<<<<<<< Updated upstream
-              <!-- CHEVRON ICON -->
-              <svg class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
-=======
               <svg
                 class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500"
                 fill="none"
@@ -426,7 +408,6 @@ watch(
                 stroke-width="2"
                 viewBox="0 0 24 24"
               >
->>>>>>> Stashed changes
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </div>
@@ -557,28 +538,17 @@ watch(
     <teleport to="body">
       <div v-if="showHireSpecialistModal"
         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity ease-out duration-300"
-<<<<<<< Updated upstream
-        @click.self="closeHireSpecialistModal">
-        <!-- Modal Content Container -->
-=======
         @click.self="closeHireSpecialistModal"
       >
->>>>>>> Stashed changes
         <div
           class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full relative transform transition-all ease-out duration-300 sm:scale-100 mobile:scale-95"
           :class="{
             'opacity-100 scale-100': showHireSpecialistModal,
             'opacity-0 scale-95': !showHireSpecialistModal,
-<<<<<<< Updated upstream
-          }">
-          <!-- Close Button -->
-          <button @click="closeHireSpecialistModal"
-=======
           }"
         >
           <button
             @click="closeHireSpecialistModal"
->>>>>>> Stashed changes
             class="absolute top-6 right-6 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
             aria-label="Close modal">
             <X :size="18" />

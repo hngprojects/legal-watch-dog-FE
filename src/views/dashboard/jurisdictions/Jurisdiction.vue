@@ -566,11 +566,6 @@ onMounted(() => {
             </div>
 
             <div>
-<<<<<<< Updated upstream
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Monitoring Instructions</label>
-              <textarea v-model="editForm.prompt" rows="3"
-                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
-=======
               <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"
                 >Monitoring Instructions</label
               >
@@ -579,7 +574,6 @@ onMounted(() => {
                 rows="3"
                 class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               />
->>>>>>> Stashed changes
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
@@ -609,14 +603,6 @@ onMounted(() => {
       <section class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
-<<<<<<< Updated upstream
-            <button @click="activeTab = 'analysis'" :class="[
-              'relative pb-4 text-sm font-semibold transition-colors',
-              activeTab === 'analysis'
-                ? 'text-[#1F1F1F]'
-                : 'text-gray-500 hover:text-[#1F1F1F]',
-            ]">
-=======
             <button
               @click="activeTab = 'analysis'"
               :class="[
@@ -624,8 +610,6 @@ onMounted(() => {
                 activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
               ]"
             >
->>>>>>> Stashed changes
-              Analysis
               <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
             </button>
 
@@ -735,54 +719,6 @@ onMounted(() => {
             </div>
 
             <div v-else class="space-y-3">
-<<<<<<< Updated upstream
-            <div
-              v-for="source in sources"
-              :key="source.id"
-              class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm"
-            >
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
-                  <p class="text-xs text-gray-500">{{ source.url }}</p>
-                  <p class="text-[11px] tracking-wide text-gray-400 uppercase">
-                    {{ source.source_type }} • {{ source.scrape_frequency }}
-                  </p>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-end gap-2">
-                  <button
-                    class="btn--sm btn--primary"
-                    :disabled="scraping[source.id]"
-                    @click="triggerScrape(source)"
-                  >
-                    <span v-if="scraping[source.id]">Scraping...</span>
-                    <span v-else>Scrape Now</span>
-                  </button>
-
-                  <button
-                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    @click="toggleSourceExpansion(source.id)"
-                  >
-                    {{ expandedSources[source.id] ? 'Hide History' : 'View History' }}
-                  </button>
-
-                  <button
-                    class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    @click="startEditSource(source)">
-                    Edit
-                  </button>
-
-                  <button
-                    class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                    @click="deleteSource(source)">
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-=======
->>>>>>> Stashed changes
               <div
                 v-for="source in sources"
                 :key="source.id"
