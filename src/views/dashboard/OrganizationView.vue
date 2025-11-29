@@ -22,14 +22,6 @@ import { useInvitationStore } from '@/stores/invitation-store'
 import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
 import illustrationImg from '@/assets/Images/dashboardillustration.png'
 import type { Organization } from '@/types/organization'
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogScrollContent,
-  DialogTitle,
-} from '@/components/ui/dialog'
 
 const organizationStore = useOrganizationStore()
 const { organizations, loading, error } = storeToRefs(organizationStore)
@@ -396,64 +388,79 @@ onMounted(async () => {
       </div>
     </div>
 
-    <Dialog :open="showCreateModal" @update:open="(value) => !value && closeCreateModal()">
-      <DialogScrollContent class="sm:max-w-[540px]">
-        <DialogHeader>
-          <DialogTitle>Set up new Organization</DialogTitle>
-          <DialogDescription>Enter the name and industry of your organization.</DialogDescription>
-        </DialogHeader>
+    <teleport to="body">
+      <div
+        v-if="showCreateModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]"
+        @click.self="closeCreateModal"
+      >
+        <div class="relative w-full max-w-[540px] rounded-2xl bg-white shadow-xl">
+          <div class="p-20">
+            <div class="mb-6">
+              <h3 class="mb-2 text-xl font-bold text-[#080808]">Set up new Organization</h3>
+              <p class="text-sm text-[#6B7280]">
+                <template v-if="formData.name">
+                  Organisation already registered? <span @click="router.push('/login')" class="text-[#401903] cursor-pointer underline hover:no-underline transition-all">Log In</span>
+                </template>
+                <template v-else>
+                  Enter the name and Industry of your Organization.
+                </template>
+              </p>
+            </div>
 
-        <form @submit.prevent="handleCreateOrganization" class="space-y-5">
-          <div class="space-y-2">
-            <label for="orgName" class="block text-sm font-medium text-[#1F1F1F]">
-              Company Name
-            </label>
-            <Input
-              v-model="formData.name"
-              id="orgName"
-              placeholder="Name"
-              required
-              class="h-11 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
-            />
+            <form @submit.prevent="handleCreateOrganization" class="space-y-5">
+              <div class="space-y-2">
+                <label for="orgName" class="block text-sm font-medium text-[#1F1F1F]">
+                  Company Name
+                </label>
+                <Input
+                  v-model="formData.name"
+                  id="orgName"
+                  placeholder="Name"
+                  required
+                  class="h-11 border-[#D5D7DA] text-sm focus:border-[#401903] rounded-md w-full"
+                />
+              </div>
+
+              <div class="space-y-2">
+                <label for="orgIndustry" class="block text-sm font-medium text-[#1F1F1F]">
+                  Industry
+                </label>
+                <Select v-model="formData.industry" required>
+                  <SelectTrigger class="h-11! border-[#D5D7DA] rounded-md text-sm focus:border-[#401903] w-full">
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Government, Politics & Public Sector">Government, Politics & Public Sector</SelectItem>
+                    <SelectItem value="Law, Regulation & Compliance">Law, Regulation & Compliance</SelectItem>
+                    <SelectItem value="Business, Finance & Professional Services">Business, Finance & Professional Services</SelectItem>
+                    <SelectItem value="Technology, Media & Telecommunications">Technology, Media & Telecommunications</SelectItem>
+                    <SelectItem value="Health, Science & Education">Health, Science & Education</SelectItem>
+                    <SelectItem value="Energy, Environment & Infrastructure">Energy, Environment & Infrastructure</SelectItem>
+                    <SelectItem value="Manufacturing, Trade & Logistics">Manufacturing, Trade & Logistics</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+                {{ error }}
+              </div>
+
+              <div class="flex flex-col justify-center gap-3 pt-8">
+                <button type="submit" class="btn btn--primary py-2.5 min-h-10">Continue</button>
+                <button
+                  type="button"
+                  @click="closeCreateModal"
+                  class="rounded-lg border border-transparent hover:border-[#F1A75F] py-2.5 text-sm font-medium text-black hover:bg-orange-50 min-h-10 cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
-
-          <div class="space-y-2">
-            <label for="orgIndustry" class="block text-sm font-medium text-[#1F1F1F]">
-              Industry
-            </label>
-            <Select v-model="formData.industry" required>
-              <SelectTrigger class="h-11! w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]">
-                <SelectValue placeholder="Select industry" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Government, Politics & Public Sector">Government, Politics & Public Sector</SelectItem>
-                <SelectItem value="Law, Regulation & Compliance">Law, Regulation & Compliance</SelectItem>
-                <SelectItem value="Business, Finance & Professional Services">Business, Finance & Professional Services</SelectItem>
-                <SelectItem value="Technology, Media & Telecommunications">Technology, Media & Telecommunications</SelectItem>
-                <SelectItem value="Health, Science & Education">Health, Science & Education</SelectItem>
-                <SelectItem value="Energy, Environment & Infrastructure">Energy, Environment & Infrastructure</SelectItem>
-                <SelectItem value="Manufacturing, Trade & Logistics">Manufacturing, Trade & Logistics</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-            {{ error }}
-          </div>
-
-          <DialogFooter class="flex flex-col justify-center gap-3 pt-8">
-            <button type="submit" class="btn--primary btn--lg">Continue</button>
-            <button
-              type="button"
-              @click="closeCreateModal"
-              class="btn--secondary btn--lg"
-            >
-              Cancel
-            </button>
-          </DialogFooter>
-        </form>
-      </DialogScrollContent>
-    </Dialog>
+        </div>
+      </div>
+    </teleport>
 
     <OrganizationFormDialog
       v-if="editingOrg"

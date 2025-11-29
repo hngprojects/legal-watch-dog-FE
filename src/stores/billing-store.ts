@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { useOrganizationStore } from './organization-store'
 import { billingService } from '@/api/billing'
 import type { AxiosError } from 'axios'
+import { useAuthStore } from './auth-store'
+import { useRouter } from 'vue-router'
 
 interface State {
   billing: number
@@ -27,9 +29,38 @@ export const useBillingStore = defineStore('billing', {
       this.loading = value
     },
 
-    async hasBillingAccount(organizationId: string) {
+    async getOrganizationId() {
+      const router = useRouter()
+      const { user } = useAuthStore()
+      const { fetchOrganizations, hasOrganizations, currentOrganizationId } = useOrganizationStore()
+
+      if (!user) {
+        this.setError('No user found. Proceed to login')
+        router.push({ name: 'login' })
+        return null
+      }
+
+      await fetchOrganizations(user.id)
+
+      // if (!hasOrganizations) {
+      //   this.setError('No organization found')
+      //   router.push({ name: 'dashboard' })
+      //   return null
+      // }
+
+      console.log(currentOrganizationId)
+
+      return currentOrganizationId
+    },
+
+    async hasBillingAccount() {
+      this.setError(null)
+      const orgId = await this.getOrganizationId()
+
+      if (!orgId) return
+
       try {
-        const res = await billingService.getOrganizationBillingAccount(organizationId)
+        const res = await billingService.getOrganizationBillingAccount(orgId)
 
         if (res.status === 200) return true
       } catch (error) {
@@ -39,9 +70,15 @@ export const useBillingStore = defineStore('billing', {
       return false
     },
 
-    async createBillingAccount(organizationId: string) {
+    async createBillingAccount() {
+      this.setError(null)
+
+      const orgId = await this.getOrganizationId()
+
+      if (!orgId) return
+
       try {
-        const res = await billingService.createOrganizationBillingAccount(organizationId)
+        const res = await billingService.createOrganizationBillingAccount(orgId)
 
         if (res.status === 200) return true
       } catch (error) {
@@ -51,9 +88,13 @@ export const useBillingStore = defineStore('billing', {
       return false
     },
 
-    async getSubscriptionStatus(organizationId: string) {
+    async getSubscriptionStatus() {
+      this.setError(null)
+      const orgId = await this.getOrganizationId()
+
+      if (!orgId) return
       try {
-        const res = await billingService.getOrganizationSubscriptionStatus(organizationId)
+        const res = await billingService.getOrganizationSubscriptionStatus(orgId)
 
         if (res.status === 200) {
           this.hasSubscribed = res.data.data.has_subscribed
@@ -63,25 +104,38 @@ export const useBillingStore = defineStore('billing', {
       }
     },
 
-    async getBillingPlans(organizationId: string) {
+    async getBillingPlans() {
+      this.setError(null)
+      const orgId = await this.getOrganizationId()
+
+      if (!orgId) return
       try {
-        const res = await billingService.getOrganizationBillingPlans(organizationId)
+        const res = await billingService.getOrganizationBillingPlans(orgId)
 
         return res.data.data
       } catch (error) {}
     },
 
-    async checkoutPlan(organizationId: string, plan: string) {
-      try {
-        const res = await billingService.checkout(organizationId, plan)
+    async checkoutPlan(plan: string) {
+      this.setError(null)
+      const orgId = await this.getOrganizationId()
 
-        return res.data.data
+      if (!orgId) return
+
+      try {
+        const res = await billingService.checkout(orgId, plan)
+
+        return res.data.data.checkout_url
       } catch (error) {}
     },
 
-    async cancelSubscription(organizationId: string) {
+    async cancelSubscription() {
+      this.setError(null)
+      const orgId = await this.getOrganizationId()
+
+      if (!orgId) return
       try {
-        const res = await billingService.cancelOrganizationSubscription(organizationId)
+        const res = await billingService.cancelOrganizationSubscription(orgId)
 
         return res.data.data
       } catch (error) {}

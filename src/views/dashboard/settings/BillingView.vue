@@ -1,31 +1,26 @@
 <script setup lang="ts">
 import CancelSubscriptionModal from '@/components/pricing/CancelSubscriptionModal.vue'
 import Icon from '@/components/reusable/Icon.vue'
-import { useAuthStore } from '@/stores/auth-store'
 import { useBillingStore } from '@/stores/billing-store'
-import { useOrganizationStore } from '@/stores/organization-store'
 import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 const hasHistory = ref(false)
-const isFreeTrial = ref(false)
+const isFreeTrial = ref(true)
 
-const { user } = useAuthStore()
-const { fetchOrganizations, hasOrganizations, currentOrganizationId } = useOrganizationStore()
-const { hasBillingAccount, createBillingAccount } = useBillingStore()
+const { hasBillingAccount, createBillingAccount, getSubscriptionStatus } = useBillingStore()
 
 onMounted(async () => {
-  if (!user) return
-
-  await fetchOrganizations(user.id)
-
-  if (!hasOrganizations) return
-
-  const [hasAccount] = await Promise.all([hasBillingAccount(currentOrganizationId!)])
+  const [hasAccount, subscriptionStatus] = await Promise.all([
+    hasBillingAccount(),
+    getSubscriptionStatus(),
+  ])
 
   if (!hasAccount) {
-    createBillingAccount(currentOrganizationId!)
+    isFreeTrial.value = true
+    hasHistory.value = false
+    createBillingAccount()
   }
 })
 </script>
@@ -61,7 +56,7 @@ onMounted(async () => {
         >
           Upgrade Plan
         </RouterLink>
-        <CancelSubscriptionModal :organizationId="currentOrganizationId!">
+        <CancelSubscriptionModal>
           <button class="btn--md btn--outline border-accent-main border text-center">
             Cancel Subscription
           </button>
