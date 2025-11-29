@@ -152,7 +152,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#FBF8F3]  py-12 sm:px-0 lg:px-0">
+  <div class="min-h-screen  py-12 sm:px-0 lg:px-0 app-container">
     <div class="mx-auto ">
       <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
         <!-- Left Column - Contact Info -->
