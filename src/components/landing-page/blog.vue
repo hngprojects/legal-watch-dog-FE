@@ -122,13 +122,14 @@
                 An overview of upcoming or evolving policy changes that could influence industries
                 in the near future.
               </TypographyText>
-              <a
-                href="#"
+              <div
                 class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
               >
-                <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
-              </a>
+                <RouterLink :to="`/blog/${1}`">
+                  <span>Learn More</span>
+                  <span class="text-[#F79009]">→</span>
+                </RouterLink>
+              </div>
             </div>
           </div>
 
@@ -152,13 +153,11 @@
                 Clear breakdown of newly issued regulations, showing what changes are expected, and
                 what organizations must do next.
               </TypographyText>
-              <a
-                href="#"
-                class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
-              >
+
+              <RouterLink :to="`/blog/${2}`">
                 <span>Learn More</span>
                 <span class="text-[#F79009]">→</span>
-              </a>
+              </RouterLink>
             </div>
           </div>
 
@@ -182,13 +181,14 @@
                 A look at emerging tools and technologies transforming how legal professionals
                 research, monitor, and manage compliance.
               </TypographyText>
-              <a
-                href="#"
+              <div
                 class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
               >
-                <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
-              </a>
+                <RouterLink :to="`/blog/${3}`">
+                  <span>Learn More</span>
+                  <span class="text-[#F79009]">→</span>
+                </RouterLink>
+              </div>
             </div>
           </div>
 
@@ -212,23 +212,89 @@
                 Clear analysis of trends shaping industries, highlighting both risks and
                 opportunities in the regulatory landscape.
               </TypographyText>
-              <a
-                href="#"
+              <div
                 class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
               >
-                <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
-              </a>
+                <RouterLink :to="`/blog/${4}`">
+                  <span>Learn More</span>
+                  <span class="text-[#F79009]">→</span>
+                </RouterLink>
+              </div>
             </div>
           </div>
+
+          <template v-if="showMoreCards">
+            <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
+              <img
+                :src="underblog5"
+                alt="Red folder covering a person"
+                class="h-48 w-full object-cover"
+              />
+              <div class="p-6">
+                <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
+                  <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]"
+                    >Policy Alerts</span
+                  >
+                  <span class="text-gray-500">| Nov 28, 2025</span>
+                </div>
+                <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
+                  Current Policy Alerts
+                </TypographyHeading>
+                <TypographyText class="mb-4 text-gray-600">
+                  Timely updates on new or emerging policies and legislation to keep you aware of to
+                  remain compliant and prepared.
+                </TypographyText>
+                <div
+                  class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
+                >
+                  <RouterLink :to="`/blog/${5}`">
+                    <span>Learn More</span>
+                    <span class="text-[#F79009]">→</span>
+                  </RouterLink>
+                </div>
+              </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
+              <img
+                :src="underblog6"
+                alt="Infographic on compliance stages"
+                class="h-48 w-full object-cover"
+              />
+              <div class="p-6">
+                <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
+                  <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]"
+                    >Compliance Tips</span
+                  >
+                  <span class="text-gray-500">| Nov 28, 2025</span>
+                </div>
+                <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
+                  Practical Compliance Guides
+                </TypographyHeading>
+                <TypographyText class="mb-4 text-gray-600">
+                  Simple guides that help businesses avoid penalties and meet all your regulatory
+                  requirements with clarity.
+                </TypographyText>
+                <div
+                  class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
+                >
+                  <RouterLink :to="`/blog/${6}`">
+                    <span>Learn More</span>
+                    <span class="text-[#F79009]">→</span>
+                  </RouterLink>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
 
         <div class="mt-12 flex justify-center">
           <Button
             variant="outline"
             class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-gray-900 transition duration-150 hover:bg-gray-50"
+            @click="toggleMoreCards"
           >
-            View More
+            {{ showMoreCards ? 'View Less' : 'View More' }}
           </Button>
         </div>
       </section>
@@ -267,7 +333,7 @@
 </template>
 
 <script setup lang="ts">
-// Custom components imports
+import { ref } from 'vue'
 import { TypographyHeading, TypographyText } from '../ui/typography'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -281,6 +347,13 @@ import blog5 from '@/assets/Images/blog5.png'
 import underblog1 from '@/assets/Images/underblog1.png'
 import underblog2 from '@/assets/Images/underblog2.png'
 import underblog3 from '@/assets/Images/underblog3.png'
+import underblog5 from '@/assets/Images/underblog5.png'
+import underblog6 from '@/assets/Images/underblog6.png'
+
+const showMoreCards = ref(false)
+const toggleMoreCards = () => {
+  showMoreCards.value = !showMoreCards.value
+}
 </script>
 
 <style scoped>
