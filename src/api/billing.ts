@@ -51,30 +51,30 @@ export const PRICINGS = [
 ]
 
 export const billingService = {
-  getOrganizationSubscriptionStatus: async (organizationId: string) =>
+  getOrganizationSubscriptionStatus: (organizationId: string) =>
     api.get(`/organizations/${organizationId}/billing/subscription`),
 
-  getOrganizationBillingAccount: async (organizationId: string) =>
+  getOrganizationBillingAccount: (organizationId: string) =>
     api.get(`/organizations/${organizationId}/billing`),
 
-  createOrganizationBillingAccount: async (organizationId: string) =>
+  createOrganizationBillingAccount: (organizationId: string) =>
     api.post(`/organizations/${organizationId}/billing/accounts`, {
       currency: 'USD',
     }),
 
-  checkout: async (organizationId: string, plan: string) =>
+  checkout: (organizationId: string, plan: string) =>
     api.post(`/organizations/${organizationId}/billing/checkout`, {
       plan,
       description: `Subscription for ${organizationId}`,
     }),
 
-  addPaymentMethod: async (organizationId: string, paymentMethodId: string) =>
+  addPaymentMethod: (organizationId: string, paymentMethodId: string) =>
     api.post(`/organizations/${organizationId}/billing/payment-methods/${paymentMethodId}`),
 
-  getOrganizationBillingPlans: async (organizationId: string) =>
+  getOrganizationBillingPlans: (organizationId: string) =>
     api.get(`/organizations/${organizationId}/billing/plans`),
 
-  cancelOrganizationSubscription: async (organizationId: string) =>
+  cancelOrganizationSubscription: (organizationId: string) =>
     api.post(`/organizations/${organizationId}/billing/subscription/cancel`, {
       cancel_at_period_end: true,
     }),
