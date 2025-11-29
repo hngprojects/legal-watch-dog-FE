@@ -347,7 +347,7 @@ watch(
         <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
           <!-- Icon -->
           <div
-            class="flex h-[40px] w-[40px] items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-[48px] sm:w-[48px]"
+            class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-12 sm:w-12"
           >
             <img :src="checkmark" alt="check-mark" class="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
@@ -362,7 +362,7 @@ watch(
         <!-- RIGHT BUTTON -->
         <button
           @click="openHireSpecialistModal"
-          class="h-[40px] w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-[44px] sm:w-auto sm:px-6 sm:text-[15px]"
+          class="h-10 w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-11 sm:w-auto sm:px-6 sm:text-[15px]"
         >
           Hire a Specialist
         </button>
@@ -423,7 +423,7 @@ watch(
 
             <!-- SELECT WRAPPER -->
             <div
-              class="relative flex h-[48px] w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-[240px]"
+              class="relative flex h-12 w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-60"
             >
               <select
                 v-model="selected"

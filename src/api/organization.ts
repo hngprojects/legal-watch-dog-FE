@@ -49,13 +49,15 @@ interface OrganizationUsersResponse {
 }
 
 export const organizationService = {
-  listOrganizations: (page?: number, limit?: number) =>
-    api.get<OrganizationsResponse>(`/users/me/organizations`, {
-      params: {
-        page,
-        limit,
-      },
-    }),
+  listOrganizations: (page?: number, limit?: number) => {
+    const params: Record<string, number> = {}
+    if (typeof page === 'number') params.page = page
+    if (typeof limit === 'number') params.limit = limit
+
+    return api.get<OrganizationsResponse>(`/users/me/organizations`, {
+      params: Object.keys(params).length ? params : undefined,
+    })
+  },
   createOrganization: (payload: CreateOrganizationPayload) =>
     api.post<OrganizationResponse>('/organizations', payload),
   updateOrganization: (organizationId: string, payload: UpdateOrganizationPayload) =>

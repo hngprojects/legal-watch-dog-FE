@@ -38,9 +38,10 @@ const formData = ref({
 // const inviteOrgNames = ref<Record<string, string>>({})
 
 const ensureUserId = async () => {
-  if (authStore.user?.id) return authStore.user.id
+  const immediateId = authStore.user?.id || authStore.user?.user_id
+  if (immediateId) return immediateId
   const loadedUser = await authStore.loadCurrentUser()
-  return loadedUser?.id
+  return loadedUser?.id || (loadedUser as { user_id?: string } | null)?.user_id || null
 }
 
 const organizationName = () => 'Organization Invitation'
