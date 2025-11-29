@@ -41,6 +41,18 @@ const router = createRouter({
 
   routes: [
     {
+      path: '/billing/cancel',
+      name: 'billing-cancel',
+      component: () => import('@/views/dashboard/payments/CancelView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/billing/success',
+      name: 'billing-success',
+      component: () => import('@/views/dashboard/payments/SuccessView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/',
       component: LandingLayout,
       children: [
@@ -204,7 +216,6 @@ const router = createRouter({
         },
       ],
     },
-
     {
       path: '/:pathMatch(.*)*',
       name: 'coming-soon',

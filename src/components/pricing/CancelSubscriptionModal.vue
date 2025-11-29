@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useBillingStore } from '@/stores/billing-store'
 import Dialog from '../ui/dialog/Dialog.vue'
 import DialogClose from '../ui/dialog/DialogClose.vue'
 import DialogContent from '../ui/dialog/DialogContent.vue'
@@ -9,12 +10,10 @@ import DialogTitle from '../ui/dialog/DialogTitle.vue'
 import DialogTrigger from '../ui/dialog/DialogTrigger.vue'
 import XIcon from '@/assets/icons/checkmark-circle-2.svg'
 
-const {} = defineProps<{
-  organizationId: string
-}>()
-
 const handleCancelSubscription = async () => {
-  console.log('cancel subscription')
+  const { cancelSubscription } = useBillingStore()
+
+  cancelSubscription()
 }
 </script>
 
