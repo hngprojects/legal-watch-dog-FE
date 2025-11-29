@@ -1,6 +1,6 @@
 <template>
   <div class="blogs-page bg-slate-100">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto app-container px-6 lg:px-8">
       <section class="pt-20 pb-16 text-center">
         <div
           class="shadow-4xl mb-4 inline-flex items-center space-x-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-[#3F1A0F]"

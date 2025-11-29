@@ -76,7 +76,7 @@ onBeforeUnmount(() => {
       ></div>
 
       <section
-        class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-14 sm:px-6 lg:flex-row lg:gap-14 lg:py-20 xl:max-w-7xl"
+        class="mx-auto flex w-full app-container flex-col gap-10 px-4 py-14 sm:px-6 lg:flex-row lg:gap-14 lg:py-20 "
       >
         <aside
           class="sticky top-24 z-10 hidden w-64 shrink-0 self-start lg:block"
@@ -107,7 +107,7 @@ onBeforeUnmount(() => {
           </nav>
         </aside>
 
-        <div class="w-full space-y-10 lg:max-w-3xl">
+        <div class="w-full space-y-10 app-container">
           <header class="space-y-3">
             <div>
               <h1 class="text-foregroud text-4xl font-bold sm:text-[60px]">Privacy Policy</h1>

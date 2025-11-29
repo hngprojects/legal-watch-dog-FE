@@ -168,9 +168,12 @@ const handleCreateAccount = async () => {
 <template>
   <AuthCard header-text="Create an account">
       <template v-slot:desc>
-        <p>
-          Already have an account? <RouterLink to="/login" class="btn--link">Sign in</RouterLink>
-        </p>
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            Already have an account? <RouterLink to="/login" class="btn--link">Sign in</RouterLink>
+          </p>
+          <RouterLink to="/" class="btn--link text-sm">← Go Home</RouterLink>
+        </div>
       </template>
       <form @submit.prevent="handleCreateAccount" class="space-y-5">
         <div

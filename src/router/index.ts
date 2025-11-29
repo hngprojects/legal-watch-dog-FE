@@ -172,6 +172,11 @@ const router = createRouter({
           component: () => import('@/views/dashboard/jurisdictions/Jurisdiction.vue'),
         },
         {
+          path: 'jurisdictions/archive',
+          name: 'jurisdictions-archive',
+          component: () => import('@/views/dashboard/jurisdictions/archive.vue'),
+        },
+        {
           path: 'jurisdictions/:id/sources',
           name: 'jurisdiction-sources',
           component: () => import('@/views/dashboard/sources/Source.vue'),
@@ -196,7 +201,7 @@ const router = createRouter({
 
     {
       path: '/:pathMatch(.*)*',
-      name: 'not-found',
+      name: 'coming-soon',
       component: () => import('@/views/NotFoundView.vue'),
     },
   ],

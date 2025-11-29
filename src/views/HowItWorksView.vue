@@ -43,7 +43,7 @@ const steps = [
 <template>
   <div class="flex min-h-screen flex-col">
     <main
-      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] px-6 py-16 md:px-12 lg:px-24"
+      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] py-16"
     >
       <div
         class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
@@ -57,8 +57,7 @@ const steps = [
           );
         "
       ></div>
-
-      <section class="relative z-10 mb-24 space-y-11 text-center">
+      <section class="relative z-10 mb-24 space-y-11 text-center app-container">
         <PillTag>
           <span class="font-normal text-gray-600">AI-Powered Regulatory Intelligence</span>
         </PillTag>
@@ -74,7 +73,7 @@ const steps = [
         </Button>
       </section>
 
-      <section class="relative z-10 text-center">
+      <section class="relative z-10 text-center app-container">
         <div class="mb-28">
           <h2 class="text-preset-display-sm font-semibold">
             5 <span class="text-peach-amber-main">Simple Steps</span> to Stay Informed
