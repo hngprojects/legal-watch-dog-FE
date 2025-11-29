@@ -122,13 +122,14 @@
                 An overview of upcoming or evolving policy changes that could influence industries
                 in the near future.
               </TypographyText>
-              <a
-                href="#"
+              <div
                 class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
               >
-                <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
-              </a>
+                <RouterLink :to="`/blog/${1}`">
+                  <span>Learn More</span>
+                  <span class="text-[#F79009]">→</span>
+                </RouterLink>
+              </div>
             </div>
           </div>
 
@@ -152,13 +153,11 @@
                 Clear breakdown of newly issued regulations, showing what changes are expected, and
                 what organizations must do next.
               </TypographyText>
-              <a
-                href="#"
-                class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
-              >
+
+              <RouterLink :to="`/blog/${2}`">
                 <span>Learn More</span>
                 <span class="text-[#F79009]">→</span>
-              </a>
+              </RouterLink>
             </div>
           </div>
 
@@ -182,13 +181,14 @@
                 A look at emerging tools and technologies transforming how legal professionals
                 research, monitor, and manage compliance.
               </TypographyText>
-              <a
-                href="#"
+              <div
                 class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
               >
-                <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
-              </a>
+                <RouterLink :to="`/blog/${3}`">
+                  <span>Learn More</span>
+                  <span class="text-[#F79009]">→</span>
+                </RouterLink>
+              </div>
             </div>
           </div>
 
@@ -212,16 +212,17 @@
                 Clear analysis of trends shaping industries, highlighting both risks and
                 opportunities in the regulatory landscape.
               </TypographyText>
-              <a
-                href="#"
+              <div
                 class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
               >
-                <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
-              </a>
+                <RouterLink :to="`/blog/${4}`">
+                  <span>Learn More</span>
+                  <span class="text-[#F79009]">→</span>
+                </RouterLink>
+              </div>
             </div>
           </div>
-          
+
           <template v-if="showMoreCards">
             <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
               <img
@@ -243,13 +244,14 @@
                   Timely updates on new or emerging policies and legislation to keep you aware of to
                   remain compliant and prepared.
                 </TypographyText>
-                <a
-                  href="#"
+                <div
                   class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
                 >
-                  <span>Learn More</span>
-                  <span class="text-[#F79009]">→</span>
-                </a>
+                  <RouterLink :to="`/blog/${5}`">
+                    <span>Learn More</span>
+                    <span class="text-[#F79009]">→</span>
+                  </RouterLink>
+                </div>
               </div>
             </div>
 
@@ -273,13 +275,14 @@
                   Simple guides that help businesses avoid penalties and meet all your regulatory
                   requirements with clarity.
                 </TypographyText>
-                <a
-                  href="#"
+                <div
                   class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
                 >
-                  <span>Learn More</span>
-                  <span class="text-[#F79009]">→</span>
-                </a>
+                  <RouterLink :to="`/blog/${6}`">
+                    <span>Learn More</span>
+                    <span class="text-[#F79009]">→</span>
+                  </RouterLink>
+                </div>
               </div>
             </div>
           </template>

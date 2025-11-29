@@ -51,6 +51,12 @@ const router = createRouter({
         { path: 'help-center', name: 'help-center', component: HelpCenter },
         { path: 'terms', name: 'terms', component: Terms },
         { path: 'blog', name: 'blog', component: BlogView },
+        {
+          path: 'blog/:id',
+          name: 'blog-detail',
+          component: () => import('@/views/BlogDetailView.vue'),
+          props: true,
+        },
         { path: 'features', name: 'features', component: Features },
         { path: 'waitlist', name: 'waitlist', component: WaitlistView },
         {
