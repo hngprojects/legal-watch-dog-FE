@@ -6,7 +6,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings, ChevronDown, X } from 'lucide-vue-next' // Added ChevronDown, X
+import { ArrowLeftIcon, Plus, Settings, ChevronDown, X } from 'lucide-vue-next' 
 import checkmark from '@/assets/Images/checkmark.png'
 import Swal from 'sweetalert2'
 import {
@@ -38,7 +38,6 @@ const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
 const selected = ref('AI')
 
-// --- NEW MODAL STATE & LOGIC START ---
 const showHireSpecialistModal = ref(false)
 const hireForm = ref({
   companyName: 'Untitled UI',
@@ -58,10 +57,7 @@ const closeHireSpecialistModal = () => {
 const submitHireForm = async () => {
   closeHireSpecialistModal()
   await Swal.fire('Request Submitted', 'Your specialist request is being reviewed.', 'success')
-  // In a real application, you would emit an event or call an API here
-  // emit('submit', hireForm.value)
 }
-// --- NEW MODAL STATE & LOGIC END ---
 
 const projectJurisdictions = computed<Jurisdiction[]>(() =>
   jurisdictionStore.jurisdictions.filter((item) => item.project_id === projectId),
@@ -337,25 +333,23 @@ watch(
         </div>
       </div>
       <div
-        class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5">
-        <!-- LEFT SECTION -->
+        class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5"
+      >
         <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
-          <!-- Icon -->
           <div
             class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-12 sm:w-12">
             <img :src="checkmark" alt="check-mark" class="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
 
-          <!-- Text -->
           <p class="text-[14px] leading-snug text-[#3A2B1B] sm:text-[16px]">
             Hiring a specialist give you the best possible result.
             <span class="cursor-pointer underline">learn more about a specialist</span>
           </p>
         </div>
-
-        <!-- RIGHT BUTTON -->
-        <button @click="openHireSpecialistModal"
-          class="h-10 w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-11 sm:w-auto sm:px-6 sm:text-[15px]">
+        <button
+          @click="openHireSpecialistModal"
+          class="h-10 w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-11 sm:w-auto sm:px-6 sm:text-[15px]"
+        >
           Hire a Specialist
         </button>
       </div>
@@ -397,10 +391,8 @@ watch(
           <h1 class="text-2xl leading-[30px] font-bold text-gray-900">{{ project.title }}</h1>
           <p class="text-sm leading-5 font-normal text-[#4B5563]">{{ project.description }}</p>
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center ">
-            <!-- LEFT LABEL -->
             <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
 
-            <!-- SELECT WRAPPER -->
             <div
               class="relative flex h-12 w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-60">
               <select v-model="selected"
@@ -409,10 +401,13 @@ watch(
                 <option value="Manual">Manual</option>
                 <option value="Hybrid">Hybrid</option>
               </select>
-
-              <!-- CHEVRON ICON -->
-              <svg class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
+              <svg
+                class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </div>
@@ -481,7 +476,6 @@ watch(
       </div>
     </div>
 
-    <!-- Existing Add Jurisdiction Modal -->
     <teleport to="body">
       <div v-if="showAddJurisdictionModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-[2px]"
@@ -544,36 +538,32 @@ watch(
     <teleport to="body">
       <div v-if="showHireSpecialistModal"
         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity ease-out duration-300"
-        @click.self="closeHireSpecialistModal">
-        <!-- Modal Content Container -->
+        @click.self="closeHireSpecialistModal"
+      >
         <div
           class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full relative transform transition-all ease-out duration-300 sm:scale-100 mobile:scale-95"
           :class="{
             'opacity-100 scale-100': showHireSpecialistModal,
             'opacity-0 scale-95': !showHireSpecialistModal,
-          }">
-          <!-- Close Button -->
-          <button @click="closeHireSpecialistModal"
+          }"
+        >
+          <button
+            @click="closeHireSpecialistModal"
             class="absolute top-6 right-6 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
             aria-label="Close modal">
             <X :size="18" />
           </button>
 
           <div class="p-6 sm:p-10">
-            <!-- Header -->
             <div class="mb-8">
-              <!-- Using native elements with classes to mock <TypographyHeading /> -->
               <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Hire a Specialist</h2>
-              <!-- Using native elements with classes to mock <TypographyText /> -->
               <p class="text-sm text-gray-600 mt-2 max-w-lg">
                 Monitor changes to EU travel rules, visa requirements, entry conditions, and policy
                 updates across all Schengen and EU member states
               </p>
             </div>
 
-            <!-- Form -->
             <form @submit.prevent="submitHireForm" class="space-y-6">
-              <!-- Company Name -->
               <div>
                 <label for="companyName" class="mb-2 block text-sm font-semibold text-gray-900">
                   Company Name
@@ -582,7 +572,6 @@ watch(
                   class="w-full border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 transition-colors bg-[#F1F5F9]" />
               </div>
 
-              <!-- Company Email Address -->
               <div>
                 <label for="companyEmail" class="mb-2 block text-sm font-semibold text-gray-900">
                   Company Email Address
@@ -591,7 +580,6 @@ watch(
                   class="w-full border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 transition-colors" />
               </div>
 
-              <!-- Industry Dropdown -->
               <div>
                 <label for="industry" class="mb-2 block text-sm font-semibold text-gray-900">
                   Industry
@@ -610,7 +598,6 @@ watch(
                 </div>
               </div>
 
-              <!-- Brief Description -->
               <div>
                 <label for="description" class="mb-2 block text-sm font-semibold text-gray-900">
                   Brief Description
@@ -619,7 +606,6 @@ watch(
                   class="w-full h-24 border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 resize-none transition-colors" />
               </div>
 
-              <!-- Form Actions -->
               <div class="flex justify-end gap-2 pt-4">
                 <button type="button" @click="closeHireSpecialistModal"
                   class="px-6 py-3 rounded-xl font-semibold border border-gray-300 text-gray-600 transition-colors hover:bg-gray-50">

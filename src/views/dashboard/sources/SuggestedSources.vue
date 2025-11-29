@@ -1,26 +1,79 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Check, X } from 'lucide-vue-next'
+import { ref, onMounted, watch } from 'vue'
+import { Check, X, Loader2 } from 'lucide-vue-next'
+import Swal from 'sweetalert2'
 import aiIcon from '@/assets/icons/ai_icon.png'
+import { sourceApi } from '@/api/source'
+import type { SuggestedSource, SuggestSourcesRequest } from '@/types/source'
+
+const props = defineProps<{
+  jurisdictionId: string
+  jurisdictionName: string
+  jurisdictionDescription: string
+  projectDescription: string
+}>()
 
 const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'save', count: number): void
+  (e: 'sources-added'): void
 }>()
 
-interface SuggestedSource {
+interface DisplaySource extends SuggestedSource {
   id: number
-  url: string
   added: boolean
 }
 
-const suggestions = ref<SuggestedSource[]>([])
+const suggestions = ref<DisplaySource[]>([])
+const loading = ref(true)
+const error = ref<string | null>(null)
+const retryCount = ref(0)
+const maxRetries = 2
+let idCounter = 1
+
+const loadSuggestions = async (attempt = 1): Promise<void> => {
+  if (!props.jurisdictionName || !props.jurisdictionDescription || !props.projectDescription) {
+    error.value = 'Missing context to generate suggestions.'
+    loading.value = false
+    return
+  }
+
+  const payload: SuggestSourcesRequest = {
+    jurisdiction_name: props.jurisdictionName,
+    jurisdiction_description: props.jurisdictionDescription,
+    project_description: props.projectDescription,
+  }
+
+  try {
+    const res = await sourceApi.suggest(payload)
+    const sources = res.data?.data?.sources || []
+
+    if (sources.length === 0 && attempt <= maxRetries) throw new Error('empty')
+
+    suggestions.value = sources.map((s: SuggestedSource) => ({
+      ...s,
+      id: idCounter++,
+      added: false,
+    }))
+    error.value = null
+  } catch (err: any) {
+    if (attempt <= maxRetries) {
+      retryCount.value = attempt
+      setTimeout(() => loadSuggestions(attempt + 1), attempt * 3000)
+      return
+    }
+    error.value = 'AI could not find reliable sources right now. Please try again later.'
+    error.value = null
+  } finally {
+    if (attempt > maxRetries || suggestions.value.length > 0) {
+      loading.value = false
+    }
+  }
+}
 
 const toggleAddSuggestion = (id: number) => {
   const item = suggestions.value.find((s) => s.id === id)
-  if (item) {
-    item.added = !item.added
-  }
+  if (item) item.added = !item.added
 }
 
 const removeSuggestion = (id: number) => {
@@ -31,14 +84,58 @@ const handleAddAllSuggestions = () => {
   suggestions.value.forEach((s) => (s.added = true))
 }
 
-const onCancel = () => {
-  emit('cancel')
+const saveSelected = async () => {
+  const toSave = suggestions.value.filter((s) => s.added)
+  if (toSave.length === 0) return
+
+  try {
+    await sourceApi.acceptSuggestions({
+      jurisdiction_id: props.jurisdictionId,
+      source_type: 'web',
+      scrape_frequency: 'DAILY',
+      suggested_sources: toSave.map((s) => ({
+        title: s.title,
+        url: s.url,
+        snippet: s.snippet,
+        confidence_reason: s.confidence_reason,
+        is_official: s.is_official,
+      })),
+    })
+
+    const count = toSave.length
+    emit('sources-added') 
+    emit('save', count)
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Done!',
+      text: `${count} source${count > 1 ? 's' : ''} added and will be monitored.`,
+      timer: 2500,
+      showConfirmButton: false,
+    })
+  } catch (err: any) {
+    Swal.fire('Error', err.response?.data?.message || 'Failed to add sources', 'error')
+  }
 }
 
-const onSave = () => {
-  const addedCount = suggestions.value.filter((s) => s.added).length
-  emit('save', addedCount)
-}
+onMounted(() => loadSuggestions())
+
+watch(
+  () => [
+    props.jurisdictionName,
+    props.jurisdictionDescription,
+    props.projectDescription,
+    props.jurisdictionId,
+  ],
+  () => {
+    if (props.jurisdictionName && props.jurisdictionId) {
+      loading.value = true
+      error.value = null
+      retryCount.value = 0
+      loadSuggestions()
+    }
+  },
+)
 </script>
 
 <template>
@@ -49,64 +146,105 @@ const onSave = () => {
           <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain brightness-0 invert" />
         </div>
         <h2 class="text-base font-semibold text-[#1F1F1F]">AI Suggested Sources</h2>
+        <span v-if="loading" class="flex items-center gap-1 text-xs text-gray-500">
+          <Loader2 class="h-3 w-3 animate-spin" /> Thinking...
+        </span>
       </div>
 
       <button
+        v-if="suggestions.length > 0"
         @click="handleAddAllSuggestions"
-        class="flex items-center gap-1 text-sm font-medium text-[#1F1F1F] hover:text-[#401903]"
+        class="flex items-center gap-1 text-sm font-medium text-[#401903] hover:opacity-80"
       >
         Add All <Check :size="16" />
       </button>
     </div>
 
-    <div class="space-y-3">
+    <div v-if="error" class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+      {{ error }}
+    </div>
+
+    <div v-if="loading" class="space-y-4 py-8 text-center">
+      <div
+        class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-[#401903]"
+      ></div>
+      <p class="text-sm font-medium text-gray-700">AI is researching official sources…</p>
+      <p v-if="retryCount > 0" class="text-xs text-gray-500">
+        Attempt {{ retryCount + 1 }} of {{ maxRetries + 1 }}…
+      </p>
+      <p class="mt-2 text-xs text-gray-400">
+        This can take up to 90 seconds for complex jurisdictions.
+      </p>
+    </div>
+
+    <div v-else-if="suggestions.length > 0" class="space-y-3">
       <div
         v-for="item in suggestions"
         :key="item.id"
-        class="flex items-center justify-between rounded-lg border border-gray-50 bg-white px-4 py-3 shadow-sm hover:border-gray-100"
+        class="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50/50 p-4 hover:border-gray-200"
       >
-        <span class="text-sm text-gray-600">{{ item.url }}</span>
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h4 class="font-medium text-gray-900">{{ item.title }}</h4>
+              <span
+                v-if="item.is_official"
+                class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+              >
+                Official
+              </span>
+            </div>
+            <a
+              :href="item.url"
+              target="_blank"
+              class="text-sm text-[#401903] underline hover:no-underline"
+            >
+              {{ item.url }}
+            </a>
+            <p class="mt-1 text-xs text-gray-600 italic">{{ item.snippet }}</p>
+            <p class="mt-2 text-xs text-gray-500">
+              <span class="font-medium">Reason:</span> {{ item.confidence_reason }}
+            </p>
+          </div>
 
-        <div class="flex items-center gap-4">
-          <button
-            @click="removeSuggestion(item.id)"
-            class="text-gray-400 hover:text-red-500 transition-colors"
-          >
-            <X :size="18" />
-          </button>
+          <div class="flex items-center gap-2">
+            <button @click="removeSuggestion(item.id)" class="text-gray-400 hover:text-red-600">
+              <X :size="18" />
+            </button>
 
-          <button
-            @click="toggleAddSuggestion(item.id)"
-            class="h-9 w-20 rounded-lg text-sm font-medium transition-all duration-200 ease-in-out"
-            :class="[
-              item.added
-                ? 'bg-[#12B76A] border-transparent text-white'
-                : 'border-[#9CA3AF] bg-transparent text-[#401903] hover:bg-gray-50',
-              'border',
-            ]"
-          >
-            {{ item.added ? 'Added' : 'Add' }}
-          </button>
+            <button
+              @click="toggleAddSuggestion(item.id)"
+              class="w-20 rounded-lg px-3 py-1.5 text-sm font-medium transition-all"
+              :class="
+                item.added
+                  ? 'bg-[#12B76A] text-white'
+                  : 'border border-gray-300 bg-white text-[#401903] hover:bg-gray-50'
+              "
+            >
+              {{ item.added ? 'Added' : 'Add' }}
+            </button>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div v-if="suggestions.length === 0" class="py-8 text-center text-sm text-gray-400">
-        No suggestions available.
-      </div>
+    <div v-else class="py-8 text-center text-sm text-gray-400">
+      No suggestions generated. Try adjusting the jurisdiction description.
     </div>
 
     <div class="mt-8 flex justify-end gap-3">
       <button
         @click="onCancel"
-        class="rounded-lg border border-[#D0D5DD] bg-white px-5 py-2.5 text-sm font-medium text-[#344054] shadow-sm hover:bg-gray-50"
+        class="rounded-lg border border-[#D0D5DD] bg-white px-5 py-2.5 text-sm font-medium text-[#344054] hover:bg-gray-50"
       >
         Cancel
       </button>
       <button
-        @click="onSave"
-        class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#401903]/90"
+        @click="saveSelected"
+        class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#401903]/90 disabled:opacity-60"
+        :disabled="suggestions.filter((s) => s.added).length === 0"
       >
-        Save
+        Save Selected ({{ suggestions.filter((s) => s.added).length }})
       </button>
     </div>
   </div>
