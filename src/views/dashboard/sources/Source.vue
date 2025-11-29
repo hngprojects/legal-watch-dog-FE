@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import { sourceApi } from '@/api/source'
 import type { SourceType, ScrapeFrequency, CreateSourcePayload } from '@/types/source'
 import type { Jurisdiction } from '@/api/jurisdiction'

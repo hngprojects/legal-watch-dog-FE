@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import {
   Breadcrumb,
   BreadcrumbItem,

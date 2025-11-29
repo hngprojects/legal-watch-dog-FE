@@ -4,7 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Plus, Settings, /* Search, */ FilePlus } from 'lucide-vue-next'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 
 import aiIcon from '@/assets/icons/ai_icon.png'
 
@@ -1044,7 +1044,13 @@ onMounted(() => {
               Cancel
             </button>
 
-            <button type="submit" class="btn--primary btn--lg">Create Sub-Jurisdiction</button>
+            <button
+              type="submit"
+              class="btn--primary btn--lg"
+              @click.prevent="createSubJurisdiction"
+            >
+              Create Sub-Jurisdiction
+            </button>
           </DialogFooter>
         </form>
       </DialogScrollContent>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import { Input } from '@/components/ui/input'
 import { userService, type UpdateProfilePayload } from '@/api/user'
 import { useAuthStore } from '@/stores/auth-store'

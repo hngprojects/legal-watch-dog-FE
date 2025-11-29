@@ -8,7 +8,7 @@ import PhoneIcon from '@/assets/icons/call.png'
 import AlertIcon from '@/assets/icons/alert.png'
 import type { ContactUsApiPayload } from '@/types/contact-us'
 import { submitContactForm } from '@/api/contact-us'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 
 interface ContactUsPayload {
   fullName: string

@@ -11,7 +11,7 @@ import type { OrganizationErrorResponse } from '@/types/organization'
 import type { Organization, RawOrganization } from '@/types/organization'
 import type { Invitation } from '@/types/invitation'
 import type { UserProfile } from '@/types/user'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import {
   Dialog,
   DialogClose,

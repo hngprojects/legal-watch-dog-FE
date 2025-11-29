@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import { Input } from '@/components/ui/input'
 import {
   Select,

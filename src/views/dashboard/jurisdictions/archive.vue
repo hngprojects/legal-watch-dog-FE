@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useOrganizationStore } from '@/stores/organization-store'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 
 const router = useRouter()
 const jurisdictionStore = useJurisdictionStore()

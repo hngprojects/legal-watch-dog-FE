@@ -8,7 +8,7 @@ import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
 import { ArrowLeftIcon, Plus, Settings, ChevronDown, X } from 'lucide-vue-next' 
 import checkmark from '@/assets/Images/checkmark.png'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import {
   Breadcrumb,
   BreadcrumbItem,

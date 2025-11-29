@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import { useAuthStore } from '@/stores/auth-store'
 import { useInvitationStore } from '@/stores/invitation-store'
 

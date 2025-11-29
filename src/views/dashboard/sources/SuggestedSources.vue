@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { Check, X, Loader2 } from 'lucide-vue-next'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import aiIcon from '@/assets/icons/ai_icon.png'
 import { sourceApi } from '@/api/source'
 import type { SuggestedSource, SuggestSourcesRequest } from '@/types/source'
