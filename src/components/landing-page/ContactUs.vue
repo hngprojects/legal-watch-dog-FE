@@ -135,15 +135,21 @@ const handleSubmit = async () => {
     if(axiosError.response?.data?.errors?.email) {
       errorMessages.push(...axiosError.response.data.errors.email)
     } 
+    if(axiosError.response?.data?.errors?.message) {
+      const messageErrors = axiosError.response.data.errors.message.map(err => 
+        err.replace(/string/gi, 'Message')
+      )
+      errorMessages.push(...messageErrors)
+    } 
     
     const errorMessage = errorMessages.length > 0 
-      ? errorMessages.join('. ') 
+      ? errorMessages.join("<br>") 
       : 'An error occurred while submitting the form. Please try again later.'
     
      Swal.fire({
       icon: 'error',
       title: 'Oops...',
-      text: errorMessage,
+      html: `${errorMessage}.`,
     })
   } finally {
     isSubmitting.value = false
