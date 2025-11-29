@@ -14,6 +14,10 @@ const mapRawOrganization = (org: RawOrganization): Organization => ({
   industry: org.industry,
   is_active: org.is_active,
   user_role: org.user_role || org.role,
+  project_count:
+    org.project_count ??
+    org.projects_count ??
+    (Array.isArray(org.projects) ? org.projects.length : undefined),
   created_at: org.created_at,
   updated_at: org.updated_at,
 })

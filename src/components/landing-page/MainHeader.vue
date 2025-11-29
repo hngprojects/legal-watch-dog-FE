@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onUnmounted, watch, computed } from 'vue'
+import { ref, onUnmounted, watch, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import BrandLogo from '../reusable/BrandLogo.vue'
 import { Button } from '../ui/button'
@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useRouter } from 'vue-router'
 
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
+import UserAvatar from '@/components/dashboard/UserAvatar.vue'
 
 const router = useRouter()
 
@@ -25,10 +26,24 @@ const showUserMenu = ref(false)
 
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+const displayName = computed(() => {
+  const user = authStore.user
+  if (!user) return 'User'
+  const fullName = user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
+  if (fullName) return fullName
+  if (user.email) return user.email.split('@')[0] || 'User'
+  return 'User'
+})
 
 const logout = () => {
   authStore.logout()
 }
+
+onMounted(async () => {
+  if (!authStore.user && authStore.accessToken) {
+    await authStore.loadCurrentUser()
+  }
+})
 
 const navLinks: NavLink[] = [
   { name: 'Home', to: '/' },
@@ -143,11 +158,12 @@ onUnmounted(() => {
               </svg>
             </button>
             <UserDropdown>
-              <div
-                class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-600"
-              >
-                U
-              </div>
+              <button class="btn btn--with-icon">
+                <UserAvatar :name="displayName" :size="38" />
+                <span class="max-w-[140px] truncate text-sm font-semibold text-gray-800">
+                  {{ displayName }}
+                </span>
+              </button>
             </UserDropdown>
           </div>
 

@@ -90,7 +90,6 @@
 
 <script setup lang="ts">
 import { TypographyHeading, TypographyText } from '../ui/typography'
-import { RouterLink } from 'vue-router'
 
 const termsContent = [
   {

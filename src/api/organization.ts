@@ -66,6 +66,13 @@ export const organizationService = {
     api.delete<{ message?: string }>(`/organizations/${organizationId}`),
   inviteMember: (organizationId: string, payload: InviteMemberPayload) =>
     api.post<InviteMemberResponse>(`/organizations/${organizationId}/invitations`, payload),
+  listOrganizationInvitations: (organizationId: string) =>
+    api.get<{
+      status?: string
+      status_code?: number
+      message?: string
+      data?: { invitations?: unknown; data?: unknown }
+    }>(`/organizations/${organizationId}/invitations`),
   listOrganizationUsers: (organizationId: string) =>
     api.get<OrganizationUsersResponse>(`/organizations/${organizationId}/users`),
   getOrganizationById: (organizationId: string) =>

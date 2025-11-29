@@ -6,7 +6,9 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { organizationService } from '@/api/organization'
+import { invitationService } from '@/api/invitation'
 import type { OrganizationErrorResponse } from '@/types/organization'
+import type { Invitation } from '@/types/invitation'
 import type { UserProfile } from '@/types/user'
 import Swal from 'sweetalert2'
 import {
@@ -56,6 +58,9 @@ const inviteForm = ref({ email: '', role: 'Member' as MemberRole })
 const inviteSending = ref(false)
 const inviteMessage = ref<string | null>(null)
 const inviteError = ref<string | null>(null)
+const orgInvitations = ref<Invitation[]>([])
+const orgInvitationsLoading = ref(false)
+const orgInvitationsError = ref<string | null>(null)
 
 const members = ref<Member[]>([])
 const membersLoading = ref(false)
@@ -195,6 +200,56 @@ const loadProjects = async () => {
   await projectStore.fetchProjects(orgId.value)
 }
 
+const normalizeOrgInvitations = (payload: unknown): Invitation[] => {
+  if (Array.isArray(payload)) {
+    return payload
+      .map((item) => ({
+        id: (item as Invitation)?.id,
+        token: (item as Invitation)?.token,
+        organization_id: (item as Invitation)?.organization_id || orgId.value,
+        organization_name: (item as Invitation)?.organization_name,
+        role: (item as Invitation)?.role || (item as Invitation)?.role_name,
+        role_name: (item as Invitation)?.role_name,
+        status: (item as Invitation)?.status,
+      }))
+      .filter((item) => item.token && item.organization_id)
+  }
+
+  if (payload && typeof payload === 'object') {
+    const obj = payload as { invitations?: unknown; data?: unknown }
+    const list = obj.invitations || obj.data
+    if (Array.isArray(list)) return normalizeOrgInvitations(list)
+  }
+
+  return []
+}
+
+const loadOrganizationInvitations = async () => {
+  if (!orgId.value) return
+  orgInvitationsLoading.value = true
+  orgInvitationsError.value = null
+  try {
+    const { data } = await invitationService.listMyInvitations()
+    const payload = data?.data ?? data
+    const allInvites = normalizeOrgInvitations(payload)
+    orgInvitations.value = allInvites.filter(
+      (invite) => invite.organization_id === orgId.value,
+    )
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+    if (!err.response) {
+      orgInvitationsError.value = 'Network error: Unable to reach server'
+    } else {
+      orgInvitationsError.value =
+        err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to load invitations'
+    }
+  } finally {
+    orgInvitationsLoading.value = false
+  }
+}
+
 const mapUserToMember = (user: UserProfile): Member => {
   const fullName = user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
   const memberId = user.id || user.user_id || ''
@@ -321,6 +376,7 @@ const sendInvitation = async () => {
     })
     inviteMessage.value = data.message || data.data?.message || 'Invitation sent successfully.'
     inviteOpen.value = false
+    await loadOrganizationInvitations()
     await Swal.fire('Invitation sent', inviteMessage.value, 'success')
     inviteForm.value.email = ''
     inviteForm.value.role = 'Member'
@@ -345,6 +401,7 @@ onMounted(async () => {
   await ensureOrganizations()
   await loadProjects()
   await fetchMembers()
+  await loadOrganizationInvitations()
 })
 
 watch(
@@ -358,6 +415,7 @@ watch(
     inviteForm.value.role = 'Member'
     await loadProjects()
     await fetchMembers()
+    await loadOrganizationInvitations()
   },
 )
 </script>
@@ -619,6 +677,46 @@ watch(
               </div>
             </article>
           </template>
+        </div>
+
+        <div class="mt-8 rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
+                Pending invitations
+              </p>
+              <p class="text-sm text-gray-600">Invites sent for this organization.</p>
+            </div>
+          </div>
+          <div v-if="orgInvitationsLoading" class="space-y-2">
+            <div v-for="n in 3" :key="n" class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm">
+              <div class="h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+              <div class="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+            </div>
+          </div>
+          <div v-else-if="orgInvitationsError" class="text-sm text-red-600">
+            {{ orgInvitationsError }}
+          </div>
+          <div v-else-if="!orgInvitations.length" class="text-sm text-gray-600">
+            No pending invitations.
+          </div>
+          <div v-else class="space-y-2">
+            <div
+              v-for="invite in orgInvitations"
+              :key="invite.token"
+              class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm"
+            >
+              <div>
+                <p class="text-sm font-semibold text-gray-900">
+                  {{ invite.organization_name || organization?.name || 'Organization' }}
+                </p>
+                <p class="text-xs text-gray-500">Token: {{ invite.token }}</p>
+              </div>
+              <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                {{ invite.role_name || invite.role || 'Member' }}
+              </span>
+            </div>
+          </div>
         </div>
       </section>
     </div>

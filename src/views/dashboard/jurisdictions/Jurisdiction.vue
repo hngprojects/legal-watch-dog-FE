@@ -65,6 +65,12 @@ const organizationName = computed(() => {
 
 const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
+const projectName = computed(() => {
+  const projId = jurisdiction.value?.project_id
+  if (!projId) return ''
+  const project = projectStore.projects.find((p) => p.id === projId)
+  return project?.title || project?.name || ''
+})
 
 const loading = ref(true)
 const activeTab = ref<'analysis' | 'sources' | 'output'>('analysis')
@@ -491,7 +497,7 @@ onMounted(() => {
 
             <BreadcrumbSeparator />
 
-            <!-- <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
+            <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
                 <RouterLink
                   :to="{
@@ -502,9 +508,9 @@ onMounted(() => {
                   {{ projectName }}
                 </RouterLink>
               </BreadcrumbLink>
-            </BreadcrumbItem> -->
+            </BreadcrumbItem>
 
-            <BreadcrumbSeparator />
+            <BreadcrumbSeparator v-if="jurisdiction.project_id && projectName" />
 
             <template v-if="parentJurisdiction">
               <BreadcrumbItem>

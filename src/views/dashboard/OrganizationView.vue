@@ -194,10 +194,59 @@ onMounted(async () => {
 <template>
   <main class="min-h-screen flex-1 bg-gray-50 ">
     <div
+      v-if="inviteLoading || inviteError || invitations.length"
+      class="mb-8"
+    >
+      <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Invitations</p>
+            <p class="text-sm text-gray-600">Organizations you have been invited to join.</p>
+          </div>
+          <button
+            @click="refreshInvitations"
+            class="btn--link"
+          >
+            Refresh
+          </button>
+        </div>
+
+        <div v-if="inviteLoading" class="space-y-3">
+          <div v-for="n in 3" :key="n" class="h-12 animate-pulse rounded-lg bg-gray-100"></div>
+        </div>
+        <div v-else-if="inviteError" class="text-sm text-red-600">
+          {{ inviteError }}
+        </div>
+        <div v-else-if="!invitations.length" class="text-sm text-gray-600">
+          No pending invitations.
+        </div>
+        <div v-else class="space-y-3">
+          <article
+            v-for="invite in invitations"
+            :key="invite.token"
+            class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+          >
+            <div>
+              <p class="text-sm font-semibold text-gray-900">
+                {{ invite.organization_name || organizationName() }}
+              </p>
+              <p class="text-xs text-gray-500">Role: {{ invite.role_name || invite.role || 'Member' }}</p>
+            </div>
+            <button
+              @click="acceptInvite(invite.token)"
+              class="btn--primary"
+            >
+              Accept
+            </button>
+          </article>
+        </div>
+      </div>
+    </div>
+    <div
       v-if="!loading && organizations.length === 0 && !error"
       class="mx-auto max-w-4xl py-16 text-center lg:py-24 flex flex-col items-center justify-center"
     >
-    <img :src="illustrationImg" alt="" srcset="">
+      <img :src="illustrationImg" alt="" srcset="">
       <h1 class="mb-4 text-3xl font-bold text-gray-900 lg:text-4xl">No Organization Yet</h1>
       <p class="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-gray-600">
         Create an organization to start grouping projects and jurisdictions.<br
@@ -237,11 +286,7 @@ onMounted(async () => {
         class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
       >
         <div>
-          <!-- <p class="text-sm tracking-wide text-[#9CA3AF] uppercase">Organization Workspace</p> -->
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Organizations</h1>
-          <!-- <p class="mt-1 text-sm text-gray-600">
-            Manage your organizations and dive into their projects.
-          </p> -->
         </div>
         <button @click="openCreateModal" class="btn--primary btn--with-icon">
           <svg
@@ -268,53 +313,6 @@ onMounted(async () => {
           </svg>
           Create Organization
         </button>
-      </div>
-
-      <div class="mb-8 hidden">
-        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
-          <div class="mb-4 flex items-center justify-between">
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Invitations</p>
-              <p class="text-sm text-gray-600">Organizations you have been invited to join.</p>
-            </div>
-            <button
-              @click="refreshInvitations"
-              class="btn--link"
-            >
-              Refresh
-            </button>
-          </div>
-
-          <div v-if="inviteLoading" class="space-y-3">
-            <div v-for="n in 3" :key="n" class="h-12 animate-pulse rounded-lg bg-gray-100"></div>
-          </div>
-          <div v-else-if="inviteError" class="text-sm text-red-600">
-            {{ inviteError }}
-          </div>
-          <div v-else-if="!invitations.length" class="text-sm text-gray-600">
-            No pending invitations.
-          </div>
-          <div v-else class="space-y-3">
-            <article
-              v-for="invite in invitations"
-              :key="invite.token"
-              class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
-            >
-              <div>
-                <p class="text-sm font-semibold text-gray-900">
-                  {{ invite.organization_name || organizationName() }}
-                </p>
-                <p class="text-xs text-gray-500">Role: {{ invite.role_name || invite.role || 'Member' }}</p>
-              </div>
-              <button
-                @click="acceptInvite(invite.token)"
-                class="btn--primary"
-              >
-                Accept
-              </button>
-            </article>
-          </div>
-        </div>
       </div>
 
       <div v-if="loading" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -350,7 +348,7 @@ onMounted(async () => {
               <DropdownMenuTrigger as-child>
                 <button
                   @click.stop
-                  class="absolute right-4 top-4 rounded-full p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
+                  class="btn absolute right-4 top-6 rounded-full p-2 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700"
                 >
                   <EllipsisVertical :size="18" />
                 </button>
@@ -364,15 +362,12 @@ onMounted(async () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <!-- <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Organization</p> -->
             <h3
               class="mb-2 text-xl font-bold text-[#1F1F1F] transition-colors group-hover:text-[#401903]"
             >
               {{ org.name }}
             </h3>
             <p class="text-sm text-[#4B5563]">{{ org.industry || 'Industry not specified' }}</p>
-            <p class="text-sm text-[#4B5563] mt-6">Projects available: <span class="text-black">
-              {{ 0 }}</span></p>
           </div>
           <div
             class="hidden items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
