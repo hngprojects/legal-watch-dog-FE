@@ -435,7 +435,7 @@ watch(
           </button> -->
 
           <button @click="openAddJurisdictionModal"
-            class="flex items-center gap-2 rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#592304]">
+            class="btn--primary btn--with-icon btn--lg">
             <Plus :size="18" />
             Add Jurisdiction
           </button>

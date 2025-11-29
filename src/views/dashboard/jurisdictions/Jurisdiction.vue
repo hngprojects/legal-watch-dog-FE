@@ -2,6 +2,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Plus, Settings, /* Search, */ FilePlus } from 'lucide-vue-next'
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import Swal from 'sweetalert2'
 
 import aiIcon from '@/assets/icons/ai_icon.png'
@@ -179,13 +181,14 @@ const triggerScrape = async (source: Source) => {
   }
 }
 
-const formatExtractedData = (data: Record<string, unknown> | null) => {
-  if (!data) return ''
+const renderSummary = (summary?: string | null) => {
+  if (!summary) return ''
 
   try {
-    return JSON.stringify(data, null, 2)
+    const html = marked.parse(summary, { breaks: true }) as string
+    return DOMPurify.sanitize(html)
   } catch (err) {
-    console.error('Failed to format extracted data', err)
+    console.error('Failed to render markdown summary', err)
     return ''
   }
 }
@@ -578,7 +581,7 @@ onMounted(() => {
 
             <div class="flex justify-end gap-3 pt-2">
               <button type="button" @click="showInlineEdit = false"
-                class="rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]">
+                class="btn rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]">
                 Cancel
               </button>
               <button type="submit" class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white">
@@ -823,27 +826,12 @@ onMounted(() => {
                         </span>
                       </div>
 
-                      <div
-                        v-if="rev.ai_markdown_summary || rev.ai_summary"
-                        class="mt-2 text-[12px] whitespace-pre-line text-gray-700"
-                      >
-                        {{ rev.ai_markdown_summary || rev.ai_summary }}
-                      </div>
-
-                      <div
-                        v-if="rev.extracted_data"
-                        class="mt-2 rounded-lg bg-gray-50 p-2 text-[11px] text-gray-700"
-                      >
-                        <div
-                          class="text-[10px] font-semibold tracking-wide text-gray-500 uppercase"
-                        >
-                          Extracted Data
-                        </div>
-                        <pre class="leading-5 whitespace-pre-wrap">{{
-                          formatExtractedData(rev.extracted_data)
-                        }}</pre>
-                      </div>
-                    </div>
+                    <div
+                      v-if="rev.ai_markdown_summary || rev.ai_summary"
+                      class="mt-2 text-[12px] leading-5 text-gray-700"
+                      v-html="renderSummary(rev.ai_markdown_summary || rev.ai_summary)"
+                    />
+                  </div>
 
                     <div
                       v-if="getPaginationForSource(source.id)"
@@ -1048,7 +1036,7 @@ onMounted(() => {
 
             <div class="flex justify-end gap-3 pt-4">
               <button type="button" @click="closeSubJurisdictionModal"
-                class="rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700">
+                class="btn rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700">
                 Cancel
               </button>
 
@@ -1114,14 +1102,14 @@ onMounted(() => {
 
             <div class="flex justify-end gap-3 pt-2">
               <button type="button" @click="closeAddSourceModal"
-                class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700">
+                class="btn rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700">
                 Cancel
               </button>
 
               <button
                 type="submit"
                 :disabled="sourcesLoading"
-                class="btn--primary btn--with-icon disabled:cursor-not-allowed disabled:opacity-70"
+                class="btn--primary btn--with-icon btn--lg"
               >
                 <span v-if="sourcesLoading">Saving...</span>
                 <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
