@@ -174,7 +174,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-gray-50 ">
+  <main class="min-h-screen flex-1 bg-gray-50 app-container">
     <div
       v-if="inviteLoading || inviteError || invitations.length"
       class="mb-8"

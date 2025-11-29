@@ -281,7 +281,7 @@ watch(
       </button>
     </div>
 
-    <div v-else class="mx-auto max-w-7xl">
+    <div v-else class="mx-auto app-container">
       <div class="mb-8 flex items-center justify-between">
         <Breadcrumb>
           <BreadcrumbList>
@@ -450,7 +450,7 @@ watch(
 
       <div class=" ">
         <div v-if="activeTab === 'jurisdictions'">
-          <div v-if="jurisdictionStore.loading" class="space-y-4 p-6">
+          <div v-if="jurisdictionStore.loading" class="space-y-4">
             <div v-for="n in 3" :key="n" class="animate-pulse">
               <div class="h-24 rounded-lg bg-gray-200"></div>
             </div>
@@ -462,7 +462,7 @@ watch(
             <p class="mt-2 text-xs text-gray-400">Add one to start monitoring changes.</p>
           </div>
 
-          <div v-else class="space-y-3 p-6">
+          <div v-else class="space-y-3 ">
             <article v-for="jurisdiction in topLevelJurisdictions" :key="jurisdiction.id"
               @click="goToJurisdiction(jurisdiction.id)"
               class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10">
