@@ -25,6 +25,14 @@ import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
+import {
+  Dialog,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogScrollContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
@@ -1009,115 +1017,105 @@ onMounted(() => {
       </section>
     </div>
 
-    <teleport to="body">
-      <div
-        v-if="subJurisdictionModalOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
-        @click.self="closeSubJurisdictionModal">
-        <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
-          <h3 class="mb-2 text-2xl font-bold text-gray-900">Define your Sub-Jurisdiction</h3>
-          <p class="mb-6 text-sm text-gray-600">
-            Define a specific legal domain or region to monitor
-          </p>
+    <Dialog :open="subJurisdictionModalOpen" @update:open="(value) => !value && closeSubJurisdictionModal()">
+      <DialogScrollContent class="sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle>Define your Sub-Jurisdiction</DialogTitle>
+          <DialogDescription>Define a specific legal domain or region to monitor</DialogDescription>
+        </DialogHeader>
 
-          <form @submit.prevent="createSubJurisdiction" class="space-y-5">
+        <form @submit.prevent="createSubJurisdiction" class="space-y-5">
+          <div>
+            <label class="mb-2 block text-sm font-medium text-gray-900">Sub-Jurisdiction Name</label>
+            <input v-model="subJurisdictionForm.name" type="text" required placeholder="e.g Global Visa Monitoring"
+              class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="mb-2 block text-sm font-medium text-gray-900">Description</label>
+            <textarea v-model="subJurisdictionForm.description" rows="4" required
+              placeholder="What legal areas will you monitor?"
+              class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"></textarea>
+          </div>
+
+          <DialogFooter class="flex justify-end gap-3 pt-4">
+            <button type="button" @click="closeSubJurisdictionModal"
+              class="btn rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700">
+              Cancel
+            </button>
+
+            <button type="submit" class="btn--primary">Create Sub-Jurisdiction</button>
+          </DialogFooter>
+        </form>
+      </DialogScrollContent>
+    </Dialog>
+
+    <Dialog :open="addSourceModalOpen" @update:open="(value) => !value && closeAddSourceModal()">
+      <DialogScrollContent class="sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle>{{ editingSourceId ? 'Edit Source' : 'Add Source' }}</DialogTitle>
+          <DialogDescription>Attach a source to monitor for this jurisdiction.</DialogDescription>
+        </DialogHeader>
+
+        <form @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()" class="space-y-4">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-800">Name</label>
+            <input v-model="sourceForm.name" required
+              class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              placeholder="e.g. Supreme Court Opinions" />
+          </div>
+
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-800">URL</label>
+            <input v-model="sourceForm.url" type="url" required
+              class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              placeholder="https://example.com" />
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label class="mb-2 block text-sm font-medium text-gray-900">Sub-Jurisdiction Name</label>
-              <input v-model="subJurisdictionForm.name" type="text" required placeholder="e.g Global Visa Monitoring"
-                class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+              <label class="mb-1 block text-sm font-medium text-gray-800">Source Type</label>
+              <select v-model="sourceForm.source_type"
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
+                <option value="web">Web</option>
+                <option value="api">API</option>
+                <option value="pdf">PDF</option>
+              </select>
             </div>
 
             <div>
-              <label class="mb-2 block text-sm font-medium text-gray-900">Description</label>
-              <textarea v-model="subJurisdictionForm.description" rows="4" required
-                placeholder="What legal areas will you monitor?"
-                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"></textarea>
+              <label class="mb-1 block text-sm font-medium text-gray-800">Scrape Frequency</label>
+              <select v-model="sourceForm.scrape_frequency"
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
+                <option value="HOURLY">Hourly</option>
+                <option value="DAILY">Daily</option>
+                <option value="WEEKLY">Weekly</option>
+                <option value="MONTHLY">Monthly</option>
+              </select>
             </div>
+          </div>
 
-            <div class="flex justify-end gap-3 pt-4">
-              <button type="button" @click="closeSubJurisdictionModal"
-                class="btn rounded-lg border border-gray-300 px-6 py-2.5 text-sm font-medium text-gray-700">
-                Cancel
-              </button>
+          <div v-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {{ sourcesError }}
+          </div>
 
-              <button type="submit" class="btn--primary">Create Sub-Jurisdiction</button>
-            </div>
-          </form>
-        </div>
-      </div>
+          <DialogFooter class="flex justify-end gap-3 pt-2">
+            <button type="button" @click="closeAddSourceModal"
+              class="btn rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700">
+              Cancel
+            </button>
 
-      <div
-        v-if="addSourceModalOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
-        @click.self="closeAddSourceModal">
-        <div class="relative w-full max-w-[520px] rounded-2xl bg-white p-8 shadow-2xl">
-          <h3 class="mb-2 text-2xl font-bold text-gray-900">
-            {{ editingSourceId ? 'Edit Source' : 'Add Source' }}
-          </h3>
-          <p class="mb-6 text-sm text-gray-600">
-            Attach a source to monitor for this jurisdiction.
-          </p>
-
-          <form @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()" class="space-y-4">
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-800">Name</label>
-              <input v-model="sourceForm.name" required
-                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="e.g. Supreme Court Opinions" />
-            </div>
-
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-800">URL</label>
-              <input v-model="sourceForm.url" type="url" required
-                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                placeholder="https://example.com" />
-            </div>
-
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-800">Source Type</label>
-                <select v-model="sourceForm.source_type"
-                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
-                  <option value="web">Web</option>
-                  <option value="api">API</option>
-                  <option value="pdf">PDF</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-800">Scrape Frequency</label>
-                <select v-model="sourceForm.scrape_frequency"
-                  class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
-                  <option value="HOURLY">Hourly</option>
-                  <option value="DAILY">Daily</option>
-                  <option value="WEEKLY">Weekly</option>
-                  <option value="MONTHLY">Monthly</option>
-                </select>
-              </div>
-            </div>
-
-            <div v-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-              {{ sourcesError }}
-            </div>
-
-            <div class="flex justify-end gap-3 pt-2">
-              <button type="button" @click="closeAddSourceModal"
-                class="btn rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700">
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                :disabled="sourcesLoading"
-                class="btn--primary btn--with-icon btn--lg"
-              >
-                <span v-if="sourcesLoading">Saving...</span>
-                <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </teleport>
+            <button
+              type="submit"
+              :disabled="sourcesLoading"
+              class="btn--primary btn--with-icon btn--lg"
+            >
+              <span v-if="sourcesLoading">Saving...</span>
+              <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogScrollContent>
+    </Dialog>
   </main>
 </template>

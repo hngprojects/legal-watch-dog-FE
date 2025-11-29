@@ -17,6 +17,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import {
+  Dialog,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogScrollContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const route = useRoute()
 const router = useRouter()
@@ -476,150 +484,114 @@ watch(
       </div>
     </div>
 
-    <teleport to="body">
-      <div v-if="showAddJurisdictionModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-[2px]"
-        @click.self="closeAddJurisdictionModal">
-        <div class="relative w-full max-w-[540px] rounded-sm bg-white shadow-xl">
-          <button @click="closeAddJurisdictionModal"
-            class="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </button>
+    <Dialog :open="showAddJurisdictionModal" @update:open="(value) => !value && closeAddJurisdictionModal()">
+      <DialogScrollContent class="sm:max-w-[540px]">
+        <DialogHeader>
+          <DialogTitle>Define your Jurisdiction</DialogTitle>
+          <DialogDescription>Define a specific legal domain or region to monitor</DialogDescription>
+        </DialogHeader>
 
-          <div class="p-8">
-            <div class="mb-6">
-              <h3 class="mb-2 text-xl font-bold text-[#080808]">Define your Jurisdiction</h3>
-              <p class="text-sm text-[#6B7280]">
-                Define a specific legal domain or region to monitor
-              </p>
-            </div>
-
-            <form @submit.prevent="handleCreateJurisdiction" class="space-y-5">
-              <div>
-                <label for="jurisdictionName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                  Jurisdiction Name
-                </label>
-                <input v-model="jurisdictionForm.name" id="jurisdictionName" placeholder="e.g United Kingdom" required
-                  class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
-              </div>
-
-              <div>
-                <label for="jurisdictionDesc" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                  Description
-                </label>
-                <textarea v-model="jurisdictionForm.description" id="jurisdictionDesc" rows="3"
-                  placeholder="What legal areas will you monitor?" required
-                  class="h-[130px] w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
-              </div>
-
-              <div v-if="jurisdictionStore.error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-                {{ jurisdictionStore.error }}
-              </div>
-
-              <div class="flex justify-end gap-2 pt-2">
-                <button type="button" @click="closeAddJurisdictionModal"
-                  class="cursor-pointer rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] hover:bg-orange-50">
-                  Cancel
-                </button>
-                <button type="submit"
-                  class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]">
-                  Create Jurisdiction
-                </button>
-              </div>
-            </form>
+        <form @submit.prevent="handleCreateJurisdiction" class="space-y-5">
+          <div>
+            <label for="jurisdictionName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+              Jurisdiction Name
+            </label>
+            <input v-model="jurisdictionForm.name" id="jurisdictionName" placeholder="e.g United Kingdom" required
+              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
           </div>
-        </div>
-      </div>
-    </teleport>
 
-    <teleport to="body">
-      <div v-if="showHireSpecialistModal"
-        class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity ease-out duration-300"
-        @click.self="closeHireSpecialistModal"
-      >
-        <div
-          class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full relative transform transition-all ease-out duration-300 sm:scale-100 mobile:scale-95"
-          :class="{
-            'opacity-100 scale-100': showHireSpecialistModal,
-            'opacity-0 scale-95': !showHireSpecialistModal,
-          }"
-        >
-          <button
-            @click="closeHireSpecialistModal"
-            class="absolute top-6 right-6 flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
-            aria-label="Close modal">
-            <X :size="18" />
-          </button>
-
-          <div class="p-6 sm:p-10">
-            <div class="mb-8">
-              <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Hire a Specialist</h2>
-              <p class="text-sm text-gray-600 mt-2 max-w-lg">
-                Monitor changes to EU travel rules, visa requirements, entry conditions, and policy
-                updates across all Schengen and EU member states
-              </p>
-            </div>
-
-            <form @submit.prevent="submitHireForm" class="space-y-6">
-              <div>
-                <label for="companyName" class="mb-2 block text-sm font-semibold text-gray-900">
-                  Company Name
-                </label>
-                <input v-model="hireForm.companyName" id="companyName" type="text" required
-                  class="w-full border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 transition-colors bg-[#F1F5F9]" />
-              </div>
-
-              <div>
-                <label for="companyEmail" class="mb-2 block text-sm font-semibold text-gray-900">
-                  Company Email Address
-                </label>
-                <input v-model="hireForm.companyEmail" id="companyEmail" type="email" required
-                  class="w-full border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 transition-colors" />
-              </div>
-
-              <div>
-                <label for="industry" class="mb-2 block text-sm font-semibold text-gray-900">
-                  Industry
-                </label>
-                <div class="relative">
-                  <select v-model="hireForm.industry" id="industry"
-                    class="w-full appearance-none border border-blue-500 bg-white rounded-xl px-4 py-3 text-sm text-gray-900 focus:ring-0 focus:border-blue-700 cursor-pointer transition-colors">
-                    <option value="Immigration & Global Mobility">
-                      Immigration & Global Mobility
-                    </option>
-                    <option value="Finance">Finance</option>
-                    <option value="Healthcare">Healthcare</option>
-                  </select>
-                  <ChevronDown :size="16"
-                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" />
-                </div>
-              </div>
-
-              <div>
-                <label for="description" class="mb-2 block text-sm font-semibold text-gray-900">
-                  Brief Description
-                </label>
-                <textarea v-model="hireForm.description" id="description" rows="3" required
-                  class="w-full h-24 border border-[#E2E8F0] rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] focus:ring-0 focus:border-blue-500 resize-none transition-colors" />
-              </div>
-
-              <div class="flex justify-end gap-2 pt-4">
-                <button type="button" @click="closeHireSpecialistModal"
-                  class="px-6 py-3 rounded-xl font-semibold border border-gray-300 text-gray-600 transition-colors hover:bg-gray-50">
-                  Cancel
-                </button>
-                <button type="submit"
-                  class="px-6 py-3 rounded-xl font-semibold bg-[#5D2D18] text-white transition-colors hover:bg-[#401903]">
-                  Hire Specialist
-                </button>
-              </div>
-            </form>
+          <div>
+            <label for="jurisdictionDesc" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+              Description
+            </label>
+            <textarea v-model="jurisdictionForm.description" id="jurisdictionDesc" rows="3"
+              placeholder="What legal areas will you monitor?" required
+              class="h-[130px] w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
           </div>
-        </div>
-      </div>
-    </teleport>
+
+          <div v-if="jurisdictionStore.error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+            {{ jurisdictionStore.error }}
+          </div>
+
+          <DialogFooter class="flex justify-end gap-2 pt-2">
+            <button type="button" @click="closeAddJurisdictionModal"
+              class="cursor-pointer rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] hover:bg-orange-50">
+              Cancel
+            </button>
+            <button type="submit"
+              class="cursor-pointer rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]">
+              Create Jurisdiction
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogScrollContent>
+    </Dialog>
+
+    <Dialog :open="showHireSpecialistModal" @update:open="(value) => !value && closeHireSpecialistModal()">
+      <DialogScrollContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Hire a Specialist</DialogTitle>
+          <DialogDescription>
+            Monitor changes to EU travel rules, visa requirements, entry conditions, and policy
+            updates across all Schengen and EU member states
+          </DialogDescription>
+        </DialogHeader>
+
+        <form @submit.prevent="submitHireForm" class="space-y-6">
+          <div>
+            <label for="companyName" class="mb-2 block text-sm font-semibold text-gray-900">
+              Company Name
+            </label>
+            <input v-model="hireForm.companyName" id="companyName" type="text" required
+              class="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
+          </div>
+
+          <div>
+            <label for="companyEmail" class="mb-2 block text-sm font-semibold text-gray-900">
+              Company Email Address
+            </label>
+            <input v-model="hireForm.companyEmail" id="companyEmail" type="email" required
+              class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
+          </div>
+
+          <div>
+            <label for="industry" class="mb-2 block text-sm font-semibold text-gray-900">
+              Industry
+            </label>
+            <div class="relative">
+              <select v-model="hireForm.industry" id="industry"
+                class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0">
+                <option value="Immigration & Global Mobility">
+                  Immigration & Global Mobility
+                </option>
+                <option value="Finance">Finance</option>
+                <option value="Healthcare">Healthcare</option>
+              </select>
+              <ChevronDown :size="16"
+                class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform text-gray-500" />
+            </div>
+          </div>
+
+          <div>
+            <label for="description" class="mb-2 block text-sm font-semibold text-gray-900">
+              Brief Description
+            </label>
+            <textarea v-model="hireForm.description" id="description" rows="3" required
+              class="h-24 w-full resize-none rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
+          </div>
+
+          <DialogFooter class="flex justify-end gap-2 pt-4">
+            <button type="button" @click="closeHireSpecialistModal"
+              class="rounded-xl border border-gray-300 px-6 py-3 font-semibold text-gray-600 transition-colors hover:bg-gray-50">
+              Cancel
+            </button>
+            <button type="submit"
+              class="rounded-xl bg-[#5D2D18] px-6 py-3 font-semibold text-white transition-colors hover:bg-[#401903]">
+              Hire Specialist
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogScrollContent>
+    </Dialog>
   </main>
 </template>

@@ -3,6 +3,14 @@ import { ref } from 'vue'
 import { useProjectStore } from '@/stores/project-store'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
+import {
+  Dialog,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogScrollContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 const projectStore = useProjectStore()
 const { projects, loading, error } = storeToRefs(projectStore)
@@ -25,6 +33,10 @@ const closeCreateModal = () => {
   showCreateModal.value = false
   formData.value = { title: '', description: '', master_prompt: '' }
   projectStore.setError(null)
+}
+
+const handleCreateModalToggle = (value: boolean) => {
+  if (!value) closeCreateModal()
 }
 
 const handleCreateProject = async () => {
@@ -168,124 +180,94 @@ const goToProject = (id: string) => {
       </div>
     </div>
 
-    <!-- Create Project Modal -->
-    <teleport to="body">
-      <div
-        v-if="showCreateModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]"
-        @click.self="closeCreateModal"
-      >
-        <div class="relative w-full max-w-[640px] rounded-2xl bg-white shadow-xl">
-          <button
-            @click="closeCreateModal"
-            class="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 14 14"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M1 1L13 13M13 1L1 13"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
+    <Dialog :open="showCreateModal" @update:open="handleCreateModalToggle">
+      <DialogScrollContent class="sm:max-w-[640px]">
+        <DialogHeader>
+          <DialogTitle>Create New Project</DialogTitle>
+          <DialogDescription>
+            Set up a new project to track legal and regulatory changes
+          </DialogDescription>
+        </DialogHeader>
 
-          <div class="p-10">
-            <div class="mb-8">
-              <h3 class="mb-2 text-xl font-bold text-[#080808]">Create New Project</h3>
-              <p class="text-sm text-[#6B7280]">
-                Set up a new project to track legal and regulatory changes
-              </p>
+        <form @submit.prevent="handleCreateProject" class="space-y-6">
+          <div>
+            <h4 class="mb-3 text-sm font-medium text-[#121110]">Project information</h4>
+
+            <div class="relative">
+              <input
+                v-model="formData.title"
+                id="projName"
+                placeholder="e.g Global Visa Monitoring"
+                required
+                class="peer h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
+              <label
+                for="projName"
+                class="pointer-events-none absolute top-2.5 left-3 origin-left -translate-y-6 scale-75 transform bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:top-2.5 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#401903]"
+              >
+                Project Name
+              </label>
+            </div>
+            <p class="mt-1.5 pl-1 text-xs text-[#717680]">
+              Give your project a descriptive name
+            </p>
+
+            <div class="relative mt-6">
+              <textarea
+                v-model="formData.description"
+                id="desc"
+                rows="4"
+                placeholder="What legal areas will you monitor?"
+                required
+                class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
+              <label
+                for="desc"
+                class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:scale-75 peer-focus:text-[#401903]"
+              >
+                Description
+              </label>
             </div>
 
-            <form @submit.prevent="handleCreateProject" class="space-y-6">
-              <div>
-                <h4 class="mb-3 text-sm font-medium text-[#121110]">Project information</h4>
-
-                <div class="relative">
-                  <input
-                    v-model="formData.title"
-                    id="projName"
-                    placeholder="e.g Global Visa Monitoring"
-                    required
-                    class="peer h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                  />
-                  <label
-                    for="projName"
-                    class="pointer-events-none absolute top-2.5 left-3 origin-left -translate-y-6 scale-75 transform bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:top-2.5 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#401903]"
-                  >
-                    Project Name
-                  </label>
-                </div>
-                <p class="mt-1.5 pl-1 text-xs text-[#717680]">
-                  Give your project a descriptive name
-                </p>
-
-                <div class="relative mt-6">
-                  <textarea
-                    v-model="formData.description"
-                    id="desc"
-                    rows="4"
-                    placeholder="What legal areas will you monitor?"
-                    required
-                    class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                  />
-                  <label
-                    for="desc"
-                    class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:scale-75 peer-focus:text-[#401903]"
-                  >
-                    Description
-                  </label>
-                </div>
-
-                <div class="relative mt-6">
-                  <textarea
-                    v-model="formData.master_prompt"
-                    id="prompt"
-                    rows="4"
-                    placeholder="e.g. Summarize any changes to visa policy in the UK, EU, USA, Canada..."
-                    required
-                    class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                  />
-                  <label
-                    for="prompt"
-                    class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:scale-75 peer-focus:text-[#401903]"
-                  >
-                    Master Prompt
-                  </label>
-                </div>
-              </div>
-
-              <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-                {{ error }}
-              </div>
-
-              <div class="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  @click="closeCreateModal"
-                  class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
-                >
-                  Save Project
-                </button>
-              </div>
-            </form>
+            <div class="relative mt-6">
+              <textarea
+                v-model="formData.master_prompt"
+                id="prompt"
+                rows="4"
+                placeholder="e.g. Summarize any changes to visa policy in the UK, EU, USA, Canada..."
+                required
+                class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              />
+              <label
+                for="prompt"
+                class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:scale-75 peer-focus:text-[#401903]"
+              >
+                Master Prompt
+              </label>
+            </div>
           </div>
-        </div>
-      </div>
-    </teleport>
+
+          <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
+            {{ error }}
+          </div>
+
+          <DialogFooter class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              @click="closeCreateModal"
+              class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
+            >
+              Save Project
+            </button>
+          </DialogFooter>
+        </form>
+      </DialogScrollContent>
+    </Dialog>
   </main>
 </template>

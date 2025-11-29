@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { organizationService } from '@/api/organization'
 import { invitationService } from '@/api/invitation'
 import type { OrganizationErrorResponse } from '@/types/organization'
+import type { Organization, RawOrganization } from '@/types/organization'
 import type { Invitation } from '@/types/invitation'
 import type { UserProfile } from '@/types/user'
 import Swal from 'sweetalert2'
@@ -54,6 +55,34 @@ const orgId = computed(() => {
   const id = route.params.organizationId
   return typeof id === 'string' ? id : ''
 })
+
+const mapRawOrganization = (org: RawOrganization): Organization => ({
+  id: org.organization_id || org.organizationId || org.id || (org as { _id?: string })._id || '',
+  name: org.name,
+  industry: org.industry,
+  is_active: org.is_active,
+  user_role: org.user_role || (org as { role?: string }).role,
+  project_count:
+    org.project_count ??
+    (org as { projects_count?: number }).projects_count ??
+    (Array.isArray((org as { projects?: unknown }).projects)
+      ? (org as { projects?: Array<unknown> }).projects?.length
+      : undefined),
+  created_at: org.created_at,
+  updated_at: org.updated_at,
+})
+
+const upsertOrganization = (raw: RawOrganization | null | undefined) => {
+  if (!raw) return
+  const mapped = mapRawOrganization(raw)
+  if (!mapped.id) return
+  const idx = organizationStore.organizations.findIndex((item) => item.id === mapped.id)
+  if (idx >= 0) {
+    organizationStore.organizations.splice(idx, 1, mapped)
+  } else {
+    organizationStore.organizations.push(mapped)
+  }
+}
 
 const inviteOpen = ref(false)
 const inviteForm = ref({ email: '', role: 'Member' as MemberRole })
@@ -238,6 +267,17 @@ const ensureOrganizations = async () => {
   const userId = await ensureUserId()
   if (userId) {
     await organizationStore.fetchOrganizations(userId)
+  }
+}
+
+const fetchOrganizationDetails = async () => {
+  if (organization.value || !orgId.value) return
+  try {
+    const { data } = await organizationService.getOrganizationById(orgId.value)
+    const raw = (data?.data as RawOrganization | undefined) ?? null
+    upsertOrganization(raw)
+  } catch (error) {
+    console.error('Failed to fetch organization details', error)
   }
 }
 
@@ -449,6 +489,7 @@ const sendInvitation = async () => {
 
 onMounted(async () => {
   await ensureOrganizations()
+  await fetchOrganizationDetails()
   await loadProjects()
   await fetchMembers()
   await loadOrganizationInvitations()
@@ -463,6 +504,7 @@ watch(
     inviteError.value = null
     inviteForm.value.email = ''
     inviteForm.value.role = 'Member'
+    await fetchOrganizationDetails()
     await loadProjects()
     await fetchMembers()
     await loadOrganizationInvitations()
