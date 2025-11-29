@@ -208,7 +208,7 @@ watch(
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-12 lg:py-14">
+  <main class="min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-0 app-container lg:py-14">
     <div
       v-if="!organizationId"
       class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-100"
