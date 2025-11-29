@@ -6,8 +6,11 @@ import EmailIcon from '@/assets/icons/message.png'
 import OfficeIcon from '@/assets/icons/officechair.png'
 import PhoneIcon from '@/assets/icons/call.png'
 import AlertIcon from '@/assets/icons/alert.png'
+import type { ContactUsApiPayload } from '@/types/contact-us'
+import { submitContactForm } from '@/api/contact-us'
+import Swal from 'sweetalert2'
 
-interface ContactForm {
+interface ContactUsPayload {
   fullName: string
   phoneNumber: string
   email: string
@@ -15,7 +18,7 @@ interface ContactForm {
   agreement: boolean
 }
 
-const form = reactive<ContactForm>({
+const form = reactive<ContactUsPayload>({
   fullName: '',
   phoneNumber: '',
   email: '',
@@ -56,8 +59,11 @@ const validateForm = () => {
   if (!form.phoneNumber.trim()) {
     errors.phoneNumber = 'Phone number is required'
     isValid = false
+  } else if (!/^[0-9\s\-\+\(\)]+$/.test(form.phoneNumber)) {
+    errors.phoneNumber = 'Phone number can only contain numbers and special characters'
+    isValid = false
   }
-
+  
   if (!form.email.trim()) {
     errors.email = 'Email is required'
     isValid = false
@@ -79,14 +85,30 @@ const validateForm = () => {
   return isValid
 }
 
-const handleSubmit = async () => {
-  if (!validateForm() || isSubmitting.value) return
+const handleSubmit = async () => { 
+  if (!validateForm()) {
+    console.log('Form validation failed')
+    return
+  }
+  
+  if (isSubmitting.value) {
+    console.log('Already submitting')
+    return
+  }
 
   isSubmitting.value = true
 
   try {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    // Transform camelCase to snake_case for API
+    const payload: ContactUsApiPayload = {
+      full_name: form.fullName,
+      phone_number: form.phoneNumber,
+      email: form.email,
+      message: form.message,
+    }
+    
+    const response = await submitContactForm(payload)
+    console.log('Form submitted successfully:', response.data)
 
     // Reset form on success
     form.fullName = ''
@@ -96,9 +118,33 @@ const handleSubmit = async () => {
     form.agreement = false
     characterCount.value = 0
 
-    alert('Form submitted successfully!')
-  } catch {
-    alert('Failed to submit form. Please try again.')
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: response.data?.message ?? "Your message has been sent successfully.",
+    })
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data?: { message?: string, errors?: { [key: string]: string[] } } }; message?: string }
+    console.error('Form submission error:', error)
+    console.error('Error response:', axiosError.response?.data?.errors)
+    const errorMessages: string[] = []
+
+    if(axiosError.response?.data?.errors?.phone_number) {
+      errorMessages.push(...axiosError.response.data.errors.phone_number)
+    } 
+    if(axiosError.response?.data?.errors?.email) {
+      errorMessages.push(...axiosError.response.data.errors.email)
+    } 
+    
+    const errorMessage = errorMessages.length > 0 
+      ? errorMessages.join('. ') 
+      : 'An error occurred while submitting the form. Please try again later.'
+    
+     Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: errorMessage,
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -299,8 +345,9 @@ const handleSubmit = async () => {
             <!-- Submit Button -->
             <Button
               type="submit"
+              @click="handleSubmit"
               :disabled="isSubmitting"
-              class="h-[52px] w-full rounded-lg bg-[#401903] text-base font-semibold text-white transition-colors hover:bg-[#2d1810] disabled:opacity-50"
+              class="h-[52px] w-full rounded-lg bg-[#401903] text-base font-semibold text-white hover:text-white transition-colors hover:bg-[#2d1810] disabled:opacity-50"
             >
               <span v-if="!isSubmitting">Submit</span>
               <span v-else>Submitting...</span>
