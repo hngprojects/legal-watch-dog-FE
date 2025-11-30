@@ -139,12 +139,27 @@ const handleSelectRevisionB = (id: string | null) => {
 const loadJurisdiction = async (id: string) => {
   loading.value = true
 
-  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id)
-  jurisdiction.value =
-    existing || (await jurisdictionStore.fetchOne(id, activeOrganizationId.value))
+  // Use any available org id: route query -> current store -> project org id (after fetch)
+  let orgId = activeOrganizationId.value || orgStore.currentOrganizationId || ''
 
-  if (!projectStore.projects.length) {
-    await projectStore.fetchProjects(activeOrganizationId.value)
+  const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id)
+  jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id, orgId || undefined))
+
+  // Load projects if we have an org id and none are cached yet
+  if (!projectStore.projects.length && orgId) {
+    await projectStore.fetchProjects(orgId)
+  }
+
+  if (jurisdiction.value) {
+    const project =
+      projectStore.projects.find((p) => p.id === jurisdiction.value?.project_id) || null
+    orgId = orgId || project?.org_id || ''
+
+    if (orgId) {
+      await jurisdictionStore.fetchJurisdictions(jurisdiction.value.project_id, orgId)
+      jurisdiction.value =
+        jurisdictionStore.jurisdictions.find((j) => j.id === id) || jurisdiction.value
+    }
   }
 
   if (jurisdiction.value) {
@@ -720,6 +735,7 @@ onMounted(() => {
           </button>
         </div>
 
+        <!-- Empty subjurisdiction section -->
         <div
           v-if="subJurisdictions.length === 0"
           class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center"
@@ -745,6 +761,7 @@ onMounted(() => {
           <p class="text-sm text-gray-500">Create one to begin categorizing legal domains.</p>
         </div>
 
+        <!-- Sub jurisdiction section -->
         <div v-else class="space-y-3">
           <article
             v-for="node in subJurisdictions"

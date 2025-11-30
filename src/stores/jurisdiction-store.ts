@@ -4,6 +4,8 @@ import { jurisdictionApi, type Jurisdiction } from '@/api/jurisdiction'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useProjectStore } from '@/stores/project-store'
 
+type JurisdictionWithChildren = Jurisdiction & { children?: JurisdictionWithChildren[] }
+
 interface ApiError {
   response?: {
     data?: {
@@ -19,7 +21,26 @@ const uniqById = (arr: Jurisdiction[]) => {
   return Array.from(map.values())
 }
 
-const cloneJurisdiction = (j: Jurisdiction) => ({ ...j })
+const cloneJurisdiction = (j: Jurisdiction) => {
+  // Flattened store representation should not retain nested children arrays
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { children, ...rest } = j as JurisdictionWithChildren
+  return { ...rest }
+}
+
+const flattenJurisdictions = (items: JurisdictionWithChildren[]): Jurisdiction[] => {
+  const flattened: Jurisdiction[] = []
+
+  const walk = (list: JurisdictionWithChildren[]) => {
+    for (const item of list) {
+      flattened.push(cloneJurisdiction(item))
+      if (item.children?.length) walk(item.children)
+    }
+  }
+
+  walk(items)
+  return flattened
+}
 
 const LOCAL_ARCHIVE_KEY = 'archived_jurisdiction_ids'
 const LOCAL_ARCHIVED_ITEMS_PREFIX = 'archived_jurisdiction_'
@@ -122,7 +143,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
         ? await jurisdictionApi.getByProject(orgId, projectId)
         : await jurisdictionApi.getAll(orgId)
 
-      const all = response.data?.data?.jurisdictions ?? []
+      const all = flattenJurisdictions(response.data?.data?.jurisdictions || [])
 
       jurisdictions.value = uniqById(all.filter((j) => !j.is_deleted).map(cloneJurisdiction))
 
@@ -179,18 +200,21 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
 
     try {
       const response = await jurisdictionApi.getOne(orgId, jurisdictionId)
-      const j = response.data?.data?.jurisdiction as Jurisdiction
+      const j = response.data?.data?.jurisdiction as JurisdictionWithChildren
 
       if (!j) return null
 
-      jurisdictions.value = jurisdictions.value.filter((x) => x.id !== j.id)
-      archivedJurisdictions.value = archivedJurisdictions.value.filter((x) => x.id !== j.id)
+      const flattened = flattenJurisdictions([j])
+      const flattenedIds = new Set(flattened.map((x) => x.id))
 
-      if (j.is_deleted) archivedJurisdictions.value.push(cloneJurisdiction(j))
-      else jurisdictions.value.push(cloneJurisdiction(j))
+      jurisdictions.value = jurisdictions.value.filter((x) => !flattenedIds.has(x.id))
+      archivedJurisdictions.value = archivedJurisdictions.value.filter((x) => !flattenedIds.has(x.id))
 
-      jurisdictions.value = uniqById(jurisdictions.value)
-      archivedJurisdictions.value = uniqById(archivedJurisdictions.value)
+      const active = flattened.filter((item) => !item.is_deleted).map(cloneJurisdiction)
+      const deleted = flattened.filter((item) => item.is_deleted).map(cloneJurisdiction)
+
+      jurisdictions.value = uniqById([...jurisdictions.value, ...active])
+      archivedJurisdictions.value = uniqById([...archivedJurisdictions.value, ...deleted])
 
       return j
     } catch (err) {
