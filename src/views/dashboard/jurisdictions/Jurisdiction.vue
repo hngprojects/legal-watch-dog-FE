@@ -73,7 +73,7 @@ const projectName = computed(() => {
 })
 
 const loading = ref(true)
-const activeTab = ref<'analysis' | 'sources'>('analysis')
+const activeTab = ref<'analysis' | 'sources'>('sources')
 
 // Separate states for the two dropdowns to avoid conflicts
 const showHeaderMenu = ref(false)
@@ -111,18 +111,34 @@ const editingSourceId = ref<string | null>(null)
 const scrapeErrors = ref<Record<string, string>>({})
 const scraping = ref<Record<string, boolean>>({})
 const expandedSources = ref<Record<string, boolean>>({})
+const selectedSourceId = ref<string>('')
+const selectedRevisionA = ref<string | null>(null)
+const selectedRevisionB = ref<string | null>(null)
 
 const revisionLimit = 5
 const revisions = computed(() => sourceStore.revisions)
 const revisionsLoading = computed(() => sourceStore.revisionsLoading)
 const revisionsError = computed(() => sourceStore.revisionsError)
-const revisionsPagination = computed(() => sourceStore.revisionsPagination)
+// const revisionsPagination = computed(() => sourceStore.revisionsPagination)
+const revisionOptions = computed(() =>
+  selectedSourceId.value ? revisions.value[selectedSourceId.value] || [] : [],
+)
+const revisionA = computed(
+  () => revisionOptions.value.find((rev) => rev.id === selectedRevisionA.value) || null,
+)
+const revisionB = computed(
+  () => revisionOptions.value.find((rev) => rev.id === selectedRevisionB.value) || null,
+)
+const latestRevision = (sourceId: string) => revisions.value[sourceId]?.[0]
+const formatRevisionLabel = (rev: { scraped_at: string }) =>
+  new Date(rev.scraped_at).toLocaleString()
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
 
   const existing = jurisdictionStore.jurisdictions.find((j) => j.id === id)
-  jurisdiction.value = existing || (await jurisdictionStore.fetchOne(id))
+  jurisdiction.value =
+    existing || (await jurisdictionStore.fetchOne(id, activeOrganizationId.value))
 
   if (!projectStore.projects.length) {
     await projectStore.fetchProjects(activeOrganizationId.value)
@@ -201,8 +217,6 @@ const renderSummary = (summary?: string | null) => {
   }
 }
 
-const getPaginationForSource = (sourceId: string) => revisionsPagination.value[sourceId]
-
 // --- DROPDOWN HANDLERS ---
 
 const closeAllMenus = () => {
@@ -245,10 +259,14 @@ const cancelSuggestions = () => {
 
 const handleSuggestionsSaved = async (count: number) => {
   showSuggestedSources.value = false
-  if (count > 0) {
-    await sourceStore.fetchSources(jurisdiction.value!.id)
+  if (count > 0 && jurisdiction.value?.id) {
+    await sourceStore.fetchSources(jurisdiction.value.id)
     Swal.fire('Success', `${count} source${count > 1 ? 's' : ''} added successfully!`, 'success')
   }
+}
+
+const toggleSuggestedDialog = (value: boolean) => {
+  showSuggestedSources.value = value
 }
 
 // --- MODALS ---
@@ -361,12 +379,24 @@ const saveEdit = async () => {
     prompt: editForm.value.prompt,
   }
 
-  const updated = await jurisdictionStore.updateJurisdiction(jurisdictionId.value, payload)
+  try {
+    const updated = await jurisdictionStore.updateJurisdiction(
+      jurisdictionId.value,
+      payload,
+      activeOrganizationId.value,
+    )
 
-  if (updated) {
-    jurisdiction.value = updated
-    Swal.fire('Updated!', '', 'success')
-    showInlineEdit.value = false
+    if (updated) {
+      jurisdiction.value = updated
+      Swal.fire('Updated!', '', 'success')
+      showInlineEdit.value = false
+    } else if (jurisdictionStore.error) {
+      Swal.fire('Update failed', jurisdictionStore.error, 'error')
+    }
+  } catch (error) {
+    const msg = jurisdictionStore.error || 'Failed to update jurisdiction'
+    Swal.fire('Update failed', msg, 'error')
+    void error
   }
 }
 
@@ -435,6 +465,43 @@ const goToJurisdiction = (id: string) => {
 const lastUpdatedText = computed(() => {
   const t = jurisdiction.value?.updated_at || jurisdiction.value?.created_at
   return t ? new Date(t).toLocaleString() : ''
+})
+
+watch(
+  sources,
+  (list) => {
+    if (!selectedSourceId.value && list.length) {
+      selectedSourceId.value = list[0]?.id as string
+    }
+  },
+  { immediate: true },
+)
+
+watch(
+  selectedSourceId,
+  async (id) => {
+    selectedRevisionA.value = null
+    selectedRevisionB.value = null
+    if (id) {
+      await fetchRevisionsForSource(id)
+    }
+  },
+  { immediate: true },
+)
+
+watch(revisionOptions, (opts) => {
+  if (!opts.length) {
+    selectedRevisionA.value = null
+    selectedRevisionB.value = null
+    return
+  }
+
+  if (!selectedRevisionA.value && opts[0]) {
+    selectedRevisionA.value = opts[0].id
+  }
+  if (!selectedRevisionB.value && opts[1]) {
+    selectedRevisionB.value = opts[1].id
+  }
 })
 
 watch(
@@ -562,44 +629,7 @@ onMounted(() => {
       </header>
 
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-        <div v-if="showInlineEdit">
-          <form @submit.prevent="saveEdit" class="space-y-4">
-            <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Name</label>
-              <input v-model="editForm.name"
-                class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
-            </div>
-
-            <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
-              <textarea v-model="editForm.description" rows="3"
-                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
-            </div>
-
-            <div>
-              <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"
-                >Instructions</label
-              >
-              <textarea
-                v-model="editForm.prompt"
-                rows="3"
-                class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              />
-            </div>
-
-            <div class="flex justify-end gap-3 pt-2">
-              <button type="button" @click="showInlineEdit = false"
-                class="btn rounded-lg border px-5 py-2.5 text-sm font-medium text-[#F1A75F]">
-                Cancel
-              </button>
-              <button type="submit" class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white">
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div v-else class="flex flex-col gap-3">
+        <div class="flex flex-col gap-3">
           <p class="text-xs font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
             Jurisdiction
           </p>
@@ -615,16 +645,6 @@ onMounted(() => {
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
             <button
-              @click="activeTab = 'analysis'"
-              :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
-              ]"
-            >
-              <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
-            </button>
-
-            <button
               @click="activeTab = 'sources'"
               :class="[
                 'relative pb-4 text-sm font-semibold transition-colors',
@@ -634,10 +654,21 @@ onMounted(() => {
               Sources
               <span v-if="activeTab === 'sources'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
             </button>
+
+            <button
+              @click="activeTab = 'analysis'"
+              :class="[
+                'relative pb-4 text-sm font-semibold transition-colors',
+                activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
+              ]"
+            >
+              Analysis
+              <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
+            </button>
           </div>
         </div>
 
-        <div v-if="activeTab === 'analysis'" class="space-y-4 p-6">
+        <div v-if="activeTab === 'sources'" class="space-y-4 p-6">
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
@@ -781,110 +812,55 @@ onMounted(() => {
                   {{ scrapeErrors[source.id] }}
                 </div>
 
-                <div
-                  v-if="expandedSources[source.id]"
-                  class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
-                >
-                  <div v-if="revisionsLoading[source.id]" class="text-sm text-gray-600">
-                    Loading revisions...
+                  <div
+                    v-if="expandedSources[source.id]"
+                    class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
+                  >
+                    <div v-if="revisionsLoading[source.id]" class="text-sm text-gray-600">
+                    Loading latest result...
                   </div>
 
                   <div v-else-if="revisionsError[source.id]" class="text-sm text-red-600">
                     {{ revisionsError[source.id] }}
                   </div>
 
-                  <div v-else-if="revisions[source.id]?.length" class="space-y-2">
-                    <div
-                      v-for="rev in revisions[source.id]"
-                      :key="rev.id"
-                      class="rounded-lg border border-gray-200 bg-white px-3 py-2"
-                    >
+                  <div v-else-if="latestRevision(source.id)">
                       <div class="flex items-start justify-between gap-3">
                         <div class="space-y-1">
-                          <p
-                            class="text-[11px] font-semibold tracking-wide text-gray-500 uppercase"
-                          >
-                            Scraped {{ new Date(rev.scraped_at).toLocaleString() }}
+                          <p class="text-[11px] font-semibold tracking-wide text-gray-500 uppercase">
+                            Scraped {{ formatRevisionLabel(latestRevision(source.id)!) }}
                           </p>
                           <p class="text-sm font-semibold text-gray-900">
-                            {{
-                              rev.ai_summary || rev.extracted_data?.title || 'No summary available'
+                          {{
+                            latestRevision(source.id)?.ai_summary ||
+                              latestRevision(source.id)?.extracted_data?.title ||
+                              'No summary available'
                             }}
                           </p>
-                          <p
-                            v-if="
-                              rev.ai_confidence_score !== undefined &&
-                              rev.ai_confidence_score !== null
+                          <span
+                            class="inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
+                            :class="
+                              latestRevision(source.id)?.was_change_detected
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-600'
                             "
-                            class="text-[11px] text-gray-500"
                           >
-                            Confidence: {{ Math.round(rev.ai_confidence_score * 100) }}%
-                          </p>
+                            {{ latestRevision(source.id)?.was_change_detected ? 'Change Detected' : 'No Change' }}
+                          </span>
                         </div>
 
-                        <span
-                          class="rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide uppercase"
-                          :class="
-                            rev.was_change_detected
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-gray-100 text-gray-600'
-                          "
-                        >
-                          {{ rev.was_change_detected ? 'Change Detected' : 'No Change' }}
-                        </span>
-                      </div>
-
-                    <div
-                      v-if="rev.ai_markdown_summary || rev.ai_summary"
-                      class="mt-2 text-[12px] leading-5 text-gray-700"
-                      v-html="renderSummary(rev.ai_markdown_summary || rev.ai_summary)"
-                    />
-                  </div>
-
-                    <div
-                      v-if="getPaginationForSource(source.id)"
-                      class="flex items-center justify-between border-t border-gray-200 pt-2 text-[12px] text-gray-600"
-                    >
-                      <span>
-                        Page {{ getPaginationForSource(source.id)?.page }} of
-                        {{ getPaginationForSource(source.id)?.total_pages }}
-                      </span>
-
-                      <div class="flex items-center gap-2">
-                        <button
-                          class="rounded border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-                          :disabled="
-                            revisionsLoading[source.id] ||
-                            (getPaginationForSource(source.id)?.page ?? 1) <= 1
-                          "
-                          @click="
-                            fetchRevisionsForSource(
-                              source.id,
-                              (getPaginationForSource(source.id)?.page ?? 1) - 1,
-                            )
-                          "
-                        >
-                          Previous
-                        </button>
-
-                        <button
-                          class="rounded border border-gray-300 px-3 py-1 text-xs text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-                          :disabled="
-                            revisionsLoading[source.id] ||
-                            (getPaginationForSource(source.id)?.page ?? 1) >=
-                              (getPaginationForSource(source.id)?.total_pages ?? 1)
-                          "
-                          @click="
-                            fetchRevisionsForSource(
-                              source.id,
-                              (getPaginationForSource(source.id)?.page ?? 1) + 1,
-                            )
-                          "
-                        >
-                          Next
-                        </button>
-                      </div>
+                      <button
+                        class="rounded border border-gray-200 px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-100"
+                        @click="expandedSources[source.id] = false"
+                      >
+                        Close
+                      </button>
                     </div>
+
+                    <div
+                      class="prose prose-sm mt-2 max-w-none text-gray-800"
+                      v-html="renderSummary(latestRevision(source.id)?.ai_markdown_summary || latestRevision(source.id)?.ai_summary)"
+                    />
                   </div>
 
                   <div v-else class="text-sm text-gray-600">
@@ -896,77 +872,94 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-else class="p-6">
-          <div v-if="showSuggestedSources">
-            <SuggestedSources
-              :jurisdiction-id="jurisdiction?.id || ''"
-              :jurisdiction-name="jurisdiction?.name || ''"
-              :jurisdiction-description="jurisdiction?.description || ''"
-              :project-description="projectName"
-              @cancel="cancelSuggestions"
-              @save="handleSuggestionsSaved"
-              @sources-added="sourceStore.fetchSources(jurisdiction?.id || '')"
-            />
+        <div v-else class="space-y-4 p-6">
+          <div>
+            <h3 class="text-lg font-semibold text-[#1F1F1F]">Analysis</h3>
+            <p class="text-xs text-gray-500">Compare two revisions side by side.</p>
           </div>
 
-          <div v-else>
-            <h3 class="mb-4 text-lg font-semibold text-[#1F1F1F]">Data Sources</h3>
-
-            <div v-if="sourcesLoading" class="space-y-2">
-              <div
-                v-for="n in 3"
-                :key="n"
-                class="h-12 w-full animate-pulse rounded-lg bg-gray-100"
-              />
+          <div class="grid gap-4 lg:grid-cols-3">
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-800">Source</label>
+              <select
+                v-model="selectedSourceId"
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+              >
+                <option disabled value="">Select a source</option>
+                <option v-for="src in sources" :key="src.id" :value="src.id">
+                  {{ src.name }}
+                </option>
+              </select>
             </div>
 
-            <div v-else>
-              <div
-                v-if="sourcesError"
-                class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-800">Revision A</label>
+              <select
+                v-model="selectedRevisionA"
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                :disabled="!revisionOptions.length"
               >
-                {{ sourcesError }}
-              </div>
+                <option v-if="!revisionOptions.length" disabled value="">No revisions yet</option>
+                <option v-for="rev in revisionOptions" :key="rev.id" :value="rev.id">
+                  {{ formatRevisionLabel(rev) }}
+                </option>
+              </select>
+            </div>
 
-              <ul v-if="sources.length" class="space-y-2">
-                <li
-                  v-for="source in sources"
-                  :key="source.id"
-                  class="flex items-center justify-between rounded-lg border border-gray-100 bg-[#FAFAFA] px-4 py-3 text-sm text-[#3D2E1F]"
-                >
-                  <div>
-                    <p class="font-semibold text-gray-900">{{ source.name }}</p>
-                    <p class="text-xs text-gray-500">{{ source.url }}</p>
-                    <p class="text-[11px] tracking-wide text-gray-400 uppercase">
-                      {{ source.source_type }} • {{ source.scrape_frequency }}
-                    </p>
-                  </div>
-
-                  <div class="flex items-center gap-2">
-                    <button
-                      class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                      @click="startEditSource(source)"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                      @click="deleteSource(source)"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              </ul>
-
-              <div
-                v-else
-                class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
+            <div class="flex flex-col gap-2">
+              <label class="text-sm font-medium text-gray-800">Revision B</label>
+              <select
+                v-model="selectedRevisionB"
+                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                :disabled="revisionOptions.length < 2"
               >
-                <p class="text-sm text-gray-500">No sources available.</p>
-                <p class="text-xs text-gray-400">Add one to start monitoring.</p>
-              </div>
+                <option v-if="revisionOptions.length < 2" disabled value="">Need another revision</option>
+                <option v-for="rev in revisionOptions" :key="rev.id" :value="rev.id">
+                  {{ formatRevisionLabel(rev) }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div class="rounded-lg border border-gray-200 bg-white p-4">
+              <h4 class="mb-1 text-sm font-semibold text-gray-900">Revision A</h4>
+              <p class="mb-3 text-xs text-gray-500">
+                {{ revisionA ? formatRevisionLabel(revisionA) : 'Select a revision' }}
+              </p>
+              <span
+                v-if="revisionA"
+                class="mb-3 inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
+                :class="
+                  revisionA.was_change_detected
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-600'
+                "
+              >
+                {{ revisionA.was_change_detected ? 'Change Detected' : 'No Change' }}
+              </span>
+              <div v-if="revisionA" class="prose prose-sm max-w-none text-gray-800" v-html="renderSummary(revisionA.ai_markdown_summary || revisionA.ai_summary)" />
+              <p v-else class="text-sm text-gray-500">Choose a revision to display.</p>
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-white p-4">
+              <h4 class="mb-1 text-sm font-semibold text-gray-900">Revision B</h4>
+              <p class="mb-3 text-xs text-gray-500">
+                {{ revisionB ? formatRevisionLabel(revisionB) : 'Select a revision' }}
+              </p>
+              <span
+                v-if="revisionB"
+                class="mb-3 inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
+                :class="
+                  revisionB.was_change_detected
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-gray-100 text-gray-600'
+                "
+              >
+                {{ revisionB.was_change_detected ? 'Change Detected' : 'No Change' }}
+              </span>
+              <div v-if="revisionB" class="prose prose-sm max-w-none text-gray-800" v-html="renderSummary(revisionB.ai_markdown_summary || revisionB.ai_summary)" />
+              <p v-else class="text-sm text-gray-500">Choose a revision to display.</p>
             </div>
           </div>
         </div>
@@ -1051,6 +1044,74 @@ onMounted(() => {
             >
               Create Sub-Jurisdiction
             </button>
+          </DialogFooter>
+        </form>
+      </DialogScrollContent>
+    </Dialog>
+
+    <Dialog :open="showSuggestedSources" @update:open="toggleSuggestedDialog">
+      <DialogScrollContent class="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>AI Suggested Sources</DialogTitle>
+          <DialogDescription>
+            Review and add AI suggested sources. Saved sources will appear in your list instantly.
+          </DialogDescription>
+        </DialogHeader>
+        <SuggestedSources
+          :jurisdiction-id="jurisdiction?.id || ''"
+          :jurisdiction-name="jurisdiction?.name || ''"
+          :jurisdiction-description="jurisdiction?.description || ''"
+          :project-description="projectName"
+          @cancel="cancelSuggestions"
+          @save="handleSuggestionsSaved"
+          @sources-added="sourceStore.fetchSources(jurisdiction?.id || '')"
+        />
+      </DialogScrollContent>
+    </Dialog>
+
+    <Dialog :open="showInlineEdit" @update:open="(value) => (showInlineEdit = value)">
+      <DialogScrollContent class="sm:max-w-[560px]">
+        <DialogHeader>
+          <DialogTitle>Edit Jurisdiction</DialogTitle>
+          <DialogDescription>Update the name, description, and instructions.</DialogDescription>
+        </DialogHeader>
+
+        <form @submit.prevent="saveEdit" class="space-y-4">
+          <div>
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Name</label>
+            <input
+              v-model="editForm.name"
+              class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
+            <textarea
+              v-model="editForm.description"
+              rows="3"
+              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Instructions</label>
+            <textarea
+              v-model="editForm.prompt"
+              rows="3"
+              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
+          </div>
+
+          <DialogFooter class="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              class="btn--secondary btn--lg"
+              @click="showInlineEdit = false"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn--primary btn--lg">Save Changes</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>
