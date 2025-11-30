@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { Plus, Settings, /* Search, */ FilePlus } from 'lucide-vue-next'
+import { Plus, Settings } from 'lucide-vue-next'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import Swal from '@/lib/swal'
 
-import aiIcon from '@/assets/icons/ai_icon.png'
-
-import SuggestedSources from '@/views/dashboard/sources/SuggestedSources.vue'
 
 import type { Jurisdiction } from '@/api/jurisdiction'
 import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
@@ -25,14 +22,12 @@ import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogScrollContent,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogScrollContent, DialogTitle } from '@/components/ui/dialog'
+import JurisdictionSources from '@/components/composables/jurisdiction/JurisdictionSources.vue'
+import JurisdictionAnalysis from '@/components/composables/jurisdiction/JurisdictionAnalysis.vue'
+import SubJurisdictionDialog from '@/components/composables/jurisdiction/dialogs/SubJurisdictionDialog.vue'
+import SourceDialog from '@/components/composables/jurisdiction/dialogs/SourceDialog.vue'
+import SuggestedSourcesDialog from '@/components/composables/jurisdiction/dialogs/SuggestedSourcesDialog.vue'
 
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
@@ -75,10 +70,6 @@ const projectName = computed(() => {
 const loading = ref(true)
 const activeTab = ref<'analysis' | 'sources'>('sources')
 
-// Separate states for the two dropdowns to avoid conflicts
-const showHeaderMenu = ref(false)
-const showEmptyStateMenu = ref(false)
-
 const showSuggestedSources = ref(false)
 const showInlineEdit = ref(false)
 
@@ -117,9 +108,6 @@ const selectedRevisionB = ref<string | null>(null)
 
 const revisionLimit = 5
 const revisions = computed(() => sourceStore.revisions)
-const revisionsLoading = computed(() => sourceStore.revisionsLoading)
-const revisionsError = computed(() => sourceStore.revisionsError)
-// const revisionsPagination = computed(() => sourceStore.revisionsPagination)
 const revisionOptions = computed(() =>
   selectedSourceId.value ? revisions.value[selectedSourceId.value] || [] : [],
 )
@@ -132,6 +120,15 @@ const revisionB = computed(
 const latestRevision = (sourceId: string) => revisions.value[sourceId]?.[0]
 const formatRevisionLabel = (rev: { scraped_at: string }) =>
   new Date(rev.scraped_at).toLocaleString()
+const handleSelectSource = (id: string) => {
+  selectedSourceId.value = id
+}
+const handleSelectRevisionA = (id: string | null) => {
+  selectedRevisionA.value = id
+}
+const handleSelectRevisionB = (id: string | null) => {
+  selectedRevisionB.value = id
+}
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
@@ -217,31 +214,11 @@ const renderSummary = (summary?: string | null) => {
   }
 }
 
-// --- DROPDOWN HANDLERS ---
-
-const closeAllMenus = () => {
-  showHeaderMenu.value = false
-  showEmptyStateMenu.value = false
-}
-
-const toggleHeaderMenu = () => {
-  // Close others to ensure only one is open
-  showEmptyStateMenu.value = false
-  showHeaderMenu.value = !showHeaderMenu.value
-}
-
-const toggleEmptyStateMenu = () => {
-  showHeaderMenu.value = false
-  showEmptyStateMenu.value = !showEmptyStateMenu.value
-}
-
 const handleManualAddSource = () => {
-  closeAllMenus()
   openAddSourceModal()
 }
 
 const handleAiSuggestedSource = () => {
-  closeAllMenus()
   activeTab.value = 'sources'
   showSuggestedSources.value = true
 }
@@ -524,7 +501,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12" @click="closeAllMenus">
+  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12">
     <div v-if="loading" class="mx-auto max-w-6xl">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
@@ -668,300 +645,41 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="activeTab === 'sources'" class="space-y-4 p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
-              <p class="text-xs text-gray-500">Trigger scraping per source and view results.</p>
-            </div>
-
-            <div class="relative">
-              <button class="btn--lg btn--primary btn--with-icon" @click.stop="toggleHeaderMenu">
-                <Plus :size="16" /> Add Source
-              </button>
-
-              <div
-                v-if="showHeaderMenu"
-                class="absolute top-full right-0 z-50 mt-2 w-60 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5"
-              >
-                <!-- <button
-                  @click="handleSearchClick"
-                  class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
-                >
-                   <Search :size="18" />
-                   Search for sources.
-                </button> -->
-
-                <button @click="handleManualAddSource" class="btn btn--lg btn--with-icon">
-                  <FilePlus :size="18" />
-                  Add Source Manually
-                </button>
-
-                <button @click="handleAiSuggestedSource" class="btn btn--md btn--with-icon">
-                  <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-                  AI Suggested sources
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="sourcesLoading" class="space-y-2">
-            <div v-for="n in 3" :key="n" class="h-12 w-full animate-pulse rounded-lg bg-gray-100" />
-          </div>
-
-          <div v-else>
-            <div
-              v-if="sourcesError"
-              class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
-            >
-              {{ sourcesError }}
-            </div>
-
-            <div
-              v-if="sources.length === 0"
-              class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"
-            >
-              <p class="text-sm text-gray-500">No sources added yet.</p>
-              <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
-
-              <div class="relative mt-4 inline-block">
-                <button
-                  class="btn--sm btn--primary btn--with-icon"
-                  @click.stop="toggleEmptyStateMenu"
-                >
-                  <Plus :size="16" /> Add Source
-                </button>
-
-                <div
-                  v-if="showEmptyStateMenu"
-                  class="absolute top-full left-1/2 z-50 mt-2 w-60 -translate-x-1/2 rounded-xl bg-white p-1 text-left shadow-lg ring-1 ring-black/5"
-                >
-                  <!-- <button
-                      @click="handleSearchClick"
-                      class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-[#475467] hover:bg-gray-50"
-                    >
-                        <Search :size="18" />
-                        Search for sources.
-                    </button> -->
-
-                  <button @click="handleManualAddSource" class="btn btn--sm btn--with-icon">
-                    <FilePlus :size="18" />
-                    Add Source Manually
-                  </button>
-
-                  <button
-                    @click="handleAiSuggestedSource"
-                    class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
-                  >
-                    <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-                    AI Suggested sources
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div v-else class="space-y-3">
-              <div
-                v-for="source in sources"
-                :key="source.id"
-                class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
-                    <p class="text-xs text-gray-500">{{ source.url }}</p>
-                    <p class="text-[11px] tracking-wide text-gray-400 uppercase">
-                      {{ source.source_type }} • {{ source.scrape_frequency }}
-                    </p>
-                  </div>
-
-                  <div class="flex flex-wrap items-center justify-end gap-2">
-                    <button
-                      class="btn--sm btn--primary"
-                      :disabled="scraping[source.id]"
-                      @click="triggerScrape(source)"
-                    >
-                      <span v-if="scraping[source.id]">Scraping...</span>
-                      <span v-else>Scrape Now</span>
-                    </button>
-
-                    <button
-                      class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                      @click="toggleSourceExpansion(source.id)"
-                    >
-                      {{ expandedSources[source.id] ? 'Hide History' : 'View History' }}
-                    </button>
-
-                    <button
-                      class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                      @click="startEditSource(source)"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-                      @click="deleteSource(source)"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-
-                <div v-if="scrapeErrors[source.id]" class="mt-2 text-xs text-red-600">
-                  {{ scrapeErrors[source.id] }}
-                </div>
-
-                  <div
-                    v-if="expandedSources[source.id]"
-                    class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
-                  >
-                    <div v-if="revisionsLoading[source.id]" class="text-sm text-gray-600">
-                    Loading latest result...
-                  </div>
-
-                  <div v-else-if="revisionsError[source.id]" class="text-sm text-red-600">
-                    {{ revisionsError[source.id] }}
-                  </div>
-
-                  <div v-else-if="latestRevision(source.id)">
-                      <div class="flex items-start justify-between gap-3">
-                        <div class="space-y-1">
-                          <p class="text-[11px] font-semibold tracking-wide text-gray-500 uppercase">
-                            Scraped {{ formatRevisionLabel(latestRevision(source.id)!) }}
-                          </p>
-                          <p class="text-sm font-semibold text-gray-900">
-                          {{
-                            latestRevision(source.id)?.ai_summary ||
-                              latestRevision(source.id)?.extracted_data?.title ||
-                              'No summary available'
-                            }}
-                          </p>
-                          <span
-                            class="inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
-                            :class="
-                              latestRevision(source.id)?.was_change_detected
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-gray-100 text-gray-600'
-                            "
-                          >
-                            {{ latestRevision(source.id)?.was_change_detected ? 'Change Detected' : 'No Change' }}
-                          </span>
-                        </div>
-
-                      <button
-                        class="rounded border border-gray-200 px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-100"
-                        @click="expandedSources[source.id] = false"
-                      >
-                        Close
-                      </button>
-                    </div>
-
-                    <div
-                      class="prose prose-sm mt-2 max-w-none text-gray-800"
-                      v-html="renderSummary(latestRevision(source.id)?.ai_markdown_summary || latestRevision(source.id)?.ai_summary)"
-                    />
-                  </div>
-
-                  <div v-else class="text-sm text-gray-600">
-                    No revisions found for this source yet.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                        <div v-if="activeTab === 'sources'" class="space-y-4 p-6">
+          <JurisdictionSources
+            :sources="sources"
+            :sources-loading="sourcesLoading"
+            :sources-error="sourcesError"
+            :scraping="scraping"
+            :scrape-errors="scrapeErrors"
+            :expanded-sources="expandedSources"
+            :latest-revision="latestRevision"
+            :format-revision-label="formatRevisionLabel"
+            :render-summary="renderSummary"
+            @add-manual="handleManualAddSource"
+            @add-ai="handleAiSuggestedSource"
+            @scrape="triggerScrape"
+            @toggle-source="toggleSourceExpansion"
+            @edit="startEditSource"
+            @delete="deleteSource"
+          />
         </div>
 
         <div v-else class="space-y-4 p-6">
-          <div>
-            <h3 class="text-lg font-semibold text-[#1F1F1F]">Analysis</h3>
-            <p class="text-xs text-gray-500">Compare two revisions side by side.</p>
-          </div>
-
-          <div class="grid gap-4 lg:grid-cols-3">
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-800">Source</label>
-              <select
-                v-model="selectedSourceId"
-                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              >
-                <option disabled value="">Select a source</option>
-                <option v-for="src in sources" :key="src.id" :value="src.id">
-                  {{ src.name }}
-                </option>
-              </select>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-800">Revision A</label>
-              <select
-                v-model="selectedRevisionA"
-                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                :disabled="!revisionOptions.length"
-              >
-                <option v-if="!revisionOptions.length" disabled value="">No revisions yet</option>
-                <option v-for="rev in revisionOptions" :key="rev.id" :value="rev.id">
-                  {{ formatRevisionLabel(rev) }}
-                </option>
-              </select>
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-sm font-medium text-gray-800">Revision B</label>
-              <select
-                v-model="selectedRevisionB"
-                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                :disabled="revisionOptions.length < 2"
-              >
-                <option v-if="revisionOptions.length < 2" disabled value="">Need another revision</option>
-                <option v-for="rev in revisionOptions" :key="rev.id" :value="rev.id">
-                  {{ formatRevisionLabel(rev) }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div class="rounded-lg border border-gray-200 bg-white p-4">
-              <h4 class="mb-1 text-sm font-semibold text-gray-900">Revision A</h4>
-              <p class="mb-3 text-xs text-gray-500">
-                {{ revisionA ? formatRevisionLabel(revisionA) : 'Select a revision' }}
-              </p>
-              <span
-                v-if="revisionA"
-                class="mb-3 inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
-                :class="
-                  revisionA.was_change_detected
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-600'
-                "
-              >
-                {{ revisionA.was_change_detected ? 'Change Detected' : 'No Change' }}
-              </span>
-              <div v-if="revisionA" class="prose prose-sm max-w-none text-gray-800" v-html="renderSummary(revisionA.ai_markdown_summary || revisionA.ai_summary)" />
-              <p v-else class="text-sm text-gray-500">Choose a revision to display.</p>
-            </div>
-
-            <div class="rounded-lg border border-gray-200 bg-white p-4">
-              <h4 class="mb-1 text-sm font-semibold text-gray-900">Revision B</h4>
-              <p class="mb-3 text-xs text-gray-500">
-                {{ revisionB ? formatRevisionLabel(revisionB) : 'Select a revision' }}
-              </p>
-              <span
-                v-if="revisionB"
-                class="mb-3 inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
-                :class="
-                  revisionB.was_change_detected
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-600'
-                "
-              >
-                {{ revisionB.was_change_detected ? 'Change Detected' : 'No Change' }}
-              </span>
-              <div v-if="revisionB" class="prose prose-sm max-w-none text-gray-800" v-html="renderSummary(revisionB.ai_markdown_summary || revisionB.ai_summary)" />
-              <p v-else class="text-sm text-gray-500">Choose a revision to display.</p>
-            </div>
-          </div>
+          <JurisdictionAnalysis
+            :sources="sources"
+            :selected-source-id="selectedSourceId"
+            :revision-options="revisionOptions"
+            :selected-revision-a="selectedRevisionA"
+            :selected-revision-b="selectedRevisionB"
+            :revision-a="revisionA"
+            :revision-b="revisionB"
+            :format-revision-label="formatRevisionLabel"
+            :render-summary="renderSummary"
+            @select-source="handleSelectSource"
+            @select-revision-a="handleSelectRevisionA"
+            @select-revision-b="handleSelectRevisionB"
+          />
         </div>
       </section>
 
@@ -1010,64 +728,26 @@ onMounted(() => {
       </section>
     </div>
 
-    <Dialog :open="subJurisdictionModalOpen" @update:open="(value) => !value && closeSubJurisdictionModal()">
-      <DialogScrollContent class="sm:max-w-[520px]">
-        <DialogHeader>
-          <DialogTitle>Define your Sub-Jurisdiction</DialogTitle>
-          <DialogDescription>Define a specific legal domain or region to monitor</DialogDescription>
-        </DialogHeader>
+    <SubJurisdictionDialog
+      :open="subJurisdictionModalOpen"
+      :form="subJurisdictionForm"
+      @update:open="(value) => !value && closeSubJurisdictionModal()"
+      @update:form="(payload) => (subJurisdictionForm = { ...subJurisdictionForm, ...payload })"
+      @submit="createSubJurisdiction"
+      @cancel="closeSubJurisdictionModal"
+    />
 
-        <form @submit.prevent="createSubJurisdiction" class="space-y-5">
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-900">Sub-Jurisdiction Name</label>
-            <input v-model="subJurisdictionForm.name" type="text" required placeholder="e.g Global Visa Monitoring"
-              class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
-          </div>
-
-          <div>
-            <label class="mb-2 block text-sm font-medium text-gray-900">Description</label>
-            <textarea v-model="subJurisdictionForm.description" rows="4" required
-              placeholder="What legal areas will you monitor?"
-              class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"></textarea>
-          </div>
-
-          <DialogFooter class="flex justify-end gap-3 pt-4">
-            <button type="button" @click="closeSubJurisdictionModal"
-              class="btn--secondary btn--lg">
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              class="btn--primary btn--lg"
-              @click.prevent="createSubJurisdiction"
-            >
-              Create Sub-Jurisdiction
-            </button>
-          </DialogFooter>
-        </form>
-      </DialogScrollContent>
-    </Dialog>
-
-    <Dialog :open="showSuggestedSources" @update:open="toggleSuggestedDialog">
-      <DialogScrollContent class="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>AI Suggested Sources</DialogTitle>
-          <DialogDescription>
-            Review and add AI suggested sources. Saved sources will appear in your list instantly.
-          </DialogDescription>
-        </DialogHeader>
-        <SuggestedSources
-          :jurisdiction-id="jurisdiction?.id || ''"
-          :jurisdiction-name="jurisdiction?.name || ''"
-          :jurisdiction-description="jurisdiction?.description || ''"
-          :project-description="projectName"
-          @cancel="cancelSuggestions"
-          @save="handleSuggestionsSaved"
-          @sources-added="sourceStore.fetchSources(jurisdiction?.id || '')"
-        />
-      </DialogScrollContent>
-    </Dialog>
+    <SuggestedSourcesDialog
+      :open="showSuggestedSources"
+      :jurisdiction-id="jurisdiction?.id || ''"
+      :jurisdiction-name="jurisdiction?.name || ''"
+      :jurisdiction-description="jurisdiction?.description || ''"
+      :project-description="projectName"
+      @update:open="toggleSuggestedDialog"
+      @cancel="cancelSuggestions"
+      @save="handleSuggestionsSaved"
+      @sources-added="sourceStore.fetchSources(jurisdiction?.id || '')"
+    />
 
     <Dialog :open="showInlineEdit" @update:open="(value) => (showInlineEdit = value)">
       <DialogScrollContent class="sm:max-w-[560px]">
@@ -1117,72 +797,16 @@ onMounted(() => {
       </DialogScrollContent>
     </Dialog>
 
-    <Dialog :open="addSourceModalOpen" @update:open="(value) => !value && closeAddSourceModal()">
-      <DialogScrollContent class="sm:max-w-[520px]">
-        <DialogHeader>
-          <DialogTitle>{{ editingSourceId ? 'Edit Source' : 'Add Source' }}</DialogTitle>
-          <DialogDescription>Attach a source to monitor for this jurisdiction.</DialogDescription>
-        </DialogHeader>
-
-        <form @submit.prevent="editingSourceId ? saveEditedSource() : createSourceFromForm()" class="space-y-4">
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-800">Name</label>
-            <input v-model="sourceForm.name" required
-              class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              placeholder="e.g. Supreme Court Opinions" />
-          </div>
-
-          <div>
-            <label class="mb-1 block text-sm font-medium text-gray-800">URL</label>
-            <input v-model="sourceForm.url" type="url" required
-              class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              placeholder="https://example.com" />
-          </div>
-
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-800">Source Type</label>
-              <select v-model="sourceForm.source_type"
-                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
-                <option value="web">Web</option>
-                <option value="api">API</option>
-                <option value="pdf">PDF</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="mb-1 block text-sm font-medium text-gray-800">Scrape Frequency</label>
-              <select v-model="sourceForm.scrape_frequency"
-                class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
-                <option value="HOURLY">Hourly</option>
-                <option value="DAILY">Daily</option>
-                <option value="WEEKLY">Weekly</option>
-                <option value="MONTHLY">Monthly</option>
-              </select>
-            </div>
-          </div>
-
-          <div v-if="sourcesError" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-            {{ sourcesError }}
-          </div>
-
-          <DialogFooter class="flex justify-end gap-3 pt-2">
-            <button type="button" @click="closeAddSourceModal"
-              class="btn--secondary btn--lg">
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              :disabled="sourcesLoading"
-              class="btn--primary btn--lg btn--with-icon disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              <span v-if="sourcesLoading">Saving...</span>
-              <span v-else>{{ editingSourceId ? 'Save Changes' : 'Add Source' }}</span>
-            </button>
-          </DialogFooter>
-        </form>
-      </DialogScrollContent>
-    </Dialog>
+    <SourceDialog
+      :open="addSourceModalOpen"
+      :editing-id="editingSourceId"
+      :form="sourceForm"
+      :loading="sourcesLoading"
+      :error="sourcesError"
+      @update:open="(value) => !value && closeAddSourceModal()"
+      @update:form="(payload) => (sourceForm = { ...sourceForm, ...payload })"
+      @submit="editingSourceId ? saveEditedSource() : createSourceFromForm()"
+      @cancel="closeAddSourceModal"
+    />
   </main>
 </template>
