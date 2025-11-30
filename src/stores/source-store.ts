@@ -112,10 +112,7 @@ export const useSourceStore = defineStore('source', () => {
     }
   }
 
-  const fetchRevisions = async (
-    sourceId: string,
-    params?: { skip?: number; limit?: number },
-  ) => {
+  const fetchRevisions = async (sourceId: string, params?: { skip?: number; limit?: number }) => {
     revisionsLoading.value[sourceId] = true
     revisionsError.value[sourceId] = null
 

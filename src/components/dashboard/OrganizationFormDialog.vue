@@ -94,11 +94,7 @@ const handleSubmit = () => {
         <Field>
           <FieldLabel class="text-sm font-medium text-gray-900">Name</FieldLabel>
           <FieldContent>
-            <Input
-              v-model="form.name"
-              placeholder="Organization name"
-              class="h-11"
-            />
+            <Input v-model="form.name" placeholder="Organization name" class="h-11" />
           </FieldContent>
         </Field>
 

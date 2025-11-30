@@ -9,7 +9,7 @@ import Timeline from '@/assets/Images/Timeline.png'
 </script>
 
 <template>
-  <section class="relative w-full app-container">
+  <section class="app-container relative w-full">
     <div class="mx-auto">
       <!-- Section Header -->
       <div class="mb-16 text-center">

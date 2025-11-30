@@ -7,7 +7,7 @@ const activeBillingCycle = ref<'monthly' | 'yearly'>('monthly')
 </script>
 
 <template>
-  <main class="flex flex-1 flex-col items-center px-6 py-20 text-center md:px-12 app-container">
+  <main class="app-container flex flex-1 flex-col items-center px-6 py-20 text-center md:px-12">
     <section class="mb-10 max-w-3xl">
       <h1 class="text-preset-display-md text-primary mb-5 capitalize">
         Choose the plan that fits your team.

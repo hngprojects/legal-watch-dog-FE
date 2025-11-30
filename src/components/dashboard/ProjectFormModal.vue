@@ -27,7 +27,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'save', payload: { title: string; description: string; organizationId: string; projectId?: string }): void
+  (
+    e: 'save',
+    payload: { title: string; description: string; organizationId: string; projectId?: string },
+  ): void
 }>()
 
 const formState = ref({
@@ -42,7 +45,8 @@ const resetState = () => {
   formState.value = {
     title: props.project?.title || '',
     description: props.project?.description || '',
-    organizationId: props.project?.org_id || props.defaultOrganizationId || props.organizations[0]?.id || '',
+    organizationId:
+      props.project?.org_id || props.defaultOrganizationId || props.organizations[0]?.id || '',
   }
   localError.value = null
 }
@@ -86,7 +90,9 @@ const handleSubmit = () => {
       <DialogHeader>
         <DialogTitle>{{ mode === 'edit' ? 'Edit Project' : 'Create New Project' }}</DialogTitle>
         <DialogDescription>
-          {{ mode === 'edit' ? 'Update project details.' : 'Set up a new project to track changes.' }}
+          {{
+            mode === 'edit' ? 'Update project details.' : 'Set up a new project to track changes.'
+          }}
         </DialogDescription>
       </DialogHeader>
 
@@ -127,17 +133,8 @@ const handleSubmit = () => {
         </div>
 
         <DialogFooter class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            @click="handleClose"
-            class="btn--secondary btn--lg"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="btn--primary btn--lg"
-          >
+          <button type="button" @click="handleClose" class="btn--secondary btn--lg">Cancel</button>
+          <button type="submit" class="btn--primary btn--lg">
             {{ mode === 'edit' ? 'Save Changes' : 'Save Project' }}
           </button>
         </DialogFooter>

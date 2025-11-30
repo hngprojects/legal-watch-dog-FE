@@ -57,7 +57,7 @@ const steps = [
           );
         "
       ></div>
-      <section class="relative z-10 mb-24 space-y-11 text-center app-container">
+      <section class="app-container relative z-10 mb-24 space-y-11 text-center">
         <PillTag>
           <span class="font-normal text-gray-600">AI-Powered Regulatory Intelligence</span>
         </PillTag>
@@ -73,7 +73,7 @@ const steps = [
         </Button>
       </section>
 
-      <section class="relative z-10 text-center app-container">
+      <section class="app-container relative z-10 text-center">
         <div class="mb-28">
           <h2 class="text-preset-display-sm font-semibold">
             5 <span class="text-peach-amber-main">Simple Steps</span> to Stay Informed

@@ -2,8 +2,7 @@ import axios from 'axios'
 import { useAuthStore } from '@/stores/auth-store'
 
 // Default to staging; override via VITE_API_BASE_URL for prod or other environments.
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'https://api.legalwatch.dog/api/v1'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.legalwatch.dog/api/v1'
 
 const api = axios.create({
   baseURL: API_BASE_URL,

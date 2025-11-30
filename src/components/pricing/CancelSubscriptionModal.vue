@@ -49,10 +49,7 @@ const handleCancelSubscription = async () => {
         <DialogClose>
           <button class="btn--secondary btn--lg">Keep My Plan</button>
         </DialogClose>
-        <button
-          class="btn--primary btn--lg"
-          @click="handleCancelSubscription"
-        >
+        <button class="btn--primary btn--lg" @click="handleCancelSubscription">
           Cancel Subscription
         </button>
       </DialogFooter>

@@ -35,7 +35,8 @@ interface UploadProfilePictureResponse {
 
 export const userService = {
   getCurrentUser: () => api.get<CurrentUserResponse>('/users/me'),
-  updateProfile: (payload: UpdateProfilePayload) => api.patch<UpdateProfileResponse>('/users/me', payload),
+  updateProfile: (payload: UpdateProfilePayload) =>
+    api.patch<UpdateProfileResponse>('/users/me', payload),
   uploadProfilePicture: (file: File) => {
     const formData = new FormData()
     formData.append('file', file)

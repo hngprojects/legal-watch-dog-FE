@@ -33,7 +33,7 @@ const FALLBACK_ERROR_MESSAGE =
 export async function submitWaitlist(payload: WaitlistPayload) {
   try {
     const response = await api.post<WaitlistSuccessResponse>('/waitlist/signup', payload)
-    
+
     return {
       ok: true,
       ...response.data,
