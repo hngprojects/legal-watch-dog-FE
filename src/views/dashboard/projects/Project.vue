@@ -6,7 +6,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings, ChevronDown, X } from 'lucide-vue-next' 
+import { ArrowLeftIcon, Plus, Settings, ChevronDown } from 'lucide-vue-next'
 import checkmark from '@/assets/Images/checkmark.png'
 import Swal from '@/lib/swal'
 import {
@@ -51,7 +51,8 @@ const hireForm = ref({
   companyName: 'Untitled UI',
   companyEmail: 'olivia@untitledui.com',
   industry: 'Immigration & Global Mobility',
-  description: 'Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states',
+  description:
+    'Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states',
 })
 
 const openHireSpecialistModal = () => {
@@ -251,8 +252,8 @@ const saveEdit = async () => {
     Swal.fire(
       'Error',
       projectStore.error ||
-      (err as ProjectErrorResponse).response?.data?.detail?.[0]?.msg ||
-      'Failed to update project',
+        (err as ProjectErrorResponse).response?.data?.detail?.[0]?.msg ||
+        'Failed to update project',
       'error',
     )
   }
@@ -285,7 +286,7 @@ watch(
       </button>
     </div>
 
-    <div v-else class="mx-auto app-container">
+    <div v-else class="app-container mx-auto">
       <div class="mb-8 flex items-center justify-between">
         <Breadcrumb>
           <BreadcrumbList>
@@ -324,17 +325,25 @@ watch(
         </Breadcrumb>
 
         <div class="relative">
-          <button @click.stop="toggleSettingsMenu"
-            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700">
+          <button
+            @click.stop="toggleSettingsMenu"
+            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+          >
             <Settings :size="18" />
           </button>
 
-          <div v-if="showSettingsMenu" @click.stop
-            class="absolute right-0 z-50 mt-2 w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5">
+          <div
+            v-if="showSettingsMenu"
+            @click.stop
+            class="absolute right-0 z-50 mt-2 w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5"
+          >
             <button @click="startEdit" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50">
               Edit Project
             </button>
-            <button @click="deleteProject" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
+            <button
+              @click="deleteProject"
+              class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+            >
               Delete Project
             </button>
           </div>
@@ -345,7 +354,8 @@ watch(
       >
         <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
           <div
-            class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-12 sm:w-12">
+            class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-12 sm:w-12"
+          >
             <img :src="checkmark" alt="check-mark" class="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
 
@@ -366,29 +376,42 @@ watch(
           <form @submit.prevent="saveEdit" class="w-full space-y-4">
             <div>
               <label class="text-sm font-medium text-[#1F1F1F]">Project Name</label>
-              <input v-model="editForm.title"
-                class="h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20" />
+              <input
+                v-model="editForm.title"
+                class="h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+              />
             </div>
 
             <div>
               <label class="text-sm font-medium text-[#1F1F1F]">Description</label>
-              <textarea v-model="editForm.description" rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"></textarea>
+              <textarea
+                v-model="editForm.description"
+                rows="3"
+                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+              ></textarea>
             </div>
 
             <div>
               <label class="text-sm font-medium text-[#1F1F1F]">Master Prompt</label>
-              <textarea v-model="editForm.master_prompt" rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"></textarea>
+              <textarea
+                v-model="editForm.master_prompt"
+                rows="3"
+                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+              ></textarea>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
-              <button type="button" @click="showInlineEdit = false"
-                class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50">
+              <button
+                type="button"
+                @click="showInlineEdit = false"
+                class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+              >
                 Cancel
               </button>
-              <button type="submit"
-                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]">
+              <button
+                type="submit"
+                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
+              >
                 Save Changes
               </button>
             </div>
@@ -398,13 +421,16 @@ watch(
         <template v-else>
           <h1 class="text-2xl leading-[30px] font-bold text-gray-900">{{ project.title }}</h1>
           <p class="text-sm leading-5 font-normal text-[#4B5563]">{{ project.description }}</p>
-          <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center ">
+          <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
             <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
 
             <div
-              class="relative flex h-12 w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-60">
-              <select v-model="selected"
-                class="w-full cursor-pointer appearance-none bg-transparent text-[16px] font-medium text-[#374151] focus:outline-none">
+              class="relative flex h-12 w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-60"
+            >
+              <select
+                v-model="selected"
+                class="w-full cursor-pointer appearance-none bg-transparent text-[16px] font-medium text-[#374151] focus:outline-none"
+              >
                 <option value="AI">AI</option>
                 <option value="Manual">Manual</option>
                 <option value="Hybrid">Hybrid</option>
@@ -425,31 +451,33 @@ watch(
 
       <div class="mb-8 flex items-end justify-between md:mt-[88px]">
         <div class="flex w-auto gap-8 border-b border-gray-200">
-          <button @click="activeTab = 'jurisdictions'" :class="[
-            'relative pb-4 text-sm font-medium transition-colors',
-            activeTab === 'jurisdictions'
-              ? 'text-gray-900'
-              : 'text-gray-500 hover:text-gray-700',
-          ]">
+          <button
+            @click="activeTab = 'jurisdictions'"
+            :class="[
+              'relative pb-4 text-sm font-medium transition-colors',
+              activeTab === 'jurisdictions' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
+            ]"
+          >
             Jurisdictions
-            <div v-if="activeTab === 'jurisdictions'" class="absolute right-0 bottom-0 left-0 h-0.5 bg-[#401903]"></div>
+            <div
+              v-if="activeTab === 'jurisdictions'"
+              class="absolute right-0 bottom-0 left-0 h-0.5 bg-[#401903]"
+            ></div>
           </button>
         </div>
 
-        <div class="flex items-center gap-3 mb-3">
+        <div class="mb-3 flex items-center gap-3">
           <!-- <button @click="router.push({ name: 'jurisdictions-archive', query: { organizationId: organizationId } })"
             class="flex items-center gap-2 rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] shadow-sm transition-all hover:bg-orange-50">
             View Archive
           </button> -->
 
-          <button @click="openAddJurisdictionModal"
-            class="btn--primary btn--with-icon btn--lg">
+          <button @click="openAddJurisdictionModal" class="btn--primary btn--with-icon btn--lg">
             <Plus :size="18" />
             Add Jurisdiction
           </button>
         </div>
       </div>
-
 
       <div class=" ">
         <div v-if="activeTab === 'jurisdictions'">
@@ -459,17 +487,24 @@ watch(
             </div>
           </div>
 
-          <div v-else-if="projectJurisdictions.length === 0"
-            class="flex flex-col items-center justify-center bg-white py-20">
+          <div
+            v-else-if="projectJurisdictions.length === 0"
+            class="flex flex-col items-center justify-center bg-white py-20"
+          >
             <p class="text-sm text-gray-500">No jurisdictions yet for this project.</p>
             <p class="mt-2 text-xs text-gray-400">Add one to start monitoring changes.</p>
           </div>
 
-          <div v-else class="space-y-3 ">
-            <article v-for="jurisdiction in topLevelJurisdictions" :key="jurisdiction.id"
+          <div v-else class="space-y-3">
+            <article
+              v-for="jurisdiction in topLevelJurisdictions"
+              :key="jurisdiction.id"
               @click="goToJurisdiction(jurisdiction.id)"
-              class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10">
-              <h3 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]">
+              class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
+            >
+              <h3
+                class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+              >
                 {{ jurisdiction.name }}
               </h3>
               <p class="text-sm leading-relaxed text-gray-600">
@@ -484,7 +519,10 @@ watch(
       </div>
     </div>
 
-    <Dialog :open="showAddJurisdictionModal" @update:open="(value) => !value && closeAddJurisdictionModal()">
+    <Dialog
+      :open="showAddJurisdictionModal"
+      @update:open="(value) => !value && closeAddJurisdictionModal()"
+    >
       <DialogScrollContent class="sm:max-w-[540px]">
         <DialogHeader>
           <DialogTitle>Define your Jurisdiction</DialogTitle>
@@ -496,17 +534,27 @@ watch(
             <label for="jurisdictionName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
               Jurisdiction Name
             </label>
-            <input v-model="jurisdictionForm.name" id="jurisdictionName" placeholder="e.g United Kingdom" required
-              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+            <input
+              v-model="jurisdictionForm.name"
+              id="jurisdictionName"
+              placeholder="e.g United Kingdom"
+              required
+              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
           </div>
 
           <div>
             <label for="jurisdictionDesc" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
               Description
             </label>
-            <textarea v-model="jurisdictionForm.description" id="jurisdictionDesc" rows="3"
-              placeholder="What legal areas will you monitor?" required
-              class="h-[130px] w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+            <textarea
+              v-model="jurisdictionForm.description"
+              id="jurisdictionDesc"
+              rows="3"
+              placeholder="What legal areas will you monitor?"
+              required
+              class="h-[130px] w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
           </div>
 
           <div v-if="jurisdictionStore.error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
@@ -514,20 +562,19 @@ watch(
           </div>
 
           <DialogFooter class="flex justify-end gap-2 pt-2">
-            <button type="button" @click="closeAddJurisdictionModal"
-              class="btn--secondary btn--lg">
+            <button type="button" @click="closeAddJurisdictionModal" class="btn--secondary btn--lg">
               Cancel
             </button>
-            <button type="submit"
-              class="btn--primary btn--lg">
-              Create Jurisdiction
-            </button>
+            <button type="submit" class="btn--primary btn--lg">Create Jurisdiction</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>
     </Dialog>
 
-    <Dialog :open="showHireSpecialistModal" @update:open="(value) => !value && closeHireSpecialistModal()">
+    <Dialog
+      :open="showHireSpecialistModal"
+      @update:open="(value) => !value && closeHireSpecialistModal()"
+    >
       <DialogScrollContent class="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Hire a Specialist</DialogTitle>
@@ -542,16 +589,26 @@ watch(
             <label for="companyName" class="mb-2 block text-sm font-semibold text-gray-900">
               Company Name
             </label>
-            <input v-model="hireForm.companyName" id="companyName" type="text" required
-              class="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
+            <input
+              v-model="hireForm.companyName"
+              id="companyName"
+              type="text"
+              required
+              class="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
+            />
           </div>
 
           <div>
             <label for="companyEmail" class="mb-2 block text-sm font-semibold text-gray-900">
               Company Email Address
             </label>
-            <input v-model="hireForm.companyEmail" id="companyEmail" type="email" required
-              class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
+            <input
+              v-model="hireForm.companyEmail"
+              id="companyEmail"
+              type="email"
+              required
+              class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
+            />
           </div>
 
           <div>
@@ -559,16 +616,19 @@ watch(
               Industry
             </label>
             <div class="relative">
-              <select v-model="hireForm.industry" id="industry"
-                class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0">
-                <option value="Immigration & Global Mobility">
-                  Immigration & Global Mobility
-                </option>
+              <select
+                v-model="hireForm.industry"
+                id="industry"
+                class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0"
+              >
+                <option value="Immigration & Global Mobility">Immigration & Global Mobility</option>
                 <option value="Finance">Finance</option>
                 <option value="Healthcare">Healthcare</option>
               </select>
-              <ChevronDown :size="16"
-                class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 transform text-gray-500" />
+              <ChevronDown
+                :size="16"
+                class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 transform text-gray-500"
+              />
             </div>
           </div>
 
@@ -576,19 +636,20 @@ watch(
             <label for="description" class="mb-2 block text-sm font-semibold text-gray-900">
               Brief Description
             </label>
-            <textarea v-model="hireForm.description" id="description" rows="3" required
-              class="h-24 w-full resize-none rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
+            <textarea
+              v-model="hireForm.description"
+              id="description"
+              rows="3"
+              required
+              class="h-24 w-full resize-none rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
+            />
           </div>
 
           <DialogFooter class="flex justify-end gap-2 pt-4">
-            <button type="button" @click="closeHireSpecialistModal"
-              class="btn--secondary btn--lg">
+            <button type="button" @click="closeHireSpecialistModal" class="btn--secondary btn--lg">
               Cancel
             </button>
-            <button type="submit"
-              class="btn--primary btn--lg">
-              Hire Specialist
-            </button>
+            <button type="submit" class="btn--primary btn--lg">Hire Specialist</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>

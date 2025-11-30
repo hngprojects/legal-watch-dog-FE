@@ -234,7 +234,7 @@ const handleGoogleLogin = async () => {
       </button> -->
     </div>
 
-    <p v-if="socialError" class="text-sm text-red-600 mt-4 text-center">
+    <p v-if="socialError" class="mt-4 text-center text-sm text-red-600">
       {{ socialError }}
     </p>
   </div>

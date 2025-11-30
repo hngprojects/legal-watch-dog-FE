@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
   form: { name: string; description: string; prompt: string }
 }>()
@@ -50,16 +50,14 @@ const emit = defineEmits<{
             required
             placeholder="What legal areas will you monitor?"
             class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            @input="emit('update:form', { description: ($event.target as HTMLTextAreaElement).value })"
+            @input="
+              emit('update:form', { description: ($event.target as HTMLTextAreaElement).value })
+            "
           ></textarea>
         </div>
 
         <DialogFooter class="flex justify-end gap-3 pt-4">
-          <button
-            type="button"
-            class="btn--secondary btn--lg"
-            @click="emit('cancel')"
-          >
+          <button type="button" class="btn--secondary btn--lg" @click="emit('cancel')">
             Cancel
           </button>
 

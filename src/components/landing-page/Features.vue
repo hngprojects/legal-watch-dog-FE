@@ -12,14 +12,14 @@
 
         <TypographyHeading
           level="h1"
-          class="mb-6 text-4xl leading-tight font-extrabold text-white sm:text-5xl md:text-6xl text-center"
+          class="mb-6 text-center text-4xl leading-tight font-extrabold text-white sm:text-5xl md:text-6xl"
         >
           Never Miss a Legal Update Again
         </TypographyHeading>
 
         <!-- FIXED: Centered on desktop (removed md:text-left) -->
         <TypographyText
-          class="mx-auto mb-10 max-w-3xl text-lg text-gray-300 text-center md:text-xl"
+          class="mx-auto mb-10 max-w-3xl text-center text-lg text-gray-300 md:text-xl"
         >
           Stay ahead of legal change by automating the monitoring process and saving hours of manual
           research every week.
@@ -34,7 +34,7 @@
     </section>
 
     <!-- Main Features -->
-    <main class="bg-gray-50 pt-20 pb-16 app-container">
+    <main class="app-container bg-gray-50 pt-20 pb-16">
       <div class="mx-auto">
         <div class="mx-auto flex justify-center text-center">
           <TypographyHeading level="h2" class="text-3xl font-bold text-gray-900 md:text-4xl">
@@ -49,7 +49,7 @@
               Real-Time Legislative Alerts
             </TypographyHeading>
 
-            <TypographyText class="text-lg text-gray-600 text-center md:text-left">
+            <TypographyText class="text-center text-lg text-gray-600 md:text-left">
               Receive instant updates whenever relevant laws or regulations change. Never miss a
               critical compliance deadline.
             </TypographyText>
@@ -85,12 +85,12 @@
           <div class="order-2">
             <TypographyHeading
               level="h3"
-              class="mb-4 text-2xl text-center md:text-left font-bold text-gray-900 md:text-3xl"
+              class="mb-4 text-center text-2xl font-bold text-gray-900 md:text-left md:text-3xl"
             >
               Customizable Watchlists
             </TypographyHeading>
 
-            <TypographyText class="text-lg text-gray-600 text-center md:text-left">
+            <TypographyText class="text-center text-lg text-gray-600 md:text-left">
               Track only the projects, areas, or jurisdictions that matter to you. Your updates,
               your focus.
             </TypographyText>
@@ -104,7 +104,7 @@
               AI-Powered Legal Insights
             </TypographyHeading>
 
-            <TypographyText class="text-lg text-gray-600 text-center md:text-left">
+            <TypographyText class="text-center text-lg text-gray-600 md:text-left">
               AI helps you quickly summarize regulations, flags critical changes, and identifies
               cross-jurisdictional risks so you stay compliant with minimal effort.
             </TypographyText>
@@ -142,7 +142,7 @@
               Task Management & Ticketing
             </TypographyHeading>
 
-            <TypographyText class="text-lg text-gray-600 text-center md:text-left">
+            <TypographyText class="text-center text-lg text-gray-600 md:text-left">
               Create actionable tickets for each legal update, keeping your team informed and
               accountable.
             </TypographyText>
@@ -161,7 +161,7 @@
           Turn <span class="text-[#F2AB6D]"> Legal Changes </span>Into Clear Actions
         </TypographyHeading>
 
-        <TypographyText class="mb-10 text-center text-lg text-gray-600 md:text-xl md:text-center">
+        <TypographyText class="mb-10 text-center text-lg text-gray-600 md:text-center md:text-xl">
           Stay informed. Stay compliant. Stay ahead.
         </TypographyText>
 

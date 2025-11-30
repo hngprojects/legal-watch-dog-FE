@@ -52,7 +52,10 @@ const handleAddAi = () => {
     </div>
 
     <div class="relative">
-      <button class="btn--lg btn--primary btn--with-icon" @click.stop="showHeaderMenu = !showHeaderMenu">
+      <button
+        class="btn--lg btn--primary btn--with-icon"
+        @click.stop="showHeaderMenu = !showHeaderMenu"
+      >
         <Plus :size="16" /> Add Source
       </button>
 
@@ -78,10 +81,7 @@ const handleAddAi = () => {
   </div>
 
   <div v-else>
-    <div
-      v-if="sourcesError"
-      class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
-    >
+    <div v-if="sourcesError" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
       {{ sourcesError }}
     </div>
 
@@ -185,8 +185,8 @@ const handleAddAi = () => {
                 <p class="text-sm font-semibold text-gray-900">
                   {{
                     latestRevision(source.id)?.ai_summary ||
-                      latestRevision(source.id)?.extracted_data?.title ||
-                      'No summary available'
+                    latestRevision(source.id)?.extracted_data?.title ||
+                    'No summary available'
                   }}
                 </p>
                 <span
@@ -198,9 +198,7 @@ const handleAddAi = () => {
                   "
                 >
                   {{
-                    latestRevision(source.id)?.was_change_detected
-                      ? 'Change Detected'
-                      : 'No Change'
+                    latestRevision(source.id)?.was_change_detected ? 'Change Detected' : 'No Change'
                   }}
                 </span>
               </div>
@@ -215,13 +213,16 @@ const handleAddAi = () => {
 
             <div
               class="prose prose-sm mt-2 max-w-none text-gray-800"
-              v-html="renderSummary(latestRevision(source.id)?.ai_markdown_summary || latestRevision(source.id)?.ai_summary)"
+              v-html="
+                renderSummary(
+                  latestRevision(source.id)?.ai_markdown_summary ||
+                    latestRevision(source.id)?.ai_summary,
+                )
+              "
             />
           </div>
 
-          <div v-else class="text-sm text-gray-600">
-            No revisions found for this source yet.
-          </div>
+          <div v-else class="text-sm text-gray-600">No revisions found for this source yet.</div>
         </div>
       </div>
     </div>

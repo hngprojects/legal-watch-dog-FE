@@ -78,23 +78,16 @@ const primaryRole = computed(() => {
 })
 
 const primaryOrg = computed(() => {
-  return (
-    organizations.value[0]?.name ||
-    userProfile.value?.organizations?.[0]?.name ||
-    'Member'
-  )
+  return organizations.value[0]?.name || userProfile.value?.organizations?.[0]?.name || 'Member'
 })
 
 const userEmail = computed(() => {
-  return (
-    userProfile.value?.email ||
-    authStore.user?.email ||''
-  )
+  return userProfile.value?.email || authStore.user?.email || ''
 })
 
 const loadAllProjects = async () => {
   if (organizations.value.length === 0) return
-  
+
   // Fetch projects for all organizations
   for (const org of organizations.value) {
     try {
@@ -212,7 +205,7 @@ const openEditModal = () => {
 const handleImageUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
-  
+
   if (!file) return
   isSaving.value = true
 
@@ -244,20 +237,20 @@ const handleImageUpload = async (event: Event) => {
 
   try {
     uploadingImage.value = true
-    
+
     // Upload image to server
     const response = await userService.uploadProfilePicture(file)
-    
+
     // Get the uploaded image URL
     const uploadedUrl = response.data?.data?.profile_picture_url
-    
+
     if (uploadedUrl && userProfile.value) {
       // Update local profile preview
       userProfile.value = {
         ...userProfile.value,
         avatar_url: uploadedUrl,
       }
-      
+
       // Update auth store
       if (authStore.user) {
         authStore.user = {
@@ -265,7 +258,7 @@ const handleImageUpload = async (event: Event) => {
           avatar_url: uploadedUrl,
         }
       }
-      
+
       Swal.fire({
         icon: 'success',
         title: 'Profile Picture Updated',
@@ -276,10 +269,11 @@ const handleImageUpload = async (event: Event) => {
   } catch (error) {
     console.error('Image upload error:', error)
     const err = error as { response?: { data?: { message?: string; error?: string } } }
-    const errorMessage = err?.response?.data?.message || 
-                        err?.response?.data?.error ||
-                        'Failed to upload profile picture. Please try again.'
-    
+    const errorMessage =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      'Failed to upload profile picture. Please try again.'
+
     Swal.fire({
       icon: 'error',
       title: 'Upload Failed',
@@ -343,10 +337,15 @@ const saveEdits = async () => {
 
     closeEditModal()
   } catch (error) {
-    const err = error as { response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } } }    
-    
-    const errorMessage = err?.response?.data?.message || err?.response?.data?.error || 'Failed to update profile. Please try again.'
-    
+    const err = error as {
+      response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } }
+    }
+
+    const errorMessage =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      'Failed to update profile. Please try again.'
+
     Swal.fire({
       icon: 'error',
       title: 'Update Failed',
@@ -384,16 +383,26 @@ const saveEdits = async () => {
       </div>
 
       <template v-else>
-        <section class="rounded-2xl border border-gray-100 bg-[#F5F5F5] p-5 shadow-sm h-[270px] flex items-center justify-center">
-          <div class="flex flex-col items-center justify-center ">
-            <div class="flex flex-col gap-6 items-center">
+        <section
+          class="flex h-[270px] items-center justify-center rounded-2xl border border-gray-100 bg-[#F5F5F5] p-5 shadow-sm"
+        >
+          <div class="flex flex-col items-center justify-center">
+            <div class="flex flex-col items-center gap-6">
               <div
-                class="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md relative"
+                class="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md"
               >
-                <img v-if="userProfile?.avatar_url" :src="userProfile.avatar_url" alt="Profile" class="h-full w-full rounded-full object-cover" />
+                <img
+                  v-if="userProfile?.avatar_url"
+                  :src="userProfile.avatar_url"
+                  alt="Profile"
+                  class="h-full w-full rounded-full object-cover"
+                />
                 <span v-else>{{ avatarInitials }}</span>
-                <div class="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-[#401903] flex justify-center items-center cursor-pointer" @click="openEditModal">
-                  <img :src="editIcon" alt="Edit Icon">
+                <div
+                  class="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#401903]"
+                  @click="openEditModal"
+                >
+                  <img :src="editIcon" alt="Edit Icon" />
                 </div>
               </div>
               <!-- <input
@@ -404,11 +413,11 @@ const saveEdits = async () => {
                 @change="handleImageUpload"
               /> -->
               <!-- <div class="space-y-3"> -->
-                <div class="flex flex-col items-center gap-2">
-                  <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
-                  <p class="text-xl text-[#1F1F1F]">{{ primaryRole }} - {{ primaryOrg }}</p>
-                  <p class="text-lg text-[#6B7280]">{{ userEmail }}</p>
-                </div>
+              <div class="flex flex-col items-center gap-2">
+                <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
+                <p class="text-xl text-[#1F1F1F]">{{ primaryRole }} - {{ primaryOrg }}</p>
+                <p class="text-lg text-[#6B7280]">{{ userEmail }}</p>
+              </div>
               <!-- </div> -->
             </div>
           </div>
@@ -463,7 +472,10 @@ const saveEdits = async () => {
             />
           </div>
 
-          <div v-else-if="orgError && projectError" class="rounded-xl border border-red-100 bg-red-50 p-4">
+          <div
+            v-else-if="orgError && projectError"
+            class="rounded-xl border border-red-100 bg-red-50 p-4"
+          >
             <p class="text-sm font-medium text-red-700">{{ orgError }}</p>
           </div>
 
@@ -486,7 +498,10 @@ const saveEdits = async () => {
                   {{ org.industry || 'No industry specified' }}
                 </p>
                 <p class="text-sm text-[#6B7280]">
-                  Projects available: <span class="text-black">{{ projects.filter(p => p.org_id === org.id).length }}</span>
+                  Projects available:
+                  <span class="text-black">{{
+                    projects.filter((p) => p.org_id === org.id).length
+                  }}</span>
                 </p>
               </div>
               <div class="flex flex-col items-start gap-2 sm:items-end">
@@ -513,18 +528,40 @@ const saveEdits = async () => {
           <div
             class="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-[#F1A75F] to-[#401903] text-2xl font-bold text-white shadow-md"
           >
-            <img v-if="userProfile?.avatar_url" :src="userProfile.avatar_url" alt="Profile" class="h-full w-full rounded-full object-cover" />
+            <img
+              v-if="userProfile?.avatar_url"
+              :src="userProfile.avatar_url"
+              alt="Profile"
+              class="h-full w-full rounded-full object-cover"
+            />
             <span v-else>{{ avatarInitials }}</span>
-            <div 
-              class="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#401903]" 
-              :class="{ 'opacity-50 cursor-not-allowed': uploadingImage }"
+            <div
+              class="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#401903]"
+              :class="{ 'cursor-not-allowed opacity-50': uploadingImage }"
             >
               <!-- @click="uploadingImage ? null : triggerFileInput()" -->
-              <svg v-if="uploadingImage" class="h-4 w-4 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <svg
+                v-if="uploadingImage"
+                class="h-4 w-4 animate-spin text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
               </svg>
-              <img v-else :src="editIcon" alt="Edit Icon">
+              <img v-else :src="editIcon" alt="Edit Icon" />
             </div>
           </div>
         </div>
@@ -549,16 +586,18 @@ const saveEdits = async () => {
           <div class="space-y-3">
             <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
             <Select v-model="editForm.role" required>
-                <SelectTrigger class="h-12 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]">
-                  <SelectValue placeholder="Select Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                  <!-- <SelectItem value="Member">Member</SelectItem> -->
-                  <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
-                  <!-- <SelectItem value="Editor">Editor</SelectItem> -->
-                </SelectContent>
-              </Select>
+              <SelectTrigger
+                class="h-12 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
+              >
+                <SelectValue placeholder="Select Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Admin">Admin</SelectItem>
+                <!-- <SelectItem value="Member">Member</SelectItem> -->
+                <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
+                <!-- <SelectItem value="Editor">Editor</SelectItem> -->
+              </SelectContent>
+            </Select>
           </div>
           <div class="space-y-3">
             <label class="text-sm font-semibold text-[#0F172A]" for="edit-email"
@@ -570,24 +609,24 @@ const saveEdits = async () => {
               type="email"
               readonly
               placeholder="you@example.com"
-              class="mt-1.5 h-12 cursor-not-allowed rounded-md border-input text-sm text-[#111827] outline-none focus-visible:border-input focus-visible:ring-0"
+              class="border-input focus-visible:border-input mt-1.5 h-12 cursor-not-allowed rounded-md text-sm text-[#111827] outline-none focus-visible:ring-0"
             />
           </div>
           <DialogFooter class="flex items-center justify-end gap-3 pt-4">
             <button
               type="button"
-              class="cursor-pointer rounded-md border border-[#401903] py-4 px-12 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
+              class="cursor-pointer rounded-md border border-[#401903] px-12 py-4 text-sm font-semibold text-[#401903] hover:bg-[#401903] hover:text-white"
               @click="closeEditModal"
             >
               Cancel
             </button>
             <button
               type="submit"
-              class="cursor-pointer rounded-md bg-[#401903] py-4 px-12 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
+              class="cursor-pointer rounded-md bg-[#401903] px-12 py-4 text-sm font-semibold text-white shadow-sm hover:bg-[#2f1202]"
               :disabled="isSaving"
             >
-            <span v-if="isSaving">Saving...</span>
-            <span v-else>Save</span>
+              <span v-if="isSaving">Saving...</span>
+              <span v-else>Save</span>
             </button>
           </DialogFooter>
         </form>

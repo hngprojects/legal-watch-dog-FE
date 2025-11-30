@@ -2,7 +2,7 @@
 import type { Source } from '@/types/source'
 import type { SourceRevision } from '@/types/source'
 
-const props = defineProps<{
+defineProps<{
   sources: Source[]
   selectedSourceId: string
   revisionOptions: SourceRevision[]

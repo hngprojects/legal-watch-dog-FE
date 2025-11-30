@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
   form: { name: string; description: string; prompt: string }
 }>()
@@ -45,7 +45,9 @@ const emit = defineEmits<{
             :value="form.description"
             rows="3"
             class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            @input="emit('update:form', { description: ($event.target as HTMLTextAreaElement).value })"
+            @input="
+              emit('update:form', { description: ($event.target as HTMLTextAreaElement).value })
+            "
           />
         </div>
 
@@ -60,11 +62,7 @@ const emit = defineEmits<{
         </div>
 
         <DialogFooter class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            class="btn--secondary btn--lg"
-            @click="emit('cancel')"
-          >
+          <button type="button" class="btn--secondary btn--lg" @click="emit('cancel')">
             Cancel
           </button>
           <button type="submit" class="btn--primary btn--lg">Save Changes</button>

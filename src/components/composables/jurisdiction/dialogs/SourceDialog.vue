@@ -17,7 +17,7 @@ type SourceForm = {
   is_active: boolean
 }
 
-const props = defineProps<{
+defineProps<{
   open: boolean
   editingId: string | null
   form: SourceForm
@@ -71,7 +71,9 @@ const emit = defineEmits<{
             <select
               :value="form.source_type"
               class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              @change="emit('update:form', { source_type: ($event.target as HTMLSelectElement).value })"
+              @change="
+                emit('update:form', { source_type: ($event.target as HTMLSelectElement).value })
+              "
             >
               <option value="web">Web</option>
               <option value="api">API</option>
@@ -84,7 +86,11 @@ const emit = defineEmits<{
             <select
               :value="form.scrape_frequency"
               class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-              @change="emit('update:form', { scrape_frequency: ($event.target as HTMLSelectElement).value })"
+              @change="
+                emit('update:form', {
+                  scrape_frequency: ($event.target as HTMLSelectElement).value,
+                })
+              "
             >
               <option value="HOURLY">Hourly</option>
               <option value="DAILY">Daily</option>
@@ -99,11 +105,7 @@ const emit = defineEmits<{
         </div>
 
         <DialogFooter class="flex justify-end gap-3 pt-2">
-          <button
-            type="button"
-            class="btn--secondary btn--lg"
-            @click="emit('cancel')"
-          >
+          <button type="button" class="btn--secondary btn--lg" @click="emit('cancel')">
             Cancel
           </button>
 

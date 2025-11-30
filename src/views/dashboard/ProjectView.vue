@@ -208,7 +208,7 @@ watch(
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-0 app-container lg:py-14">
+  <main class="app-container min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-0 lg:py-14">
     <div
       v-if="!organizationId"
       class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-100"
@@ -218,10 +218,7 @@ watch(
         Projects live under organizations. Select an organization to view or create projects.
       </p>
       <div class="mt-6 flex justify-center">
-        <RouterLink
-          to="/dashboard/organizations"
-          class="btn--primary btn--lg"
-        >
+        <RouterLink to="/dashboard/organizations" class="btn--primary btn--lg">
           Go to Organizations
         </RouterLink>
       </div>
@@ -240,9 +237,7 @@ watch(
 
             <BreadcrumbItem v-if="hasOrganization">
               <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{ name: 'organization-profile', params: { organizationId } }"
-                >
+                <RouterLink :to="{ name: 'organization-profile', params: { organizationId } }">
                   {{ organizationName || 'Organization' }}
                 </RouterLink>
               </BreadcrumbLink>
@@ -286,7 +281,7 @@ watch(
           </div>
 
           <div v-else-if="projects.length === 0" class="flex items-center justify-center">
-            <div class="text-center flex flex-col items-center">
+            <div class="flex flex-col items-center text-center">
               <div class="mb-6 flex justify-center">
                 <svg
                   width="240"
@@ -326,10 +321,7 @@ watch(
               <p class="mb-8 text-sm text-gray-600">
                 Our AI will monitor the sites and send you summarized updates automatically.
               </p>
-              <button
-                @click="openCreateModal"
-                class="btn--primary btn--lg btn--with-icon"
-              >
+              <button @click="openCreateModal" class="btn--primary btn--lg btn--with-icon">
                 <svg
                   width="16"
                   height="16"
@@ -363,10 +355,7 @@ watch(
               <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">
                 {{ organizationName || 'Organization' }}'s Projects
               </h1>
-              <button
-                @click="openCreateModal"
-                class="btn--with-icon btn--primary"
-              >
+              <button @click="openCreateModal" class="btn--with-icon btn--primary">
                 <svg
                   width="20"
                   height="20"
@@ -490,7 +479,6 @@ watch(
         </aside> -->
       </div>
     </div>
-
   </main>
 
   <ProjectFormModal

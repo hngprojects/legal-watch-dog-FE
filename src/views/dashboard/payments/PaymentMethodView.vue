@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import PricingCard from '@/components/pricing/PricingCard.vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { PRICINGS } from '@/api/billing'
 import { ref } from 'vue'
 import { useBillingStore } from '@/stores/billing-store'
 
 const route = useRoute()
-const router = useRouter()
 const paymentMethod = ref<'stripe' | null>(null)
 const plan = PRICINGS.find((plan) => plan.title.toLowerCase() === route.params.plan)!
 const cycle = route.query.cycle as 'monthly' | 'yearly'

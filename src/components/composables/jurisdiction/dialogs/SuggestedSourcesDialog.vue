@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import SuggestedSources from '@/views/dashboard/sources/SuggestedSources.vue'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
   jurisdictionId: string
   jurisdictionName: string

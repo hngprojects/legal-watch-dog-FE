@@ -26,7 +26,10 @@ export const projectService = {
     api.post<ApiResponse<Project>>(`/organizations/${organization_id}/projects`, payload),
 
   updateProject: (organization_id: string, project_id: string, payload: UpdateProjectPayload) =>
-    api.patch<ApiResponse<Project>>(`/organizations/${organization_id}/projects/${project_id}`, payload),
+    api.patch<ApiResponse<Project>>(
+      `/organizations/${organization_id}/projects/${project_id}`,
+      payload,
+    ),
 
   deleteProject: (organization_id: string, project_id: string) =>
     api.delete<ApiResponse<{ success?: boolean }>>(

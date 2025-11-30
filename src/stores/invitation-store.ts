@@ -67,7 +67,9 @@ export const useInvitationStore = defineStore('invitations', {
           this.error = 'Network error: Unable to reach server'
         } else {
           this.error =
-            err.response.data?.detail?.[0]?.msg || err.response.data?.message || 'Failed to load invitations'
+            err.response.data?.detail?.[0]?.msg ||
+            err.response.data?.message ||
+            'Failed to load invitations'
         }
       } finally {
         this.loading = false
@@ -86,7 +88,9 @@ export const useInvitationStore = defineStore('invitations', {
           this.error = 'Network error: Unable to reach server'
         } else {
           this.error =
-            err.response.data?.detail?.[0]?.msg || err.response.data?.message || 'Failed to accept invitation'
+            err.response.data?.detail?.[0]?.msg ||
+            err.response.data?.message ||
+            'Failed to accept invitation'
         }
         throw error
       }

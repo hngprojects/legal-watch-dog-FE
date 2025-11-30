@@ -6,7 +6,6 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import Swal from '@/lib/swal'
 
-
 import type { Jurisdiction } from '@/api/jurisdiction'
 import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
 
@@ -22,7 +21,14 @@ import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
-import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogScrollContent, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogScrollContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import JurisdictionSources from '@/components/composables/jurisdiction/JurisdictionSources.vue'
 import JurisdictionAnalysis from '@/components/composables/jurisdiction/JurisdictionAnalysis.vue'
 import SubJurisdictionDialog from '@/components/composables/jurisdiction/dialogs/SubJurisdictionDialog.vue'
@@ -515,7 +521,10 @@ onMounted(() => {
       class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm"
     >
       <h1 class="text-2xl font-semibold text-gray-900">Jurisdiction not found</h1>
-      <button @click="goBack" class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline">
+      <button
+        @click="goBack"
+        class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline"
+      >
         Back to Projects
       </button>
     </div>
@@ -549,10 +558,12 @@ onMounted(() => {
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink :to="{
-                  name: 'organization-projects',
-                  params: { organizationId: activeOrganizationId },
-                }">
+                <RouterLink
+                  :to="{
+                    name: 'organization-projects',
+                    params: { organizationId: activeOrganizationId },
+                  }"
+                >
                   Projects
                 </RouterLink>
               </BreadcrumbLink>
@@ -562,10 +573,12 @@ onMounted(() => {
 
             <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
-                <RouterLink :to="{
-                  name: 'project-detail',
-                  params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
-                }">
+                <RouterLink
+                  :to="{
+                    name: 'project-detail',
+                    params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
+                  }"
+                >
                   {{ projectName }}
                 </RouterLink>
               </BreadcrumbLink>
@@ -629,7 +642,10 @@ onMounted(() => {
               ]"
             >
               Sources
-              <span v-if="activeTab === 'sources'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
+              <span
+                v-if="activeTab === 'sources'"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
+              ></span>
             </button>
 
             <button
@@ -640,12 +656,15 @@ onMounted(() => {
               ]"
             >
               Analysis
-              <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
+              <span
+                v-if="activeTab === 'analysis'"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
+              ></span>
             </button>
           </div>
         </div>
 
-                        <div v-if="activeTab === 'sources'" class="space-y-4 p-6">
+        <div v-if="activeTab === 'sources'" class="space-y-4 p-6">
           <JurisdictionSources
             :sources="sources"
             :sources-loading="sourcesLoading"
@@ -697,10 +716,19 @@ onMounted(() => {
           class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center"
         >
           <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-7 w-7 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+              />
             </svg>
           </div>
 
@@ -709,10 +737,16 @@ onMounted(() => {
         </div>
 
         <div v-else class="space-y-3">
-          <article v-for="node in subJurisdictions" :key="node.id" @click="goToJurisdiction(node.id)"
+          <article
+            v-for="node in subJurisdictions"
+            :key="node.id"
+            @click="goToJurisdiction(node.id)"
             class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
-            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }">
-            <h4 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]">
+            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }"
+          >
+            <h4
+              class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+            >
               {{ node.name }}
             </h4>
 
@@ -784,11 +818,7 @@ onMounted(() => {
           </div>
 
           <DialogFooter class="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              class="btn--secondary btn--lg"
-              @click="showInlineEdit = false"
-            >
+            <button type="button" class="btn--secondary btn--lg" @click="showInlineEdit = false">
               Cancel
             </button>
             <button type="submit" class="btn--primary btn--lg">Save Changes</button>

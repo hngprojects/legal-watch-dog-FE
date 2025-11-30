@@ -121,34 +121,38 @@ const handleSubmit = async () => {
     Swal.fire({
       icon: 'success',
       title: 'Success!',
-      text: response.data?.message ?? "Your message has been sent successfully.",
+      text: response.data?.message ?? 'Your message has been sent successfully.',
     })
   } catch (error: unknown) {
-    const axiosError = error as { response?: { data?: { message?: string, errors?: { [key: string]: string[] } } }; message?: string }
+    const axiosError = error as {
+      response?: { data?: { message?: string; errors?: { [key: string]: string[] } } }
+      message?: string
+    }
     const errorMessages: string[] = []
 
-    if(axiosError?.message){
+    if (axiosError?.message) {
       errorMessages.push(axiosError.message)
     }
 
-    if(axiosError.response?.data?.errors?.phone_number) {
+    if (axiosError.response?.data?.errors?.phone_number) {
       errorMessages.push(...axiosError.response.data.errors.phone_number)
     }
-    if(axiosError.response?.data?.errors?.email) {
+    if (axiosError.response?.data?.errors?.email) {
       errorMessages.push(...axiosError.response.data.errors.email)
     }
-    if(axiosError.response?.data?.errors?.message) {
-      const messageErrors = axiosError.response.data.errors.message.map(err =>
-        err.replace(/string/gi, 'Message')
+    if (axiosError.response?.data?.errors?.message) {
+      const messageErrors = axiosError.response.data.errors.message.map((err) =>
+        err.replace(/string/gi, 'Message'),
       )
       errorMessages.push(...messageErrors)
     }
 
-    const errorMessage = errorMessages.length > 0
-      ? errorMessages.join("<br>")
-      : 'An error occurred while submitting the form. Please try again later.'
+    const errorMessage =
+      errorMessages.length > 0
+        ? errorMessages.join('<br>')
+        : 'An error occurred while submitting the form. Please try again later.'
 
-     Swal.fire({
+    Swal.fire({
       icon: 'error',
       title: 'Oops...',
       html: `${errorMessage}.`,
@@ -160,8 +164,8 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen  py-12 sm:px-0 lg:px-0 app-container">
-    <div class="mx-auto ">
+  <div class="app-container min-h-screen py-12 sm:px-0 lg:px-0">
+    <div class="mx-auto">
       <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
         <!-- Left Column - Contact Info -->
         <div class="flex flex-col">
@@ -337,7 +341,7 @@ const handleSubmit = async () => {
               type="submit"
               @click="handleSubmit"
               :disabled="isSubmitting"
-              class="h-[52px] w-full rounded-lg bg-[#401903] text-base font-semibold text-white hover:text-white transition-colors hover:bg-[#2d1810] disabled:opacity-50"
+              class="h-[52px] w-full rounded-lg bg-[#401903] text-base font-semibold text-white transition-colors hover:bg-[#2d1810] hover:text-white disabled:opacity-50"
             >
               <span v-if="!isSubmitting">Submit</span>
               <span v-else>Submitting...</span>
