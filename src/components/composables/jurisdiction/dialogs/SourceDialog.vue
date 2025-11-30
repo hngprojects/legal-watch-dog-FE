@@ -72,7 +72,9 @@ const emit = defineEmits<{
               :value="form.source_type"
               class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               @change="
-                emit('update:form', { source_type: ($event.target as HTMLSelectElement).value })
+                emit('update:form', {
+                  source_type: ($event.target as HTMLSelectElement).value as SourceType,
+                })
               "
             >
               <option value="web">Web</option>
@@ -88,7 +90,7 @@ const emit = defineEmits<{
               class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               @change="
                 emit('update:form', {
-                  scrape_frequency: ($event.target as HTMLSelectElement).value,
+                  scrape_frequency: ($event.target as HTMLSelectElement).value as ScrapeFrequency,
                 })
               "
             >

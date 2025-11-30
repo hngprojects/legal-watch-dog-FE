@@ -422,11 +422,11 @@ const closeSubJurisdictionModal = () => {
   subJurisdictionModalOpen.value = false
 }
 
-const createSubJurisdiction = async () => {
-  if (!jurisdiction.value) return
+  const createSubJurisdiction = async () => {
+    if (!jurisdiction.value) return
 
-  if (!subJurisdictionForm.value.name.trim()) return
-  if (!subJurisdictionForm.value.description.trim()) return
+    if (!subJurisdictionForm.value.name.trim()) return
+    if (!subJurisdictionForm.value.description.trim()) return
 
   const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
     name: subJurisdictionForm.value.name.trim(),
@@ -435,7 +435,16 @@ const createSubJurisdiction = async () => {
     parent_id: jurisdiction.value.id,
   })
 
-  if (created) closeSubJurisdictionModal()
+  if (created) {
+    closeSubJurisdictionModal()
+    Swal.fire({
+      icon: 'success',
+      title: 'Sub-jurisdiction created',
+      text: `"${created.name}" has been added.`,
+      timer: 2000,
+      showConfirmButton: false,
+    })
+  }
 }
 
 const goToJurisdiction = (id: string) => {
