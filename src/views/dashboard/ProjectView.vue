@@ -210,7 +210,7 @@ watch(
 </script>
 
 <template>
-  <main class="app-container min-h-screen flex-1 bg-gray-50 py-10 px-0 lg:py-14">
+  <main class="app-container min-h-screen flex-1 bg-gray-50 px-0 py-10 lg:py-14">
     <div
       v-if="!organizationId"
       class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-100"
@@ -353,7 +353,9 @@ watch(
 
           <div v-else class="space-y-8">
             <!-- Header with Create Button -->
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div
+              class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+            >
               <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">
                 {{ organizationName || 'Organization' }}'s Projects
               </h1>

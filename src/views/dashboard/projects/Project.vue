@@ -304,7 +304,7 @@ watch(
     </div>
 
     <div v-else class="app-container mx-auto">
-      <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -342,25 +342,19 @@ watch(
         </Breadcrumb>
 
         <div class="relative">
-          <button
-            @click.stop="toggleSettingsMenu"
-            class="btn--default btn--icon-sm btn--icon-only"
-          >
+          <button @click.stop="toggleSettingsMenu" class="btn--default btn--icon-sm btn--icon-only">
             <Settings :size="18" />
           </button>
 
           <div
             v-if="showSettingsMenu"
             @click.stop
-            class="absolute sm:right-0 z-50 mt-2 w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5 p-1 space-y-1"
+            class="absolute z-50 mt-2 w-44 space-y-1 rounded-md bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0"
           >
             <button @click="startEdit" class="btn--secondary btn--full btn--sm">
               Edit Project
             </button>
-            <button
-              @click="deleteProject"
-              class="btn--danger btn--full btn--sm"
-            >
+            <button @click="deleteProject" class="btn--danger btn--full btn--sm">
               Delete Project
             </button>
           </div>
@@ -428,12 +422,7 @@ watch(
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                class="btn--default btn--sm md:btn--lg"
-              >
-                Save Changes
-              </button>
+              <button type="submit" class="btn--default btn--sm md:btn--lg">Save Changes</button>
             </div>
           </form>
         </template>

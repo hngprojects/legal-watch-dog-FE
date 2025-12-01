@@ -90,7 +90,7 @@ onUnmounted(() => {
     class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="app-container mx-auto flex flex-col items-center sm:flex-row w-full sm:items-center justify-between gap-8 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
+      class="app-container mx-auto flex w-full flex-col items-center justify-between gap-8 px-3 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
     >
       <!-- LOGO -->
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
@@ -132,7 +132,7 @@ onUnmounted(() => {
             :to="{ path: '/signup' }"
             variant="default"
             size="default"
-            class="hidden sm:block text-sm sm:text-base"
+            class="hidden text-sm sm:block sm:text-base"
           >
             Sign Up
           </Button>
@@ -262,7 +262,11 @@ onUnmounted(() => {
             >
               Go to Dashboard
             </Button>
-            <Button variant="outline" @click="handleLogout" class="btn--secondary btn--sm sm:btn--lg mt-6">
+            <Button
+              variant="outline"
+              @click="handleLogout"
+              class="btn--secondary btn--sm sm:btn--lg mt-6"
+            >
               Logout
             </Button>
           </template>

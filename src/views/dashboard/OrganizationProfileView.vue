@@ -529,7 +529,7 @@ watch(
 <template>
   <main class="app-container min-h-screen flex-1 bg-gray-50 px-4 py-6 md:px-6 lg:px-0 lg:py-14">
     <div class="mx-auto flex flex-col gap-6 md:gap-8">
-      <div class="flex flex-col items-start sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p class="text-xs font-medium tracking-wide text-[#9CA3AF] uppercase md:text-sm">
             Organization Profile

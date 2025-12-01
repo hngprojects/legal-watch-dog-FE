@@ -45,7 +45,7 @@ const handleAddAi = () => {
 </script>
 
 <template>
-  <div class="flex flex-col items-start sm:flex-row sm:items-center gap-2 justify-between">
+  <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
     <div>
       <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
       <p class="text-xs text-gray-500">Trigger scraping per source and view results.</p>
@@ -63,7 +63,7 @@ const handleAddAi = () => {
 
       <div
         v-if="showHeaderMenu"
-        class="absolute top-full sm:right-0 z-50 mt-2 w-60 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 space-y-2"
+        class="absolute top-full z-50 mt-2 w-60 space-y-2 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0"
       >
         <button @click="handleAddManual" class="btn--secondary btn--sm lg:btn--lg btn--with-icon">
           <FilePlus :size="18" />
@@ -137,7 +137,7 @@ const handleAddAi = () => {
             <p class="truncate text-sm font-semibold text-gray-900 sm:text-base">
               {{ source.name }}
             </p>
-            <p class="sm:truncate text-xs text-gray-500 sm:text-sm">
+            <p class="text-xs text-gray-500 sm:truncate sm:text-sm">
               {{ source.url }}
             </p>
             <p class="mt-1 text-[11px] tracking-wide text-gray-400 uppercase">
