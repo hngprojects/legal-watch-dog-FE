@@ -10,6 +10,7 @@ import { RouterLink } from 'vue-router'
 
 const hasHistory = ref(false)
 const isFreeTrial = ref(true)
+const cancelled = ref(false)
 const currentPlan = ref<BillingPlan | null>(null)
 const endDate = ref<Date | undefined>(undefined)
 
@@ -37,12 +38,13 @@ onMounted(async () => {
     endDate.value = subscriptionStatus.current_period_end
   }
 
+  cancelled.value = subscriptionStatus?.cancel_at_period_end || false
+
   if (history && history.length > 0) {
     hasHistory.value = true
   }
 })
 
-//create a function that counts the number of days left before a specific date and returns a string
 const calculateDaysLeft = (endDate: string | Date): string => {
   console.log(endDate)
   const today = new Date()
@@ -81,6 +83,9 @@ const calculateDaysLeft = (endDate: string | Date): string => {
       </template>
       <template v-else-if="currentPlan && !isFreeTrial">
         <h3 class="mb-4 text-3xl font-semibold">{{ currentPlan.label }}</h3>
+        <p class="text-red-main mb-2 rounded-full bg-red-200 p-2 text-sm" v-if="cancelled">
+          Cancelled
+        </p>
         <p class="mb-10 text-gray-600">{{ currentPlan.description }}</p>
       </template>
 
@@ -91,12 +96,8 @@ const calculateDaysLeft = (endDate: string | Date): string => {
         >
           Upgrade Plan
         </RouterLink>
-        <CancelSubscriptionModal>
-          <button
-            class="btn--md btn--secondary border-accent-main border text-center"
-            :class="[isFreeTrial && 'btn--disabled']"
-            :disabled="isFreeTrial"
-          >
+        <CancelSubscriptionModal :endDate="endDate">
+          <button class="btn--md btn--secondary border-accent-main border text-center">
             Cancel Subscription
           </button>
         </CancelSubscriptionModal>

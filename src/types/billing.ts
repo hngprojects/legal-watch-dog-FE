@@ -32,7 +32,6 @@ export interface BillingSubscriptionStatus {
 }
 
 export interface BillingHistoryEntry {
-  //convert the fields to types
   id: string
   billing_account_id: string
   amount_due: number

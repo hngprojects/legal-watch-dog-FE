@@ -176,7 +176,7 @@ export const useBillingStore = defineStore('billing', {
 
       if (!orgId) return
       try {
-        const res = await billingService.cancelOrganizationSubscription(orgId)
+        const res = await billingService.cancelOrganizationSubscriptionAtPeriodEnd(orgId)
 
         return res.data.data
       } catch (error) {
