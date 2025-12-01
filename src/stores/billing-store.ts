@@ -4,6 +4,7 @@ import { billingService } from '@/api/billing'
 import type { AxiosError } from 'axios'
 import { useAuthStore } from './auth-store'
 import { useRouter } from 'vue-router'
+import type { BillingErrorResponse, BillingPlan } from '@/types/billing'
 
 interface State {
   billing: number
@@ -29,18 +30,33 @@ export const useBillingStore = defineStore('billing', {
       this.loading = value
     },
 
+    async fetchPlans() {
+      this.setError(null)
+      this.setLoading(true)
+
+      try {
+        const res = await billingService.getPlans()
+
+        return res.data.data as BillingPlan[]
+      } catch (error) {
+        this.setError((error as BillingErrorResponse).message)
+      } finally {
+        this.setLoading(false)
+      }
+    },
+
     async getOrganizationId() {
       const router = useRouter()
-      const { user } = useAuthStore()
-      const { fetchOrganizations, currentOrganizationId } = useOrganizationStore()
+      const authStore = useAuthStore()
+      const organizationStore = useOrganizationStore()
 
-      if (!user) {
+      if (!authStore.user) {
         this.setError('No user found. Proceed to login')
         router.push({ name: 'login' })
         return null
       }
 
-      await fetchOrganizations(user.id)
+      await organizationStore.fetchOrganizations(authStore.user.id)
 
       // if (!hasOrganizations) {
       //   this.setError('No organization found')
@@ -48,9 +64,9 @@ export const useBillingStore = defineStore('billing', {
       //   return null
       // }
 
-      console.log(currentOrganizationId)
+      console.log(organizationStore.currentOrganizationId)
 
-      return currentOrganizationId
+      return organizationStore.currentOrganizationId
     },
 
     async hasBillingAccount() {

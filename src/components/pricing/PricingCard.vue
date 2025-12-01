@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import Icon from '@/components/reusable/Icon.vue'
-import { CheckmarkSquare02Icon } from '@hugeicons/core-free-icons'
+import type { BillingPlan } from '@/types/billing'
+import {
+  CheckmarkSquare02Icon,
+  Briefcase01Icon,
+  Building03Icon,
+  Target01Icon,
+} from '@hugeicons/core-free-icons'
 import { RouterLink } from 'vue-router'
 
 const { i, activeBillingCycle, plan } = defineProps<{
   i: number
-  activeBillingCycle: 'monthly' | 'yearly'
-  plan: {
-    title: string
-    description: string
-    icon: typeof CheckmarkSquare02Icon
-    price: number
-    yearly: number
-    benefits: string[]
-  }
+  activeBillingCycle: 'month' | 'year'
+  plan: BillingPlan
 }>()
 </script>
 
@@ -24,7 +23,11 @@ const { i, activeBillingCycle, plan } = defineProps<{
   >
     <div class="text flex items-center justify-between">
       <div class="bg-chocolate-brown-main size-fit rounded-full p-4">
-        <Icon :icon="plan.icon" :size="24" color="var(--peach-amber-200)" />
+        <Icon
+          :icon="i === 0 ? Briefcase01Icon : i === 1 ? Target01Icon : Building03Icon"
+          :size="24"
+          color="var(--peach-amber-200)"
+        />
       </div>
 
       <p v-if="i === 1" class="bg-chocolate-brown-main rounded-md px-2 py-1 text-sm text-white">
@@ -32,21 +35,20 @@ const { i, activeBillingCycle, plan } = defineProps<{
       </p>
     </div>
     <div class="space-y-5">
-      <h2 class="text-2xl font-medium">{{ plan.title }}</h2>
+      <h2 class="text-2xl font-medium">{{ plan.label }}</h2>
       <p class="text-gray-600">{{ plan.description }}</p>
     </div>
     <p>
-      <span class="text-3xl font-medium"
-        >${{ activeBillingCycle === 'monthly' ? plan.price : plan.yearly }}</span
+      <span class="text-3xl font-medium">${{ plan.amount }}</span
       ><span class="text-gray-500">
-        {{ activeBillingCycle === 'monthly' ? '/month' : '/year' }}
+        {{ activeBillingCycle === 'month' ? '/month' : '/year' }}
       </span>
     </p>
 
     <RouterLink
       :to="{
         name: 'payment-method',
-        params: { plan: plan.title.toLowerCase() },
+        params: { plan: plan.label.toLowerCase() },
         query: { cycle: activeBillingCycle },
       }"
       class="btn--secondary btn--xl block w-full border text-center"
@@ -56,9 +58,9 @@ const { i, activeBillingCycle, plan } = defineProps<{
     </RouterLink>
 
     <ul class="space-y-5 pt-4">
-      <li :key="i" v-for="(benefit, i) in plan.benefits" class="flex items-center gap-2">
+      <li :key="i" v-for="(feature, i) in plan.features" class="flex items-center gap-2">
         <Icon :icon="CheckmarkSquare02Icon" :size="20" color="var(--chocolate-brown-main)" />
-        <span class="text-gray-600">{{ benefit }}</span>
+        <span class="text-gray-600">{{ feature }}</span>
       </li>
     </ul>
   </article>
