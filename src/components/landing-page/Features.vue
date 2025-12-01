@@ -1,25 +1,24 @@
 <template>
   <div class="features-page">
     <!-- Hero Section -->
-    <section class="bg-[#3F1A0F] py-24 text-center md:py-36">
-      <div class="mx-auto max-w-5xl px-6">
+    <section class="bg-[#3F1A0F] py-16 text-center sm:py-20 md:py-28 lg:py-36">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6">
         <div
-          class="mb-6 inline-flex items-center space-x-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-[#3F1A0F]"
+          class="mb-4 inline-flex items-center justify-center space-x-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[#3F1A0F] sm:mb-5 sm:px-4 sm:py-2 sm:text-sm"
         >
-          <img :src="starIcon" alt="Star Icon" class="h-4 w-4" />
+          <img :src="starIcon" alt="Star Icon" class="h-3 w-3 sm:h-4 sm:w-4" />
           <span>Features</span>
         </div>
 
         <TypographyHeading
           level="h1"
-          class="mb-6 text-center text-4xl leading-tight font-extrabold text-white sm:text-5xl md:text-6xl"
+          class="mb-4 text-3xl font-extrabold leading-tight text-white sm:mb-5 sm:text-4xl md:text-5xl lg:text-6xl"
         >
           Never Miss a Legal Update Again
         </TypographyHeading>
 
-        <!-- FIXED: Centered on desktop (removed md:text-left) -->
         <TypographyText
-          class="mx-auto mb-10 max-w-3xl text-center text-lg text-gray-300 md:text-xl"
+          class="mx-auto mb-8 max-w-3xl text-sm text-gray-300 sm:mb-10 sm:text-base md:text-lg lg:text-xl"
         >
           Stay ahead of legal change by automating the monitoring process and saving hours of manual
           research every week.
@@ -30,63 +29,60 @@
     </section>
 
     <!-- Main Features -->
-    <main class="app-container bg-gray-50 pt-20 pb-16">
+    <main class="app-container bg-gray-50 py-12 sm:py-16 lg:pt-20 lg:pb-16">
       <div class="mx-auto">
-        <div class="mx-auto flex justify-center text-center">
-          <TypographyHeading level="h2" class="text-3xl font-bold text-gray-900 md:text-4xl">
+        <div class="mx-auto mb-12 flex justify-center text-center sm:mb-16">
+          <TypographyHeading level="h2" class="text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
             Exploring the <span class="text-[#F2AB6D]">Uniqueness</span> of our Product
           </TypographyHeading>
         </div>
 
         <!-- 1. Real-Time Alerts -->
-        <div class="mb-24 grid items-center gap-12 md:grid-cols-2 md:gap-20">
+        <div class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20">
           <div class="order-2 md:order-1">
-            <TypographyHeading level="h3" class="mb-4 text-2xl font-bold text-gray-900 md:text-3xl">
+            <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl">
               Real-Time Legislative Alerts
             </TypographyHeading>
 
-            <TypographyText class="text-center text-lg text-gray-600 md:text-left">
+            <TypographyText class="text-base text-gray-600 sm:text-lg">
               Receive instant updates whenever relevant laws or regulations change. Never miss a
               critical compliance deadline.
             </TypographyText>
           </div>
 
           <div class="relative order-1 md:order-2">
-            <div class="overflow-hidden rounded-3xl p-6 md:p-10">
-              <img :src="feature1" alt="Dashboard" class="w-full rounded-2xl shadow-xl" />
+            <div class="overflow-hidden rounded-2xl p-4 sm:rounded-3xl sm:p-6 md:p-8 lg:p-10">
+              <img :src="feature1" alt="Dashboard" class="w-full rounded-xl shadow-xl sm:rounded-2xl" />
             </div>
 
             <img
               :src="featureChild1"
               alt="Notification Bell"
-              class="absolute right-0 bottom-0 z-10 h-28 w-35 -translate-x-[430px] -translate-y-6 rounded-2xl object-cover md:h-40 md:w-40"
+              class="absolute bottom-0 right-0 z-10 h-20 w-20 -translate-x-4 -translate-y-4 rounded-xl object-cover sm:h-24 sm:w-24 sm:-translate-x-6 sm:-translate-y-6 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:-translate-x-[430px] xl:-translate-y-6"
             />
           </div>
         </div>
 
         <!-- 2. Customizable Watchlists -->
-        <div class="mb-24 grid items-center gap-12 md:grid-cols-2 md:gap-20">
+        <div class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20">
           <div class="relative order-1">
-            <div class="overflow-hidden p-6 md:p-10">
-              <img :src="feature2" alt="Jurisdiction Modal" class="w-full" />
+            <div class="overflow-hidden rounded-2xl p-4 sm:rounded-3xl sm:p-6 md:p-8 lg:p-10">
+              <img :src="feature2" alt="Jurisdiction Modal" class="w-full rounded-xl sm:rounded-2xl" />
             </div>
 
             <img
               :src="featureChild2"
               alt="AI Toolkit"
-              class="absolute bottom-0 left-0 z-10 h-28 w-32 translate-x-[410px] -translate-y-6 rounded-2xl object-cover md:h-40 md:w-40"
+              class="absolute bottom-0 left-0 z-10 h-20 w-20 translate-x-4 -translate-y-4 rounded-xl object-cover sm:h-24 sm:w-24 sm:translate-x-6 sm:-translate-y-6 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:translate-x-[410px] xl:-translate-y-6"
             />
           </div>
 
           <div class="order-2">
-            <TypographyHeading
-              level="h3"
-              class="mb-4 text-center text-2xl font-bold text-gray-900 md:text-left md:text-3xl"
-            >
+            <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl">
               Customizable Watchlists
             </TypographyHeading>
 
-            <TypographyText class="text-center text-lg text-gray-600 md:text-left">
+            <TypographyText class="text-base text-gray-600 sm:text-lg">
               Track only the projects, areas, or jurisdictions that matter to you. Your updates,
               your focus.
             </TypographyText>
@@ -94,51 +90,51 @@
         </div>
 
         <!-- 3. AI-Powered Insights -->
-        <div class="mb-24 grid items-center gap-12 md:grid-cols-2 md:gap-20">
+        <div class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20">
           <div class="order-2 md:order-1">
-            <TypographyHeading level="h3" class="mb-4 text-2xl font-bold text-gray-900 md:text-3xl">
+            <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl">
               AI-Powered Legal Insights
             </TypographyHeading>
 
-            <TypographyText class="text-center text-lg text-gray-600 md:text-left">
+            <TypographyText class="text-base text-gray-600 sm:text-lg">
               AI helps you quickly summarize regulations, flags critical changes, and identifies
               cross-jurisdictional risks so you stay compliant with minimal effort.
             </TypographyText>
           </div>
 
           <div class="relative order-1 md:order-2">
-            <div class="overflow-hidden p-6 md:p-10">
-              <img :src="feature3" alt="AI Summary" class="w-full rounded-2xl shadow-xl" />
+            <div class="overflow-hidden rounded-2xl p-4 sm:rounded-3xl sm:p-6 md:p-8 lg:p-10">
+              <img :src="feature3" alt="AI Summary" class="w-full rounded-xl shadow-xl sm:rounded-2xl" />
             </div>
 
             <img
               :src="featureChild3"
               alt="AI Brain"
-              class="absolute bottom-0 left-1/2 z-10 h-32 w-32 -translate-x-[280px] -translate-y-6 md:h-40 md:w-60"
+              class="absolute bottom-0 left-1/2 z-10 h-24 w-24 -translate-x-1/2 -translate-y-4 rounded-xl object-cover sm:h-28 sm:w-28 md:h-36 md:w-36 lg:h-40 lg:w-60 xl:-translate-x-[280px] xl:-translate-y-6"
             />
           </div>
         </div>
 
         <!-- 4. Task Management & Ticketing -->
-        <div class="grid items-center gap-12 md:grid-cols-2 md:gap-20">
+        <div class="grid items-center gap-8 md:grid-cols-2 md:gap-12 lg:gap-20">
           <div class="relative order-1">
-            <div class="overflow-hidden p-6 md:p-10">
-              <img :src="feature4" alt="Team Invite" class="w-full rounded-2xl" />
+            <div class="overflow-hidden rounded-2xl p-4 sm:rounded-3xl sm:p-6 md:p-8 lg:p-10">
+              <img :src="feature4" alt="Team Invite" class="w-full rounded-xl sm:rounded-2xl" />
             </div>
 
             <img
               :src="featureChild4"
               alt="Tickets"
-              class="absolute bottom-0 left-0 z-10 h-28 w-28 translate-x-[400px] -translate-y-6 md:h-40 md:w-40"
+              class="absolute bottom-0 left-0 z-10 h-20 w-20 translate-x-4 -translate-y-4 rounded-xl object-cover sm:h-24 sm:w-24 sm:translate-x-6 sm:-translate-y-6 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:translate-x-[400px] xl:-translate-y-6"
             />
           </div>
 
           <div class="order-2">
-            <TypographyHeading level="h3" class="mb-4 text-2xl font-bold text-gray-900 md:text-3xl">
+            <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl">
               Task Management & Ticketing
             </TypographyHeading>
 
-            <TypographyText class="text-center text-lg text-gray-600 md:text-left">
+            <TypographyText class="text-base text-gray-600 sm:text-lg">
               Create actionable tickets for each legal update, keeping your team informed and
               accountable.
             </TypographyText>
@@ -148,16 +144,16 @@
     </main>
 
     <!-- Final CTA -->
-    <section class="bg-white py-20 text-center md:py-28">
-      <div class="mx-auto max-w-5xl px-6">
+    <section class="bg-white py-12 text-center sm:py-16 md:py-20 lg:py-28">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6">
         <TypographyHeading
           level="h2"
-          class="mb-6 text-center text-4xl leading-tight font-bold text-[#401903]"
+          class="mb-4 text-2xl font-bold leading-tight text-[#401903] sm:mb-5 sm:text-3xl md:text-4xl"
         >
           Turn <span class="text-[#F2AB6D]"> Legal Changes </span>Into Clear Actions
         </TypographyHeading>
 
-        <TypographyText class="mb-10 text-center text-lg text-gray-600 md:text-center md:text-xl">
+        <TypographyText class="mb-8 text-base text-gray-600 sm:mb-10 sm:text-lg md:text-xl">
           Stay informed. Stay compliant. Stay ahead.
         </TypographyText>
 
@@ -182,3 +178,58 @@ import featureChild3 from '@/assets/Images/Featurechild3.png'
 import featureChild4 from '@/assets/Images/Featurechild4.png'
 import { RouterLink } from 'vue-router'
 </script>
+
+<style scoped>
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .app-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .features-page section,
+  .features-page main {
+    overflow-x: hidden;
+  }
+  
+  /* Ensure images don't overflow on mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Better touch targets for buttons */
+  button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Tablet-specific adjustments */
+@media (min-width: 640px) and (max-width: 1024px) {
+  /* Adjust floating image positions for tablet */
+  .relative img[alt*="Notification Bell"],
+  .relative img[alt*="AI Toolkit"],
+  .relative img[alt*="AI Brain"],
+  .relative img[alt*="Tickets"] {
+    transform: translateX(0) translateY(0) !important;
+    position: relative !important;
+    margin-top: 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+}
+
+/* Ensure content doesn't become too wide on large screens */
+@media (min-width: 1536px) {
+  .app-container {
+    max-width: 1280px;
+  }
+}
+</style>

@@ -74,21 +74,23 @@ onUnmounted(() => {
 
 <template>
   <header
-    class="text-text-main container--wide sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
+    class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="app-container mx-auto flex w-full flex-col items-center justify-between gap-4 px-4 py-4 sm:flex-row sm:px-0 lg:py-5"
+      class="app-container mx-auto flex w-full items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
     >
+      <!-- LOGO -->
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
-        <BrandLogo />
+        <BrandLogo class="h-8 w-auto sm:h-10" />
       </RouterLink>
 
+      <!-- DESKTOP NAV -->
       <nav aria-label="Primary" class="hidden flex-1 lg:flex lg:items-center lg:justify-center">
-        <ul class="flex items-center gap-8">
+        <ul class="flex items-center gap-6 xl:gap-8">
           <li v-for="link in navLinks" :key="link.name">
             <RouterLink
               :to="link.to"
-              class="hover:text-accent-main text-base font-medium text-gray-500 transition-colors"
+              class="hover:text-accent-main text-sm font-medium text-gray-500 transition-colors xl:text-base"
             >
               {{ link.name }}
             </RouterLink>
@@ -97,26 +99,39 @@ onUnmounted(() => {
       </nav>
 
       <!-- RIGHT SIDE -->
-      <div class="relative flex w-full items-center gap-3 sm:w-auto">
+      <div class="relative flex items-center gap-2 sm:gap-3">
         <!-- NOT LOGGED IN -->
         <template v-if="!isAuthenticated">
-          <div class="hidden flex-col gap-2 sm:flex sm:flex-row">
-            <Button :as="RouterLink" :to="{ path: '/login' }" variant="default" size="lg">
-              Sign In
-            </Button>
-            <Button :as="RouterLink" :to="{ path: '/signup' }" variant="default" size="lg">
-              Sign Up
-            </Button>
-          </div>
+          <!-- Hide Sign In on mobile, show on tablet+ -->
+          <Button
+            :as="RouterLink"
+            :to="{ path: '/login' }"
+            variant="outline"
+            size="default"
+            class="hidden text-sm sm:inline-flex sm:text-base"
+          >
+            Sign In
+          </Button>
+          
+          <!-- Sign Up button - smaller on mobile -->
+          <Button
+            :as="RouterLink"
+            :to="{ path: '/signup' }"
+            variant="default"
+            size="default"
+            class="text-sm sm:text-base"
+          >
+            Sign Up
+          </Button>
         </template>
 
-        <!-- LOGGED IN VIEW — U ICON + DROPDOWN -->
-        <div v-else class="flex items-center gap-5">
+        <!-- LOGGED IN VIEW -->
+        <div v-else class="hidden items-center gap-3 sm:gap-5 lg:flex">
           <div class="flex items-center space-x-4">
             <UserDropdown @logout="handleLogout">
-              <button class="btn btn--with-icon">
+              <button class="btn btn--with-icon flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-gray-100">
                 <UserAvatar :name="displayName" :size="38" />
-                <span class="max-w-[140px] truncate text-sm font-semibold text-gray-800">
+                <span class="max-w-[100px] truncate text-sm font-semibold text-gray-800 xl:max-w-[140px]">
                   {{ displayName }}
                 </span>
               </button>
@@ -124,14 +139,15 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- MOBILE MENU BUTTON -->
+        <!-- MOBILE/TABLET MENU BUTTON -->
         <button
           @click="isMenuOpen = !isMenuOpen"
-          class="btn--icon-only btn--default btn--icon-sm ml-auto lg:hidden"
+          class="text-text-main inline-flex items-center justify-center rounded-lg border p-2 hover:bg-gray-50 lg:hidden"
+          aria-label="Toggle menu"
         >
           <svg
             v-if="!isMenuOpen"
-            class="h-6 w-6"
+            class="h-5 w-5 sm:h-6 sm:w-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -143,7 +159,7 @@ onUnmounted(() => {
               d="M4 6h16M4 12h16M4 18h16"
             />
           </svg>
-          <svg v-else class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg v-else class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -155,7 +171,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Mobile Menu — unchanged -->
+    <!-- MOBILE/TABLET MENU -->
     <Transition
       enter-active-class="transition-transform duration-300 ease-in-out"
       enter-from-class="-translate-x-full"
@@ -167,13 +183,14 @@ onUnmounted(() => {
       <div
         v-if="isMenuOpen"
         id="mobile-menu"
-        class="fixed top-0 left-0 z-50 h-screen w-full max-w-sm bg-white shadow-2xl lg:hidden"
+        class="fixed top-0 left-0 z-50 h-screen w-full max-w-xs bg-white shadow-2xl sm:max-w-sm lg:hidden"
       >
-        <div class="flex items-center justify-between border-b p-6">
+        <!-- Menu Header -->
+        <div class="flex items-center justify-between border-b p-4 sm:p-6">
           <RouterLink to="/" @click="closeMenu">
-            <BrandLogo />
+            <BrandLogo class="h-8 w-auto sm:h-10" />
           </RouterLink>
-          <button @click="closeMenu" class="btn--icon-only btn--default btn--icon-sm">
+          <button @click="closeMenu" class="rounded-lg p-1 hover:bg-gray-100" aria-label="Close menu">
             <svg class="h-6 w-6" fill="none" stroke="currentColor">
               <path
                 stroke-linecap="round"
@@ -185,38 +202,82 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <nav class="flex flex-col gap-2 bg-white p-6">
+        <!-- Navigation Links -->
+        <nav class="flex flex-col gap-1 bg-white p-4 sm:gap-2 sm:p-6">
           <RouterLink
             v-for="link in navLinks"
             :key="link.name"
             :to="link.to"
             @click="closeMenu"
-            class="rounded-lg px-3 py-2 text-lg text-gray-600 hover:bg-gray-100"
+            class="rounded-lg px-3 py-2.5 text-base text-gray-600 transition-colors hover:bg-gray-100 sm:text-lg"
           >
             {{ link.name }}
           </RouterLink>
         </nav>
 
-        <div class="space-y-4 border-t p-6">
+        <!-- Action Buttons -->
+        <div class="space-y-3 border-t p-4 sm:space-y-4 sm:p-6">
           <template v-if="isAuthenticated">
-            <Button :as="RouterLink" :to="{ name: 'organizations' }" class="w-full text-white">
+            <!-- User info on mobile/tablet -->
+            <div class="mb-4 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
+              <UserAvatar :name="displayName" :size="40" />
+              <div class="flex-1 min-w-0">
+                <p class="truncate text-sm font-semibold text-gray-800">{{ displayName }}</p>
+                <p class="text-xs text-gray-500">Logged in</p>
+              </div>
+            </div>
+            
+            <Button
+              :as="RouterLink"
+              :to="{ name: 'organizations' }"
+              @click="closeMenu"
+              class="w-full text-white"
+            >
               Go to Dashboard
             </Button>
-            <Button variant="outline" @click="handleLogout" class="w-full"> Logout </Button>
+           <Button variant="outline" @click="handleLogout" class="w-full">
+              Logout
+            </Button>
           </template>
 
           <template v-else>
-            <div class="flex flex-col gap-2 sm:flex-row">
-              <Button variant="outline" :as="RouterLink" :to="{ path: '/login' }" class="w-full">
-                Sign in
-              </Button>
-              <Button variant="outline" :as="RouterLink" :to="{ path: '/signup' }" class="w-full">
-                Sign up
-              </Button>
-            </div>
+            <Button
+              :as="RouterLink"
+              :to="{ path: '/login' }"
+              @click="closeMenu"
+              variant="outline"
+              class="w-full mr-2"
+            >
+              Sign In
+            </Button>
+            <Button
+              :as="RouterLink"
+              :to="{ path: '/signup' }"
+              @click="closeMenu"
+              class="w-full text-white"
+            >
+              Sign Up
+            </Button>
           </template>
         </div>
       </div>
+    </Transition>
+
+    <!-- Backdrop overlay for mobile menu -->
+    <Transition
+      enter-active-class="transition-opacity duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-300"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="isMenuOpen"
+        @click="closeMenu"
+        class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+        aria-hidden="true"
+      ></div>
     </Transition>
   </header>
 </template>
