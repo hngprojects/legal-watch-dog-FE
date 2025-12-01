@@ -22,7 +22,6 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
 })
 
-const isNativeButton = computed(() => !props.as || props.as === 'button')
 const isDisabled = computed(() => Boolean(props.disabled || props.loading))
 </script>
 
@@ -34,8 +33,7 @@ const isDisabled = computed(() => Boolean(props.disabled || props.loading))
     :aria-busy="props.loading || undefined"
     :aria-disabled="isDisabled || undefined"
     :data-loading="props.loading || undefined"
-    :data-disabled="isDisabled || undefined"
-    :disabled="isNativeButton ? isDisabled : undefined"
+    :disabled="isDisabled || undefined"
     :class="cn(buttonVariants({ variant, size, layout }), props.class)"
   >
     <span class="inline-flex items-center justify-center gap-2">
