@@ -10,10 +10,14 @@ import DialogTitle from '../ui/dialog/DialogTitle.vue'
 import DialogTrigger from '../ui/dialog/DialogTrigger.vue'
 import XIcon from '@/assets/icons/checkmark-circle-2.svg'
 
-const handleCancelSubscription = async () => {
-  const { cancelSubscription } = useBillingStore()
+const {} = defineProps<{
+  endDate?: Date
+}>()
 
-  cancelSubscription()
+const handleCancelSubscription = async () => {
+  const billingStore = useBillingStore()
+
+  billingStore.cancelSubscription()
 }
 </script>
 
@@ -28,7 +32,8 @@ const handleCancelSubscription = async () => {
 
         <DialogTitle> Cancel your subscription? </DialogTitle>
         <DialogDescription class="py-4">
-          You'll lose premium access at the end of your billing period on December 15, 2025.
+          You'll lose premium access at the end of your billing period on
+          {{ endDate ? endDate.toLocaleDateString() : '' }}.
         </DialogDescription>
       </DialogHeader>
       <section class="bg-peach-amber-100 border-peach-amber-200 rounded-md border px-10 py-4">
