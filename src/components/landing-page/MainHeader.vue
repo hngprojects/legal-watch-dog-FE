@@ -77,7 +77,7 @@ onUnmounted(() => {
     class="text-text-main container--wide sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="app-container mx-auto flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-0 lg:py-5"
+      class="app-container mx-auto flex flex-col sm:flex-row w-full items-center justify-between gap-4 px-4 py-4 sm:px-0 lg:py-5"
     >
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
         <BrandLogo />
@@ -97,7 +97,7 @@ onUnmounted(() => {
       </nav>
 
       <!-- RIGHT SIDE -->
-      <div class="relative flex items-center gap-3">
+      <div class="relative flex items-center gap-3 w-full sm:w-auto">
         <!-- NOT LOGGED IN -->
         <template v-if="!isAuthenticated">
           <div class="sm:flex flex-col gap-2 sm:flex-row hidden">
@@ -122,13 +122,12 @@ onUnmounted(() => {
               </button>
             </UserDropdown>
           </div>
-
         </div>
 
         <!-- MOBILE MENU BUTTON -->
         <button
           @click="isMenuOpen = !isMenuOpen"
-          class="text-text-main ml-auto inline-flex items-center justify-center rounded-full border p-2 lg:hidden"
+          class="btn--icon-only btn--default btn--icon-sm ml-auto lg:hidden"
         >
           <svg
             v-if="!isMenuOpen"
