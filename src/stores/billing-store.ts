@@ -140,14 +140,14 @@ export const useBillingStore = defineStore('billing', {
       }
     },
 
-    async checkoutPlan(plan: string) {
+    async checkoutPlan(plan_id: string) {
       this.setError(null)
       const orgId = await this.getOrganizationId()
 
       if (!orgId) return
 
       try {
-        const res = await billingService.checkout(orgId, plan)
+        const res = await billingService.checkout(orgId, plan_id)
 
         return res.data.data.checkout_url
       } catch (error) {

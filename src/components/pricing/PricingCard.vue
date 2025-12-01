@@ -20,7 +20,7 @@ const route = useRoute()
 const billingStore = useBillingStore()
 
 const handlePay = async () => {
-  const checkoutUrl = await billingStore.checkoutPlan('yearly')
+  const checkoutUrl = await billingStore.checkoutPlan(plan.id)
 
   console.log(checkoutUrl)
 

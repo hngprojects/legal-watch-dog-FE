@@ -17,9 +17,9 @@ export const billingService = {
 
   getPlans: () => axios.get(BASE_URL + '/billing/plans'),
 
-  checkout: (organizationId: string, plan: string) =>
+  checkout: (organizationId: string, plan_id: string) =>
     api.post(`/organizations/${organizationId}/billing/checkout`, {
-      plan,
+      plan_id,
       description: `Subscription for ${organizationId}`,
     }),
 
