@@ -218,7 +218,7 @@ watch(
         Projects live under organizations. Select an organization to view or create projects.
       </p>
       <div class="mt-6 flex justify-center">
-        <RouterLink to="/dashboard/organizations" class="btn--primary btn--lg">
+        <RouterLink to="/dashboard/organizations" class="btn--default btn--lg">
           Go to Organizations
         </RouterLink>
       </div>
@@ -321,7 +321,7 @@ watch(
               <p class="mb-8 text-sm text-gray-600">
                 Our AI will monitor the sites and send you summarized updates automatically.
               </p>
-              <button @click="openCreateModal" class="btn--primary btn--lg btn--with-icon">
+              <button @click="openCreateModal" class="btn--default btn--lg btn--with-icon">
                 <svg
                   width="16"
                   height="16"
@@ -355,7 +355,7 @@ watch(
               <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">
                 {{ organizationName || 'Organization' }}'s Projects
               </h1>
-              <button @click="openCreateModal" class="btn--with-icon btn--primary">
+              <button @click="openCreateModal" class="btn--with-icon btn--lg btn--default">
                 <svg
                   width="20"
                   height="20"

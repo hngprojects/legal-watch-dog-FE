@@ -49,8 +49,8 @@ const { i, activeBillingCycle, plan } = defineProps<{
         params: { plan: plan.title.toLowerCase() },
         query: { cycle: activeBillingCycle },
       }"
-      class="btn--outline btn--xl block w-full border text-center"
-      :class="[i == 1 && 'btn--primary']"
+      class="btn--secondary btn--xl block w-full border text-center"
+      :class="[i == 1 && 'btn--default']"
     >
       {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
     </RouterLink>

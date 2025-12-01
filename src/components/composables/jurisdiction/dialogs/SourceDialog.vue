@@ -114,7 +114,7 @@ const emit = defineEmits<{
           <button
             type="submit"
             :disabled="loading"
-            class="btn--primary btn--lg btn--with-icon disabled:cursor-not-allowed disabled:opacity-70"
+            class="btn--default btn--lg btn--with-icon disabled:cursor-not-allowed disabled:opacity-70"
           >
             <span v-if="loading">Saving...</span>
             <span v-else>{{ editingId ? 'Save Changes' : 'Add Source' }}</span>

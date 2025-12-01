@@ -49,12 +49,12 @@ onMounted(async () => {
       <div class="flex flex-col gap-x-6 gap-y-4 *:flex-1 md:flex-row">
         <RouterLink
           :to="{ name: 'payment-plan' }"
-          class="btn--md btn--primary flex items-center justify-center text-center"
+          class="btn--md btn--default flex items-center justify-center text-center"
         >
           Upgrade Plan
         </RouterLink>
         <CancelSubscriptionModal>
-          <button class="btn--md btn--outline border-accent-main border text-center">
+          <button class="btn--md btn--secondary border-accent-main border text-center">
             Cancel Subscription
           </button>
         </CancelSubscriptionModal>
@@ -71,7 +71,7 @@ onMounted(async () => {
       <AddPaymentModal>
         <RouterLink
           :to="{ name: 'payment-method', params: { plan: 'professional' } }"
-          class="btn--md btn--outline block w-fit text-center"
+          class="btn--md btn--secondary block w-fit text-center"
         >
           Add Payment Method
         </RouterLink>

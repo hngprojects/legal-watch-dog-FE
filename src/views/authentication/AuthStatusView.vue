@@ -148,7 +148,7 @@ const isSuccess = computed(() => statusType.value === 'success')
         <button
           type="button"
           @click="handleRedirect"
-          class="btn--primary btn--lg w-full"
+          class="btn--default btn--lg w-full"
           :disabled="isNavigating"
         >
           <span>{{ isNavigating ? 'Redirecting...' : statusCopy.cta }}</span>

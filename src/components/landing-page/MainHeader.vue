@@ -107,24 +107,20 @@ onUnmounted(() => {
       <div class="relative flex items-center gap-3">
         <!-- NOT LOGGED IN -->
         <template v-if="!isAuthenticated">
-          <Button
+          <!-- <Button
             :as="RouterLink"
             :to="{ path: '/waitlist' }"
-            variant="ghost"
+            variant="outline"
             size="lg"
-            class="hidden px-7 lg:inline-flex"
           >
             Join Waitlist
-          </Button>
+          </Button> -->
 
-          <Button
-            :as="RouterLink"
-            :to="{ path: '/login' }"
-            variant="secondary"
-            size="lg"
-            class="hidden px-7 lg:inline-flex"
-          >
+          <Button :as="RouterLink" :to="{ path: '/login' }" variant="default" size="lg">
             Sign In
+          </Button>
+          <Button :as="RouterLink" :to="{ path: '/signup' }" variant="default" size="lg">
+            Sign Up
           </Button>
         </template>
 
@@ -264,8 +260,11 @@ onUnmounted(() => {
           </template>
 
           <template v-else>
-            <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full text-white">
+            <!-- <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full text-white">
               Join Waitlist
+            </Button> -->
+            <Button variant="outline" :as="RouterLink" :to="{ path: '/login' }" class="w-full">
+              Sign in
             </Button>
             <Button variant="outline" :as="RouterLink" :to="{ path: '/signup' }" class="w-full">
               Sign up

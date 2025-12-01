@@ -53,7 +53,7 @@ const handleAddAi = () => {
 
     <div class="relative">
       <button
-        class="btn--lg btn--primary btn--with-icon"
+        class="btn--lg btn--default btn--with-icon"
         @click.stop="showHeaderMenu = !showHeaderMenu"
       >
         <Plus :size="16" /> Add Source
@@ -94,7 +94,7 @@ const handleAddAi = () => {
 
       <div class="relative mt-4 inline-block">
         <button
-          class="btn--sm btn--primary btn--with-icon"
+          class="btn--sm btn--default btn--with-icon"
           @click.stop="showEmptyStateMenu = !showEmptyStateMenu"
         >
           <Plus :size="16" /> Add Source
@@ -137,7 +137,7 @@ const handleAddAi = () => {
 
           <div class="flex flex-wrap items-center justify-end gap-2">
             <button
-              class="btn--sm btn--primary"
+              class="btn--sm btn--default"
               :disabled="scraping[source.id]"
               @click="emit('scrape', source)"
             >

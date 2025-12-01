@@ -315,7 +315,7 @@ const goToProject = (id: string) => {
             <button type="button" @click="closeCreateModal" class="btn--secondary btn--lg">
               Cancel
             </button>
-            <button type="submit" class="btn--primary btn--lg">Save Project</button>
+            <button type="submit" class="btn--default btn--lg">Save Project</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>
