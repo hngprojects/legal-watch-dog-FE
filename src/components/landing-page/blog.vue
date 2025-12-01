@@ -299,7 +299,7 @@
         </div>
       </section>
 
-      <section class="-mx-6 bg-gray-50/50 py-20 text-center lg:-mx-8">
+      <!-- <section class="-mx-6 bg-gray-50/50 py-20 text-center lg:-mx-8">
         <div class="mx-auto max-w-xl px-6">
           <TypographyHeading
             level="h3"
@@ -327,7 +327,7 @@
             </Button>
           </div>
         </div>
-      </section>
+      </section> -->
     </div>
   </div>
 </template>

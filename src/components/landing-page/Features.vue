@@ -25,11 +25,7 @@
           research every week.
         </TypographyText>
 
-        <button
-          class="rounded-lg bg-white px-8 py-3 font-semibold text-[#3F1A0F] shadow-lg transition duration-200 hover:bg-gray-100"
-        >
-          Get Started
-        </button>
+        <RouterLink to="/signup" class="btn--contrast btn--lg">Get Started</RouterLink>
       </div>
     </section>
 
@@ -165,11 +161,7 @@
           Stay informed. Stay compliant. Stay ahead.
         </TypographyText>
 
-        <button
-          class="rounded-lg bg-[#3F1A0F] px-8 py-4 text-lg font-semibold text-white shadow-xl transition duration-200 hover:bg-[#2F140A]"
-        >
-          Get Started
-        </button>
+        <RouterLink to="/signup" class="btn--default btn--lg">Get Started</RouterLink>
       </div>
     </section>
   </div>
@@ -188,4 +180,5 @@ import featureChild1 from '@/assets/Images/Featurechild1.png'
 import featureChild2 from '@/assets/Images/Featurechild2.png'
 import featureChild3 from '@/assets/Images/Featurechild3.png'
 import featureChild4 from '@/assets/Images/Featurechild4.png'
+import { RouterLink } from 'vue-router'
 </script>
