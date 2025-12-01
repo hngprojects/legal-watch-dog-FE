@@ -81,7 +81,7 @@
               ></path>
             </svg>
             <Input
-              class="h-9 grow border-0 bg-transparent px-2 py-1 text-base shadow-none"
+              class="h-9 grow border-0 bg-transparent px-2 py-1 text-base outline-0"
               placeholder="Search Blogs..."
             />
             <button

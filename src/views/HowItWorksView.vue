@@ -46,10 +46,11 @@ const showVideo = ref(false)
 <template>
   <div class="flex min-h-screen flex-col">
     <main
-      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] py-16"
+      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] py-12 sm:py-16 lg:py-20"
     >
+      <!-- Background gradient - responsive -->
       <div
-        class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+        class="pointer-events-none absolute top-0 left-1/2 z-0 h-[500px] w-[1200px] -translate-x-1/2 -translate-y-[50%] rounded-[50%] sm:h-[600px] sm:w-[1400px] sm:-translate-y-[55%] lg:h-[800px] lg:w-[1600px] lg:-translate-y-[60%]"
         style="
           background: radial-gradient(
             ellipse,
@@ -60,40 +61,49 @@ const showVideo = ref(false)
           );
         "
       ></div>
-      <section class="app-container relative z-10 mb-24 space-y-11 text-center">
+      
+      <!-- Hero Section -->
+      <section class="app-container relative z-10 mb-16 space-y-8 text-center sm:mb-20 sm:space-y-10 lg:mb-24">
         <PillTag>
-          <span class="font-normal text-gray-600">AI-Powered Regulatory Intelligence</span>
+          <span class="text-sm font-normal text-gray-600 sm:text-base">AI-Powered Regulatory Intelligence</span>
         </PillTag>
-        <div class="space-y-5">
-          <h1 class="text-preset-display-md text-primary font-bold">How Legal Watch Dog Works</h1>
-          <p class="text-preset-body-xx-lg text-gray-600">
-            Stay ahead of legal changes with AI-powered monitoring.<br />
+        
+        <div class="space-y-4 sm:space-y-5">
+          <h1 class="text-3xl font-bold text-primary sm:text-4xl md:text-5xl lg:text-preset-display-md">
+            How Legal Watch Dog Works
+          </h1>
+          <p class="text-base text-gray-600 sm:text-lg md:text-xl lg:text-preset-body-xx-lg">
+            Stay ahead of legal changes with AI-powered monitoring.<br class="hidden sm:block" />
             Never miss an important update across any jurisdiction.
           </p>
         </div>
+        
+        <!-- Video Button -->
         <Button
           variant="secondary"
-          class="my-8 cursor-pointer self-center px-8"
+          class="my-4 cursor-pointer self-center px-6 py-5 text-sm sm:my-6 sm:px-8 sm:text-base"
           size="lg"
           @click="showVideo = true"
         >
-          <Icon :icon="PlayIcon" class="mr-2" /> Watch 2-minute Demo
+          <Icon :icon="PlayIcon" class="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Watch 2-minute Demo
         </Button>
+        
+        <!-- Video Modal -->
         <Teleport to="body">
           <div
             v-if="showVideo"
-            class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+            class="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4"
             @click="showVideo = false"
           >
-            <div class="relative w-full max-w-5xl">
+            <div class="relative w-full max-w-3xl sm:max-w-4xl lg:max-w-5xl">
               <button
-                class="absolute -top-12 right-0 z-10 cursor-pointer text-5xl leading-none font-light text-white transition-colors duration-200 select-none hover:text-gray-300"
+                class="absolute -top-10 right-0 z-10 cursor-pointer select-none text-4xl font-light leading-none text-white transition-colors duration-200 hover:text-gray-300 sm:-top-12 sm:text-5xl"
                 @click="showVideo = false"
               >
                 ×
               </button>
 
-              <div class="relative overflow-hidden rounded-2xl shadow-2xl">
+              <div class="relative overflow-hidden rounded-xl shadow-2xl sm:rounded-2xl">
                 <iframe
                   src="https://drive.google.com/file/d/13Tm2Ysa0wwVKmkTOLcZe9c5eMmxJDb1b/preview"
                   allow="autoplay; encrypted-media; picture-in-picture"
@@ -107,34 +117,65 @@ const showVideo = ref(false)
         </Teleport>
       </section>
 
+      <!-- Steps Section -->
       <section class="app-container relative z-10 text-center">
-        <div class="mb-28">
-          <h2 class="text-preset-display-sm font-semibold">
+        <div class="mb-16 sm:mb-20 lg:mb-28">
+          <h2 class="text-2xl font-semibold sm:text-3xl md:text-4xl lg:text-preset-display-sm">
             5 <span class="text-peach-amber-main">Simple Steps</span> to Stay Informed
           </h2>
-          <p class="text-preset-body-xx-lg text-gray-600">From setups to alerts in minutes</p>
+          <p class="mt-2 text-base text-gray-600 sm:mt-3 sm:text-lg md:text-xl lg:text-preset-body-xx-lg">
+            From setups to alerts in minutes
+          </p>
         </div>
 
-        <div class="space-y-20 text-center lg:text-start">
+        <div class="space-y-16 sm:space-y-20">
           <article
-            :key="i"
             v-for="(step, i) in steps"
-            class="flex w-full flex-col justify-center gap-10 *:basis-1/2 lg:flex-row lg:gap-0 lg:[&>div]:first:flex-1"
+            :key="i"
+            class="flex w-full flex-col items-center justify-center gap-8 text-center md:gap-10 lg:flex-row lg:items-start lg:text-start"
             :class="{ 'lg:flex-row-reverse': i % 2 !== 0 }"
           >
-            <div class="space-y-4 lg:self-center" :class="[i % 2 !== 0 ? 'lg:pl-14' : 'lg:pr-14']">
-              <div class="flex items-center justify-center gap-3 lg:justify-start">
-                <div class="p-4">
-                  <img :src="workIcon" alt="icon" />
+            <!-- Content Column -->
+            <div 
+              class="w-full max-w-md space-y-4 md:max-w-lg lg:max-w-none lg:basis-1/2 lg:space-y-5 lg:self-center"
+              :class="[
+                i % 2 !== 0 ? 'lg:pl-10 xl:pl-14' : 'lg:pr-10 xl:pr-14'
+              ]"
+            >
+              <!-- Step Indicator -->
+              <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+                <div class="flex items-center justify-center p-3 sm:p-4">
+                  <img 
+                    :src="workIcon" 
+                    alt="icon" 
+                    class="h-10 w-10 sm:h-12 sm:w-12"
+                  />
                 </div>
-                <h3 class="text-preset-heading-lg text-peach-amber-main">Step {{ i + 1 }}</h3>
+                <div class="flex items-center gap-3">
+                  <h3 class="text-lg font-semibold text-peach-amber-main sm:text-xl md:text-2xl">
+                    Step {{ i + 1 }}
+                  </h3>
+                </div>
               </div>
-              <h4 class="text-preset-heading-lg">{{ step.title }}</h4>
-              <p class="pt-1 font-medium text-gray-600">{{ step.description }}</p>
+              
+              <!-- Title & Description -->
+              <div class="space-y-3">
+                <h4 class="text-xl font-bold sm:text-2xl md:text-3xl lg:text-preset-heading-lg">
+                  {{ step.title }}
+                </h4>
+                <p class="text-sm font-medium text-gray-600 sm:text-base md:text-lg lg:pt-1">
+                  {{ step.description }}
+                </p>
+              </div>
             </div>
 
-            <div class="w-full self-center md:w-4/5 lg:w-full">
-              <img :src="step.image" class="w-full rounded-3xl" />
+            <!-- Image Column -->
+            <div class="w-full max-w-md md:max-w-lg lg:basis-1/2 lg:max-w-none">
+              <img 
+                :src="step.image" 
+                :alt="step.title"
+                class="w-full rounded-2xl shadow-lg sm:rounded-3xl"
+              />
             </div>
           </article>
         </div>
@@ -144,8 +185,46 @@ const showVideo = ref(false)
 </template>
 
 <style scoped>
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .app-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Stack steps vertically on mobile/tablet */
+  article {
+    flex-direction: column !important;
+  }
+  
+  /* Center content on mobile */
+  .lg\:text-start {
+    text-align: center;
+  }
+  
+  .lg\:justify-start {
+    justify-content: center;
+  }
+}
+
+/* Hover effects */
 button:hover {
   transform: translateY(-1px);
   transition: all 0.2s ease;
+}
+
+/* Image optimization */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent content from being too wide on large screens */
+@media (min-width: 1536px) {
+  .app-container {
+    max-width: 1280px;
+  }
 }
 </style>

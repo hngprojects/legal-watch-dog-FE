@@ -360,9 +360,7 @@ watch(
 
           <p class="text-fg text-[14px] leading-snug sm:text-[16px]">
             Hiring a specialist give you the best possible result.
-            <RouterLink to="/about-us" class="cursor-pointer underline"
-              >learn more about a specialist</RouterLink
-            >
+            <!-- <span class="cursor-pointer underline">learn more about a specialist</span> -->
           </p>
         </div>
         <button
