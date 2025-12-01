@@ -117,7 +117,7 @@ onBeforeUnmount(() => {
             </div>
           </header>
 
-          <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)]">
+          <div class="policy-content grid gap-10 lg:grid-cols-[minmax(0,1fr)]">
             <nav class="lg:hidden" aria-label="Privacy policy sections (mobile)">
               <div
                 class="flex flex-col gap-2 overflow-x-auto rounded-xl border border-[#f4e4d7] bg-white/90 p-3"
@@ -393,3 +393,15 @@ onBeforeUnmount(() => {
     </main>
   </div>
 </template>
+
+<style scoped>
+.policy-content section {
+  scroll-margin-top: 140px;
+}
+
+@media (min-width: 1024px) {
+  .policy-content section {
+    scroll-margin-top: 180px;
+  }
+}
+</style>
