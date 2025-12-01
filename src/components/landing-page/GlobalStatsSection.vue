@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Button } from '../ui/button'
 import backleft from '@/assets/Images/backleft.png'
 import backright from '@/assets/Images/backright.png'
+import { RouterLink } from 'vue-router'
 </script>
 
 <template>
@@ -65,11 +65,9 @@ import backright from '@/assets/Images/backright.png'
           Stop worrying about regulatory blindsides. Start tracking changes with precision and
           confidence today.
         </p>
-        <Button
-          class="rounded-lg bg-[#F2AB6D] px-8 py-6 text-lg font-semibold text-white hover:bg-[#F2AB6D]/90"
-        >
+        <RouterLink to="/signup" class="btn--default btn--lg bg-accent-subtle hover:bg-accent-main">
           Start monitoring now
-        </Button>
+        </RouterLink>
       </div>
     </section>
   </section>

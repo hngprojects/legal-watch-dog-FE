@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import EmailIcon from '@/assets/icons/message.png'
@@ -254,7 +255,7 @@ const handleSubmit = async () => {
                   v-model="form.phoneNumber"
                   type="tel"
                   placeholder="+1 (555) 000-0000"
-                  class="h-[52px] w-full rounded-lg border border-[#E5E7EB] bg-white pr-4 pl-20 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                  class="h-[52px] w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
                 />
               </div>
               <p v-if="errors.phoneNumber" class="mt-1 text-sm text-red-600">
@@ -322,11 +323,14 @@ const handleSubmit = async () => {
                       for="agreement"
                       class="cursor-pointer text-sm leading-relaxed text-[#6B7280]"
                     >
-                      By completing and submitting this form, I agree to having this website store
-                      my submitted information, so they can respond to my inquiry or to send
-                      occassional updates. For information on how to unsubscribe, as well as our
-                      privacy pratices and commitment to protecting your privacy, check out our
-                      <a href="#" class="font-medium text-[#401903] underline">privacy policy</a>
+                      By completing and submitting this form, I agree to have this website store my
+                      submitted information so they can respond to my inquiry or send occasional
+                      updates. For information on how to unsubscribe, as well as our privacy
+                      practices and commitment to protecting your privacy, please refer to our
+                      <RouterLink to="/privacy-policy" class="font-medium text-[#401903] underline">
+                        privacy policy
+                      </RouterLink>
+                      .
                     </label>
                   </div>
                   <p v-if="errors.agreement" class="mt-2 text-sm text-red-600">
