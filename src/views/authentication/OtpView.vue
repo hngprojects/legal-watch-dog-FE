@@ -264,7 +264,7 @@ const handleResend = async () => {
       </p>
     </template>
     <div
-      class="flex w-full max-w-5xl flex-col gap-10 lg:flex-row lg:items-center lg:justify-between px-2"
+      class="flex w-full max-w-5xl flex-col gap-10 px-2 lg:flex-row lg:items-center lg:justify-between"
     >
       <div class="w-full max-w-xl space-y-8">
         <div class="flex justify-between gap-3">
@@ -276,7 +276,7 @@ const handleResend = async () => {
             inputmode="numeric"
             autocomplete="one-time-code"
             maxlength="1"
-            class="focus:border-accent-main h-8 w-8 sm:h-14 sm:w-14  rounded-md border border-gray-300 text-center text-lg font-medium text-gray-900 focus:ring-2 focus:ring-[#F4E4D4]"
+            class="focus:border-accent-main h-8 w-8 rounded-md border border-gray-300 text-center text-lg font-medium text-gray-900 focus:ring-2 focus:ring-[#F4E4D4] sm:h-14 sm:w-14"
             :value="otpDigits[index]"
             @input="handleDigitInput($event, index)"
             @keydown="handleKeydown($event, index)"

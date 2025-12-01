@@ -351,16 +351,18 @@ watch(
       <div
         class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5"
       >
-          <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-fg bg-[#1F1F1F1A] p-1 sm:h-12 sm:w-12"
-            >
-              <CheckSquare class="h-5 w-5 text-fg sm:h-6 sm:w-6" />
-            </div>
+        <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
+          <div
+            class="border-fg flex h-10 w-10 items-center justify-center rounded-[8px] border bg-[#1F1F1F1A] p-1 sm:h-12 sm:w-12"
+          >
+            <CheckSquare class="text-fg h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
 
-          <p class="text-[14px] leading-snug text-fg sm:text-[16px]">
+          <p class="text-fg text-[14px] leading-snug sm:text-[16px]">
             Hiring a specialist give you the best possible result.
-            <RouterLink to="/about-us" class="cursor-pointer underline">learn more about a specialist</RouterLink>
+            <RouterLink to="/about-us" class="cursor-pointer underline"
+              >learn more about a specialist</RouterLink
+            >
           </p>
         </div>
         <button

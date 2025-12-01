@@ -77,7 +77,7 @@ onUnmounted(() => {
     class="text-text-main container--wide sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="app-container mx-auto flex flex-col sm:flex-row w-full items-center justify-between gap-4 px-4 py-4 sm:px-0 lg:py-5"
+      class="app-container mx-auto flex w-full flex-col items-center justify-between gap-4 px-4 py-4 sm:flex-row sm:px-0 lg:py-5"
     >
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
         <BrandLogo />
@@ -97,10 +97,10 @@ onUnmounted(() => {
       </nav>
 
       <!-- RIGHT SIDE -->
-      <div class="relative flex items-center gap-3 w-full sm:w-auto">
+      <div class="relative flex w-full items-center gap-3 sm:w-auto">
         <!-- NOT LOGGED IN -->
         <template v-if="!isAuthenticated">
-          <div class="sm:flex flex-col gap-2 sm:flex-row hidden">
+          <div class="hidden flex-col gap-2 sm:flex sm:flex-row">
             <Button :as="RouterLink" :to="{ path: '/login' }" variant="default" size="lg">
               Sign In
             </Button>

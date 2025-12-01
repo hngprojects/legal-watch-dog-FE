@@ -90,10 +90,8 @@ const teamMembers = [
             AI monitoring and human expertise help your team stay compliant, informed, and always
             ahead without stress.
           </TypographyText>
-          <RouterLink to="/signup" class="btn--default btn--lg">
-            Get Started
-          </RouterLink>
-          <div class="w-full max-w-[1000px] overflow-hidden rounded-2xl shadow-xl mt-6">
+          <RouterLink to="/signup" class="btn--default btn--lg"> Get Started </RouterLink>
+          <div class="mt-6 w-full max-w-[1000px] overflow-hidden rounded-2xl shadow-xl">
             <img :src="aboutHeroImg" alt="Team collaborating" class="h-auto w-full object-cover" />
           </div>
         </div>
