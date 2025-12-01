@@ -776,7 +776,7 @@ watch(
               </div>
 
               <div
-                class="flex w-full items-center justify-between gap-3 pl-[48px] sm:w-auto sm:justify-start sm:pl-0"
+                class="flex w-full items-center justify-between gap-3 pl-12 sm:w-auto sm:justify-start sm:pl-0"
               >
                 <div class="flex gap-2">
                   <Badge

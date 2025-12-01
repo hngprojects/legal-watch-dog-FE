@@ -23,37 +23,63 @@
       </section>
 
       <section class="overflow-hidden pb-20">
-        <div class="scrollbar-hide flex space-x-4 overflow-x-auto whitespace-nowrap md:space-x-6">
-          <img
-            :src="blog5"
-            alt="Person typing policy document"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog2"
-            alt="Compliance charts and people in a meeting"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog3"
-            alt="Person holding a tablet with security icons"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog4"
-            alt="Abstract law, legal, and rights icons"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog1"
-            alt="Laptop displaying policy text"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog5"
-            alt="Person typing policy document"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
+        <div class="relative" @mouseenter="stopAutoSlide" @mouseleave="startAutoSlide">
+          <div
+            class="overflow-hidden rounded-2xl border border-gray-200 shadow-md"
+            @touchstart="onTouchStart"
+            @touchend="onTouchEnd"
+          >
+            <div
+              class="flex transition-transform duration-500 ease-in-out"
+              :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
+            >
+              <div v-for="(slide, idx) in slides" :key="idx" class="w-full shrink-0">
+                <div class="grid grid-cols-1 gap-3 bg-white p-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div v-for="item in slide" :key="item.alt" class="relative overflow-hidden rounded-xl">
+                    <img
+                      :src="item.src"
+                      :alt="item.alt"
+                      class="h-48 w-full bg-gray-50 object-cover sm:h-56 md:h-60 lg:h-64"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="absolute left-3 top-1/2 z-10 -translate-y-1/2 btn--default btn--icon-only btn--icon-sm"
+            type="button"
+            aria-label="Previous slide"
+            @click="prevSlide"
+          >
+            <svg class="h-5 w-5 text-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            class="absolute right-3 top-1/2 z-10 -translate-y-1/2 btn--default btn--icon-only btn--icon-sm"
+            type="button"
+            aria-label="Next slide"
+            @click="nextSlide"
+          >
+            <svg class="h-5 w-5 text-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <div class="mt-4 flex justify-center gap-2">
+            <button
+              v-for="(_, idx) in slides"
+              :key="idx"
+              type="button"
+              class="h-2 w-2 rounded-full transition-all"
+              :class="idx === currentSlide ? 'bg-[#3F1A0F] w-4' : 'bg-gray-300'"
+              @click="goToSlide(idx)"
+              :aria-label="`Go to slide ${idx + 1}`"
+            />
+          </div>
         </div>
       </section>
 
@@ -197,7 +223,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { TypographyHeading, TypographyText } from '../ui/typography'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -209,9 +235,32 @@ import blog2 from '@/assets/Images/blog2.png'
 import blog3 from '@/assets/Images/blog3.png'
 import blog4 from '@/assets/Images/blog4.png'
 import blog5 from '@/assets/Images/blog5.png'
+import underblog4 from '@/assets/Images/underblog4.png'
+
+const carouselImages = [
+  { src: blog5, alt: 'Person typing policy document' },
+  { src: blog2, alt: 'Compliance charts and people in a meeting' },
+  { src: blog3, alt: 'Person holding a tablet with security icons' },
+  { src: blog4, alt: 'Abstract law, legal, and rights icons' },
+  { src: blog1, alt: 'Laptop displaying policy text' },
+  { src: underblog4, alt: 'Market and industry insights charts' },
+]
 
 const searchTerm = ref('')
 const showMoreCards = ref(false)
+const currentSlide = ref(0)
+const autoSlideDelay = 5000
+let autoSlideTimer: ReturnType<typeof setInterval> | null = null
+const perView = ref(1)
+
+const slides = computed(() => {
+  const chunkSize = perView.value
+  const result: Array<Array<(typeof carouselImages)[number]>> = []
+  for (let i = 0; i < carouselImages.length; i += chunkSize) {
+    result.push(carouselImages.slice(i, i + chunkSize))
+  }
+  return result
+})
 
 const filteredPosts = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
@@ -237,7 +286,64 @@ watch(filteredPosts, (posts) => {
   }
 })
 
+watch(slides, () => {
+  if (currentSlide.value >= slides.value.length) {
+    currentSlide.value = 0
+  }
+})
+
 const getPreview = (post: (typeof blogPosts)[number]) => post.introduction?.[0] ?? ''
+
+const goToSlide = (index: number) => {
+  const total = slides.value.length
+  currentSlide.value = (index + total) % total
+  startAutoSlide()
+}
+
+const nextSlide = () => goToSlide(currentSlide.value + 1)
+const prevSlide = () => goToSlide(currentSlide.value - 1)
+
+let touchStartX = 0
+const onTouchStart = (event: TouchEvent) => {
+  touchStartX = event.touches[0]?.clientX ?? 0
+}
+
+const onTouchEnd = (event: TouchEvent) => {
+  const deltaX = (event.changedTouches[0]?.clientX ?? 0) - touchStartX
+  if (Math.abs(deltaX) < 40) return
+  if (deltaX < 0) nextSlide()
+  else prevSlide()
+}
+
+const startAutoSlide = () => {
+  stopAutoSlide()
+  autoSlideTimer = window.setInterval(() => nextSlide(), autoSlideDelay)
+}
+
+const stopAutoSlide = () => {
+  if (autoSlideTimer) {
+    clearInterval(autoSlideTimer)
+    autoSlideTimer = null
+  }
+}
+
+const setPerViewFromWidth = () => {
+  const width = window.innerWidth
+  if (width >= 1024) perView.value = 3
+  else if (width >= 640) perView.value = 2
+  else perView.value = 1
+}
+
+onMounted(() => {
+  setPerViewFromWidth()
+  window.addEventListener('resize', setPerViewFromWidth)
+  startAutoSlide()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', setPerViewFromWidth)
+  stopAutoSlide()
+})
 </script>
 
 <style scoped>
