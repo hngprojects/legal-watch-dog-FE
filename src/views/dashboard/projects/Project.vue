@@ -361,7 +361,7 @@ watch(
 
           <p class="text-[14px] leading-snug text-[#3A2B1B] sm:text-[16px]">
             Hiring a specialist give you the best possible result.
-            <span class="cursor-pointer underline">learn more about a specialist</span>
+            <!-- <span class="cursor-pointer underline">learn more about a specialist</span> -->
           </p>
         </div>
         <button

@@ -80,7 +80,7 @@ onUnmounted(() => {
 
 <template>
   <header
-    class="text-text-main container--wide sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
+    class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
       class="app-container mx-auto flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-0 lg:py-5"
