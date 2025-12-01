@@ -90,7 +90,7 @@ onUnmounted(() => {
     class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="app-container mx-auto flex flex-col items-start sm:flex-row w-full sm:items-center justify-between gap-8 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
+      class="app-container mx-auto flex flex-col items-center sm:flex-row w-full sm:items-center justify-between gap-8 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
     >
       <!-- LOGO -->
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
