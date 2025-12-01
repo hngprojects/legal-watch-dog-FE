@@ -20,7 +20,7 @@
         <div class="grid grid-cols-1 gap-6 text-center sm:grid-cols-2 lg:grid-cols-3 sm:gap-8">
           <!-- Card 1: Contact Support -->
           <RouterLink
-            to="/coming-soon"
+            to="/contact-us"
             class="flex h-[180px] flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-6 shadow-lg transition duration-300 hover:shadow-2xl sm:h-[200px] sm:p-8"
           >
             <div class="mb-4 h-10 w-4 sm:h-12 sm:w-5">
@@ -41,7 +41,7 @@
 
           <!-- Card 2: Search Articles -->
           <RouterLink
-            to="/coming-soon"
+            to="/blog"
             class="flex h-[180px] flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-6 text-center shadow-lg transition duration-300 hover:shadow-2xl sm:h-[200px] sm:p-8"
           >
             <div class="mb-4 h-10 w-4 sm:h-12 sm:w-5">
@@ -58,7 +58,7 @@
 
           <!-- Card 3: User Guide -->
           <RouterLink
-            to="/coming-soon"
+            to="/how-it-works"
             class="flex h-[180px] flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-6 shadow-lg transition duration-300 hover:shadow-2xl sm:h-[200px] sm:p-8"
           >
             <div class="mb-4 h-10 w-4 sm:h-12 sm:w-5">
