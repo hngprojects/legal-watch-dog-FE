@@ -116,7 +116,7 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setAccessToken(token: string | null, rememberMe = this.rememberMePreference ?? true) {
+    setAccessToken(token: string | null, rememberMe?: boolean) {
       const persist = rememberMe ?? this.rememberMePreference ?? true
       this.accessToken = token
       if (token) {
@@ -126,7 +126,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    setUserEmail(email: string | null, rememberMe = this.rememberMePreference ?? true) {
+    setUserEmail(email: string | null, rememberMe?: boolean) {
       const persist = rememberMe ?? this.rememberMePreference ?? true
       this.email = email
       if (email) {
@@ -195,7 +195,7 @@ export const useAuthStore = defineStore('auth', {
       this.setResetToken(null)
       return responseBody
     },
-    async login(payload: LoginPayload, rememberMe = this.rememberMePreference ?? false) {
+    async login(payload: LoginPayload, rememberMe?: boolean) {
       const response = await authService.login(payload)
       const responseBody = response.data as unknown as LoginApiResponse
       const authData = responseBody.data
