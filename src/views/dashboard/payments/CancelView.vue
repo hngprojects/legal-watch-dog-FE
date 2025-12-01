@@ -16,7 +16,7 @@ const handleGoHome = async () => {
 </script>
 
 <template>
-  <Dialog defaultOpen>
+  <Dialog defaultOpen @update:open="handleGoHome">
     <DialogContent>
       <DialogHeader class="text-center">
         <img :src="XIcon" class="mx-auto size-[118px]" alt="" />

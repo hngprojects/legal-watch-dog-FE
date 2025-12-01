@@ -1,54 +1,7 @@
 import api from '@/lib/api'
-import { Briefcase01Icon, Building03Icon, Target01Icon } from '@hugeicons/core-free-icons'
+import axios from 'axios'
 
-export const PRICINGS = [
-  {
-    title: 'Essential',
-    description: 'Best for individual consultants and small teams.',
-    icon: Target01Icon,
-    price: 29,
-    yearly: 288,
-    benefits: [
-      '1 Projects',
-      '2 Jurisdictions',
-      '1-day snapshot history',
-      '20 monthly scans',
-      'Email summaries',
-      'AI summaries',
-    ],
-  },
-  {
-    title: 'Professional',
-    description: 'Designed for growing legal and compliance teams.',
-    price: 79,
-    yearly: 768,
-    icon: Briefcase01Icon,
-    benefits: [
-      '20 Projects',
-      '50 Jurisdictions',
-      'Unlimited scans',
-      'Priority AI summaries',
-      'Team notifications',
-      'API access',
-      '1-year snapshot history',
-    ],
-  },
-  {
-    title: 'Enterprise',
-    description: 'For large companies with complex regulatory needs.',
-    price: 99,
-    yearly: 960,
-    icon: Building03Icon,
-    benefits: [
-      'Unlimited projects and jurisdictions',
-      'Dedicated CSM',
-      'Custom AI configuration',
-      'SSO & advanced roles',
-      'Unlimited snapshot history',
-      'Full audit logs',
-    ],
-  },
-]
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.staging.legalwatch.dog/api/v1'
 
 export const billingService = {
   getOrganizationSubscriptionStatus: (organizationId: string) =>
@@ -62,20 +15,22 @@ export const billingService = {
       currency: 'USD',
     }),
 
-  checkout: (organizationId: string, plan: string) =>
+  getPlans: () => axios.get(BASE_URL + '/billing/plans'),
+
+  checkout: (organizationId: string, plan_id: string) =>
     api.post(`/organizations/${organizationId}/billing/checkout`, {
-      plan,
+      plan_id,
       description: `Subscription for ${organizationId}`,
     }),
 
-  addPaymentMethod: (organizationId: string, paymentMethodId: string) =>
-    api.post(`/organizations/${organizationId}/billing/payment-methods/${paymentMethodId}`),
+  getOrganizationPaymentHistory: (organizationId: string) =>
+    api.get(`/organizations/${organizationId}/billing/invoices`),
 
-  getOrganizationBillingPlans: (organizationId: string) =>
-    api.get(`/organizations/${organizationId}/billing/plans`),
-
-  cancelOrganizationSubscription: (organizationId: string) =>
-    api.post(`/organizations/${organizationId}/billing/subscription/cancel`, {
-      cancel_at_period_end: true,
+  changeOrganizationSubscription: (organizationId: string, plan_id: string) =>
+    api.post(`/organizations/${organizationId}/billing/subscription/change-plan`, {
+      plan_id,
     }),
+
+  cancelOrganizationSubscriptionAtPeriodEnd: (organizationId: string) =>
+    api.post(`/organizations/${organizationId}/billing/subscription/cancel`),
 }
