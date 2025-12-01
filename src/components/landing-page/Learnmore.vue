@@ -1,11 +1,8 @@
 <template>
   <div class="min-h-screen bg-[#F8FAFC]">
-    <!-- Main Content Area with Layout Grid -->
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:py-16 lg:px-8">
       <div class="flex flex-col lg:space-x-12">
-        <!-- LEFT COLUMN: Hero, Specialist Cards, Security/Pricing (Approx. 70%) -->
         <div class="space-y-12 md:space-y-16 lg:w-[70%]">
-          <!-- 2. Hero Section -->
           <section>
             <TypographyHeading
               level="h1"
@@ -20,7 +17,6 @@
             </TypographyText>
           </section>
 
-          <!-- 3. What Specialists Do (4 Cards) -->
           <section>
             <TypographyHeading
               level="h2"
@@ -50,7 +46,7 @@
                 :key="index"
                 class="flex items-start space-x-4"
               >
-                <!-- Numbered Circle -->
+  
                 <div
                   class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#401903] text-sm font-bold text-white"
                 >
@@ -64,9 +60,7 @@
             </div>
           </section>
 
-          <!-- 5. Security & Pricing (Bottom Section - Left Side) -->
           <section class="space-y-10">
-            <!-- Security & Privacy -->
             <div>
               <TypographyHeading level="h2" class="mb-4 text-2xl font-bold text-[#401903]">
                 Security & Privacy

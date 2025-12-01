@@ -16,6 +16,7 @@ import Features from '@/views/FeaturesView.vue'
 import BlogView from '@/views/BlogView.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
+import LearnMore from '@/views/LearnMore.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
 import PrivacyPolicyView from '@/views/PrivacyPolicyView.vue'
 
@@ -72,6 +73,7 @@ const router = createRouter({
         },
         { path: 'features', name: 'features', component: Features },
         { path: 'waitlist', name: 'waitlist', component: WaitlistView },
+
         {
           path: 'how-it-works',
           name: 'how-it-works',
@@ -211,6 +213,7 @@ const router = createRouter({
           name: 'billing',
           component: () => import('@/views/dashboard/settings/BillingView.vue'),
         },
+        { path: 'learn-more', name: 'learn-more', component:LearnMore },
         {
           path: 'payment/plan',
           name: 'payment-plan',
