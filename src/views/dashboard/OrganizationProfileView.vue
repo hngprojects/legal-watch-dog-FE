@@ -199,17 +199,17 @@ const handleOrgSave = async (payload: { name: string; industry: string }) => {
   if (!orgId.value) return
   orgEditSaving.value = true
   orgEditError.value = null
-  
+
   const updated = await organizationStore.updateOrganization(orgId.value, payload)
-  
+
   if (updated) {
-    orgEditDialogOpen.value = false 
-    
+    orgEditDialogOpen.value = false
+
     await Swal.fire('Updated', 'Organization updated successfully.', 'success')
   } else if (organizationStore.error) {
     orgEditError.value = organizationStore.error
   }
-  
+
   orgEditSaving.value = false
 }
 
@@ -515,16 +515,21 @@ watch(
     <div class="mx-auto flex flex-col gap-6 md:gap-8">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-xs md:text-sm font-medium tracking-wide text-[#9CA3AF] uppercase">
+          <p class="text-xs font-medium tracking-wide text-[#9CA3AF] uppercase md:text-sm">
             Organization Profile
           </p>
         </div>
-        <RouterLink to="/dashboard/organizations" class="text-xs md:text-sm text-[#401903] underline">
+        <RouterLink
+          to="/dashboard/organizations"
+          class="text-xs text-[#401903] underline md:text-sm"
+        >
           Back to organizations
         </RouterLink>
       </div>
 
-      <section class="rounded-xl md:rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:p-8 lg:p-10">
+      <section
+        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-8 lg:p-10"
+      >
         <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div class="flex items-center gap-4 md:gap-6">
             <div
@@ -533,22 +538,27 @@ watch(
               {{ initials(organization?.name || 'Org') || 'Org' }}
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-[10px] md:text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">
+              <p
+                class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs"
+              >
                 Organization
               </p>
               <h2 class="truncate text-lg font-bold text-gray-900 md:text-2xl">
                 {{ organization?.name || 'Org Name' }}
               </h2>
-              <p class="truncate text-xs md:text-sm text-gray-600">
+              <p class="truncate text-xs text-gray-600 md:text-sm">
                 {{ organization?.industry || 'Law, Regulations & Compliance' }}
               </p>
             </div>
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <button class="bg-[#401903] text-white hover:bg-[#401903]/90 transition-colors flex h-9 w-full items-center justify-center gap-2 rounded-lg text-xs font-medium md:h-11 md:px-8 md:w-auto md:text-sm">
-                <Settings :size="16" class="md:hidden" /> <Settings :size="18" class="hidden md:block" />
+              <button
+                class="flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#401903] text-xs font-medium text-white transition-colors hover:bg-[#401903]/90 md:h-11 md:w-auto md:px-8 md:text-sm"
+              >
+                <Settings :size="16" class="md:hidden" />
+                <Settings :size="18" class="hidden md:block" />
                 Manage
               </button>
             </DropdownMenuTrigger>
@@ -562,21 +572,28 @@ watch(
         </div>
       </section>
 
-      <section class="rounded-xl md:rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:p-6">
+      <section
+        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
+      >
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p class="text-[10px] md:text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">
+            <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
               Projects ({{ projects.length }})
             </p>
           </div>
           <div class="flex items-center gap-3">
-            <button 
-              @click="openCreateProject" 
-              class="bg-[#401903] text-white hover:bg-[#401903]/90 transition-colors rounded-lg h-8 px-3 text-xs md:h-11 md:px-8 md:text-sm"
+            <button
+              @click="openCreateProject"
+              class="h-8 rounded-lg bg-[#401903] px-3 text-xs text-white transition-colors hover:bg-[#401903]/90 md:h-11 md:px-8 md:text-sm"
             >
               Add Project
             </button>
-            <button @click="openProjects" class="text-[#401903] hover:underline text-xs md:text-sm font-medium">View all</button>
+            <button
+              @click="openProjects"
+              class="text-xs font-medium text-[#401903] hover:underline md:text-sm"
+            >
+              View all
+            </button>
           </div>
         </div>
 
@@ -587,23 +604,32 @@ watch(
           v-else-if="!projects.length"
           class="space-y-3 rounded-xl border border-dashed border-gray-200 p-6 text-center"
         >
-          <p class="text-xs md:text-sm text-gray-600">
+          <p class="text-xs text-gray-600 md:text-sm">
             No projects yet. Create one to start tracking changes.
           </p>
           <div class="flex justify-center">
-            <button class="bg-[#401903] text-white hover:bg-[#401903]/90 transition-colors rounded-lg h-9 px-4 text-xs md:h-11 md:px-8 md:text-sm" @click="openCreateProject">Add Project</button>
+            <button
+              class="h-9 rounded-lg bg-[#401903] px-4 text-xs text-white transition-colors hover:bg-[#401903]/90 md:h-11 md:px-8 md:text-sm"
+              @click="openCreateProject"
+            >
+              Add Project
+            </button>
           </div>
         </div>
         <div v-else class="space-y-2 md:space-y-3">
           <article
             v-for="project in projects"
             :key="project.id"
-            class="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3 transition hover:bg-white md:rounded-xl md:gap-4 md:p-5"
+            class="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3 transition hover:bg-white md:gap-4 md:rounded-xl md:p-5"
             @click="goToProject(project.id)"
           >
-            <div class="flex-1 min-w-0">
-              <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">{{ project.title }}</p>
-              <p class="line-clamp-1 text-[10px] text-gray-500 md:line-clamp-2 md:text-xs">{{ project.description }}</p>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">
+                {{ project.title }}
+              </p>
+              <p class="line-clamp-1 text-[10px] text-gray-500 md:line-clamp-2 md:text-xs">
+                {{ project.description }}
+              </p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
@@ -626,15 +652,25 @@ watch(
         </div>
       </section>
 
-      <section class="rounded-xl md:rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:p-6">
+      <section
+        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
+      >
         <div class="mb-4 flex items-center justify-between gap-2">
           <div class="min-w-0">
-            <p class="text-[10px] md:text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Members</p>
-            <p class="truncate text-xs text-gray-500 md:text-sm">Invite teammates to collaborate.</p>
+            <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
+              Members
+            </p>
+            <p class="truncate text-xs text-gray-500 md:text-sm">
+              Invite teammates to collaborate.
+            </p>
           </div>
           <Dialog v-model:open="inviteOpen">
             <DialogTrigger as-child>
-              <button class="bg-[#401903] text-white hover:bg-[#401903]/90 transition-colors rounded-lg h-8 px-3 text-xs whitespace-nowrap md:h-11 md:px-8 md:text-sm">Invite Member</button>
+              <button
+                class="h-8 rounded-lg bg-[#401903] px-3 text-xs whitespace-nowrap text-white transition-colors hover:bg-[#401903]/90 md:h-11 md:px-8 md:text-sm"
+              >
+                Invite Member
+              </button>
             </DialogTrigger>
             <DialogContent class="w-[95%] rounded-xl sm:max-w-[480px]">
               <DialogHeader>
@@ -652,7 +688,7 @@ watch(
                     type="email"
                     placeholder="teammate@company.com"
                     required
-                    class="h-10 md:h-11 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                    class="h-10 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none md:h-11"
                   />
                 </div>
                 <div class="space-y-2">
@@ -660,7 +696,7 @@ watch(
                   <select
                     id="invite-role"
                     v-model="inviteForm.role"
-                    class="h-10 md:h-11 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+                    class="h-10 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none md:h-11"
                   >
                     <option value="Admin">Admin</option>
                     <option value="Manager">Manager</option>
@@ -677,12 +713,17 @@ watch(
 
                 <DialogFooter class="mt-2 flex items-center justify-end gap-3">
                   <DialogClose as-child>
-                    <button type="button" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded-lg h-10 px-4 text-sm md:h-11 md:px-8">Cancel</button>
+                    <button
+                      type="button"
+                      class="h-10 rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-700 transition-colors hover:bg-gray-50 md:h-11 md:px-8"
+                    >
+                      Cancel
+                    </button>
                   </DialogClose>
                   <button
                     type="submit"
                     :disabled="inviteSending"
-                    class="bg-[#401903] text-white hover:bg-[#401903]/90 transition-colors rounded-lg h-10 px-4 text-sm md:h-11 md:px-8 disabled:cursor-not-allowed disabled:opacity-70"
+                    class="h-10 rounded-lg bg-[#401903] px-4 text-sm text-white transition-colors hover:bg-[#401903]/90 disabled:cursor-not-allowed disabled:opacity-70 md:h-11 md:px-8"
                   >
                     <span v-if="inviteSending">Sending...</span>
                     <span v-else>Send Invite</span>
@@ -706,11 +747,11 @@ watch(
             </div>
           </div>
 
-          <div v-else-if="membersError" class="py-4 text-xs md:text-sm text-red-600">
+          <div v-else-if="membersError" class="py-4 text-xs text-red-600 md:text-sm">
             {{ membersError }}
           </div>
 
-          <div v-else-if="!members.length" class="py-4 text-xs md:text-sm text-gray-600">
+          <div v-else-if="!members.length" class="py-4 text-xs text-gray-600 md:text-sm">
             No members yet. Invite someone to get started.
           </div>
 
@@ -720,14 +761,16 @@ watch(
               :key="member.id"
               class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
             >
-              <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
                 <div
                   class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f4dfcd] text-xs font-semibold text-[#5c2a05] md:h-10 md:w-10 md:text-sm"
                 >
                   {{ initials(member.name) }}
                 </div>
                 <div class="min-w-0 flex-1 pr-2">
-                  <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">{{ member.name }}</p>
+                  <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">
+                    {{ member.name }}
+                  </p>
                   <p class="truncate text-[10px] text-[#9b755a] md:text-xs">{{ member.email }}</p>
                 </div>
               </div>
@@ -737,7 +780,10 @@ watch(
               >
                 <div class="flex gap-2">
                   <Badge
-                    :class="['border px-2 py-0.5 text-[10px] font-semibold md:px-3 md:py-1 md:text-xs', roleClass(member.role)]"
+                    :class="[
+                      'border px-2 py-0.5 text-[10px] font-semibold md:px-3 md:py-1 md:text-xs',
+                      roleClass(member.role),
+                    ]"
                   >
                     {{ member.role }}
                   </Badge>
@@ -762,19 +808,25 @@ watch(
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Admin'"
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` || member.role === 'Admin'
+                      "
                       @click.stop="updateMemberRole(member, 'Admin')"
                     >
                       Admin
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Manager'"
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` || member.role === 'Manager'
+                      "
                       @click.stop="updateMemberRole(member, 'Manager')"
                     >
                       Manager
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Member'"
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` || member.role === 'Member'
+                      "
                       @click.stop="updateMemberRole(member, 'Member')"
                     >
                       Member
@@ -792,10 +844,14 @@ watch(
           </template>
         </div>
 
-        <div class="mt-6 md:mt-8 rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-3 md:p-4">
+        <div
+          class="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-3 md:mt-8 md:p-4"
+        >
           <div class="mb-3 flex items-center justify-between">
             <div>
-              <p class="text-[10px] md:text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">
+              <p
+                class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs"
+              >
                 Pending invitations
               </p>
               <p class="text-xs text-gray-600 md:text-sm">Invites sent for this organization.</p>
@@ -811,10 +867,10 @@ watch(
               <div class="h-3 w-12 animate-pulse rounded bg-gray-200"></div>
             </div>
           </div>
-          <div v-else-if="orgInvitationsError" class="text-xs md:text-sm text-red-600">
+          <div v-else-if="orgInvitationsError" class="text-xs text-red-600 md:text-sm">
             {{ orgInvitationsError }}
           </div>
-          <div v-else-if="!orgInvitations.length" class="text-xs md:text-sm text-gray-600">
+          <div v-else-if="!orgInvitations.length" class="text-xs text-gray-600 md:text-sm">
             No pending invitations.
           </div>
           <div v-else class="space-y-2">
@@ -827,7 +883,9 @@ watch(
                 <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">
                   {{ invite.organization_name || organization?.name || 'Organization' }}
                 </p>
-                <p class="truncate text-[10px] text-gray-500 md:text-xs">Token: {{ invite.token }}</p>
+                <p class="truncate text-[10px] text-gray-500 md:text-xs">
+                  Token: {{ invite.token }}
+                </p>
               </div>
               <span
                 class="self-start rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 sm:self-auto md:px-3 md:py-1 md:text-xs"
@@ -845,9 +903,7 @@ watch(
       class="mx-auto mt-10 max-w-3xl rounded-xl bg-white p-8 text-center shadow-sm"
     >
       <p class="text-lg font-semibold text-gray-900">Organization not found</p>
-      <p class="mt-2 text-sm text-gray-600">
-        Return to organizations to choose a valid profile.
-      </p>
+      <p class="mt-2 text-sm text-gray-600">Return to organizations to choose a valid profile.</p>
       <RouterLink to="/dashboard/organizations" class="mt-4 inline-block text-[#401903] underline">
         Go back
       </RouterLink>

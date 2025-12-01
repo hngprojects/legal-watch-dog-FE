@@ -4,6 +4,10 @@ import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuConte
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
 import { RouterLink } from 'vue-router'
+
+const emit = defineEmits<{
+  (e: 'logout'): void
+}>()
 </script>
 
 <template>
@@ -21,6 +25,7 @@ import { RouterLink } from 'vue-router'
       <DropdownMenuItem asChild>
         <RouterLink :to="{ name: 'billing' }"> Billing </RouterLink>
       </DropdownMenuItem>
+      <DropdownMenuItem @click="emit('logout')">Logout</DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>

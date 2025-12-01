@@ -138,11 +138,27 @@
 }
 
 @utility btn--lg {
-  @apply px-4.5 py-2.5;
+  @apply px-4.5 py-3;
 }
 
 @utility btn--xl {
   @apply px-5 py-4;
+}
+
+@utility btn--icon-sm {
+  @apply p-2;
+}
+
+@utility btn--icon-md {
+  @apply p-2.5;
+}
+
+@utility btn--icon-lg {
+  @apply p-3;
+}
+
+@utility btn--icon-xl {
+  @apply p-4;
 }
 
 @utility btn--full {

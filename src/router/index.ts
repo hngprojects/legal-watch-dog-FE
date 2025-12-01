@@ -244,6 +244,12 @@ router.beforeEach(async (to) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const isAuthRoute = to.name === 'login' || to.name === 'signup'
 
+  if (to.name === 'auth-status') {
+    const issued = to.query.issued === 'true'
+    if (auth.isAuthenticated || issued) return true
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
   if (isAuthRoute && auth.isAuthenticated) {
     return { name: 'dashboard' }
   }

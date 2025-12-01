@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
 
 type InputType =
   | 'text'
@@ -11,6 +11,10 @@ type InputType =
   | 'search'
   | 'date'
   | 'checkbox'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const props = withDefaults(
   defineProps<{
@@ -39,6 +43,8 @@ const props = withDefaults(
     autocomplete: 'off',
   },
 )
+
+const attrs = useAttrs()
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string | number | boolean): void
@@ -146,6 +152,7 @@ const handleFocus = (event: FocusEvent) => emit('focus', event)
         :required="required"
         :autocomplete="autocomplete"
         class="w-full bg-transparent px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:outline-none disabled:cursor-not-allowed"
+        v-bind="attrs"
         @input="handleInput"
         @blur="handleBlur"
         @focus="handleFocus"
