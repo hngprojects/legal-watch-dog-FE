@@ -51,10 +51,10 @@ const cards = [
           class="basis-full space-y-4 rounded-2xl bg-white px-8 py-10 text-left md:max-w-[400px] md:basis-[calc(50%-0.625rem)]"
         >
           <CardHeader class="gap-4 p-0">
-            <div class="text-accent-foreground flex h-16 w-16 items-center justify-center">
+            <div class="text-accent-fg flex h-16 w-16 items-center justify-center">
               <img :src="card.icon" :alt="`${card.title} icon`" class="size-12" />
             </div>
-            <CardTitle class="text-foreground text-2xl font-semibold">
+            <CardTitle class="text-fg text-2xl font-semibold">
               {{ card.title }}
             </CardTitle>
           </CardHeader>

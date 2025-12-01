@@ -472,7 +472,7 @@ watch(
             View Archive
           </button> -->
 
-          <button @click="openAddJurisdictionModal" class="btn--primary btn--with-icon btn--lg">
+          <button @click="openAddJurisdictionModal" class="btn--default btn--with-icon btn--lg">
             <Plus :size="18" />
             Add Jurisdiction
           </button>
@@ -565,7 +565,7 @@ watch(
             <button type="button" @click="closeAddJurisdictionModal" class="btn--secondary btn--lg">
               Cancel
             </button>
-            <button type="submit" class="btn--primary btn--lg">Create Jurisdiction</button>
+            <button type="submit" class="btn--default btn--lg">Create Jurisdiction</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>
@@ -649,7 +649,7 @@ watch(
             <button type="button" @click="closeHireSpecialistModal" class="btn--secondary btn--lg">
               Cancel
             </button>
-            <button type="submit" class="btn--primary btn--lg">Hire Specialist</button>
+            <button type="submit" class="btn--default btn--lg">Hire Specialist</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>
