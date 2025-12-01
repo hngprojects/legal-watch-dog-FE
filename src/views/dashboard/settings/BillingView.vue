@@ -96,8 +96,12 @@ const calculateDaysLeft = (endDate: string | Date): string => {
         >
           Upgrade Plan
         </RouterLink>
-        <CancelSubscriptionModal :endDate="endDate">
-          <button class="btn--md btn--secondary border-accent-main border text-center">
+        <CancelSubscriptionModal :endDate="endDate" :currentPlan="currentPlan!">
+          <button
+            class="btn--md btn--secondary border-accent-main border text-center"
+            :class="[isFreeTrial && 'btn--disabled']"
+            :disabled="isFreeTrial"
+          >
             Cancel Subscription
           </button>
         </CancelSubscriptionModal>

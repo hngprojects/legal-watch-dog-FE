@@ -9,9 +9,11 @@ import DialogHeader from '../ui/dialog/DialogHeader.vue'
 import DialogTitle from '../ui/dialog/DialogTitle.vue'
 import DialogTrigger from '../ui/dialog/DialogTrigger.vue'
 import XIcon from '@/assets/icons/checkmark-circle-2.svg'
+import type { BillingPlan } from '@/types/billing'
 
 const {} = defineProps<{
   endDate?: Date
+  currentPlan: BillingPlan
 }>()
 
 const handleCancelSubscription = async () => {
@@ -38,15 +40,13 @@ const handleCancelSubscription = async () => {
       </DialogHeader>
       <section class="bg-peach-amber-100 border-peach-amber-200 rounded-md border px-10 py-4">
         <h3 class="mb-4">Current Plan</h3>
-        <p class="text-xs">Professional Plan</p>
+        <p class="text-xs">{{ currentPlan.label }}/p></p>
       </section>
 
       <section class="my-4">
         <h3>What You'll Lose:</h3>
         <ul class="space-y-2 px-4 py-2 *:list-disc">
-          <li>Unlimited Projects</li>
-          <li>Advanced Analytics</li>
-          <li>Priority Support</li>
+          <li :key="i" v-for="(feat, i) in currentPlan.features">{{ feat }}</li>
         </ul>
       </section>
 
