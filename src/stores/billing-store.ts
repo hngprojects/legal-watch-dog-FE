@@ -46,7 +46,7 @@ export const useBillingStore = defineStore('billing', {
 
         return res.data.data as BillingPlan[]
       } catch (error) {
-        this.setError('help1' + (error as BillingErrorResponse).message)
+        this.setError((error as BillingErrorResponse).message)
       } finally {
         this.setLoading(false)
       }
@@ -117,7 +117,7 @@ export const useBillingStore = defineStore('billing', {
           this.account_id = res.data.data.id
         }
       } catch (error) {
-        this.setError('help2' + (error as BillingErrorResponse).message)
+        this.setError((error as BillingErrorResponse).message)
       }
     },
 
@@ -136,7 +136,7 @@ export const useBillingStore = defineStore('billing', {
         }
         return status
       } catch (error) {
-        this.setError('help3' + (error as BillingErrorResponse).message)
+        this.setError((error as BillingErrorResponse).message)
       }
     },
 
@@ -151,7 +151,7 @@ export const useBillingStore = defineStore('billing', {
 
         return res.data.data.checkout_url
       } catch (error) {
-        this.setError('help4' + (error as BillingErrorResponse).message)
+        this.setError((error as BillingErrorResponse).message)
       }
     },
 
@@ -166,7 +166,7 @@ export const useBillingStore = defineStore('billing', {
 
         return res.data.data as BillingHistoryEntry[]
       } catch (error) {
-        this.setError('help5' + (error as BillingErrorResponse).message)
+        this.setError((error as BillingErrorResponse).message)
       }
     },
 
@@ -180,7 +180,7 @@ export const useBillingStore = defineStore('billing', {
 
         return res.data.data
       } catch (error) {
-        this.setError('help6' + (error as BillingErrorResponse).message)
+        this.setError((error as BillingErrorResponse).message)
       }
     },
   },
