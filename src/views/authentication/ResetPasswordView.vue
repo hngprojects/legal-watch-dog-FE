@@ -215,7 +215,7 @@ const handleSubmit = async () => {
         <button
           type="submit"
           :disabled="isSubmitting"
-          class="btn--primary btn--lg disabled:btn--disabled"
+          class="btn--default btn--lg disabled:btn--disabled"
         >
           <span v-if="!isSubmitting">Confirm</span>
           <span v-else>Updating password...</span>

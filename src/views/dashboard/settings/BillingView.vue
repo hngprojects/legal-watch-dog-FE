@@ -49,7 +49,7 @@ onMounted(async () => {
       <div class="flex flex-col gap-x-6 gap-y-4 *:flex-1 md:flex-row">
         <RouterLink
           :to="{ name: 'payment-plan' }"
-          class="btn--md btn--primary flex items-center justify-center text-center"
+          class="btn--md btn--default flex items-center justify-center text-center"
         >
           Upgrade Plan
         </RouterLink>

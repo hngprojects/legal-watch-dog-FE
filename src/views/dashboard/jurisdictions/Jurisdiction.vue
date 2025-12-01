@@ -629,7 +629,7 @@ onMounted(() => {
 
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button type="button" class="btn--primary btn--sm">
+            <button type="button" class="btn--default btn--sm">
               <Settings :size="18" />
             </button>
           </DropdownMenuTrigger>
@@ -730,7 +730,7 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between gap-4">
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
-          <button class="btn--primary btn--with-icon btn--lg" @click="openSubJurisdictionModal">
+          <button class="btn--default btn--with-icon btn--lg" @click="openSubJurisdictionModal">
             <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>
@@ -844,10 +844,10 @@ onMounted(() => {
           </div>
 
           <DialogFooter class="flex justify-end gap-3 pt-2">
-            <button type="button" class="btn--secondary btn--lg" @click="showInlineEdit = false">
+            <button type="button" class="btn--outline btn--lg" @click="showInlineEdit = false">
               Cancel
             </button>
-            <button type="submit" class="btn--primary btn--lg">Save Changes</button>
+            <button type="submit" class="btn--default btn--lg">Save Changes</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>

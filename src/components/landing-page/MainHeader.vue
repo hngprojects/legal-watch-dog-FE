@@ -110,9 +110,8 @@ onUnmounted(() => {
           <Button
             :as="RouterLink"
             :to="{ path: '/waitlist' }"
-            variant="ghost"
+            variant="outline"
             size="lg"
-            class="hidden px-7 lg:inline-flex"
           >
             Join Waitlist
           </Button>
@@ -120,9 +119,8 @@ onUnmounted(() => {
           <Button
             :as="RouterLink"
             :to="{ path: '/login' }"
-            variant="secondary"
+            variant="default"
             size="lg"
-            class="hidden px-7 lg:inline-flex"
           >
             Sign In
           </Button>

@@ -542,7 +542,7 @@ watch(
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <button class="btn--primary btn--lg btn--with-icon">
+              <button class="btn--default btn--lg btn--with-icon">
                 <Settings :size="18" />
                 Manage
               </button>
@@ -565,7 +565,7 @@ watch(
             </p>
           </div>
           <div class="flex items-center gap-3">
-            <button @click="openCreateProject" class="btn--primary btn--lg">Add Project</button>
+            <button @click="openCreateProject" class="btn--default btn--lg">Add Project</button>
             <button @click="openProjects" class="btn--link">View all</button>
           </div>
         </div>
@@ -581,7 +581,7 @@ watch(
             No projects yet. Create one to start tracking changes.
           </p>
           <div class="flex justify-center">
-            <button class="btn--primary btn--lg" @click="openCreateProject">Add Project</button>
+            <button class="btn--default btn--lg" @click="openCreateProject">Add Project</button>
           </div>
         </div>
         <div v-else class="space-y-3">
@@ -623,7 +623,7 @@ watch(
           </div>
           <Dialog v-model:open="inviteOpen">
             <DialogTrigger as-child>
-              <button class="btn--primary btn--lg">Invite Member</button>
+              <button class="btn--default btn--lg">Invite Member</button>
             </DialogTrigger>
             <DialogContent class="sm:max-w-[480px]">
               <DialogHeader>
@@ -666,12 +666,12 @@ watch(
 
                 <DialogFooter class="mt-2 flex items-center justify-end gap-3">
                   <DialogClose as-child>
-                    <button type="button" class="btn--secondary btn--lg">Cancel</button>
+                    <button type="button" class="btn--outline btn--lg">Cancel</button>
                   </DialogClose>
                   <button
                     type="submit"
                     :disabled="inviteSending"
-                    class="btn--primary btn--lg disabled:cursor-not-allowed disabled:opacity-70"
+                    class="btn--default btn--lg disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     <span v-if="inviteSending">Sending...</span>
                     <span v-else>Send Invite</span>

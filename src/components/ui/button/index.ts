@@ -9,19 +9,19 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'border border-accent-main bg-accent-main text-white hover:text-accent-main hover:bg-gray-50',
+          'btn--default',
         destructive:
           'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20',
         outline:
-          'border border-accent-main bg-gray-50 text-accent-main hover:bg-accent-main hover:text-white',
-        secondary: 'bg-accent-main text-white hover:bg-accent/50',
+          'btn--outline',
+        secondary: 'btn--outline',
         ghost: 'border border-destructive hover:bg-accent/50',
-        link: 'text-primary underline-offset-4 hover:underline',
+        link: 'btn--link',
       },
       size: {
-        default: 'text-lg px-4 py-4 has-[>svg]:px-3',
-        sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
-        lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
+        default: 'btn--lg',
+        sm: 'btn--sm',
+        lg: 'btn--lg',
         icon: 'size-9',
         'icon-sm': 'size-8',
         'icon-lg': 'size-10',
