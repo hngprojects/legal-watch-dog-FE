@@ -5,8 +5,8 @@ import { onMounted } from 'vue'
 
 const { getBillingPlans } = useBillingStore()
 
-onMounted(async () => {
-  const plans = await getBillingPlans()
+onMounted(() => {
+  void getBillingPlans()
 })
 </script>
 

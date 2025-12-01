@@ -60,7 +60,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex min-h-screen flex-col bg-[#F7F4EF] text-gray-800">
-
     <main class="relative flex-1">
       <div
         class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px]"
@@ -76,7 +75,7 @@ onBeforeUnmount(() => {
       ></div>
 
       <section
-        class="mx-auto flex w-full app-container flex-col gap-10 px-4 py-14 sm:px-6 lg:flex-row lg:gap-14 lg:py-20 "
+        class="app-container mx-auto flex w-full flex-col gap-10 px-4 py-14 sm:px-6 lg:flex-row lg:gap-14 lg:py-20"
       >
         <aside
           class="sticky top-24 z-10 hidden w-64 shrink-0 self-start lg:block"
@@ -107,7 +106,7 @@ onBeforeUnmount(() => {
           </nav>
         </aside>
 
-        <div class="w-full space-y-10 app-container">
+        <div class="app-container w-full space-y-10">
           <header class="space-y-3">
             <div>
               <h1 class="text-foregroud text-4xl font-bold sm:text-[60px]">Privacy Policy</h1>
@@ -392,6 +391,5 @@ onBeforeUnmount(() => {
         </div>
       </section>
     </main>
-
   </div>
 </template>

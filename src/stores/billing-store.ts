@@ -32,7 +32,7 @@ export const useBillingStore = defineStore('billing', {
     async getOrganizationId() {
       const router = useRouter()
       const { user } = useAuthStore()
-      const { fetchOrganizations, hasOrganizations, currentOrganizationId } = useOrganizationStore()
+      const { fetchOrganizations, currentOrganizationId } = useOrganizationStore()
 
       if (!user) {
         this.setError('No user found. Proceed to login')
@@ -83,6 +83,7 @@ export const useBillingStore = defineStore('billing', {
         if (res.status === 200) return true
       } catch (error) {
         this.setError('Failed to create billing account.')
+        console.error(error)
       }
 
       return false
@@ -101,6 +102,7 @@ export const useBillingStore = defineStore('billing', {
         }
       } catch (error) {
         this.setError('Failed to get subscription status.')
+        console.error(error)
       }
     },
 
@@ -113,7 +115,10 @@ export const useBillingStore = defineStore('billing', {
         const res = await billingService.getOrganizationBillingPlans(orgId)
 
         return res.data.data
-      } catch (error) {}
+      } catch (error) {
+        console.error('Failed to load billing plans', error)
+        this.setError('Failed to load billing plans.')
+      }
     },
 
     async checkoutPlan(plan: string) {
@@ -126,7 +131,10 @@ export const useBillingStore = defineStore('billing', {
         const res = await billingService.checkout(orgId, plan)
 
         return res.data.data.checkout_url
-      } catch (error) {}
+      } catch (error) {
+        console.error('Checkout failed', error)
+        this.setError('Failed to start checkout.')
+      }
     },
 
     async cancelSubscription() {
@@ -138,7 +146,10 @@ export const useBillingStore = defineStore('billing', {
         const res = await billingService.cancelOrganizationSubscription(orgId)
 
         return res.data.data
-      } catch (error) {}
+      } catch (error) {
+        console.error('Cancel subscription failed', error)
+        this.setError('Failed to cancel subscription.')
+      }
     },
   },
 })

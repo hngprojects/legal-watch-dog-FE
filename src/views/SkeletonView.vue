@@ -1,11 +1,9 @@
 <script setup lang="ts">
-
 import SkeletonBlock from '@/components/reusable/SkeletonBlock.vue'
 </script>
 
 <template>
   <div class="flex min-h-screen flex-col bg-[#F7F3EF] text-[#3C2610]">
-
     <main class="flex-1">
       <div class="mx-auto max-w-6xl space-y-10 px-4 py-12 sm:px-8">
         <section class="space-y-6">

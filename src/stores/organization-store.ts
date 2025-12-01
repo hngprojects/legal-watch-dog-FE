@@ -51,17 +51,21 @@ const extractOrgArray = (value: unknown): RawOrganization[] => {
 
 const parseRawOrganizations = (payload: unknown): RawOrganization[] => {
   if (!payload || typeof payload !== 'object') return []
-  const maybePayload = payload as { organisations?: unknown; organizations?: unknown; data?: unknown }
+  const maybePayload = payload as {
+    organisations?: unknown
+    organizations?: unknown
+    data?: unknown
+  }
   const candidates = [
     maybePayload.organisations,
     maybePayload.organizations,
     maybePayload.data,
-    (maybePayload.data && typeof maybePayload.data === 'object'
+    maybePayload.data && typeof maybePayload.data === 'object'
       ? (maybePayload.data as { organisations?: unknown }).organisations
-      : undefined),
-    (maybePayload.data && typeof maybePayload.data === 'object'
+      : undefined,
+    maybePayload.data && typeof maybePayload.data === 'object'
       ? (maybePayload.data as { organizations?: unknown }).organizations
-      : undefined),
+      : undefined,
   ]
 
   for (const candidate of candidates) {
@@ -148,9 +152,7 @@ const resolveTotalPages = (payload: unknown, fallbackLimit: number): number => {
 
     const innerData = (payload as { data?: unknown }).data
     if (innerData && typeof innerData === 'object') {
-      const inner = compute(
-        innerData as { total_pages?: number; total?: number; limit?: number },
-      )
+      const inner = compute(innerData as { total_pages?: number; total?: number; limit?: number })
       if (inner) return inner
     }
   }
@@ -190,7 +192,10 @@ const mapAndFilterOrganizations = (rawList: RawOrganization[]): Organization[] =
   return cleaned
 }
 
-const mergeOrganizations = (current: Organization[], rawList: RawOrganization[]): Organization[] => {
+const mergeOrganizations = (
+  current: Organization[],
+  rawList: RawOrganization[],
+): Organization[] => {
   const incoming = mapAndFilterOrganizations(rawList)
   const seen = new Set(current.map((org) => org.id || org.name).filter(Boolean) as string[])
   const merged = [...current]
@@ -253,7 +258,11 @@ export const useOrganizationStore = defineStore('organizations', {
 
         // Backend occasionally returns empty `organizations` despite meta showing data.
         const announcedTotal = resolveMetaNumber(payload, 'total')
-        if (!this.organizations.length && !options?.skipFallback && (announcedTotal === null || announcedTotal > 0)) {
+        if (
+          !this.organizations.length &&
+          !options?.skipFallback &&
+          (announcedTotal === null || announcedTotal > 0)
+        ) {
           const fallback = await organizationService.listOrganizations()
           const fallbackPayload = fallback?.data?.data ?? fallback?.data
           const fallbackList = parseRawOrganizations(fallbackPayload)

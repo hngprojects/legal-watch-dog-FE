@@ -81,16 +81,16 @@ onUnmounted(() => {
 
 <template>
   <header
-    class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md container--wide"
+    class="text-text-main container--wide sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="mx-auto flex w-full app-container items-center justify-between gap-4 px-4 py-4 sm:px-0 lg:py-5"
+      class="app-container mx-auto flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-0 lg:py-5"
     >
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
         <BrandLogo />
       </RouterLink>
 
-      <nav aria-label="Primary" class="hidden flex-1 lg:flex lg:items-center lg:justify-center ">
+      <nav aria-label="Primary" class="hidden flex-1 lg:flex lg:items-center lg:justify-center">
         <ul class="flex items-center gap-8">
           <li v-for="link in navLinks" :key="link.name">
             <RouterLink

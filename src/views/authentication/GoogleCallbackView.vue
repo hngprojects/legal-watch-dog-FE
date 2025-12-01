@@ -37,8 +37,7 @@ const parseOauthParams = () => {
     state: getParam('state'),
     isNewUser: getParam('is_new_user'),
     error: getParam('error'),
-    errorDescription:
-      getParam('error_description') ?? getParam('message') ?? getParam('detail'),
+    errorDescription: getParam('error_description') ?? getParam('message') ?? getParam('detail'),
   }
 }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import { sourceApi } from '@/api/source'
 import type { SourceType, ScrapeFrequency, CreateSourcePayload } from '@/types/source'
 import type { Jurisdiction } from '@/api/jurisdiction'
@@ -158,33 +158,66 @@ const cancel = () => {
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">
               Source Name <span class="text-red-500">*</span>
             </label>
-            <input v-model="sourceForm.name" type="text" placeholder="e.g. Supreme Court Opinions"
-              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+            <input
+              v-model="sourceForm.name"
+              type="text"
+              placeholder="e.g. Supreme Court Opinions"
+              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
           </div>
 
           <div>
-            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Source Type <span class="text-red-500">*</span></label>
-            <select v-model="sourceForm.type" class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"
+              >Source Type <span class="text-red-500">*</span></label
+            >
+            <select
+              v-model="sourceForm.type"
+              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            >
               <option disabled value="">Select type</option>
-              <option v-for="t in sourceTypes" :key="t.value" :value="t.value">{{ t.label }}</option>
+              <option v-for="t in sourceTypes" :key="t.value" :value="t.value">
+                {{ t.label }}
+              </option>
             </select>
           </div>
 
           <div>
-            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Source URL <span class="text-red-500">*</span></label>
-            <input v-model="sourceForm.url" type="url" placeholder="https://example.com" class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]"
+              >Source URL <span class="text-red-500">*</span></label
+            >
+            <input
+              v-model="sourceForm.url"
+              type="url"
+              placeholder="https://example.com"
+              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
           </div>
 
           <div>
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Scrape Frequency</label>
-            <select v-model="sourceForm.frequency" class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none">
-              <option v-for="f in frequencies" :key="f.value" :value="f.value">{{ f.label }}</option>
+            <select
+              v-model="sourceForm.frequency"
+              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            >
+              <option v-for="f in frequencies" :key="f.value" :value="f.value">
+                {{ f.label }}
+              </option>
             </select>
           </div>
 
           <div class="flex justify-end gap-3">
-            <button type="button" @click="cancel" class="rounded-lg border border-[#D5D7DA] px-6 py-2.5 text-sm font-medium">Cancel</button>
-            <button type="submit" :disabled="submitting" class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white">
+            <button
+              type="button"
+              @click="cancel"
+              class="rounded-lg border border-[#D5D7DA] px-6 py-2.5 text-sm font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="submitting"
+              class="rounded-lg bg-[#401903] px-6 py-2.5 text-sm font-medium text-white"
+            >
               <span v-if="submitting">Saving...</span><span v-else>Save Source</span>
             </button>
           </div>

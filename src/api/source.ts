@@ -1,4 +1,4 @@
-import api from '@/lib/api' 
+import api from '@/lib/api'
 import type {
   Source,
   CreateSourcePayload,
@@ -9,7 +9,6 @@ import type {
   SourceType,
   ScrapeFrequency,
 } from '@/types/source'
-
 
 type ApiEnvelope<T> = {
   status?: string
@@ -30,8 +29,7 @@ export const sourceApi = {
   list: (params?: { jurisdiction_id?: string; page?: number; limit?: number }) =>
     api.get<ApiEnvelope<ListResponse>>('/sources', { params }),
 
-  getOne: (source_id: string) =>
-    api.get<ApiEnvelope<{ source: Source }>>(`/sources/${source_id}`),
+  getOne: (source_id: string) => api.get<ApiEnvelope<{ source: Source }>>(`/sources/${source_id}`),
 
   update: (source_id: string, payload: UpdateSourcePayload) =>
     api.put<ApiEnvelope<{ source: Source }>>(`/sources/${source_id}`, payload),
@@ -57,10 +55,12 @@ export const sourceApi = {
       is_official?: boolean
     }>
   }) =>
-    api.post<ApiEnvelope<{ count: number; sources: Source[] }>>('/sources/accept-suggestions', payload),
+    api.post<ApiEnvelope<{ count: number; sources: Source[] }>>(
+      '/sources/accept-suggestions',
+      payload,
+    ),
 
-  scrape: (source_id: string) =>
-    api.post<ApiEnvelope<unknown>>(`/sources/${source_id}/scrapes`),
+  scrape: (source_id: string) => api.post<ApiEnvelope<unknown>>(`/sources/${source_id}/scrapes`),
 
   getRevisions: (source_id: string, params?: { skip?: number; limit?: number }) =>
     api.get<ApiEnvelope<RevisionsResponse>>(`/sources/${source_id}/revisions`, {

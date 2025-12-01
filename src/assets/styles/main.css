@@ -45,7 +45,7 @@
 }
 
 @utility container--wide {
-  @apply max-w-[1200px] w-full m-auto;
+  @apply m-auto w-full max-w-[1200px];
 }
 
 .app-container {
@@ -140,7 +140,7 @@
 }
 
 @utility btn--secondary {
-  @apply btn bg-transparent border border-accent-main hover:bg-accent-main/30;
+  @apply btn border-accent-main hover:bg-accent-main/30 border bg-transparent;
 }
 
 @utility btn--with-icon {

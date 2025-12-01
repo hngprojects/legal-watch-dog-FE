@@ -63,7 +63,11 @@ export const useProjectStore = defineStore('projects', {
         if (!err.response) {
           this.setError('Network error: Unable to reach server')
         } else {
-          this.setError(err.response.data?.message || err.response.data?.detail?.[0]?.msg || 'Failed to load projects')
+          this.setError(
+            err.response.data?.message ||
+              err.response.data?.detail?.[0]?.msg ||
+              'Failed to load projects',
+          )
         }
       } finally {
         this.loading = false
@@ -90,7 +94,11 @@ export const useProjectStore = defineStore('projects', {
         if (!err.response) {
           this.setError('Network error: Unable to reach server')
         } else {
-          this.setError(err.response.data?.message || err.response.data?.detail?.[0]?.msg || 'Failed to create project')
+          this.setError(
+            err.response.data?.message ||
+              err.response.data?.detail?.[0]?.msg ||
+              'Failed to create project',
+          )
         }
         return null
       }
@@ -105,7 +113,11 @@ export const useProjectStore = defineStore('projects', {
         if (!err.response) {
           this.setError('Network error: Unable to reach server')
         } else {
-          this.setError(err.response.data?.message || err.response.data?.detail?.[0]?.msg || 'Failed to delete project')
+          this.setError(
+            err.response.data?.message ||
+              err.response.data?.detail?.[0]?.msg ||
+              'Failed to delete project',
+          )
         }
         throw error
       }
@@ -142,14 +154,13 @@ export const useProjectStore = defineStore('projects', {
           assigned_users: [],
         }
 
-        const updatedProject: Project =
-          resolveProject(data) || {
-            ...baseProject,
-            title: payload.title ?? baseProject.title,
-            description: payload.description ?? baseProject.description,
-            master_prompt: payload.master_prompt ?? baseProject.master_prompt ?? null,
-            org_id: resolvedOrgId,
-          }
+        const updatedProject: Project = resolveProject(data) || {
+          ...baseProject,
+          title: payload.title ?? baseProject.title,
+          description: payload.description ?? baseProject.description,
+          master_prompt: payload.master_prompt ?? baseProject.master_prompt ?? null,
+          org_id: resolvedOrgId,
+        }
 
         const index = this.projects.findIndex((p) => p.id === projectId)
         if (index !== -1) {
@@ -162,7 +173,11 @@ export const useProjectStore = defineStore('projects', {
         if (!err.response) {
           this.setError('Network error: Unable to reach server')
         } else {
-          this.setError(err.response.data?.message || err.response.data?.detail?.[0]?.msg || 'Failed to update project')
+          this.setError(
+            err.response.data?.message ||
+              err.response.data?.detail?.[0]?.msg ||
+              'Failed to update project',
+          )
         }
         throw error
       }

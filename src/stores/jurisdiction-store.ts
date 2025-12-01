@@ -4,6 +4,8 @@ import { jurisdictionApi, type Jurisdiction } from '@/api/jurisdiction'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useProjectStore } from '@/stores/project-store'
 
+type JurisdictionWithChildren = Jurisdiction & { children?: JurisdictionWithChildren[] }
+
 interface ApiError {
   response?: {
     data?: {
@@ -19,7 +21,26 @@ const uniqById = (arr: Jurisdiction[]) => {
   return Array.from(map.values())
 }
 
-const cloneJurisdiction = (j: Jurisdiction) => ({ ...j })
+const cloneJurisdiction = (j: Jurisdiction) => {
+  // Flattened store representation should not retain nested children arrays
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { children, ...rest } = j as JurisdictionWithChildren
+  return { ...rest }
+}
+
+const flattenJurisdictions = (items: JurisdictionWithChildren[]): Jurisdiction[] => {
+  const flattened: Jurisdiction[] = []
+
+  const walk = (list: JurisdictionWithChildren[]) => {
+    for (const item of list) {
+      flattened.push(cloneJurisdiction(item))
+      if (item.children?.length) walk(item.children)
+    }
+  }
+
+  walk(items)
+  return flattened
+}
 
 const LOCAL_ARCHIVE_KEY = 'archived_jurisdiction_ids'
 const LOCAL_ARCHIVED_ITEMS_PREFIX = 'archived_jurisdiction_'
@@ -40,7 +61,7 @@ const saveArchivedJurisdiction = (jurisdiction: Jurisdiction) => {
   try {
     const key = `${LOCAL_ARCHIVED_ITEMS_PREFIX}${jurisdiction.id}`
     localStorage.setItem(key, JSON.stringify(jurisdiction))
-    
+
     const archivedIds = loadArchivedIds()
     if (!archivedIds.includes(jurisdiction.id)) {
       archivedIds.push(jurisdiction.id)
@@ -54,9 +75,9 @@ const saveArchivedJurisdiction = (jurisdiction: Jurisdiction) => {
 const removeArchivedJurisdiction = (jurisdictionId: string) => {
   try {
     localStorage.removeItem(`${LOCAL_ARCHIVED_ITEMS_PREFIX}${jurisdictionId}`)
-    
+
     const archivedIds = loadArchivedIds()
-    const updatedIds = archivedIds.filter(id => id !== jurisdictionId)
+    const updatedIds = archivedIds.filter((id) => id !== jurisdictionId)
     saveArchivedIds(updatedIds)
   } catch (error) {
     console.error('Failed to remove archived jurisdiction:', error)
@@ -67,14 +88,14 @@ const loadArchivedFromLocalStorage = (): Jurisdiction[] => {
   try {
     const archivedIds = loadArchivedIds()
     const archivedItems: Jurisdiction[] = []
-    
+
     for (const id of archivedIds) {
       const item = localStorage.getItem(`${LOCAL_ARCHIVED_ITEMS_PREFIX}${id}`)
       if (item) {
         archivedItems.push(JSON.parse(item))
       }
     }
-    
+
     return archivedItems
   } catch (error) {
     console.error('Failed to load archived from localStorage:', error)
@@ -122,19 +143,13 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
         ? await jurisdictionApi.getByProject(orgId, projectId)
         : await jurisdictionApi.getAll(orgId)
 
-      const all = response.data?.data?.jurisdictions ?? []
+      const all = flattenJurisdictions(response.data?.data?.jurisdictions || [])
 
-      jurisdictions.value = uniqById(
-        all.filter((j) => !j.is_deleted).map(cloneJurisdiction)
-      )
+      jurisdictions.value = uniqById(all.filter((j) => !j.is_deleted).map(cloneJurisdiction))
 
       // Load archived items from localStorage to ensure persistence
       const localArchived = loadArchivedFromLocalStorage()
-      archivedJurisdictions.value = uniqById([
-        ...archivedJurisdictions.value,
-        ...localArchived
-      ])
-
+      archivedJurisdictions.value = uniqById([...archivedJurisdictions.value, ...localArchived])
     } catch (err) {
       const apiErr = err as ApiError
       error.value =
@@ -147,9 +162,8 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
   }
 
   const fetchArchived = async (projectId?: string, organizationId?: string) => {
-    let orgId: string
     try {
-      orgId = getOrgId(organizationId, projectId)
+      getOrgId(organizationId, projectId)
     } catch (e) {
       error.value = (e as Error).message
       return
@@ -162,8 +176,8 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
       // Load from localStorage instead of API (since API doesn't return archived items)
       const localArchived = loadArchivedFromLocalStorage()
       archivedJurisdictions.value = uniqById(localArchived.map(cloneJurisdiction))
-      
-      console.log("📦 Loaded archived from localStorage:", archivedJurisdictions.value.length)
+
+      console.log('📦 Loaded archived from localStorage:', archivedJurisdictions.value.length)
     } catch (err) {
       const apiErr = err as ApiError
       error.value = apiErr.response?.data?.detail || 'Failed to load archived items'
@@ -186,18 +200,21 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
 
     try {
       const response = await jurisdictionApi.getOne(orgId, jurisdictionId)
-      const j = response.data?.data?.jurisdiction as Jurisdiction
+      const j = response.data?.data?.jurisdiction as JurisdictionWithChildren
 
       if (!j) return null
 
-      jurisdictions.value = jurisdictions.value.filter((x) => x.id !== j.id)
-      archivedJurisdictions.value = archivedJurisdictions.value.filter((x) => x.id !== j.id)
+      const flattened = flattenJurisdictions([j])
+      const flattenedIds = new Set(flattened.map((x) => x.id))
 
-      if (j.is_deleted) archivedJurisdictions.value.push(cloneJurisdiction(j))
-      else jurisdictions.value.push(cloneJurisdiction(j))
+      jurisdictions.value = jurisdictions.value.filter((x) => !flattenedIds.has(x.id))
+      archivedJurisdictions.value = archivedJurisdictions.value.filter((x) => !flattenedIds.has(x.id))
 
-      jurisdictions.value = uniqById(jurisdictions.value)
-      archivedJurisdictions.value = uniqById(archivedJurisdictions.value)
+      const active = flattened.filter((item) => !item.is_deleted).map(cloneJurisdiction)
+      const deleted = flattened.filter((item) => item.is_deleted).map(cloneJurisdiction)
+
+      jurisdictions.value = uniqById([...jurisdictions.value, ...active])
+      archivedJurisdictions.value = uniqById([...archivedJurisdictions.value, ...deleted])
 
       return j
     } catch (err) {
@@ -231,10 +248,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
       const newJ = response.data?.data?.jurisdiction as Jurisdiction
 
       if (newJ) {
-        jurisdictions.value = uniqById([
-          ...jurisdictions.value,
-          cloneJurisdiction(newJ),
-        ])
+        jurisdictions.value = uniqById([...jurisdictions.value, cloneJurisdiction(newJ)])
       }
 
       return newJ
@@ -287,8 +301,8 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     const orgId = getOrgId(organizationId)
 
     try {
-      const itemToArchive = jurisdictions.value.find(j => j.id === jurisdictionId)
-      
+      const itemToArchive = jurisdictions.value.find((j) => j.id === jurisdictionId)
+
       if (!itemToArchive) {
         throw new Error('Jurisdiction not found')
       }
@@ -301,7 +315,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
         deleted_at: new Date().toISOString(),
       }
 
-      jurisdictions.value = jurisdictions.value.filter(j => j.id !== jurisdictionId)
+      jurisdictions.value = jurisdictions.value.filter((j) => j.id !== jurisdictionId)
       archivedJurisdictions.value = uniqById([
         ...archivedJurisdictions.value,
         cloneJurisdiction(archivedItem),
@@ -309,8 +323,7 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
 
       saveArchivedJurisdiction(archivedItem)
 
-      console.log("✅ Jurisdiction archived locally:", jurisdictionId)
-
+      console.log('✅ Jurisdiction archived locally:', jurisdictionId)
     } catch (err) {
       console.error('❌ Delete failed:', err)
       const apiErr = err as ApiError
@@ -319,42 +332,41 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     }
   }
 
-const restoreJurisdiction = async (jurisdictionId: string, organizationId?: string) => {
-  const orgId = getOrgId(organizationId)
+  const restoreJurisdiction = async (jurisdictionId: string, organizationId?: string) => {
+    const orgId = getOrgId(organizationId)
 
-  try {
-    console.log('🔄 Restoring jurisdiction via update endpoint (fallback)')
-    
-    const response = await jurisdictionApi.update(orgId, jurisdictionId, {
-      is_deleted: false,
-      deleted_at: null
-    } as Partial<Jurisdiction>)
-    
-    const restored = response.data?.data?.jurisdiction as Jurisdiction
-    console.log('✅ Restore successful via update endpoint')
+    try {
+      console.log('🔄 Restoring jurisdiction via update endpoint (fallback)')
 
-    archivedJurisdictions.value = archivedJurisdictions.value.filter(
-      j => j.id !== jurisdictionId,
-    )
-    
-    jurisdictions.value = uniqById([...jurisdictions.value, cloneJurisdiction(restored)])
+      const response = await jurisdictionApi.update(orgId, jurisdictionId, {
+        is_deleted: false,
+        deleted_at: null,
+      } as Partial<Jurisdiction>)
 
-    removeArchivedJurisdiction(jurisdictionId)
+      const restored = response.data?.data?.jurisdiction as Jurisdiction
+      console.log('✅ Restore successful via update endpoint')
 
-    return restored
-    
-  } catch (err) {
-    console.error(' Restore failed:', err)
-    const apiErr = err as ApiError
-    error.value = apiErr.response?.data?.detail || 'Failed to restore jurisdiction'
-    throw err
+      archivedJurisdictions.value = archivedJurisdictions.value.filter(
+        (j) => j.id !== jurisdictionId,
+      )
+
+      jurisdictions.value = uniqById([...jurisdictions.value, cloneJurisdiction(restored)])
+
+      removeArchivedJurisdiction(jurisdictionId)
+
+      return restored
+    } catch (err) {
+      console.error(' Restore failed:', err)
+      const apiErr = err as ApiError
+      error.value = apiErr.response?.data?.detail || 'Failed to restore jurisdiction'
+      throw err
+    }
   }
-}
 
   const initializeArchived = () => {
     const localArchived = loadArchivedFromLocalStorage()
     archivedJurisdictions.value = uniqById(localArchived.map(cloneJurisdiction))
-    console.log("Initialized archived from localStorage:", archivedJurisdictions.value.length)
+    console.log('Initialized archived from localStorage:', archivedJurisdictions.value.length)
   }
 
   const setError = (msg: string | null) => {
@@ -374,7 +386,7 @@ const restoreJurisdiction = async (jurisdictionId: string, organizationId?: stri
     updateJurisdiction,
     deleteJurisdiction,
     restoreJurisdiction,
-    initializeArchived, 
+    initializeArchived,
 
     setError,
   }
