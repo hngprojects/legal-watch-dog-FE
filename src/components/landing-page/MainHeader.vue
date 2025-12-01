@@ -235,7 +235,7 @@ onUnmounted(() => {
             >
               Go to Dashboard
             </Button>
-           <Button variant="outline" @click="handleLogout" class="w-full mt-6">
+           <Button variant="outline" @click="handleLogout" class="w-full lg:mt-0 mt-6">
               Logout
             </Button>
           </template>
