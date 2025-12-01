@@ -99,6 +99,7 @@ const handleSubmit = async () => {
       query: {
         status: 'success',
         context: 'reset-password',
+        issued: 'true',
         message: successMessage.value,
       },
     })
@@ -116,6 +117,7 @@ const handleSubmit = async () => {
       query: {
         status: 'error',
         context: 'reset-password',
+        issued: 'true',
         message: serverError.value,
       },
     })
