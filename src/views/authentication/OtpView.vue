@@ -255,80 +255,80 @@ const handleResend = async () => {
 
 <template>
   <AuthCard :header-text="headingText">
-      <template v-slot:desc>
-        <p class="text-base text-gray-500">
-          {{ subtitle }}
-          <span class="font-semibold text-gray-800">{{ obfuscatedEmail }}</span>
-        </p>
-      </template>
-      <div
-        class="flex w-full max-w-5xl flex-col gap-10 lg:flex-row lg:items-center lg:justify-between"
-      >
-        <div class="w-full max-w-xl space-y-8">
-          <div class="flex justify-between gap-3">
-            <input
-              v-for="(_, index) in otpDigits"
-              :key="index"
-              ref="digitInputs"
-              type="text"
-              inputmode="numeric"
-              autocomplete="one-time-code"
-              maxlength="1"
-              class="focus:border-accent-main h-14 w-14 rounded-md border border-gray-300 text-center text-lg font-medium text-gray-900 focus:ring-2 focus:ring-[#F4E4D4]"
-              :value="otpDigits[index]"
-              @input="handleDigitInput($event, index)"
-              @keydown="handleKeydown($event, index)"
-              @paste="handlePaste($event, index)"
-            />
-          </div>
+    <template v-slot:desc>
+      <p class="text-base text-gray-500">
+        {{ subtitle }}
+        <span class="font-semibold text-gray-800">{{ obfuscatedEmail }}</span>
+      </p>
+    </template>
+    <div
+      class="flex w-full max-w-5xl flex-col gap-10 lg:flex-row lg:items-center lg:justify-between"
+    >
+      <div class="w-full max-w-xl space-y-8">
+        <div class="flex justify-between gap-3">
+          <input
+            v-for="(_, index) in otpDigits"
+            :key="index"
+            ref="digitInputs"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="1"
+            class="focus:border-accent-main h-14 w-14 rounded-md border border-gray-300 text-center text-lg font-medium text-gray-900 focus:ring-2 focus:ring-[#F4E4D4]"
+            :value="otpDigits[index]"
+            @input="handleDigitInput($event, index)"
+            @keydown="handleKeydown($event, index)"
+            @paste="handlePaste($event, index)"
+          />
+        </div>
 
-          <div class="space-y-4">
+        <div class="space-y-4">
+          <button
+            type="button"
+            @click="handleContinue"
+            :disabled="isVerifying || !isComplete"
+            class="btn--primary btn--lg disabled:btn--disabled w-full"
+          >
+            <span v-if="!isVerifying">Continue</span>
+            <span v-else>Verifying...</span>
+          </button>
+
+          <div class="flex items-center justify-center gap-2 text-sm text-gray-700">
+            <span>Didn't receive the link?</span>
             <button
               type="button"
-              @click="handleContinue"
-              :disabled="isVerifying || !isComplete"
-              class="btn--primary btn--lg disabled:btn--disabled w-full"
+              @click="handleResend"
+              :disabled="timer > 0 || isResending"
+              class="btn--link disabled:link--disabled"
             >
-              <span v-if="!isVerifying">Continue</span>
-              <span v-else>Verifying...</span>
+              <span v-if="isResending">Sending...</span>
+              <span v-else-if="timer > 0">{{ formatTime(timer) }}</span>
+              <span v-else>Resend Code</span>
             </button>
-
-            <div class="flex items-center justify-center gap-2 text-sm text-gray-700">
-              <span>Didn't receive the link?</span>
-              <button
-                type="button"
-                @click="handleResend"
-                :disabled="timer > 0 || isResending"
-                class="btn--link disabled:link--disabled"
-              >
-                <span v-if="isResending">Sending...</span>
-                <span v-else-if="timer > 0">{{ formatTime(timer) }}</span>
-                <span v-else>Resend Code</span>
-              </button>
-            </div>
-
-            <RouterLink
-              :to="backRoute"
-              class="btn--link flex items-center justify-center gap-2 text-sm"
-            >
-              <ArrowLeftIcon :size="18" />
-              <span>{{ backText }}</span>
-            </RouterLink>
           </div>
 
-          <div
-            v-if="errorMessage"
-            class="bg-destructive/70 text-surface rounded-md border border-red-200 p-3 text-sm"
+          <RouterLink
+            :to="backRoute"
+            class="btn--link flex items-center justify-center gap-2 text-sm"
           >
-            {{ errorMessage }}
-          </div>
-          <div
-            v-if="successMessage"
-            class="rounded-md border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-700"
-          >
-            {{ successMessage }}
-          </div>
+            <ArrowLeftIcon :size="18" />
+            <span>{{ backText }}</span>
+          </RouterLink>
+        </div>
+
+        <div
+          v-if="errorMessage"
+          class="bg-destructive/70 text-surface rounded-md border border-red-200 p-3 text-sm"
+        >
+          {{ errorMessage }}
+        </div>
+        <div
+          v-if="successMessage"
+          class="rounded-md border border-emerald-200 bg-emerald-50/70 p-3 text-sm text-emerald-700"
+        >
+          {{ successMessage }}
         </div>
       </div>
-    </AuthCard>
+    </div>
+  </AuthCard>
 </template>

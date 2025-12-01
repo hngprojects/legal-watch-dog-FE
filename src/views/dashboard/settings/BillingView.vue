@@ -12,10 +12,7 @@ const isFreeTrial = ref(true)
 const { hasBillingAccount, createBillingAccount, getSubscriptionStatus } = useBillingStore()
 
 onMounted(async () => {
-  const [hasAccount, subscriptionStatus] = await Promise.all([
-    hasBillingAccount(),
-    getSubscriptionStatus(),
-  ])
+  const [hasAccount] = await Promise.all([hasBillingAccount(), getSubscriptionStatus()])
 
   if (!hasAccount) {
     isFreeTrial.value = true

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { Check, X, Loader2 } from 'lucide-vue-next'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import aiIcon from '@/assets/icons/ai_icon.png'
 import { sourceApi } from '@/api/source'
 import type { SuggestedSource, SuggestSourcesRequest } from '@/types/source'
@@ -56,14 +56,14 @@ const loadSuggestions = async (attempt = 1): Promise<void> => {
       added: false,
     }))
     error.value = null
-  } catch (err: any) {
+  } catch (err) {
     if (attempt <= maxRetries) {
       retryCount.value = attempt
       setTimeout(() => loadSuggestions(attempt + 1), attempt * 3000)
       return
     }
     error.value = 'AI could not find reliable sources right now. Please try again later.'
-    error.value = null
+    console.error('Failed to load suggestions', err)
   } finally {
     if (attempt > maxRetries || suggestions.value.length > 0) {
       loading.value = false
@@ -103,7 +103,7 @@ const saveSelected = async () => {
     })
 
     const count = toSave.length
-    emit('sources-added') 
+    emit('sources-added')
     emit('save', count)
 
     Swal.fire({
@@ -113,8 +113,15 @@ const saveSelected = async () => {
       timer: 2500,
       showConfirmButton: false,
     })
-  } catch (err: any) {
-    Swal.fire('Error', err.response?.data?.message || 'Failed to add sources', 'error')
+  } catch (err) {
+    const message =
+      typeof err === 'object' && err && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : err instanceof Error
+          ? err.message
+          : null
+
+    Swal.fire('Error', message || 'Failed to add sources', 'error')
   }
 }
 

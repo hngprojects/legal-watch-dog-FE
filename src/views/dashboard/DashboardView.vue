@@ -208,9 +208,7 @@ const goToProject = (id: string) => {
                 Project Name
               </label>
             </div>
-            <p class="mt-1.5 pl-1 text-xs text-[#717680]">
-              Give your project a descriptive name
-            </p>
+            <p class="mt-1.5 pl-1 text-xs text-[#717680]">Give your project a descriptive name</p>
 
             <div class="relative mt-6">
               <textarea
@@ -314,19 +312,10 @@ const goToProject = (id: string) => {
           </div>
 
           <DialogFooter class="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              @click="closeCreateModal"
-              class="btn--secondary btn--lg"
-            >
+            <button type="button" @click="closeCreateModal" class="btn--secondary btn--lg">
               Cancel
             </button>
-            <button
-              type="submit"
-              class="btn--primary btn--lg"
-            >
-              Save Project
-            </button>
+            <button type="submit" class="btn--primary btn--lg">Save Project</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>

@@ -11,7 +11,7 @@ import type { OrganizationErrorResponse } from '@/types/organization'
 import type { Organization, RawOrganization } from '@/types/organization'
 import type { Invitation } from '@/types/invitation'
 import type { UserProfile } from '@/types/user'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 import {
   Dialog,
   DialogClose,
@@ -97,8 +97,8 @@ const members = ref<Member[]>([])
 const membersLoading = ref(false)
 const membersError = ref<string | null>(null)
 
-const organization = computed(() =>
-  organizations.value.find((item) => item.id === orgId.value) || null,
+const organization = computed(
+  () => organizations.value.find((item) => item.id === orgId.value) || null,
 )
 
 const projectModalOpen = ref(false)
@@ -318,9 +318,7 @@ const loadOrganizationInvitations = async () => {
     const { data } = await invitationService.listMyInvitations()
     const payload = data?.data ?? data
     const allInvites = normalizeOrgInvitations(payload)
-    orgInvitations.value = allInvites.filter(
-      (invite) => invite.organization_id === orgId.value,
-    )
+    orgInvitations.value = allInvites.filter((invite) => invite.organization_id === orgId.value)
   } catch (error) {
     const err = error as OrganizationErrorResponse
     if (!err.response) {
@@ -343,11 +341,7 @@ const mapUserToMember = (user: UserProfile): Member => {
   const orgRole = orgRecord?.role || user.role || ''
   const normalizedRole = orgRole?.toLowerCase()
   const role: MemberRole =
-    normalizedRole === 'admin'
-      ? 'Admin'
-      : normalizedRole === 'manager'
-        ? 'Manager'
-        : 'Member'
+    normalizedRole === 'admin' ? 'Admin' : normalizedRole === 'manager' ? 'Manager' : 'Member'
   const orgActive = user.organizations?.find((org) => org.organization_id === orgId.value)
   const effectiveActive =
     orgActive?.is_active ??
@@ -513,11 +507,11 @@ watch(
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-0 app-container lg:py-14">
+  <main class="app-container min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-0 lg:py-14">
     <div class="mx-auto flex flex-col gap-8">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-sm font-medium uppercase tracking-wide text-[#9CA3AF]">
+          <p class="text-sm font-medium tracking-wide text-[#9CA3AF] uppercase">
             Organization Profile
           </p>
         </div>
@@ -526,9 +520,7 @@ watch(
         </RouterLink>
       </div>
 
-      <section
-        class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60 md:p-8 lg:p-10"
-      >
+      <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60 md:p-8 lg:p-10">
         <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div class="flex items-center gap-4 md:gap-6">
             <div
@@ -537,10 +529,12 @@ watch(
               {{ initials(organization?.name || 'Org') || 'Org' }}
             </div>
             <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
+              <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">
                 Organization
               </p>
-              <h2 class="text-2xl font-bold text-gray-900">{{ organization?.name || 'Org Name' }}</h2>
+              <h2 class="text-2xl font-bold text-gray-900">
+                {{ organization?.name || 'Org Name' }}
+              </h2>
               <p class="text-sm text-gray-600">
                 {{ organization?.industry || 'Law, Regulations & Compliance' }}
               </p>
@@ -548,9 +542,7 @@ watch(
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <button
-                class="btn--primary btn--lg btn--with-icon"
-              >
+              <button class="btn--primary btn--lg btn--with-icon">
                 <Settings :size="18" />
                 Manage
               </button>
@@ -568,7 +560,9 @@ watch(
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Projects ({{ projects.length}})</p>
+            <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">
+              Projects ({{ projects.length }})
+            </p>
           </div>
           <div class="flex items-center gap-3">
             <button @click="openCreateProject" class="btn--primary btn--lg">Add Project</button>
@@ -579,8 +573,13 @@ watch(
         <div v-if="projectsLoading" class="space-y-4">
           <div class="h-20 animate-pulse rounded-xl bg-gray-100"></div>
         </div>
-        <div v-else-if="!projects.length" class="space-y-4 rounded-xl border border-dashed border-gray-200 p-6 text-center">
-          <p class="text-sm text-gray-600">No projects yet. Create one to start tracking changes.</p>
+        <div
+          v-else-if="!projects.length"
+          class="space-y-4 rounded-xl border border-dashed border-gray-200 p-6 text-center"
+        >
+          <p class="text-sm text-gray-600">
+            No projects yet. Create one to start tracking changes.
+          </p>
           <div class="flex justify-center">
             <button class="btn--primary btn--lg" @click="openCreateProject">Add Project</button>
           </div>
@@ -594,7 +593,7 @@ watch(
           >
             <div>
               <p class="text-sm font-semibold text-gray-900">{{ project.title }}</p>
-              <p class="text-xs text-gray-500 line-clamp-2">{{ project.description }}</p>
+              <p class="line-clamp-2 text-xs text-gray-500">{{ project.description }}</p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
@@ -619,16 +618,12 @@ watch(
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
         <div class="mb-4 flex items-center justify-between">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Members</p>
+            <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Members</p>
             <p class="text-sm text-gray-500">Invite teammates to collaborate.</p>
           </div>
           <Dialog v-model:open="inviteOpen">
             <DialogTrigger as-child>
-              <button
-                class="btn--primary btn--lg"
-              >
-                Invite Member
-              </button>
+              <button class="btn--primary btn--lg">Invite Member</button>
             </DialogTrigger>
             <DialogContent class="sm:max-w-[480px]">
               <DialogHeader>
@@ -671,12 +666,7 @@ watch(
 
                 <DialogFooter class="mt-2 flex items-center justify-end gap-3">
                   <DialogClose as-child>
-                    <button
-                      type="button"
-                      class="btn--secondary btn--lg"
-                    >
-                      Cancel
-                    </button>
+                    <button type="button" class="btn--secondary btn--lg">Cancel</button>
                   </DialogClose>
                   <button
                     type="submit"
@@ -736,9 +726,7 @@ watch(
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <Badge
-                  :class="['border px-3 py-1 text-xs font-semibold', roleClass(member.role)]"
-                >
+                <Badge :class="['border px-3 py-1 text-xs font-semibold', roleClass(member.role)]">
                   {{ member.role }}
                 </Badge>
                 <Badge
@@ -757,19 +745,25 @@ watch(
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Admin'"
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` || member.role === 'Admin'
+                      "
                       @click.stop="updateMemberRole(member, 'Admin')"
                     >
                       Admin
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Manager'"
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` || member.role === 'Manager'
+                      "
                       @click.stop="updateMemberRole(member, 'Manager')"
                     >
                       Manager
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      :disabled="memberActionLoading === `${member.id}-role` || member.role === 'Member'"
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` || member.role === 'Member'
+                      "
                       @click.stop="updateMemberRole(member, 'Member')"
                     >
                       Member
@@ -790,14 +784,18 @@ watch(
         <div class="mt-8 rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-4">
           <div class="mb-3 flex items-center justify-between">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
+              <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">
                 Pending invitations
               </p>
               <p class="text-sm text-gray-600">Invites sent for this organization.</p>
             </div>
           </div>
           <div v-if="orgInvitationsLoading" class="space-y-2">
-            <div v-for="n in 3" :key="n" class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm">
+            <div
+              v-for="n in 3"
+              :key="n"
+              class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm"
+            >
               <div class="h-4 w-32 animate-pulse rounded bg-gray-200"></div>
               <div class="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
             </div>

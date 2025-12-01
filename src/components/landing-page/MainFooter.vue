@@ -1,6 +1,6 @@
 <template>
-  <footer class="border-t border-gray-100 bg-[#F9FAFB] text-gray-800 container--wide">
-    <div class="mx-auto px-6 pt-16 pb-6 lg:px-0 app-container">
+  <footer class="container--wide border-t border-gray-100 bg-[#F9FAFB] text-gray-800">
+    <div class="app-container mx-auto px-6 pt-16 pb-6 lg:px-0">
       <div class="mb-12">
         <div class="flex items-center gap-3">
           <img
@@ -137,7 +137,7 @@ import { RouterLink } from 'vue-router'
 
 const products = [
   { label: 'Features', path: '/features' },
-  { label: 'Pricing', path: '/pricing' }
+  { label: 'Pricing', path: '/pricing' },
 ]
 
 const companies = [

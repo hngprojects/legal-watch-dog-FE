@@ -67,7 +67,7 @@ const handleLogout = async () => {
       <UserDropdown>
         <button class="btn btn--with-icon">
           <UserAvatar :name="displayName" :size="40" />
-          <span class="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
+          <span class="max-w-[140px] truncate text-sm font-semibold text-gray-800">
             {{ displayName }}
           </span>
         </button>

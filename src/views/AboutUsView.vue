@@ -75,7 +75,7 @@ const teamMembers = [
         "
       ></div>
 
-      <section class="relative z-10 flex w-full flex-col items-center justify-center pt-16 pb-12 ">
+      <section class="relative z-10 flex w-full flex-col items-center justify-center pt-16 pb-12">
         <div class="mx-auto flex w-full flex-col items-center px-6 text-center">
           <TypographyHeading level="h1" align="center" class="mb-6 max-w-4xl">
             We're Transforming How <br />
@@ -99,7 +99,7 @@ const teamMembers = [
         </div>
       </section>
 
-      <section class="relative z-10 w-full px-6 py-16 app-container">
+      <section class="app-container relative z-10 w-full px-6 py-16">
         <div class="mx-auto flex w-full max-w-[1240px] flex-col items-center gap-12 md:flex-row">
           <div class="flex-1 space-y-6">
             <TypographyHeading level="h2" class="text-[#F2AB6D]">
@@ -118,7 +118,7 @@ const teamMembers = [
         </div>
       </section>
 
-      <section class="relative z-10 w-full bg-transparent px-6 py-16 app-container">
+      <section class="app-container relative z-10 w-full bg-transparent px-6 py-16">
         <div class="mx-auto flex w-full max-w-[1240px] flex-col items-center gap-12">
           <div class="space-y-4 text-center">
             <TypographyHeading level="h2">
@@ -154,7 +154,7 @@ const teamMembers = [
         </div>
       </section>
 
-      <section class="relative z-10 w-full py-16 app-container">
+      <section class="app-container relative z-10 w-full py-16">
         <div class="mx-auto flex w-full flex-col items-center gap-12">
           <div class="space-y-4 text-center">
             <TypographyHeading level="h2" class="text-center">
@@ -190,7 +190,7 @@ const teamMembers = [
       </section>
 
       <section
-        class="relative mx-auto mt-12 mb-12 w-full overflow-hidden rounded-3xl bg-[#3C2610] px-6 py-24 app-container"
+        class="app-container relative mx-auto mt-12 mb-12 w-full overflow-hidden rounded-3xl bg-[#3C2610] px-6 py-24"
       >
         <img
           :src="stratBgLeft"

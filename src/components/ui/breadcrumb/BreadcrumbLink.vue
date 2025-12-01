@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<PrimitiveProps & { class?: HTMLAttributes
     :as-child="asChild"
     :class="
       cn(
-        'text-[#401903] transition-colors hover:text-[#2a1102] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#f1a75f]/60',
+        'text-[#401903] transition-colors hover:text-[#2a1102] focus-visible:ring-2 focus-visible:ring-[#f1a75f]/60 focus-visible:ring-offset-2 focus-visible:outline-none',
         props.class,
       )
     "
