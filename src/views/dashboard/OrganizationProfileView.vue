@@ -378,11 +378,17 @@ const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
     await Swal.fire('Role updated', `${member.name} is now ${targetRole}.`, 'success')
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    const message = !err.response
-      ? 'Network error: Unable to reach server'
-      : err.response.data?.detail?.[0]?.msg ||
-        err.response.data?.message ||
-        'Failed to update member role'
+    let message =
+      !err.response
+        ? 'Network error: Unable to reach server'
+        : err.response.data?.detail?.[0]?.msg ||
+          err.response.data?.message ||
+          'Failed to update member role'
+
+    if (typeof message === 'string' && /through this endpoint./i.test(message)) {
+      message = message.replace(/through this endpoint./gi, '').replace(/\s{2,}/g, ' ').trim()
+      if (message && !/[.!?]$/.test(message)) message = `${message}.`
+    }
     await Swal.fire('Could not update role', message, 'error')
   } finally {
     memberActionLoading.value = null
@@ -406,11 +412,17 @@ const toggleMemberStatus = async (member: Member) => {
     await Swal.fire('Status updated', `${member.name} has been ${verb}.`, 'success')
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    const message = !err.response
-      ? 'Network error: Unable to reach server'
-      : err.response.data?.detail?.[0]?.msg ||
-        err.response.data?.message ||
-        'Failed to update member status'
+    let message =
+      !err.response
+        ? 'Network error: Unable to reach server'
+        : err.response.data?.detail?.[0]?.msg ||
+          err.response.data?.message ||
+          'Failed to update member status'
+
+    if (typeof message === 'string' && /through this endpoint./i.test(message)) {
+      message = message.replace(/through this endpoint/gi, '').replace(/\s{2,}/g, ' ').trim()
+      if (message && !/[.!?]$/.test(message)) message = `${message}.`
+    }
     await Swal.fire('Could not update status', message, 'error')
   } finally {
     memberActionLoading.value = null
