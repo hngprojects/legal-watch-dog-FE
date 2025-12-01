@@ -6,8 +6,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings, ChevronDown } from 'lucide-vue-next'
-import checkmark from '@/assets/Images/checkmark.png'
+import { ArrowLeftIcon, Plus, Settings, ChevronDown, CheckSquare } from 'lucide-vue-next'
 import Swal from '@/lib/swal'
 import {
   Breadcrumb,
@@ -352,14 +351,14 @@ watch(
       <div
         class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5"
       >
-        <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
-          <div
-            class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-12 sm:w-12"
-          >
-            <img :src="checkmark" alt="check-mark" class="h-5 w-5 sm:h-6 sm:w-6" />
-          </div>
+          <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-fg bg-[#1F1F1F1A] p-1 sm:h-12 sm:w-12"
+            >
+              <CheckSquare class="h-5 w-5 text-fg sm:h-6 sm:w-6" />
+            </div>
 
-          <p class="text-[14px] leading-snug text-[#3A2B1B] sm:text-[16px]">
+          <p class="text-[14px] leading-snug text-fg sm:text-[16px]">
             Hiring a specialist give you the best possible result.
             <span class="cursor-pointer underline">learn more about a specialist</span>
           </p>
