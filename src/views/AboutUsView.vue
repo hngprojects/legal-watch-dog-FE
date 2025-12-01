@@ -60,8 +60,9 @@ const teamMembers = [
 <template>
   <div class="flex min-h-screen flex-col">
     <main class="relative mx-auto flex w-full flex-1 flex-col overflow-hidden bg-[#F7F7F7]">
+      <!-- Background gradient - responsive -->
       <div
-        class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+        class="pointer-events-none absolute top-0 left-1/2 z-0 h-[400px] w-[1000px] -translate-x-1/2 -translate-y-[50%] rounded-[50%] sm:h-[500px] sm:w-[1200px] md:h-[600px] md:w-[1400px] lg:h-[800px] lg:w-[1600px] lg:-translate-y-[60%]"
         style="
           background: radial-gradient(
             ellipse,
@@ -73,114 +74,118 @@ const teamMembers = [
         "
       ></div>
 
-      <section class="relative z-10 flex w-full flex-col items-center justify-center pt-16 pb-12">
-        <div class="mx-auto flex w-full flex-col items-center px-6 text-center">
+      <!-- Hero Section -->
+      <section class="relative z-10 flex w-full flex-col items-center justify-center pt-12 pb-8 sm:pt-16 sm:pb-12">
+        <div class="app-container flex w-full flex-col items-center text-center">
           <TypographyHeading
             level="h1"
             align="center"
-            class="mb-6 max-w-5xl px-4 leading-[1.1] sm:px-0"
+            class="mb-4 text-2xl leading-tight sm:mb-5 sm:text-3xl md:text-4xl lg:text-5xl lg:leading-[1.1]"
           >
             We're Transforming How Companies Track Regulatory Changes.
           </TypographyHeading>
           <TypographyText
-            class="mx-auto mb-8 max-w-2xl leading-7 font-semibold text-gray-600"
+            class="mx-auto mb-6 max-w-2xl text-sm leading-relaxed font-semibold text-gray-600 sm:mb-8 sm:text-base md:text-lg"
             align="center"
             tone="muted"
           >
             AI monitoring and human expertise help your team stay compliant, informed, and always
             ahead without stress.
           </TypographyText>
-          <RouterLink to="/signup" class="btn--default btn--lg">
+          <RouterLink to="/signup" class="btn--default btn--lg mb-6 sm:mb-8">
             Get Started
           </RouterLink>
-          <div class="w-full max-w-[1000px] overflow-hidden rounded-2xl shadow-xl mt-6">
+          <div class="w-full max-w-[800px] overflow-hidden rounded-xl shadow-xl sm:max-w-[900px] lg:max-w-[1000px] lg:rounded-2xl">
             <img :src="aboutHeroImg" alt="Team collaborating" class="h-auto w-full object-cover" />
           </div>
         </div>
       </section>
 
-      <section class="app-container relative z-10 w-full px-6 py-16">
-        <div class="mx-auto flex w-full max-w-[1240px] flex-col items-center gap-12 md:flex-row">
-          <div class="flex-1 space-y-6">
-            <TypographyHeading level="h2" class="text-[#F2AB6D]">
+      <!-- Mission & Vision -->
+      <section class="app-container relative z-10 w-full py-12 sm:py-16">
+        <div class="mx-auto flex w-full flex-col items-center gap-8 md:flex-row md:gap-12 lg:max-w-[1240px]">
+          <div class="flex-1 space-y-4 sm:space-y-6">
+            <TypographyHeading level="h2" class="text-lg font-semibold text-[#F2AB6D] sm:text-xl md:text-2xl">
               Our Mission & Vision
             </TypographyHeading>
-            <TypographyText class="text-lg leading-relaxed text-gray-700">
+            <TypographyText class="text-base leading-relaxed text-gray-700 sm:text-lg">
               Our goal is to make compliance effortless. We believe businesses shouldn't struggle to
               track complex regulatory updates across regions. By combining automation, human
               expertise, and powerful research workflows, we provide clarity where others provide
               chaos.
             </TypographyText>
           </div>
-          <div class="flex-1">
-            <img :src="missionImg" alt="Mission and Vision" class="w-full rounded-2xl shadow-lg" />
+          <div class="flex-1 w-full">
+            <img :src="missionImg" alt="Mission and Vision" class="w-full rounded-xl shadow-lg sm:rounded-2xl" />
           </div>
         </div>
       </section>
 
-      <section class="app-container relative z-10 w-full bg-transparent px-6 py-16">
-        <div class="mx-auto flex w-full max-w-[1240px] flex-col items-center gap-12">
-          <div class="space-y-4 text-center">
-            <TypographyHeading level="h2">
+      <!-- Core Values -->
+      <section class="app-container relative z-10 w-full bg-transparent py-12 sm:py-16">
+        <div class="mx-auto flex w-full flex-col items-center gap-8 sm:gap-12">
+          <div class="space-y-3 text-center sm:space-y-4">
+            <TypographyHeading level="h2" class="text-2xl font-bold sm:text-3xl md:text-4xl">
               Our <span class="text-[#F2AB6D]">Core</span> Values
             </TypographyHeading>
-            <TypographyText tone="muted" align="center">
+            <TypographyText tone="muted" align="center" class="text-sm sm:text-base">
               The principles that guide everything we do
             </TypographyText>
           </div>
-          <div class="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card
+          <div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+            <div
               v-for="(card, i) in coreValues"
               :key="i"
-              class="flex flex-col items-start gap-4 rounded-xl border-none bg-white p-6 shadow-md transition-shadow hover:shadow-lg"
+              class="flex flex-col items-start gap-3 rounded-xl border-none bg-white p-4 shadow-md transition-shadow hover:shadow-lg sm:gap-4 sm:p-6"
             >
-              <CardHeader class="w-full space-y-4 p-0">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#fae5d3]">
+              <div class="flex flex-col gap-3 w-full">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#fae5d3] sm:h-12 sm:w-12">
                   <img
                     :src="card.icon"
                     :alt="`${card.title} icon`"
-                    class="h-6 w-6 object-contain"
+                    class="h-5 w-5 object-contain sm:h-6 sm:w-6"
                   />
                 </div>
-                <CardTitle class="text-xl font-bold text-gray-900">
+                <h3 class="text-lg font-bold text-gray-900 sm:text-xl">
                   {{ card.title }}
-                </CardTitle>
-              </CardHeader>
-              <CardDescription class="mt-2 text-sm leading-relaxed text-gray-600">
+                </h3>
+              </div>
+              <p class="text-sm leading-relaxed text-gray-600 sm:text-base">
                 {{ card.description }}
-              </CardDescription>
-            </Card>
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="app-container relative z-10 w-full py-16">
-        <div class="mx-auto flex w-full flex-col items-center gap-12">
-          <div class="space-y-4 text-center">
-            <TypographyHeading level="h2" class="text-center">
+      <!-- Meet Our Team -->
+      <section class="app-container relative z-10 w-full py-12 sm:py-16">
+        <div class="mx-auto flex w-full flex-col items-center gap-8 sm:gap-12">
+          <div class="space-y-3 text-center sm:space-y-4">
+            <TypographyHeading level="h2" class="text-2xl font-bold sm:text-3xl md:text-4xl">
               Meet <span class="text-[#F2AB6D]">Our</span> Team
             </TypographyHeading>
-            <TypographyText tone="muted" align="center">
+            <TypographyText tone="muted" align="center" class="text-sm sm:text-base">
               Meet the dedicated minds working to bring transparency and innovation.
             </TypographyText>
           </div>
-          <div class="flex w-full flex-wrap justify-center gap-8">
+          <div class="flex w-full flex-col items-center justify-center gap-8 sm:flex-row sm:flex-wrap sm:gap-6 lg:gap-8">
             <div
               v-for="(member, i) in teamMembers"
               :key="i"
-              class="flex max-w-[350px] flex-col items-start"
+              class="flex w-full max-w-[300px] flex-col items-start sm:max-w-[280px] md:max-w-[320px] lg:max-w-[350px]"
             >
-              <div class="mb-4 h-[300px] w-full overflow-hidden rounded-xl">
+              <div class="mb-3 h-[250px] w-full overflow-hidden rounded-lg sm:mb-4 sm:h-[280px] lg:h-[300px] lg:rounded-xl">
                 <img
                   :src="member.image"
                   :alt="member.name"
                   class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                 />
               </div>
-              <p class="mb-2.5 text-xl leading-relaxed font-normal text-[#1F1F1F]">
+              <p class="mb-2 text-base leading-relaxed font-normal text-[#1F1F1F] sm:text-lg">
                 {{ member.description }}
               </p>
-              <p class="font-medium">
+              <p class="font-medium text-sm sm:text-base">
                 <span class="text-[#1F1F1F]">({{ member.role }})</span>
                 <span class="text-[#F2AB6D]"> {{ member.name }}</span>
               </p>
@@ -193,3 +198,45 @@ const teamMembers = [
     </main>
   </div>
 </template>
+
+<style scoped>
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .app-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Ensure images maintain aspect ratio */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Better touch targets */
+@media (max-width: 768px) {
+  a, button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Prevent content from being too wide on large screens */
+@media (min-width: 1536px) {
+  .app-container {
+    max-width: 1280px;
+  }
+}
+
+/* Smooth transitions */
+.transition-shadow {
+  transition: box-shadow 0.3s ease;
+}
+
+.transition-transform {
+  transition: transform 0.3s ease;
+}
+</style>
