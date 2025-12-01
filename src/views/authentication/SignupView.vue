@@ -246,6 +246,10 @@ const handleCreateAccount = async () => {
         :type="showConfirmPassword ? 'text' : 'password'"
         label="Confirm Password"
         placeholder="Confirm your password"
+        @paste.prevent
+        @copy.prevent
+        @cut.prevent
+        @drop.prevent
         required
       >
         <template #trailing>

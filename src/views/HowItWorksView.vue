@@ -3,6 +3,7 @@ import PillTag from '@/components/reusable/PillTag.vue'
 import { Button } from '@/components/ui/button'
 import Icon from '@/components/reusable/Icon.vue'
 import { PlayIcon } from '@hugeicons/core-free-icons'
+import { ref } from 'vue'
 
 import projectImg from '@/assets/Images/how-it-works/project.webp'
 import jurisdictionImg from '@/assets/Images/how-it-works/jurisdiction.webp'
@@ -38,6 +39,8 @@ const steps = [
     image: alertsImg,
   },
 ]
+
+const showVideo = ref(false)
 </script>
 
 <template>
@@ -68,9 +71,40 @@ const steps = [
             Never miss an important update across any jurisdiction.
           </p>
         </div>
-        <Button variant="secondary" class="my-8 cursor-pointer self-center px-8" size="lg">
-          <Icon :icon="PlayIcon" /> Watch 2-minute Demo
+        <Button
+          variant="secondary"
+          class="my-8 cursor-pointer self-center px-8"
+          size="lg"
+          @click="showVideo = true"
+        >
+          <Icon :icon="PlayIcon" class="mr-2" /> Watch 2-minute Demo
         </Button>
+        <Teleport to="body">
+          <div
+            v-if="showVideo"
+            class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+            @click="showVideo = false"
+          >
+            <div class="relative w-full max-w-5xl">
+              <button
+                class="absolute -top-12 right-0 z-10 cursor-pointer text-5xl leading-none font-light text-white transition-colors duration-200 select-none hover:text-gray-300"
+                @click="showVideo = false"
+              >
+                ×
+              </button>
+
+              <div class="relative overflow-hidden rounded-2xl shadow-2xl">
+                <iframe
+                  src="https://drive.google.com/file/d/13Tm2Ysa0wwVKmkTOLcZe9c5eMmxJDb1b/preview"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowfullscreen
+                  class="aspect-video w-full border-0"
+                  title="Legal Watch Dog - 2 Minute Demo"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </Teleport>
       </section>
 
       <section class="app-container relative z-10 text-center">

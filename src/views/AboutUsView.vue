@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TypographyHeading, TypographyText } from '@/components/ui/typography'
 import aboutHeroImg from '@/assets/Images/About_us.png'
 import missionImg from '@/assets/Images/mission_vision.png'
@@ -11,8 +9,8 @@ import trustIcon from '@/assets/icons/trust.png'
 import team1 from '@/assets/Images/meet_team_1.png'
 import team2 from '@/assets/Images/meet_team_2.png'
 import team3 from '@/assets/Images/meet_team_3.png'
-import stratBgLeft from '@/assets/Images/backleft.png'
-import stratBgRight from '@/assets/Images/backright.png'
+import { RouterLink } from 'vue-router'
+import GlobalStatsSection from '@/components/landing-page/GlobalStatsSection.vue'
 
 const coreValues = [
   {
@@ -39,22 +37,22 @@ const coreValues = [
 
 const teamMembers = [
   {
-    name: 'Mark Essien',
-    role: 'CEO',
+    name: 'Amara Okafor',
+    role: 'Chief Data Officer',
     image: team1,
-    description: 'A product-driven leader leveraging AI to help teams stay ahead.',
+    description: 'Builds responsible AI pipelines that keep our insights precise and auditable.',
   },
   {
-    name: 'Mark Essien',
-    role: 'CEO',
+    name: 'Lucas Nguyen',
+    role: 'VP, Legal Operations',
     image: team2,
-    description: 'A product-driven leader leveraging AI to help teams stay ahead.',
+    description: 'Former regulator translating policy shifts into clear, actionable playbooks.',
   },
   {
-    name: 'Mark Essien',
-    role: 'CEO',
+    name: 'Sabastian Ogbufuru',
+    role: 'Head of Product Design',
     image: team3,
-    description: 'A product-driven leader leveraging AI to help teams stay ahead.',
+    description: 'Designs the human-first experiences that make complex compliance feel simple.',
   },
 ]
 </script>
@@ -77,10 +75,12 @@ const teamMembers = [
 
       <section class="relative z-10 flex w-full flex-col items-center justify-center pt-16 pb-12">
         <div class="mx-auto flex w-full flex-col items-center px-6 text-center">
-          <TypographyHeading level="h1" align="center" class="mb-6 max-w-4xl">
-            We're Transforming How <br />
-            Companies Track Regulatory <br />
-            Changes.
+          <TypographyHeading
+            level="h1"
+            align="center"
+            class="mb-6 max-w-5xl px-4 leading-[1.1] sm:px-0"
+          >
+            We're Transforming How Companies Track Regulatory Changes.
           </TypographyHeading>
           <TypographyText
             class="mx-auto mb-8 max-w-2xl leading-7 font-semibold text-gray-600"
@@ -90,10 +90,10 @@ const teamMembers = [
             AI monitoring and human expertise help your team stay compliant, informed, and always
             ahead without stress.
           </TypographyText>
-          <Button class="mb-12 bg-[#3C2610] px-8 py-6 text-white hover:bg-[#3C2610]/90">
+          <RouterLink to="/signup" class="btn--default btn--lg">
             Get Started
-          </Button>
-          <div class="w-full max-w-[1000px] overflow-hidden rounded-2xl shadow-xl">
+          </RouterLink>
+          <div class="w-full max-w-[1000px] overflow-hidden rounded-2xl shadow-xl mt-6">
             <img :src="aboutHeroImg" alt="Team collaborating" class="h-auto w-full object-cover" />
           </div>
         </div>
@@ -181,7 +181,7 @@ const teamMembers = [
                 {{ member.description }}
               </p>
               <p class="font-medium">
-                <span class="text-[#1F1F1F]">(CEO)</span>
+                <span class="text-[#1F1F1F]">({{ member.role }})</span>
                 <span class="text-[#F2AB6D]"> {{ member.name }}</span>
               </p>
             </div>
@@ -189,32 +189,7 @@ const teamMembers = [
         </div>
       </section>
 
-      <section
-        class="app-container relative mx-auto mt-12 mb-12 w-full overflow-hidden rounded-3xl bg-[#3C2610] px-6 py-24"
-      >
-        <img
-          :src="stratBgLeft"
-          alt=""
-          class="pointer-events-none absolute bottom-0 left-0 w-48 opacity-50 md:w-64"
-        />
-        <img
-          :src="stratBgRight"
-          alt=""
-          class="pointer-events-none absolute right-0 bottom-0 w-48 opacity-50 md:w-64"
-        />
-        <div class="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
-          <h2 class="text-3xl font-bold text-white md:text-4xl">Gain your Strategic Advantage</h2>
-          <p class="text-lg leading-relaxed text-white/80">
-            Stop reacting to change. Start predicting it. See how LegalWatchDog can transform your
-            workflow with intelligence, and autonomous updates in real time.
-          </p>
-          <Button
-            class="rounded-lg bg-[#F2AB6D] px-8 py-6 text-lg font-semibold text-white hover:bg-[#F2AB6D]/90"
-          >
-            + Get Monitoring For Free
-          </Button>
-        </div>
-      </section>
+      <GlobalStatsSection />
     </main>
   </div>
 </template>

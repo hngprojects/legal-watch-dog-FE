@@ -190,6 +190,7 @@ const handleContinue = async () => {
         query: {
           status: 'success',
           context: 'signup',
+          issued: 'true',
           message: successMessage.value,
         },
       })
@@ -208,6 +209,7 @@ const handleContinue = async () => {
         query: {
           status: 'error',
           context: 'signup',
+          issued: 'true',
           message: errorMessage.value,
         },
       })

@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { authService } from '@/api/auth'
-// import { useAuthStore } from '@/stores/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { isAxiosError } from 'axios'
 import { ref } from 'vue'
 // import { useRouter } from 'vue-router'
 
 const baseButtonClass =
   'flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 shadow-[0_1px_0_rgba(16,24,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-sm sm:w-auto sm:min-w-[180px] cursor-pointer'
+
+const props = defineProps<{
+  rememberMe?: boolean
+}>()
 
 // const microsoftRedirectUri = import.meta.env.VITE_MICROSOFT_REDIRECT_URI
 // const appleClientId = import.meta.env.VITE_APPLE_CLIENT_ID
@@ -18,7 +22,7 @@ const isGoogleLoading = ref(false)
 const socialError = ref('')
 
 // const router = useRouter()
-// const authStore = useAuthStore()
+const authStore = useAuthStore()
 
 declare global {
   interface Window {
@@ -44,6 +48,8 @@ const handleGoogleLogin = async () => {
 
   socialError.value = ''
   isGoogleLoading.value = true
+  const persist = props.rememberMe ?? authStore.rememberMePreference
+  authStore.setRememberPreference(persist)
   const defaultError = 'Unable to start Google login. Please try again.'
 
   try {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import EmailIcon from '@/assets/icons/message.png'
@@ -181,7 +182,7 @@ const handleSubmit = async () => {
           <!-- Contact Info Items -->
           <div class="flex flex-col gap-6">
             <!-- Email -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
               <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
                 style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
@@ -189,12 +190,12 @@ const handleSubmit = async () => {
                 <img :src="EmailIcon" alt="Email" class="h-full w-full object-contain" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-base font-medium text-[#1F1F1F]">example@legalwatchdog.com</p>
+                <p class="text-base font-medium text-[#1F1F1F]">contact@legalwatch.dog</p>
               </div>
             </div>
 
             <!-- Office Address -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
               <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
                 style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
@@ -209,7 +210,7 @@ const handleSubmit = async () => {
             </div>
 
             <!-- Phone -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
               <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
                 style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
@@ -254,7 +255,7 @@ const handleSubmit = async () => {
                   v-model="form.phoneNumber"
                   type="tel"
                   placeholder="+1 (555) 000-0000"
-                  class="h-[52px] w-full rounded-lg border border-[#E5E7EB] bg-white pr-4 pl-20 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                  class="h-[52px] w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
                 />
               </div>
               <p v-if="errors.phoneNumber" class="mt-1 text-sm text-red-600">
@@ -322,11 +323,14 @@ const handleSubmit = async () => {
                       for="agreement"
                       class="cursor-pointer text-sm leading-relaxed text-[#6B7280]"
                     >
-                      By completing and submitting this form, I agree to having this website store
-                      my submitted information, so they can respond to my inquiry or to send
-                      occassional updates. For information on how to unsubscribe, as well as our
-                      privacy pratices and commitment to protecting your privacy, check out our
-                      <a href="#" class="font-medium text-[#401903] underline">privacy policy</a>
+                      By completing and submitting this form, I agree to have this website store my
+                      submitted information so they can respond to my inquiry or send occasional
+                      updates. For information on how to unsubscribe, as well as our privacy
+                      practices and commitment to protecting your privacy, please refer to our
+                      <RouterLink to="/privacy-policy" class="font-medium text-[#401903] underline">
+                        privacy policy
+                      </RouterLink>
+                      .
                     </label>
                   </div>
                   <p v-if="errors.agreement" class="mt-2 text-sm text-red-600">
@@ -341,7 +345,7 @@ const handleSubmit = async () => {
               type="submit"
               @click="handleSubmit"
               :disabled="isSubmitting"
-              class="h-[52px] w-full rounded-lg bg-[#401903] text-base font-semibold text-white transition-colors hover:bg-[#2d1810] hover:text-white disabled:opacity-50"
+              class="btn--default btn--lg btn--full text-center"
             >
               <span v-if="!isSubmitting">Submit</span>
               <span v-else>Submitting...</span>
