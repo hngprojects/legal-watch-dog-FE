@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import EmailIcon from '@/assets/icons/message.png'
@@ -318,15 +319,15 @@ const handleSubmit = async () => {
                       type="checkbox"
                       class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#D1D5DB] text-[#401903] focus:ring-2 focus:ring-[#401903]/20"
                     />
-                    <label
-                      for="agreement"
-                      class="cursor-pointer text-sm leading-relaxed text-[#6B7280]"
-                    >
-                      By completing and submitting this form, I agree to having this website store
-                      my submitted information, so they can respond to my inquiry or to send
-                      occassional updates. For information on how to unsubscribe, as well as our
-                      privacy pratices and commitment to protecting your privacy, check out our
-                      <a href="#" class="font-medium text-[#401903] underline">privacy policy</a>
+                    <label for="agreement" class="cursor-pointer text-sm leading-relaxed text-[#6B7280]">
+                      By completing and submitting this form, I agree to have this website store my
+                      submitted information so they can respond to my inquiry or send occasional
+                      updates. For information on how to unsubscribe, as well as our privacy
+                      practices and commitment to protecting your privacy, please refer to our
+                      <RouterLink to="/privacy-policy" class="font-medium text-[#401903] underline">
+                        privacy policy
+                      </RouterLink>
+                      .
                     </label>
                   </div>
                   <p v-if="errors.agreement" class="mt-2 text-sm text-red-600">

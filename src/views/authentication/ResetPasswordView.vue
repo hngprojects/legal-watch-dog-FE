@@ -195,6 +195,10 @@ const handleSubmit = async () => {
           label="Confirm New Password"
           placeholder="Confirm password"
           autocomplete="new-password"
+          @paste.prevent
+          @copy.prevent
+          @cut.prevent
+          @drop.prevent
           required
         >
           <template #trailing>

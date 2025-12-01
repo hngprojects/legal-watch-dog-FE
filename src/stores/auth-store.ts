@@ -35,6 +35,7 @@ interface State {
   resetToken: string | null
   signupDraft: SignupDraft | null
   resetPasswordDraft: ResetPasswordDraft | null
+  rememberMePreference: boolean
 }
 
 interface ApiTokenData {
@@ -72,6 +73,7 @@ interface ResetPasswordDraft {
 
 const TOKEN_KEY = 'lwd_access_token'
 const EMAIL_KEY = 'lwd_user_email'
+const REMEMBER_ME_KEY = 'lwd_remember_me'
 
 const getStoredValue = (key: string) => localStorage.getItem(key) ?? sessionStorage.getItem(key)
 
@@ -85,6 +87,17 @@ const setStoredValue = (key: string, value: string, persist: boolean) => {
   ;(persist ? localStorage : sessionStorage).setItem(key, value)
 }
 
+const getStoredRememberPreference = () => {
+  const stored =
+    localStorage.getItem(REMEMBER_ME_KEY) ?? sessionStorage.getItem(REMEMBER_ME_KEY) ?? 'false'
+  return stored === 'true'
+}
+
+const setStoredRememberPreference = (remember: boolean) => {
+  localStorage.setItem(REMEMBER_ME_KEY, String(remember))
+  sessionStorage.setItem(REMEMBER_ME_KEY, String(remember))
+}
+
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
     accessToken: getStoredValue(TOKEN_KEY),
@@ -95,6 +108,7 @@ export const useAuthStore = defineStore('auth', {
     resetToken: null,
     signupDraft: null,
     resetPasswordDraft: null,
+    rememberMePreference: getStoredRememberPreference(),
   }),
 
   getters: {
@@ -102,22 +116,29 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setAccessToken(token: string | null, rememberMe = true) {
+    setAccessToken(token: string | null, rememberMe = this.rememberMePreference ?? true) {
+      const persist = rememberMe ?? this.rememberMePreference ?? true
       this.accessToken = token
       if (token) {
-        setStoredValue(TOKEN_KEY, token, rememberMe)
+        setStoredValue(TOKEN_KEY, token, persist)
       } else {
         clearStoredValue(TOKEN_KEY)
       }
     },
 
-    setUserEmail(email: string | null, rememberMe = true) {
+    setUserEmail(email: string | null, rememberMe = this.rememberMePreference ?? true) {
+      const persist = rememberMe ?? this.rememberMePreference ?? true
       this.email = email
       if (email) {
-        setStoredValue(EMAIL_KEY, email, rememberMe)
+        setStoredValue(EMAIL_KEY, email, persist)
       } else {
         clearStoredValue(EMAIL_KEY)
       }
+    },
+
+    setRememberPreference(rememberMe: boolean) {
+      this.rememberMePreference = rememberMe
+      setStoredRememberPreference(rememberMe)
     },
 
     setOtpPurpose(purpose: 'signup' | 'password-reset' | null) {
@@ -158,6 +179,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     handleLoginSuccess(token: string, rememberMe: boolean, user?: User) {
+      this.setRememberPreference(rememberMe)
       this.setAccessToken(token, rememberMe)
       if (user) {
         this.user = user
@@ -173,7 +195,7 @@ export const useAuthStore = defineStore('auth', {
       this.setResetToken(null)
       return responseBody
     },
-    async login(payload: LoginPayload, rememberMe = false) {
+    async login(payload: LoginPayload, rememberMe = this.rememberMePreference ?? false) {
       const response = await authService.login(payload)
       const responseBody = response.data as unknown as LoginApiResponse
       const authData = responseBody.data
@@ -182,8 +204,9 @@ export const useAuthStore = defineStore('auth', {
         throw new Error('Login response missing access token.')
       }
 
-      this.handleLoginSuccess(authData.access_token, rememberMe, authData.user)
-      this.setUserEmail(payload.email, rememberMe)
+      const persist = rememberMe ?? this.rememberMePreference ?? false
+      this.handleLoginSuccess(authData.access_token, persist, authData.user)
+      this.setUserEmail(payload.email, persist)
 
       return true
     },
@@ -196,10 +219,11 @@ export const useAuthStore = defineStore('auth', {
       const responseBody = response.data as VerifyOtpResponse
       const authData = responseBody.data ?? responseBody.login_data
 
-      this.setUserEmail(payload.email)
+      const persist = this.rememberMePreference ?? true
+      this.setUserEmail(payload.email, persist)
 
       if (authData?.access_token) {
-        this.handleLoginSuccess(authData.access_token, true, authData.user as User | undefined)
+        this.handleLoginSuccess(authData.access_token, persist, authData.user as User | undefined)
       }
 
       this.setOtpPurpose(null)

@@ -68,6 +68,7 @@ const tryFetchGoogleProfile = async () => {
 
 const finishGoogleLogin = async () => {
   const params = parseOauthParams()
+  const rememberPreference = authStore.rememberMePreference
 
   if (params.error) {
     status.value = 'error'
@@ -84,11 +85,11 @@ const finishGoogleLogin = async () => {
   }
 
   try {
-    authStore.handleLoginSuccess(params.accessToken, true)
+    authStore.handleLoginSuccess(params.accessToken, rememberPreference)
 
     const profileUser = await tryFetchGoogleProfile()
     if (profileUser) {
-      authStore.handleLoginSuccess(params.accessToken, true, profileUser as never)
+      authStore.handleLoginSuccess(params.accessToken, rememberPreference, profileUser as never)
     } else {
       await authStore.loadCurrentUser()
     }
