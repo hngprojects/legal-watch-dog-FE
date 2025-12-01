@@ -222,11 +222,6 @@ const router = createRouter({
           name: 'payment-plan',
           component: () => import('@/views/dashboard/payments/PlanView.vue'),
         },
-        {
-          path: 'payment/method/:plan',
-          name: 'payment-method',
-          component: () => import('@/views/dashboard/payments/PaymentMethodView.vue'),
-        },
       ],
     },
     {

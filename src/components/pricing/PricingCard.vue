@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Icon from '@/components/reusable/Icon.vue'
+import { useBillingStore } from '@/stores/billing-store'
 import type { BillingPlan } from '@/types/billing'
 import {
   CheckmarkSquare02Icon,
@@ -7,13 +8,24 @@ import {
   Building03Icon,
   Target01Icon,
 } from '@hugeicons/core-free-icons'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 
 const { i, activeBillingCycle, plan } = defineProps<{
   i: number
   activeBillingCycle: 'month' | 'year'
   plan: BillingPlan
 }>()
+
+const route = useRoute()
+const billingStore = useBillingStore()
+
+const handlePay = async () => {
+  const checkoutUrl = await billingStore.checkoutPlan('yearly')
+
+  console.log(checkoutUrl)
+
+  if (checkoutUrl) window.location.replace(checkoutUrl)
+}
 </script>
 
 <template>
@@ -45,17 +57,26 @@ const { i, activeBillingCycle, plan } = defineProps<{
       </span>
     </p>
 
-    <RouterLink
-      :to="{
-        name: 'payment-method',
-        params: { plan: plan.label.toLowerCase() },
-        query: { cycle: activeBillingCycle },
-      }"
-      class="btn--secondary btn--xl block w-full border text-center"
-      :class="[i == 1 && 'btn--default hover:text-white']"
-    >
-      {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
-    </RouterLink>
+    <template v-if="route.name === 'payment-plan'">
+      <button
+        @click="handlePay"
+        class="btn--secondary btn--xl block w-full border text-center"
+        :class="[i == 1 && 'btn--default hover:text-white']"
+      >
+        {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
+      </button>
+    </template>
+    <template v-else>
+      <RouterLink
+        :to="{
+          name: 'dashboard',
+        }"
+        class="btn--secondary btn--xl block w-full border text-center"
+        :class="[i == 1 && 'btn--default hover:text-white']"
+      >
+        {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
+      </RouterLink>
+    </template>
 
     <ul class="space-y-5 pt-4">
       <li :key="i" v-for="(feature, i) in plan.features" class="flex items-center gap-2">
