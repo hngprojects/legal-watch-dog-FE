@@ -211,7 +211,7 @@
           </TypographyHeading>
 
           <TypographyText class="mb-8 text-center text-base text-gray-600">
-            Join our newsletter to get early alerts on regulation updates, price fluctuations, and
+            Join our newsletmter to get early alerts on regulation updates, price fluctuations, and
             compliance insights that matter to your business.
           </TypographyText>
 
