@@ -1,20 +1,14 @@
 <script setup lang="ts">
 import { ref, onUnmounted, watch, computed, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import BrandLogo from '../reusable/BrandLogo.vue'
 import { Button } from '../ui/button'
 import { useAuthStore } from '@/stores/auth-store'
-import { useRouter } from 'vue-router'
 
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 import UserAvatar from '@/components/dashboard/UserAvatar.vue'
 
 const router = useRouter()
-
-const handleLogout = async () => {
-  await authStore.logout()
-  router.replace({ name: 'login' })
-}
 
 type NavLink = {
   name: string
@@ -34,10 +28,6 @@ const displayName = computed(() => {
   return 'User'
 })
 
-const logout = () => {
-  authStore.logout()
-}
-
 onMounted(async () => {
   if (!authStore.user && authStore.accessToken) {
     await authStore.loadCurrentUser()
@@ -50,19 +40,17 @@ const navLinks: NavLink[] = [
   { name: 'Contact Us', to: { path: '/contact-us' } },
 ]
 
-// Handle body scroll lock for mobile menu
 let bodyOverflow: string | null = null
 const toggleBodyScroll = (lock: boolean) => {
-  if (typeof window !== 'undefined' && window.document) {
-    const body = document.body
-    if (lock) {
-      bodyOverflow = body.style.overflow
-      body.style.overflow = 'hidden'
-    } else {
-      body.style.overflow = bodyOverflow || ''
-      bodyOverflow = null
-    }
+  if (typeof document === 'undefined') return
+  const body = document.body
+  if (lock) {
+    bodyOverflow = body.style.overflow
+    body.style.overflow = 'hidden'
+    return
   }
+  body.style.overflow = bodyOverflow || ''
+  bodyOverflow = null
 }
 
 watch(isMenuOpen, (newVal) => {
@@ -71,6 +59,12 @@ watch(isMenuOpen, (newVal) => {
 
 const closeMenu = () => {
   isMenuOpen.value = false
+}
+
+const handleLogout = async () => {
+  isMenuOpen.value = false
+  await authStore.logout()
+  router.replace({ name: 'login' })
 }
 
 onUnmounted(() => {
@@ -106,15 +100,6 @@ onUnmounted(() => {
       <div class="relative flex items-center gap-3">
         <!-- NOT LOGGED IN -->
         <template v-if="!isAuthenticated">
-          <!-- <Button
-            :as="RouterLink"
-            :to="{ path: '/waitlist' }"
-            variant="outline"
-            size="lg"
-          >
-            Join Waitlist
-          </Button> -->
-
           <Button :as="RouterLink" :to="{ path: '/login' }" variant="default" size="lg">
             Sign In
           </Button>
@@ -187,7 +172,7 @@ onUnmounted(() => {
           <RouterLink to="/" @click="closeMenu">
             <BrandLogo />
           </RouterLink>
-          <button @click="closeMenu">
+          <button @click="closeMenu" class="btn--icon-only btn--default btn--icon-sm">
             <svg class="h-6 w-6" fill="none" stroke="currentColor">
               <path
                 stroke-linecap="round"
@@ -216,19 +201,18 @@ onUnmounted(() => {
             <Button :as="RouterLink" :to="{ name: 'organizations' }" class="w-full text-white">
               Go to Dashboard
             </Button>
-            <Button variant="outline" @click="logout" class="w-full"> Logout </Button>
+            <Button variant="outline" @click="handleLogout" class="w-full"> Logout </Button>
           </template>
 
           <template v-else>
-            <!-- <Button :as="RouterLink" :to="{ path: '/waitlist' }" class="w-full text-white">
-              Join Waitlist
-            </Button> -->
-            <Button variant="outline" :as="RouterLink" :to="{ path: '/login' }" class="w-full">
-              Sign in
-            </Button>
-            <Button variant="outline" :as="RouterLink" :to="{ path: '/signup' }" class="w-full">
-              Sign up
-            </Button>
+            <div class="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" :as="RouterLink" :to="{ path: '/login' }" class="w-full">
+                Sign in
+              </Button>
+              <Button variant="outline" :as="RouterLink" :to="{ path: '/signup' }" class="w-full">
+                Sign up
+              </Button>
+            </div>
           </template>
         </div>
       </div>

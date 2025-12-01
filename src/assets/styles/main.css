@@ -126,7 +126,7 @@
 }
 
 @utility btn {
-  @apply cursor-pointer rounded-sm disabled:cursor-not-allowed;
+  @apply cursor-pointer text-center rounded-sm disabled:cursor-not-allowed;
 }
 
 @utility btn--sm {

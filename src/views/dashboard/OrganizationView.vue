@@ -386,15 +386,7 @@ onMounted(async () => {
             <div class="mb-6">
               <h3 class="mb-2 text-xl font-bold text-[#080808]">Set up new Organization</h3>
               <p class="text-sm text-[#6B7280]">
-                <template v-if="formData.name">
-                  Organisation already registered?
-                  <span
-                    @click="router.push('/login')"
-                    class="cursor-pointer text-[#401903] underline transition-all hover:no-underline"
-                    >Log In</span
-                  >
-                </template>
-                <template v-else> Enter the name and Industry of your Organization. </template>
+                <template> Enter the name and Industry of your Organization. </template>
               </p>
             </div>
 
