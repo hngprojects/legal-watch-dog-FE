@@ -23,14 +23,14 @@ export const billingService = {
       description: `Subscription for ${organizationId}`,
     }),
 
-  addPaymentMethod: (organizationId: string, paymentMethodId: string) =>
-    api.post(`/organizations/${organizationId}/billing/payment-methods/${paymentMethodId}`),
+  getOrganizationPaymentHistory: (organizationId: string) =>
+    api.get(`/organizations/${organizationId}/billing/invoices`),
 
-  getOrganizationBillingPlans: (organizationId: string) =>
-    api.get(`/organizations/${organizationId}/billing/plans`),
-
-  cancelOrganizationSubscription: (organizationId: string) =>
-    api.post(`/organizations/${organizationId}/billing/subscription/cancel`, {
-      cancel_at_period_end: true,
+  changeOrganizationSubscription: (organizationId: string, plan_id: string) =>
+    api.post(`/organizations/${organizationId}/billing/subscription/change-plan`, {
+      plan_id,
     }),
+
+  cancelOrganizationSubscriptionAtPeriodEnd: (organizationId: string) =>
+    api.post(`/organizations/${organizationId}/billing/subscription/cancel`),
 }
