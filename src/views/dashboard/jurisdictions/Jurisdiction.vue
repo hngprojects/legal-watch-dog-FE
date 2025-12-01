@@ -662,7 +662,7 @@ onMounted(() => {
               @click="activeTab = 'sources'"
               :class="[
                 'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'sources' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
+                activeTab === 'sources' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F cursor-pointer',
               ]"
             >
               Sources
@@ -676,7 +676,7 @@ onMounted(() => {
               @click="activeTab = 'analysis'"
               :class="[
                 'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
+                activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F] cursor-pointer',
               ]"
             >
               Analysis
@@ -727,10 +727,10 @@ onMounted(() => {
       </section>
 
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-        <div class="mb-4 flex items-center justify-between gap-4">
+        <div class="mb-4 flex flex-col items-start sm:flex-row sm:items-center justify-between gap-4">
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
-          <button class="btn--default btn--with-icon btn--lg" @click="openSubJurisdictionModal">
+          <button class="btn--default btn--with-icon btn--sm sm-btn--lg" @click="openSubJurisdictionModal">
             <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>

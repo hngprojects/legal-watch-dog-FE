@@ -181,8 +181,12 @@
   @apply btn bg-accent-subtle hover:bg-accent text-bg;
 }
 
+@utility btn--danger {
+  @apply btn bg-transparent text-destructive border border-destructive hover:bg-destructive hover:text-destructive-fg;
+}
+
 @utility btn--with-icon {
-  @apply flex items-center justify-center gap-2;
+  @apply btn flex items-center justify-center gap-2;
 }
 
 @utility btn--link {

@@ -3,6 +3,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useOrganizationStore } from '@/stores/organization-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
@@ -30,6 +31,8 @@ const router = useRouter()
 const projectStore = useProjectStore()
 const jurisdictionStore = useJurisdictionStore()
 const organizationStore = useOrganizationStore()
+const authStore = useAuthStore()
+const organizationsRequested = ref(false)
 const projectId = route.params.id as string
 const organizationId = computed(
   () => (route.params.organizationId as string) || project.value?.org_id || '',
@@ -139,7 +142,22 @@ const goToJurisdiction = (jurisdictionId: string) => {
   })
 }
 
+const ensureOrganizations = async () => {
+  if (organizationStore.organizations.length || organizationsRequested.value) return
+  let userId = authStore.user?.id
+  if (!userId) {
+    const loaded = await authStore.loadCurrentUser?.()
+    userId = loaded?.id
+  }
+  if (userId) {
+    organizationsRequested.value = true
+    await organizationStore.fetchOrganizations(userId)
+  }
+}
+
 onMounted(async () => {
+  void ensureOrganizations()
+
   const existingProject = projectStore.projects.find((p) => p.id === projectId)
 
   if (existingProject) {
@@ -269,7 +287,7 @@ watch(
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-gray-50 p-6 lg:p-10">
+  <main class="min-h-screen flex-1 bg-gray-50 p-2 lg:p-10">
     <div v-if="loading" class="mx-auto max-w-7xl">
       <div class="animate-pulse">
         <div class="mb-8 h-6 w-64 rounded bg-gray-200"></div>
@@ -286,7 +304,7 @@ watch(
     </div>
 
     <div v-else class="app-container mx-auto">
-      <div class="mb-8 flex items-center justify-between">
+      <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -326,7 +344,7 @@ watch(
         <div class="relative">
           <button
             @click.stop="toggleSettingsMenu"
-            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+            class="btn--default btn--icon-sm btn--icon-only"
           >
             <Settings :size="18" />
           </button>
@@ -334,14 +352,14 @@ watch(
           <div
             v-if="showSettingsMenu"
             @click.stop
-            class="absolute right-0 z-50 mt-2 w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5"
+            class="absolute sm:right-0 z-50 mt-2 w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5 p-1 space-y-1"
           >
-            <button @click="startEdit" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50">
+            <button @click="startEdit" class="btn--secondary btn--full btn--sm">
               Edit Project
             </button>
             <button
               @click="deleteProject"
-              class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+              class="btn--danger btn--full btn--sm"
             >
               Delete Project
             </button>
@@ -406,13 +424,13 @@ watch(
               <button
                 type="button"
                 @click="showInlineEdit = false"
-                class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+                class="btn--secondary btn--sm md:btn--lg"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
+                class="btn--default btn--sm md:btn--lg"
               >
                 Save Changes
               </button>
@@ -476,7 +494,7 @@ watch(
 
           <button
             @click="openAddJurisdictionModal"
-            class="btn--default btn--with-icon flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all sm:px-5 sm:py-3 sm:text-base"
+            class="btn--default btn--with-icon btn--sm md:btn--lg"
           >
             <Plus :size="18" class="sm:size-5" />
             <span class="hidden sm:inline">Add Jurisdiction</span>

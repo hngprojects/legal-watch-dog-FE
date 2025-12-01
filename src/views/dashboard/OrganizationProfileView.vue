@@ -378,15 +378,17 @@ const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
     await Swal.fire('Role updated', `${member.name} is now ${targetRole}.`, 'success')
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    let message =
-      !err.response
-        ? 'Network error: Unable to reach server'
-        : err.response.data?.detail?.[0]?.msg ||
-          err.response.data?.message ||
-          'Failed to update member role'
+    let message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to update member role'
 
     if (typeof message === 'string' && /through this endpoint./i.test(message)) {
-      message = message.replace(/through this endpoint./gi, '').replace(/\s{2,}/g, ' ').trim()
+      message = message
+        .replace(/through this endpoint./gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
       if (message && !/[.!?]$/.test(message)) message = `${message}.`
     }
     await Swal.fire('Could not update role', message, 'error')
@@ -412,15 +414,17 @@ const toggleMemberStatus = async (member: Member) => {
     await Swal.fire('Status updated', `${member.name} has been ${verb}.`, 'success')
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    let message =
-      !err.response
-        ? 'Network error: Unable to reach server'
-        : err.response.data?.detail?.[0]?.msg ||
-          err.response.data?.message ||
-          'Failed to update member status'
+    let message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to update member status'
 
     if (typeof message === 'string' && /through this endpoint./i.test(message)) {
-      message = message.replace(/through this endpoint/gi, '').replace(/\s{2,}/g, ' ').trim()
+      message = message
+        .replace(/through this endpoint/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
       if (message && !/[.!?]$/.test(message)) message = `${message}.`
     }
     await Swal.fire('Could not update status', message, 'error')
@@ -525,7 +529,7 @@ watch(
 <template>
   <main class="app-container min-h-screen flex-1 bg-gray-50 px-4 py-6 md:px-6 lg:px-0 lg:py-14">
     <div class="mx-auto flex flex-col gap-6 md:gap-8">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col items-start sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <p class="text-xs font-medium tracking-wide text-[#9CA3AF] uppercase md:text-sm">
             Organization Profile
