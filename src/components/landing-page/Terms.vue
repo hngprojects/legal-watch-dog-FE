@@ -47,42 +47,6 @@
             </TypographyText>
           </section>
         </div>
-
-        <div class="p-6 md:p-8">
-          <TypographyText class="mb-6 block text-base text-gray-700">
-            By clicking Accept, you confirm that you have read, understood and agree to our Terms
-            and Service and Privacy Policy.
-          </TypographyText>
-
-          <div class="mb-8 space-y-4">
-            <div class="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="agreeTerms"
-                class="custom-checkbox h-5 w-5 rounded-sm border-gray-300 text-[#5D2D18] focus:ring-[#5D2D18]"
-                required
-              />
-              <label for="agreeTerms" class="text-sm text-gray-700"
-                >I agree to the terms and conditions of Legal WatchDog</label
-              >
-            </div>
-          </div>
-
-          <!-- FIXED: Buttons now centered on desktop, tablet, and mobile -->
-          <div class="flex items-center justify-center gap-4">
-            <button
-              class="cursor-pointer rounded border border-gray-400 px-12 py-3 text-sm font-medium text-gray-700 transition duration-150 hover:bg-gray-100"
-            >
-              Decline
-            </button>
-
-            <button
-              class="cursor-pointer rounded bg-[#401903] px-12 py-3 text-sm font-medium text-white transition duration-150 hover:bg-[#9e765fa9]"
-            >
-              Accept
-            </button>
-          </div>
-        </div>
       </div>
     </main>
   </div>
