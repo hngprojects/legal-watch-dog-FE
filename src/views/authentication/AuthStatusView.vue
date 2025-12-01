@@ -158,8 +158,7 @@ const isSuccess = computed(() => statusType.value === 'success')
           <span>{{ isNavigating ? 'Redirecting...' : statusCopy.cta }}</span>
         </button>
         <p v-else class="text-sm text-gray-500">
-          This page is only available immediately after an action such as sign up or password
-          reset.
+          This page is only available immediately after an action such as sign up or password reset.
         </p>
       </div>
     </div>

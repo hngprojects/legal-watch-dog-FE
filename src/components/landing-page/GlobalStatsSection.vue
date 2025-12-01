@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import backleft from '@/assets/Images/backleft.png'
 import backright from '@/assets/Images/backright.png'
-import { RouterLink } from 'vue-router';
+import { RouterLink } from 'vue-router'
 </script>
 
 <template>
@@ -65,10 +65,7 @@ import { RouterLink } from 'vue-router';
           Stop worrying about regulatory blindsides. Start tracking changes with precision and
           confidence today.
         </p>
-        <RouterLink
-          to="/signup"
-          class="btn--default btn--lg bg-accent-subtle hover:bg-accent-main"
-        >
+        <RouterLink to="/signup" class="btn--default btn--lg bg-accent-subtle hover:bg-accent-main">
           Start monitoring now
         </RouterLink>
       </div>

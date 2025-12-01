@@ -321,7 +321,10 @@ onMounted(async () => {
           <div class="relative p-8">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <button @click.stop class="btn--default btn--icon-sm btn--icon-only absolute top-6 right-4">
+                <button
+                  @click.stop
+                  class="btn--default btn--icon-sm btn--icon-only absolute top-6 right-4"
+                >
                   <EllipsisVertical :size="18" />
                 </button>
               </DropdownMenuTrigger>
@@ -451,11 +454,7 @@ onMounted(async () => {
 
               <div class="flex flex-col justify-center gap-3 pt-8">
                 <button type="submit" class="btn--default btn--lg">Continue</button>
-                <button
-                  type="button"
-                  @click="closeCreateModal"
-                  class="btn--secondary btn--lg"
-                >
+                <button type="button" @click="closeCreateModal" class="btn--secondary btn--lg">
                   Cancel
                 </button>
               </div>

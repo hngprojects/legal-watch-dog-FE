@@ -319,7 +319,10 @@ const handleSubmit = async () => {
                       type="checkbox"
                       class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#D1D5DB] text-[#401903] focus:ring-2 focus:ring-[#401903]/20"
                     />
-                    <label for="agreement" class="cursor-pointer text-sm leading-relaxed text-[#6B7280]">
+                    <label
+                      for="agreement"
+                      class="cursor-pointer text-sm leading-relaxed text-[#6B7280]"
+                    >
                       By completing and submitting this form, I agree to have this website store my
                       submitted information so they can respond to my inquiry or send occasional
                       updates. For information on how to unsubscribe, as well as our privacy
