@@ -471,9 +471,13 @@ watch(
             View Archive
           </button> -->
 
-          <button @click="openAddJurisdictionModal" class="btn--default btn--with-icon btn--lg">
-            <Plus :size="18" />
-            Add Jurisdiction
+          <button
+            @click="openAddJurisdictionModal"
+            class="btn--default btn--with-icon flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all sm:px-5 sm:py-3 sm:text-base"
+          >
+            <Plus :size="18" class="sm:size-5" />
+            <span class="hidden sm:inline">Add Jurisdiction</span>
+            <span class="sm:hidden">Add</span>
           </button>
         </div>
       </div>
