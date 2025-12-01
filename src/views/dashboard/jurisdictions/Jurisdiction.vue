@@ -531,7 +531,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12">
+  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-4 py-6 sm:px-6 lg:px-10 lg:py-12">
     <div v-if="loading" class="mx-auto max-w-6xl">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
@@ -629,8 +629,11 @@ onMounted(() => {
 
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button type="button" class="btn--default btn--sm">
-              <Settings :size="18" />
+            <button
+              type="button"
+              class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 sm:h-10 sm:w-10"
+            >
+              <Settings :size="17" class="sm:size-[18px]" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" class="w-48">
@@ -647,7 +650,7 @@ onMounted(() => {
           <p class="text-xs font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
             Jurisdiction
           </p>
-          <h1 class="text-3xl font-bold text-[#1F1F1F]">{{ jurisdiction.name }}</h1>
+          <h1 class="text-2xl font-bold text-[#1F1F1F] sm:text-3xl">{{ jurisdiction.name }}</h1>
           <p v-if="jurisdiction.description" class="text-base leading-relaxed text-[#4B5563]">
             {{ jurisdiction.description }}
           </p>
@@ -730,8 +733,13 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between gap-4">
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
-          <button class="btn--default btn--with-icon btn--lg" @click="openSubJurisdictionModal">
-            <Plus :size="16" /> Add Sub-jurisdiction
+          <button
+            @click="openSubJurisdictionModal"
+            class="btn--default btn--with-icon inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all sm:px-5 sm:py-3 sm:text-base"
+          >
+            <Plus :size="16" class="sm:size-[18px]" />
+            <span class="hidden sm:inline">Add Sub-jurisdiction</span>
+            <span class="sm:hidden">Add Sub</span>
           </button>
         </div>
 
