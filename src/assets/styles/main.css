@@ -173,6 +173,10 @@
   @apply btn text-accent-main border-accent-main hover:text-accent-subtle hover:border-accent-subtle border bg-transparent;
 }
 
+@utility btn--contrast {
+  @apply  btn bg-accent-subtle hover:bg-accent text-bg;
+}
+
 @utility btn--with-icon {
   @apply flex items-center gap-2;
 }

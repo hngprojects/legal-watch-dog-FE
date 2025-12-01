@@ -100,12 +100,14 @@ onUnmounted(() => {
       <div class="relative flex items-center gap-3">
         <!-- NOT LOGGED IN -->
         <template v-if="!isAuthenticated">
-          <Button :as="RouterLink" :to="{ path: '/login' }" variant="default" size="lg">
-            Sign In
-          </Button>
-          <Button :as="RouterLink" :to="{ path: '/signup' }" variant="default" size="lg">
-            Sign Up
-          </Button>
+          <div class="sm:flex flex-col gap-2 sm:flex-row hidden">
+            <Button :as="RouterLink" :to="{ path: '/login' }" variant="default" size="lg">
+              Sign In
+            </Button>
+            <Button :as="RouterLink" :to="{ path: '/signup' }" variant="default" size="lg">
+              Sign Up
+            </Button>
+          </div>
         </template>
 
         <!-- LOGGED IN VIEW — U ICON + DROPDOWN -->
