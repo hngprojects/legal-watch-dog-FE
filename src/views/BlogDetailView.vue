@@ -88,7 +88,7 @@ const blogPost = blogPosts.find((post) => post.id === blogId)
           {{ blogPost.summary }}
         </p>
       </section>
-      <section class="pt-16 pb-20 text-center">
+      <!-- <section class="pt-16 pb-20 text-center">
         <TypographyHeading
           level="h2"
           class="mb-4 text-center text-3xl font-extrabold text-gray-900 md:text-4xl"
@@ -114,7 +114,7 @@ const blogPost = blogPosts.find((post) => post.id === blogId)
             Subscribe
           </Button>
         </div>
-      </section>
+      </section> -->
       <!-- Related Posts -->
       <section v-if="blogPost.relatedPosts?.length" class="mt-16 border-t border-gray-200 pt-8">
         <TypographyHeading level="h2" class="mb-8 text-2xl font-bold">
