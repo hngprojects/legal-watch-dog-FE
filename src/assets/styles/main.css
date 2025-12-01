@@ -165,6 +165,10 @@
   @apply w-full;
 }
 
+@utility btn--compact {
+  @apply w-auto self-start;
+}
+
 @utility btn--default {
   @apply btn bg-accent-main hover:bg-accent-subtle text-bg disabled:bg-raised disabled:text-raised-fg;
 }
@@ -178,7 +182,7 @@
 }
 
 @utility btn--with-icon {
-  @apply flex items-center gap-2;
+  @apply flex items-center gap-2 justify-center;
 }
 
 @utility btn--link {

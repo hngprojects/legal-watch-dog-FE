@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth-store'
 
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 import UserAvatar from '@/components/dashboard/UserAvatar.vue'
+import Swal from '@/lib/swal'
 
 const router = useRouter()
 
@@ -62,6 +63,18 @@ const closeMenu = () => {
 }
 
 const handleLogout = async () => {
+  const result = await Swal.fire({
+    icon: 'warning',
+    title: 'Log out?',
+    text: 'You will need to sign in again to access your dashboard.',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, log me out',
+    cancelButtonText: 'Stay logged in',
+    confirmButtonColor: '#DC2626',
+  })
+
+  if (!result.isConfirmed) return
+
   isMenuOpen.value = false
   await authStore.logout()
   router.replace({ name: 'login' })
