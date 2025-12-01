@@ -48,7 +48,8 @@
   a {
     @apply text-inherit no-underline;
   }
-  a, button {
+  a,
+  button {
     @apply focus:ring-focus focus:ring-2 focus:ring-offset-2 focus:outline-none;
   }
 }
@@ -153,7 +154,7 @@
 }
 
 @utility btn--secondary {
-  @apply btn bg-transparent text-accent-main border border-accent-main hover:text-accent-subtle hover:border-accent-subtle;
+  @apply btn text-accent-main border-accent-main hover:text-accent-subtle hover:border-accent-subtle border bg-transparent;
 }
 
 @utility btn--with-icon {

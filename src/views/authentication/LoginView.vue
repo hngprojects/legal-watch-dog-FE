@@ -158,11 +158,7 @@ const handleLogin = async () => {
         <RouterLink to="/forgot-password" class="btn--link">Forgot password?</RouterLink>
       </div>
 
-      <button
-        type="submit"
-        :disabled="isSubmitting"
-        class="btn--default btn--lg btn--full"
-      >
+      <button type="submit" :disabled="isSubmitting" class="btn--default btn--lg btn--full">
         <span v-if="!isSubmitting">Login</span>
         <span v-else>Checking credentials...</span>
       </button>

@@ -38,7 +38,9 @@ const isDisabled = computed(() => Boolean(props.disabled || props.loading))
   >
     <span class="inline-flex items-center justify-center gap-2">
       <span v-if="props.loading" class="grid place-items-center">
-        <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <span
+          class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+        />
       </span>
       <slot />
     </span>

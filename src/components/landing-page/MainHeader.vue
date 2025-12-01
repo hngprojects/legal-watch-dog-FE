@@ -116,20 +116,10 @@ onUnmounted(() => {
             Join Waitlist
           </Button> -->
 
-          <Button
-            :as="RouterLink"
-            :to="{ path: '/login' }"
-            variant="default"
-            size="lg"
-          >
+          <Button :as="RouterLink" :to="{ path: '/login' }" variant="default" size="lg">
             Sign In
           </Button>
-          <Button
-            :as="RouterLink"
-            :to="{ path: '/signup' }"
-            variant="default"
-            size="lg"
-          >
+          <Button :as="RouterLink" :to="{ path: '/signup' }" variant="default" size="lg">
             Sign Up
           </Button>
         </template>

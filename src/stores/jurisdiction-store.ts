@@ -208,7 +208,9 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
       const flattenedIds = new Set(flattened.map((x) => x.id))
 
       jurisdictions.value = jurisdictions.value.filter((x) => !flattenedIds.has(x.id))
-      archivedJurisdictions.value = archivedJurisdictions.value.filter((x) => !flattenedIds.has(x.id))
+      archivedJurisdictions.value = archivedJurisdictions.value.filter(
+        (x) => !flattenedIds.has(x.id),
+      )
 
       const active = flattened.filter((item) => !item.is_deleted).map(cloneJurisdiction)
       const deleted = flattened.filter((item) => item.is_deleted).map(cloneJurisdiction)
