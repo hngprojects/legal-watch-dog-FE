@@ -61,7 +61,7 @@ const emit = defineEmits<{
             Cancel
           </button>
 
-          <button type="submit" class="btn--primary btn--lg">Create Sub-Jurisdiction</button>
+          <button type="submit" class="btn--default btn--lg">Create Sub-Jurisdiction</button>
         </DialogFooter>
       </form>
     </DialogScrollContent>

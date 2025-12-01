@@ -134,7 +134,7 @@ const handleSubmit = () => {
 
         <DialogFooter class="flex justify-end gap-3 pt-2">
           <button type="button" @click="handleClose" class="btn--secondary btn--lg">Cancel</button>
-          <button type="submit" class="btn--primary btn--lg">
+          <button type="submit" class="btn--default btn--lg">
             {{ mode === 'edit' ? 'Save Changes' : 'Save Project' }}
           </button>
         </DialogFooter>

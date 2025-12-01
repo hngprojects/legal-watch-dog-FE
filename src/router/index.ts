@@ -28,6 +28,7 @@ import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 import AcceptInviteView from '@/views/authentication/AcceptInviteView.vue'
 import GoogleCallbackView from '@/views/authentication/GoogleCallbackView.vue'
+import ComponentCatalogueView from '@/views/ComponentCatalogueView.vue'
 
 // Dashboard pages
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
@@ -52,6 +53,11 @@ const router = createRouter({
       name: 'billing-success',
       component: () => import('@/views/dashboard/payments/SuccessView.vue'),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/component-catalogue',
+      name: 'component-catalogue',
+      component: ComponentCatalogueView,
     },
     {
       path: '/',

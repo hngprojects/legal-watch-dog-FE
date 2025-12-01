@@ -287,7 +287,7 @@ const handleResend = async () => {
             type="button"
             @click="handleContinue"
             :disabled="isVerifying || !isComplete"
-            class="btn--primary btn--lg disabled:btn--disabled w-full"
+            class="btn--default btn--lg disabled:btn--disabled w-full"
           >
             <span v-if="!isVerifying">Continue</span>
             <span v-else>Verifying...</span>
@@ -318,7 +318,7 @@ const handleResend = async () => {
 
         <div
           v-if="errorMessage"
-          class="bg-destructive/70 text-surface rounded-md border border-red-200 p-3 text-sm"
+          class="bg-destructive/70 text-bg rounded-md border border-red-200 p-3 text-sm"
         >
           {{ errorMessage }}
         </div>

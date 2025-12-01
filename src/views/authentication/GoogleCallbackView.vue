@@ -185,7 +185,7 @@ const goToLogin = () => router.replace({ name: 'login' })
         <button
           v-if="status === 'error'"
           type="button"
-          class="btn btn--primary w-full"
+          class="btn btn--default w-full"
           @click="goToLogin"
         >
           Back to Login
@@ -193,7 +193,7 @@ const goToLogin = () => router.replace({ name: 'login' })
         <button
           v-else
           type="button"
-          class="btn btn--primary w-full cursor-not-allowed opacity-80"
+          class="btn btn--default w-full cursor-not-allowed opacity-80"
           disabled
         >
           Connecting...

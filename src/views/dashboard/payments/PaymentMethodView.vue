@@ -38,7 +38,7 @@ const handlePay = async () => {
             <input id="stripe" type="radio" value="stripe" v-model="paymentMethod" />
             <label for="stripe"> Stripe </label>
           </div>
-          <button v-if="paymentMethod" @click="handlePay" class="btn--md btn--primary mt-6 w-full">
+          <button v-if="paymentMethod" @click="handlePay" class="btn--md btn--default mt-6 w-full">
             Pay now
           </button>
         </div>

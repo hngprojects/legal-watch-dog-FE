@@ -35,7 +35,7 @@ import Timeline from '@/assets/Images/Timeline.png'
               AI Powered Summaries
             </h3>
             <p
-              class="max-w-sm text-[1rem] leading-relaxed font-semibold text-gray-600 sm:text-[1.05rem]"
+              class="max-w-sm text-[1rem] leading-relaxed font-semibold text-white/80 sm:text-[1.05rem]"
             >
               Turn Complex legal jargon into plain English summaries you can act on immediately
             </p>
@@ -64,7 +64,7 @@ import Timeline from '@/assets/Images/Timeline.png'
               Change Timeline
             </h3>
             <p
-              class="max-w-sm text-[1rem] leading-relaxed font-semibold text-gray-600 sm:text-[1.05rem]"
+              class="max-w-sm text-[1rem] leading-relaxed font-semibold text-white/80 sm:text-[1.05rem]"
             >
               Visually track historical changes to understand the evolution or that document or
               policy.
@@ -82,7 +82,7 @@ import Timeline from '@/assets/Images/Timeline.png'
               Source Verification
             </h3>
             <p
-              class="max-w-sm text-[1rem] leading-relaxed font-semibold text-gray-600 sm:text-[1.05rem]"
+              class="max-w-sm text-[1rem] leading-relaxed font-semibold text-white/80 sm:text-[1.05rem]"
             >
               Get real time notifications with direct links to the source of any change or full
               transparency.
