@@ -75,10 +75,12 @@ const teamMembers = [
 
       <section class="relative z-10 flex w-full flex-col items-center justify-center pt-16 pb-12">
         <div class="mx-auto flex w-full flex-col items-center px-6 text-center">
-          <TypographyHeading level="h1" align="center" class="mb-6 max-w-4xl">
-            We're Transforming How <br />
-            Companies Track Regulatory <br />
-            Changes.
+          <TypographyHeading
+            level="h1"
+            align="center"
+            class="mb-6 max-w-5xl px-4 leading-[1.1] sm:px-0"
+          >
+            We're Transforming How Companies Track Regulatory Changes.
           </TypographyHeading>
           <TypographyText
             class="mx-auto mb-8 max-w-2xl leading-7 font-semibold text-gray-600"
