@@ -152,16 +152,12 @@
   @apply btn bg-accent-main hover:bg-accent-subtle text-bg disabled:bg-raised disabled:text-raised-fg;
 }
 
-@utility btn--outline {
+@utility btn--secondary {
   @apply btn bg-transparent text-accent-main border border-accent-main hover:text-accent-subtle hover:border-accent-subtle;
 }
 
 @utility btn--with-icon {
   @apply flex items-center gap-2;
-}
-
-@utility btn--outline {
-  @apply btn border-accent-main text-accent-main border hover:bg-gray-100;
 }
 
 @utility btn--link {
@@ -172,10 +168,18 @@
   @apply disabled:text-fg disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-70;
 }
 
+/* @utility btn--default {
+  @apply btn bg-accent-main hover:bg-accent-subtle text-bg disabled:bg-raised disabled:text-raised-fg;
+}
+
+@utility btn--secondary {
+  @apply btn bg-transparent text-accent-main border border-accent-main hover:text-accent-subtle hover:border-accent-subtle;
+} */
+
 @utility link--disabled {
   @apply disabled:cursor-not-allowed;
 }
 
-/* @utility btn--icon-only {
-  @apply b;
-} */
+@utility btn--icon-only {
+  @apply rounded-full;
+}

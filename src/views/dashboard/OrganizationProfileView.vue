@@ -666,7 +666,7 @@ watch(
 
                 <DialogFooter class="mt-2 flex items-center justify-end gap-3">
                   <DialogClose as-child>
-                    <button type="button" class="btn--outline btn--lg">Cancel</button>
+                    <button type="button" class="btn--secondary btn--lg">Cancel</button>
                   </DialogClose>
                   <button
                     type="submit"

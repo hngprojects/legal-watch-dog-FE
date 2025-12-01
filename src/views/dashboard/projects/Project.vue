@@ -562,7 +562,7 @@ watch(
           </div>
 
           <DialogFooter class="flex justify-end gap-2 pt-2">
-            <button type="button" @click="closeAddJurisdictionModal" class="btn--outline btn--lg">
+            <button type="button" @click="closeAddJurisdictionModal" class="btn--secondary btn--lg">
               Cancel
             </button>
             <button type="submit" class="btn--default btn--lg">Create Jurisdiction</button>
@@ -646,7 +646,7 @@ watch(
           </div>
 
           <DialogFooter class="flex justify-end gap-2 pt-4">
-            <button type="button" @click="closeHireSpecialistModal" class="btn--outline btn--lg">
+            <button type="button" @click="closeHireSpecialistModal" class="btn--secondary btn--lg">
               Cancel
             </button>
             <button type="submit" class="btn--default btn--lg">Hire Specialist</button>

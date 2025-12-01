@@ -355,7 +355,7 @@ watch(
               <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">
                 {{ organizationName || 'Organization' }}'s Projects
               </h1>
-              <button @click="openCreateModal" class="btn--with-icon btn--default">
+              <button @click="openCreateModal" class="btn--with-icon btn--lg btn--default">
                 <svg
                   width="20"
                   height="20"

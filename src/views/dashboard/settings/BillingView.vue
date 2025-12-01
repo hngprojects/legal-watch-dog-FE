@@ -54,7 +54,7 @@ onMounted(async () => {
           Upgrade Plan
         </RouterLink>
         <CancelSubscriptionModal>
-          <button class="btn--md btn--outline border-accent-main border text-center">
+          <button class="btn--md btn--secondary border-accent-main border text-center">
             Cancel Subscription
           </button>
         </CancelSubscriptionModal>
@@ -71,7 +71,7 @@ onMounted(async () => {
       <AddPaymentModal>
         <RouterLink
           :to="{ name: 'payment-method', params: { plan: 'professional' } }"
-          class="btn--md btn--outline block w-fit text-center"
+          class="btn--md btn--secondary block w-fit text-center"
         >
           Add Payment Method
         </RouterLink>

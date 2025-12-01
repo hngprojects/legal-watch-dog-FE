@@ -3,7 +3,7 @@ import Swal from 'sweetalert2'
 const themedSwal = Swal.mixin({
   customClass: {
     confirmButton: 'btn--default btn--lg',
-    cancelButton: 'btn--outline btn--lg',
+    cancelButton: 'btn--secondary btn--lg',
   },
   buttonsStyling: false,
 })

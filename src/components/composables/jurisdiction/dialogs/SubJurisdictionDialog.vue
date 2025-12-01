@@ -57,7 +57,7 @@ const emit = defineEmits<{
         </div>
 
         <DialogFooter class="flex justify-end gap-3 pt-4">
-          <button type="button" class="btn--outline btn--lg" @click="emit('cancel')">
+          <button type="button" class="btn--secondary btn--lg" @click="emit('cancel')">
             Cancel
           </button>
 

@@ -120,7 +120,7 @@ const handleSubmit = () => {
       <DialogFooter class="pt-4">
         <button
           type="button"
-          class="btn--outline btn--lg"
+          class="btn--secondary btn--lg"
           @click="emit('update:open', false)"
           :disabled="loading"
         >
