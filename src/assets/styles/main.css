@@ -169,14 +169,6 @@
   @apply disabled:text-fg disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-70;
 }
 
-/* @utility btn--default {
-  @apply btn bg-accent-main hover:bg-accent-subtle text-bg disabled:bg-raised disabled:text-raised-fg;
-}
-
-@utility btn--secondary {
-  @apply btn bg-transparent text-accent-main border border-accent-main hover:text-accent-subtle hover:border-accent-subtle;
-} */
-
 @utility link--disabled {
   @apply disabled:cursor-not-allowed;
 }

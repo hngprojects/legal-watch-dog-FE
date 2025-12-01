@@ -6,11 +6,11 @@ export { default as Button } from './Button.vue'
 export const buttonVariants = cva('btn', {
   variants: {
     variant: {
-      primary: 'btn--primary',
+      primary: 'btn--default',
       secondary: 'btn--secondary',
       link: 'btn--link',
       // Legacy aliases to avoid breaking existing usage
-      default: 'btn--primary',
+      default: 'btn--default',
       outline: 'btn--secondary',
       ghost: 'btn--secondary',
       destructive:

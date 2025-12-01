@@ -54,7 +54,7 @@ const cards = [
             <div class="text-accent-fg flex h-16 w-16 items-center justify-center">
               <img :src="card.icon" :alt="`${card.title} icon`" class="size-12" />
             </div>
-            <CardTitle class="text-foreground text-2xl font-semibold">
+            <CardTitle class="text-fg text-2xl font-semibold">
               {{ card.title }}
             </CardTitle>
           </CardHeader>
