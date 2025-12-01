@@ -45,16 +45,16 @@ const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
 const selected = ref('AI')
 
-const showHireSpecialistModal = ref(false)
-const hireForm = ref({
-  companyName: 'Untitled UI',
-  companyEmail: 'olivia@untitledui.com',
+// Default form structure for Hire Specialist
+const defaultHireForm = {
   industry: 'Immigration & Global Mobility',
-  description:
-    'Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states',
-})
+}
+
+const showHireSpecialistModal = ref(false)
+const hireForm = ref({ ...defaultHireForm })
 
 const openHireSpecialistModal = () => {
+  hireForm.value = { ...defaultHireForm }
   showHireSpecialistModal.value = true
 }
 
@@ -360,7 +360,10 @@ watch(
 
           <p class="text-fg text-[14px] leading-snug sm:text-[16px]">
             Hiring a specialist give you the best possible result.
-            <!-- <span class="cursor-pointer underline">learn more about a specialist</span> -->
+        
+            <RouterLink :to="{ name: 'learn-more' }">
+              <span class="cursor-pointer underline">learn more about a specialist</span>
+            </RouterLink>
           </p>
         </div>
         <button
@@ -471,9 +474,13 @@ watch(
             View Archive
           </button> -->
 
-          <button @click="openAddJurisdictionModal" class="btn--default btn--with-icon btn--lg">
-            <Plus :size="18" />
-            Add Jurisdiction
+          <button
+            @click="openAddJurisdictionModal"
+            class="btn--default btn--with-icon flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all sm:px-5 sm:py-3 sm:text-base"
+          >
+            <Plus :size="18" class="sm:size-5" />
+            <span class="hidden sm:inline">Add Jurisdiction</span>
+            <span class="sm:hidden">Add</span>
           </button>
         </div>
       </div>
@@ -577,10 +584,6 @@ watch(
       <DialogScrollContent class="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Hire a Specialist</DialogTitle>
-          <DialogDescription>
-            Monitor changes to EU travel rules, visa requirements, entry conditions, and policy
-            updates across all Schengen and EU member states
-          </DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="submitHireForm" class="space-y-6">
@@ -589,7 +592,7 @@ watch(
               Company Name
             </label>
             <input
-              v-model="hireForm.companyName"
+              placeholder="United UI"
               id="companyName"
               type="text"
               required
@@ -602,8 +605,7 @@ watch(
               Company Email Address
             </label>
             <input
-              v-model="hireForm.companyEmail"
-              id="companyEmail"
+              placeholder="olivia@untitledui.com"
               type="email"
               required
               class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
@@ -616,7 +618,6 @@ watch(
             </label>
             <div class="relative">
               <select
-                v-model="hireForm.industry"
                 id="industry"
                 class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0"
               >
@@ -636,7 +637,7 @@ watch(
               Brief Description
             </label>
             <textarea
-              v-model="hireForm.description"
+              placeholder="Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states"
               id="description"
               rows="3"
               required

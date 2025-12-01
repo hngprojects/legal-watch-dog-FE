@@ -181,10 +181,10 @@
         <div class="mt-12 flex justify-center" v-if="canToggle">
           <Button
             variant="outline"
-            class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-gray-900 transition duration-150 hover:bg-gray-50"
+            class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-gray-900 transition duration-150 hover:bg-gray-50 text-center"
             @click="toggleMoreCards"
           >
-            {{ showMoreCards ? 'View Less' : 'View More' }}
+            {{ showMoreCards ? 'View Less' : 'View Mor' }}
           </Button>
         </div>
       </section>
