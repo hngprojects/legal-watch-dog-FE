@@ -90,7 +90,7 @@ onUnmounted(() => {
     class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="app-container mx-auto flex w-full items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
+      class="app-container mx-auto flex flex-col items-start sm:flex-row w-full sm:items-center justify-between gap-8 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
     >
       <!-- LOGO -->
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
@@ -132,7 +132,7 @@ onUnmounted(() => {
             :to="{ path: '/signup' }"
             variant="default"
             size="default"
-            class="text-sm sm:text-base"
+            class="hidden sm:block text-sm sm:text-base"
           >
             Sign Up
           </Button>
@@ -159,7 +159,7 @@ onUnmounted(() => {
         <!-- MOBILE/TABLET MENU BUTTON -->
         <button
           @click="isMenuOpen = !isMenuOpen"
-          class="text-text-main inline-flex items-center justify-center rounded-lg border p-2 hover:bg-gray-50 lg:hidden"
+          class="btn--icon-only btn--icon-sm btn--default lg:hidden"
           aria-label="Toggle menu"
         >
           <svg
@@ -215,7 +215,7 @@ onUnmounted(() => {
           </RouterLink>
           <button
             @click="closeMenu"
-            class="rounded-lg p-1 hover:bg-gray-100"
+            class="btn--icon-only btn--icon-sm btn--default"
             aria-label="Close menu"
           >
             <svg class="h-6 w-6" fill="none" stroke="currentColor">
@@ -258,11 +258,11 @@ onUnmounted(() => {
               :as="RouterLink"
               :to="{ name: 'organizations' }"
               @click="closeMenu"
-              class="w-full text-white"
+              class="btn--default btn--sm sm:btn--lg"
             >
               Go to Dashboard
             </Button>
-            <Button variant="outline" @click="handleLogout" class="mt-6 w-full lg:mt-0">
+            <Button variant="outline" @click="handleLogout" class="btn--secondary btn--sm sm:btn--lg mt-6">
               Logout
             </Button>
           </template>
