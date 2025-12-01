@@ -128,7 +128,7 @@ const handleSubmit = () => {
         </button>
         <button
           type="button"
-          class="btn--primary btn--lg disabled:cursor-not-allowed disabled:opacity-60"
+          class="btn--default btn--lg disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="!isValid || loading"
           @click="handleSubmit"
         >

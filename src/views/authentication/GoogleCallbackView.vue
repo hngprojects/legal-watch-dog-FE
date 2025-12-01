@@ -68,6 +68,7 @@ const tryFetchGoogleProfile = async () => {
 
 const finishGoogleLogin = async () => {
   const params = parseOauthParams()
+  const rememberPreference = authStore.rememberMePreference
 
   if (params.error) {
     status.value = 'error'
@@ -84,11 +85,11 @@ const finishGoogleLogin = async () => {
   }
 
   try {
-    authStore.handleLoginSuccess(params.accessToken, true)
+    authStore.handleLoginSuccess(params.accessToken, rememberPreference)
 
     const profileUser = await tryFetchGoogleProfile()
     if (profileUser) {
-      authStore.handleLoginSuccess(params.accessToken, true, profileUser as never)
+      authStore.handleLoginSuccess(params.accessToken, rememberPreference, profileUser as never)
     } else {
       await authStore.loadCurrentUser()
     }
@@ -97,7 +98,7 @@ const finishGoogleLogin = async () => {
     if (isNewUser) {
       await router.replace({
         name: 'auth-status',
-        query: { status: 'success', context: 'signup', redirect: 'organizations' },
+        query: { status: 'success', context: 'signup', redirect: 'organizations', issued: 'true' },
       })
     } else {
       await router.replace({ name: 'organizations' })
@@ -185,7 +186,7 @@ const goToLogin = () => router.replace({ name: 'login' })
         <button
           v-if="status === 'error'"
           type="button"
-          class="btn btn--primary w-full"
+          class="btn btn--default w-full"
           @click="goToLogin"
         >
           Back to Login
@@ -193,7 +194,7 @@ const goToLogin = () => router.replace({ name: 'login' })
         <button
           v-else
           type="button"
-          class="btn btn--primary w-full cursor-not-allowed opacity-80"
+          class="btn btn--default w-full cursor-not-allowed opacity-80"
           disabled
         >
           Connecting...

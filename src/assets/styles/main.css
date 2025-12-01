@@ -6,13 +6,20 @@
 @import 'tw-animate-css';
 
 @theme {
-  --color-surface: var(--color-gray-white);
-  --color-foreground: var(--color-gray-700);
+  --color-bg: var(--color-gray-white);
+  --color-fg-subtle: var(--color-gray-600);
+  --color-fg: var(--color-gray-700);
+
+  --color-raised: var(--color-gray-200);
+  --color-raised-fg: var(--color-gray-500);
+
   --color-accent-main: var(--color-chocolate-brown-main);
-  --color-accent-subtle: #3c2610;
+  --color-accent-subtle: var(--color-chocolate-brown-850);
+
   --color-destructive: var(--color-red-600);
   --color-destructive-fg: var(--color-gray-white);
-  --color-focus: #fff2db;
+
+  --color-focus: var(--color-chocolate-brown-400);
 
   --font-sans: var(--font-default);
 }
@@ -39,8 +46,11 @@
   }
 
   a {
-    color: inherit;
-    text-decoration: none;
+    @apply text-inherit no-underline;
+  }
+  a,
+  button {
+    @apply focus:ring-focus focus:ring-2 focus:ring-offset-2 focus:outline-none;
   }
 }
 
@@ -116,7 +126,7 @@
 }
 
 @utility btn {
-  @apply ring-focus cursor-pointer rounded-sm focus:ring-1;
+  @apply cursor-pointer rounded-sm text-center disabled:cursor-not-allowed;
 }
 
 @utility btn--sm {
@@ -128,27 +138,47 @@
 }
 
 @utility btn--lg {
-  @apply px-4.5 py-2.5;
+  @apply px-4.5 py-3;
 }
 
 @utility btn--xl {
   @apply px-5 py-4;
 }
 
-@utility btn--primary {
-  @apply btn bg-accent-main hover:bg-accent-subtle text-surface;
+@utility btn--icon-sm {
+  @apply p-2;
+}
+
+@utility btn--icon-md {
+  @apply p-2.5;
+}
+
+@utility btn--icon-lg {
+  @apply p-3;
+}
+
+@utility btn--icon-xl {
+  @apply p-4;
+}
+
+@utility btn--full {
+  @apply w-full;
+}
+
+@utility btn--default {
+  @apply btn bg-accent-main hover:bg-accent-subtle text-bg disabled:bg-raised disabled:text-raised-fg;
 }
 
 @utility btn--secondary {
-  @apply btn border-accent-main hover:bg-accent-main/30 border bg-transparent;
+  @apply btn text-accent-main border-accent-main hover:text-accent-subtle hover:border-accent-subtle border bg-transparent;
+}
+
+@utility btn--contrast {
+  @apply btn bg-accent-subtle hover:bg-accent text-bg;
 }
 
 @utility btn--with-icon {
   @apply flex items-center gap-2;
-}
-
-@utility btn--outline {
-  @apply btn border-accent-main text-accent-main border hover:bg-gray-100;
 }
 
 @utility btn--link {
@@ -156,13 +186,13 @@
 }
 
 @utility btn--disabled {
-  @apply disabled:text-foreground disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-70;
+  @apply disabled:text-fg disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-70;
 }
 
 @utility link--disabled {
   @apply disabled:cursor-not-allowed;
 }
 
-/* @utility btn--icon-only {
-  @apply b;
-} */
+@utility btn--icon-only {
+  @apply rounded-full;
+}

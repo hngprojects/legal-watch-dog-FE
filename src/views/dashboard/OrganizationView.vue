@@ -213,7 +213,7 @@ onMounted(async () => {
                 Role: {{ invite.role_name || invite.role || 'Member' }}
               </p>
             </div>
-            <button @click="acceptInvite(invite.token)" class="btn--primary btn--lg">Accept</button>
+            <button @click="acceptInvite(invite.token)" class="btn--default btn--lg">Accept</button>
           </article>
         </div>
       </div>
@@ -230,7 +230,7 @@ onMounted(async () => {
         />
         Projects and jurisdictions are scoped within organizations.
       </p>
-      <button @click="openCreateModal" class="btn--primary btn--lg btn--with-icon">
+      <button @click="openCreateModal" class="btn--default btn--lg btn--with-icon">
         <svg
           width="20"
           height="20"
@@ -264,7 +264,7 @@ onMounted(async () => {
         <div>
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Organizations</h1>
         </div>
-        <button @click="openCreateModal" class="btn--primary btn--lg btn--with-icon">
+        <button @click="openCreateModal" class="btn--default btn--lg btn--with-icon">
           <svg
             width="20"
             height="20"
@@ -321,7 +321,10 @@ onMounted(async () => {
           <div class="relative p-8">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <button @click.stop class="btn--primary btn--sm absolute top-6 right-4">
+                <button
+                  @click.stop
+                  class="btn--default btn--icon-sm btn--icon-only absolute top-6 right-4"
+                >
                   <EllipsisVertical :size="18" />
                 </button>
               </DropdownMenuTrigger>
@@ -342,7 +345,7 @@ onMounted(async () => {
           <div
             class="hidden items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
           >
-            <button @click="goToOrganization(org.id)" class="btn--primary flex items-center gap-1">
+            <button @click="goToOrganization(org.id)" class="btn--default flex items-center gap-1">
               View Organization
               <svg
                 class="h-4 w-4"
@@ -363,7 +366,7 @@ onMounted(async () => {
       <div v-if="hasMoreOrganizations" class="mt-8 flex justify-center">
         <button
           @click="loadMoreOrganizations"
-          class="btn--primary btn--lg"
+          class="btn--default btn--lg"
           :disabled="organizationStore.loadingMore"
         >
           <span v-if="organizationStore.loadingMore">Loading...</span>
@@ -383,15 +386,7 @@ onMounted(async () => {
             <div class="mb-6">
               <h3 class="mb-2 text-xl font-bold text-[#080808]">Set up new Organization</h3>
               <p class="text-sm text-[#6B7280]">
-                <template v-if="formData.name">
-                  Organisation already registered?
-                  <span
-                    @click="router.push('/login')"
-                    class="cursor-pointer text-[#401903] underline transition-all hover:no-underline"
-                    >Log In</span
-                  >
-                </template>
-                <template v-else> Enter the name and Industry of your Organization. </template>
+                <template> Enter the name and Industry of your Organization. </template>
               </p>
             </div>
 
@@ -450,12 +445,8 @@ onMounted(async () => {
               </div>
 
               <div class="flex flex-col justify-center gap-3 pt-8">
-                <button type="submit" class="btn btn--primary min-h-10 py-2.5">Continue</button>
-                <button
-                  type="button"
-                  @click="closeCreateModal"
-                  class="min-h-10 cursor-pointer rounded-lg border border-transparent py-2.5 text-sm font-medium text-black hover:border-[#F1A75F] hover:bg-orange-50"
-                >
+                <button type="submit" class="btn--default btn--lg">Continue</button>
+                <button type="button" @click="closeCreateModal" class="btn--secondary btn--lg">
                   Cancel
                 </button>
               </div>

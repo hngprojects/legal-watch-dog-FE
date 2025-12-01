@@ -437,11 +437,11 @@ const closeSubJurisdictionModal = () => {
   subJurisdictionModalOpen.value = false
 }
 
-  const createSubJurisdiction = async () => {
-    if (!jurisdiction.value) return
+const createSubJurisdiction = async () => {
+  if (!jurisdiction.value) return
 
-    if (!subJurisdictionForm.value.name.trim()) return
-    if (!subJurisdictionForm.value.description.trim()) return
+  if (!subJurisdictionForm.value.name.trim()) return
+  if (!subJurisdictionForm.value.description.trim()) return
 
   const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
     name: subJurisdictionForm.value.name.trim(),
@@ -629,7 +629,7 @@ onMounted(() => {
 
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button type="button" class="btn--primary btn--sm">
+            <button type="button" class="btn--default btn--sm">
               <Settings :size="18" />
             </button>
           </DropdownMenuTrigger>
@@ -730,7 +730,7 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between gap-4">
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
-          <button class="btn--primary btn--with-icon btn--lg" @click="openSubJurisdictionModal">
+          <button class="btn--default btn--with-icon btn--lg" @click="openSubJurisdictionModal">
             <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>
@@ -847,7 +847,7 @@ onMounted(() => {
             <button type="button" class="btn--secondary btn--lg" @click="showInlineEdit = false">
               Cancel
             </button>
-            <button type="submit" class="btn--primary btn--lg">Save Changes</button>
+            <button type="submit" class="btn--default btn--lg">Save Changes</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>

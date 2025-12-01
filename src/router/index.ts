@@ -29,6 +29,7 @@ import ResetPasswordView from '@/views/authentication/ResetPasswordView.vue'
 import AuthStatusView from '@/views/authentication/AuthStatusView.vue'
 import AcceptInviteView from '@/views/authentication/AcceptInviteView.vue'
 import GoogleCallbackView from '@/views/authentication/GoogleCallbackView.vue'
+import ComponentCatalogueView from '@/views/ComponentCatalogueView.vue'
 
 // Dashboard pages
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
@@ -53,6 +54,11 @@ const router = createRouter({
       name: 'billing-success',
       component: () => import('@/views/dashboard/payments/SuccessView.vue'),
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/component-catalogue',
+      name: 'component-catalogue',
+      component: ComponentCatalogueView,
     },
     {
       path: '/',
@@ -240,6 +246,12 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const isAuthRoute = to.name === 'login' || to.name === 'signup'
+
+  if (to.name === 'auth-status') {
+    const issued = to.query.issued === 'true'
+    if (auth.isAuthenticated || issued) return true
+    return { name: 'login', query: { redirect: to.fullPath } }
+  }
 
   if (isAuthRoute && auth.isAuthenticated) {
     return { name: 'dashboard' }

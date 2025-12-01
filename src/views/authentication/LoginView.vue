@@ -4,7 +4,7 @@ import AuthCard from '@/components/authentication/AuthCard.vue'
 import FormControl from '@/components/composables/FormControl.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import { isAxiosError } from 'axios'
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
@@ -21,6 +21,18 @@ const isSubmitting = ref(false)
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MIN_PASSWORD_LENGTH = 8
 const sanitize = (value: string) => value.trim()
+
+onMounted(() => {
+  rememberMe.value = authStore.rememberMePreference
+  if (authStore.email) {
+    email.value = authStore.email
+  }
+})
+
+watch(
+  () => rememberMe.value,
+  (val) => authStore.setRememberPreference(val),
+)
 
 const handleLogin = async () => {
   const sanitizedEmail = sanitize(email.value).toLowerCase()
@@ -43,6 +55,7 @@ const handleLogin = async () => {
 
   isSubmitting.value = true
   serverError.value = ''
+  authStore.setRememberPreference(rememberMe.value)
 
   try {
     const success = await authStore.login(
@@ -95,7 +108,7 @@ const handleLogin = async () => {
         v-model="email"
         type="email"
         label="Company Email"
-        placeholder="Enter your company's email"
+        placeholder="Enter your registered email"
         required
       />
 
@@ -158,11 +171,7 @@ const handleLogin = async () => {
         <RouterLink to="/forgot-password" class="btn--link">Forgot password?</RouterLink>
       </div>
 
-      <button
-        type="submit"
-        :disabled="isSubmitting"
-        class="bg-accent-subtle mt-3 w-full cursor-pointer rounded-md px-5 py-4 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70"
-      >
+      <button type="submit" :disabled="isSubmitting" class="btn--default btn--lg btn--full">
         <span v-if="!isSubmitting">Login</span>
         <span v-else>Checking credentials...</span>
       </button>
@@ -176,7 +185,7 @@ const handleLogin = async () => {
         </div>
       </div>
 
-      <SocialLogins />
+      <SocialLogins :remember-me="rememberMe" />
     </form>
   </AuthCard>
 </template>

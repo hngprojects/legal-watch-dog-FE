@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import EmailIcon from '@/assets/icons/message.png'
@@ -164,60 +165,64 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="app-container min-h-screen py-12 sm:px-0 lg:px-0">
+  <div class="app-container min-h-screen py-8 sm:py-12 lg:py-16">
     <div class="mx-auto">
-      <div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
+      <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-20">
         <!-- Left Column - Contact Info -->
         <div class="flex flex-col">
-          <h1 class="mb-4 text-4xl font-bold text-[#1F1F1F] sm:text-5xl lg:text-[48px]">
+          <h1 class="mb-4 text-3xl font-bold text-[#1F1F1F] sm:text-4xl lg:text-[48px]">
             Contact Us
           </h1>
 
-          <p class="mb-12 max-w-md text-base leading-relaxed text-[#6B7280]">
+          <p class="mb-8 max-w-md text-sm leading-relaxed text-[#6B7280] sm:mb-10 sm:text-base lg:mb-12">
             Have any enquiry? you have come to the right place. Get in touch with us through the
             form and we will get back to you as soon as possible
           </p>
 
           <!-- Contact Info Items -->
-          <div class="flex flex-col gap-6">
+          <div class="flex flex-col gap-5 sm:gap-6">
             <!-- Email -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-start gap-3 sm:items-center sm:gap-4">
               <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
-                style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                style="background: #f1a75f"
               >
-                <img :src="EmailIcon" alt="Email" class="h-full w-full object-contain" />
+                <img :src="EmailIcon" alt="Email" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-base font-medium text-[#1F1F1F]">example@legalwatchdog.com</p>
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">
+                  contact@legalwatch.dog
+                </p>
               </div>
             </div>
 
             <!-- Office Address -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-start gap-3 sm:items-center sm:gap-4">
               <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
-                style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                style="background: #f1a75f"
               >
-                <img :src="OfficeIcon" alt="Office" class="h-full w-full object-contain" />
+                <img :src="OfficeIcon" alt="Office" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-base font-medium text-[#1F1F1F]">
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">
                   2972 Westheimer Rd. Santa Ana,<br />Illinois 85486
                 </p>
               </div>
             </div>
 
             <!-- Phone -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-start gap-3 sm:items-center sm:gap-4">
               <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
-                style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                style="background: #f1a75f"
               >
-                <img :src="PhoneIcon" alt="Phone" class="h-full w-full object-contain" />
+                <img :src="PhoneIcon" alt="Phone" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-base font-medium text-[#1F1F1F]">+44 123 654 7890</p>
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">
+                  +44 123 654 7890
+                </p>
               </div>
             </div>
           </div>
@@ -225,7 +230,7 @@ const handleSubmit = async () => {
 
         <!-- Right Column - Form -->
         <div class="flex flex-col">
-          <form @submit.prevent="handleSubmit" class="flex flex-col gap-6">
+          <form @submit.prevent="handleSubmit" class="flex flex-col gap-5 sm:gap-6">
             <!-- Full Name -->
             <div>
               <label for="fullName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
@@ -236,7 +241,7 @@ const handleSubmit = async () => {
                 v-model="form.fullName"
                 type="text"
                 placeholder="John Doe"
-                class="h-[52px] w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
               />
               <p v-if="errors.fullName" class="mt-1 text-sm text-red-600">
                 {{ errors.fullName }}
@@ -254,7 +259,7 @@ const handleSubmit = async () => {
                   v-model="form.phoneNumber"
                   type="tel"
                   placeholder="+1 (555) 000-0000"
-                  class="h-[52px] w-full rounded-lg border border-[#E5E7EB] bg-white pr-4 pl-20 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                  class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
                 />
               </div>
               <p v-if="errors.phoneNumber" class="mt-1 text-sm text-red-600">
@@ -272,7 +277,7 @@ const handleSubmit = async () => {
                 v-model="form.email"
                 type="email"
                 placeholder="olivia@untitledui.com"
-                class="h-[52px] w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
               />
               <p v-if="errors.email" class="mt-1 text-sm text-red-600">
                 {{ errors.email }}
@@ -289,25 +294,27 @@ const handleSubmit = async () => {
                 v-model="form.message"
                 @input="updateCharacterCount"
                 :maxlength="maxCharacters"
-                rows="6"
+                rows="5"
                 placeholder="Add message"
-                class="w-full resize-none rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#1F1F1F] placeholder-[#9CA3AF] transition-all outline-none focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                class="w-full resize-none rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#1F1F1F] placeholder-[#9CA3AF] transition-all outline-none focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:rows-6"
               ></textarea>
-              <div class="mt-2 flex items-center justify-between">
-                <p v-if="errors.message" class="text-sm text-red-600">
-                  {{ errors.message }}
-                </p>
-                <p class="text-sm text-[#6B7280]">
+              <div class="mt-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0">
+                <div class="order-2 sm:order-1">
+                  <p v-if="errors.message" class="text-sm text-red-600">
+                    {{ errors.message }}
+                  </p>
+                </div>
+                <p class="order-1 text-sm text-[#6B7280] sm:order-2">
                   {{ characterCount }}/{{ maxCharacters }} characters
                 </p>
               </div>
             </div>
 
             <!-- Agreement Section -->
-            <div class="rounded-lg p-4" style="background: #fffaeb">
+            <div class="rounded-lg p-3 sm:p-4" style="background: #fffaeb">
               <div class="flex items-start gap-3">
                 <div class="flex h-5 w-5 shrink-0 items-center justify-center">
-                  <img :src="AlertIcon" alt="Alert" class="h-5 w-5" />
+                  <img :src="AlertIcon" alt="Alert" class="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <div class="flex-1">
                   <h4 class="mb-2 text-sm font-semibold text-[#1F1F1F]">Agreement</h4>
@@ -320,13 +327,16 @@ const handleSubmit = async () => {
                     />
                     <label
                       for="agreement"
-                      class="cursor-pointer text-sm leading-relaxed text-[#6B7280]"
+                      class="cursor-pointer text-xs leading-relaxed text-[#6B7280] sm:text-sm"
                     >
-                      By completing and submitting this form, I agree to having this website store
-                      my submitted information, so they can respond to my inquiry or to send
-                      occassional updates. For information on how to unsubscribe, as well as our
-                      privacy pratices and commitment to protecting your privacy, check out our
-                      <a href="#" class="font-medium text-[#401903] underline">privacy policy</a>
+                      By completing and submitting this form, I agree to have this website store my
+                      submitted information so they can respond to my inquiry or send occasional
+                      updates. For information on how to unsubscribe, as well as our privacy
+                      practices and commitment to protecting your privacy, please refer to our
+                      <RouterLink to="/privacy-policy" class="font-medium text-[#401903] underline">
+                        privacy policy
+                      </RouterLink>
+                      .
                     </label>
                   </div>
                   <p v-if="errors.agreement" class="mt-2 text-sm text-red-600">
@@ -341,7 +351,7 @@ const handleSubmit = async () => {
               type="submit"
               @click="handleSubmit"
               :disabled="isSubmitting"
-              class="h-[52px] w-full rounded-lg bg-[#401903] text-base font-semibold text-white transition-colors hover:bg-[#2d1810] hover:text-white disabled:opacity-50"
+              class="btn--default btn--lg btn--full text-center"
             >
               <span v-if="!isSubmitting">Submit</span>
               <span v-else>Submitting...</span>
@@ -352,3 +362,69 @@ const handleSubmit = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .app-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Stack character count below error message on mobile */
+  .sm\:flex-row {
+    flex-direction: column;
+  }
+  
+  .sm\:order-1 {
+    order: 2;
+  }
+  
+  .sm\:order-2 {
+    order: 1;
+  }
+}
+
+/* Improve textarea on mobile */
+textarea {
+  min-height: 120px;
+}
+
+@media (min-width: 640px) {
+  textarea {
+    min-height: 150px;
+  }
+}
+
+/* Ensure icons maintain aspect ratio */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent form from being too wide on large screens */
+@media (min-width: 1536px) {
+  .app-container {
+    max-width: 1280px;
+  }
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+  label,
+  input,
+  button,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+  
+  input,
+  textarea {
+    min-height: 44px; /* Better touch target */
+  }
+  
+  .h-\[48px\] {
+    height: 44px;
+  }
+}
+</style>

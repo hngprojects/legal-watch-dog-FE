@@ -6,8 +6,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings, ChevronDown } from 'lucide-vue-next'
-import checkmark from '@/assets/Images/checkmark.png'
+import { ArrowLeftIcon, Plus, Settings, ChevronDown, CheckSquare } from 'lucide-vue-next'
 import Swal from '@/lib/swal'
 import {
   Breadcrumb,
@@ -354,12 +353,12 @@ watch(
       >
         <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
           <div
-            class="flex h-10 w-10 items-center justify-center rounded-[8px] border border-[#D87A07] bg-[#1F1F1F1A] sm:h-12 sm:w-12"
+            class="border-fg flex h-10 w-10 items-center justify-center rounded-[8px] border bg-[#1F1F1F1A] p-1 sm:h-12 sm:w-12"
           >
-            <img :src="checkmark" alt="check-mark" class="h-5 w-5 sm:h-6 sm:w-6" />
+            <CheckSquare class="text-fg h-5 w-5 sm:h-6 sm:w-6" />
           </div>
 
-          <p class="text-[14px] leading-snug text-[#3A2B1B] sm:text-[16px]">
+          <p class="text-fg text-[14px] leading-snug sm:text-[16px]">
             Hiring a specialist give you the best possible result.
         
             <RouterLink :to="{ name: 'learn-more' }">
@@ -475,9 +474,13 @@ watch(
             View Archive
           </button> -->
 
-          <button @click="openAddJurisdictionModal" class="btn--primary btn--with-icon btn--lg">
-            <Plus :size="18" />
-            Add Jurisdiction
+          <button
+            @click="openAddJurisdictionModal"
+            class="btn--default btn--with-icon flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all sm:px-5 sm:py-3 sm:text-base"
+          >
+            <Plus :size="18" class="sm:size-5" />
+            <span class="hidden sm:inline">Add Jurisdiction</span>
+            <span class="sm:hidden">Add</span>
           </button>
         </div>
       </div>
@@ -568,7 +571,7 @@ watch(
             <button type="button" @click="closeAddJurisdictionModal" class="btn--secondary btn--lg">
               Cancel
             </button>
-            <button type="submit" class="btn--primary btn--lg">Create Jurisdiction</button>
+            <button type="submit" class="btn--default btn--lg">Create Jurisdiction</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>
@@ -646,7 +649,7 @@ watch(
             <button type="button" @click="closeHireSpecialistModal" class="btn--secondary btn--lg">
               Cancel
             </button>
-            <button type="submit" class="btn--primary btn--lg">Hire Specialist</button>
+            <button type="submit" class="btn--default btn--lg">Hire Specialist</button>
           </DialogFooter>
         </form>
       </DialogScrollContent>

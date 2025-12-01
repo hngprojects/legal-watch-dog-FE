@@ -28,37 +28,50 @@ const cards = [
 </script>
 
 <template>
-  <section id="how-it-works" class="app-container relative flex items-center justify-center">
-    <div class="flex w-full flex-col gap-11">
-      <div class="mx-auto flex w-full flex-col items-center gap-5 text-center">
-        <TypographyHeading level="h2" align="center">
+  <section id="how-it-works" class="app-container relative flex items-center justify-center py-12 sm:py-16 lg:py-20">
+    <div class="flex w-full flex-col gap-8 sm:gap-10 lg:gap-11">
+      <!-- Header Section -->
+      <div class="mx-auto flex w-full flex-col items-center gap-3 px-4 text-center sm:gap-4 sm:px-6 lg:gap-5">
+        <TypographyHeading 
+          level="h2" 
+          align="center"
+          class="text-2xl leading-tight sm:text-3xl sm:leading-tight lg:text-4xl lg:leading-tight"
+        >
           How <span class="text-[#F2AB6D]">Legal WatchDog</span> Works
         </TypographyHeading>
         <TypographyText
           align="center"
           tone="muted"
-          class="max-w-2xl text-lg font-semibold text-gray-600"
+          class="max-w-full text-sm font-semibold leading-relaxed text-gray-600 sm:max-w-xl sm:text-base lg:max-w-2xl lg:text-lg"
         >
           Discover how LegalWatchDog continuously monitors legal sources, detects changes, and
           delivers reliable, AI-summarized updates — all in just a few steps.
         </TypographyText>
       </div>
 
-      <div class="mx-auto flex flex-wrap items-center gap-5 md:items-stretch lg:flex-nowrap">
+      <!-- Cards Grid -->
+      <div class="mx-auto flex w-full flex-col items-stretch gap-4 px-4 sm:gap-5 sm:px-6 md:flex-row md:flex-wrap lg:flex-nowrap">
         <Card
           v-for="(card, i) in cards"
           :key="i"
-          class="basis-full space-y-4 rounded-2xl bg-white px-8 py-10 text-left md:max-w-[400px] md:basis-[calc(50%-0.625rem)]"
+          class="flex-1 space-y-3 rounded-2xl bg-white px-5 py-6 text-left sm:space-y-4 sm:px-6 sm:py-8 md:min-w-[280px] md:max-w-[380px] md:basis-[calc(50%-0.625rem)] lg:max-w-none lg:basis-0 lg:px-8 lg:py-10"
         >
-          <CardHeader class="gap-4 p-0">
-            <div class="text-accent-foreground flex h-16 w-16 items-center justify-center">
-              <img :src="card.icon" :alt="`${card.title} icon`" class="size-12" />
+          <CardHeader class="gap-3 p-0 sm:gap-4">
+            <!-- Icon -->
+            <div class="text-accent-fg flex h-12 w-12 items-center justify-center sm:h-14 sm:w-14 lg:h-16 lg:w-16">
+              <img 
+                :src="card.icon" 
+                :alt="`${card.title} icon`" 
+                class="h-10 w-10 sm:h-11 sm:w-11 lg:h-12 lg:w-12" 
+              />
             </div>
-            <CardTitle class="text-foreground text-2xl font-semibold">
+            <!-- Title -->
+            <CardTitle class="text-fg text-xl font-semibold sm:text-2xl">
               {{ card.title }}
             </CardTitle>
           </CardHeader>
-          <CardDescription class="text-base leading-relaxed">
+          <!-- Description -->
+          <CardDescription class="text-sm leading-relaxed sm:text-base">
             {{ card.description }}
           </CardDescription>
         </Card>

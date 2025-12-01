@@ -27,7 +27,7 @@ const handleGoHome = async () => {
         </DialogDescription>
       </DialogHeader>
       <DialogFooter class="flex w-full flex-row items-center justify-center! gap-4 text-center">
-        <button class="btn--primary btn--md" @click="handleGoHome">Return to Dashboard</button>
+        <button class="btn--default btn--md" @click="handleGoHome">Return to Dashboard</button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

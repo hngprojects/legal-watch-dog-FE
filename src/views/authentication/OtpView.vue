@@ -14,6 +14,7 @@ const DIGIT_COUNT = 6
 
 const otpDigits = ref<string[]>(Array(DIGIT_COUNT).fill(''))
 const digitInputs = ref<Array<HTMLInputElement | null>>([])
+const otpContainerRef = ref<HTMLDivElement | null>(null)
 const timer = ref(0)
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -77,11 +78,20 @@ onMounted(() => {
     return
   }
   startTimer()
+  
+  // Add paste event listener to the container
+  if (otpContainerRef.value) {
+    otpContainerRef.value.addEventListener('paste', handleContainerPaste)
+  }
 })
 
 onUnmounted(() => {
   if (interval) {
     clearInterval(interval)
+  }
+  // Remove paste event listener
+  if (otpContainerRef.value) {
+    otpContainerRef.value.removeEventListener('paste', handleContainerPaste)
   }
 })
 
@@ -131,21 +141,47 @@ const handleKeydown = (event: KeyboardEvent, index: number) => {
 const handlePaste = (event: ClipboardEvent, index: number) => {
   event.preventDefault()
   const paste = event.clipboardData?.getData('text') ?? ''
-  const digits = paste
-    .replace(/\D/g, '')
-    .slice(0, DIGIT_COUNT - index)
-    .split('')
-
-  digits.forEach((digit, offset) => {
-    const targetIndex = index + offset
+  const digits = paste.replace(/\D/g, '').split('')
+  
+  // Fill all digits starting from the current index
+  for (let i = 0; i < DIGIT_COUNT; i++) {
+    const targetIndex = index + i
     if (targetIndex < DIGIT_COUNT) {
-      otpDigits.value[targetIndex] = digit
-      const input = digitInputs.value[targetIndex]
-      if (input) input.value = digit
+      const digit = digits[i]
+      if (digit) {
+        otpDigits.value[targetIndex] = digit
+        const input = digitInputs.value[targetIndex]
+        if (input) input.value = digit
+      } else {
+        otpDigits.value[targetIndex] = ''
+        const input = digitInputs.value[targetIndex]
+        if (input) input.value = ''
+      }
     }
-  })
+  }
+  
+  // Focus on the last input or the next empty input
+  const lastFilledIndex = Math.min(index + digits.length, DIGIT_COUNT - 1)
+  digitInputs.value[lastFilledIndex]?.focus()
+}
 
-  const focusIndex = Math.min(index + digits.length, DIGIT_COUNT - 1)
+// Alternative: Paste anywhere in the container
+const handleContainerPaste = (event: ClipboardEvent) => {
+  event.preventDefault()
+  const paste = event.clipboardData?.getData('text') ?? ''
+  const digits = paste.replace(/\D/g, '').split('').slice(0, DIGIT_COUNT)
+  
+  // Fill all digits from the beginning
+  for (let i = 0; i < DIGIT_COUNT; i++) {
+    const digit = digits[i]
+    otpDigits.value[i] = digit || ''
+    const input = digitInputs.value[i]
+    if (input) input.value = digit || ''
+  }
+  
+  // Focus on the next empty input or the last one
+  const firstEmptyIndex = otpDigits.value.findIndex(digit => !digit)
+  const focusIndex = firstEmptyIndex === -1 ? DIGIT_COUNT - 1 : Math.min(firstEmptyIndex, DIGIT_COUNT - 1)
   digitInputs.value[focusIndex]?.focus()
 }
 
@@ -190,6 +226,7 @@ const handleContinue = async () => {
         query: {
           status: 'success',
           context: 'signup',
+          issued: 'true',
           message: successMessage.value,
         },
       })
@@ -208,6 +245,7 @@ const handleContinue = async () => {
         query: {
           status: 'error',
           context: 'signup',
+          issued: 'true',
           message: errorMessage.value,
         },
       })
@@ -262,10 +300,14 @@ const handleResend = async () => {
       </p>
     </template>
     <div
-      class="flex w-full max-w-5xl flex-col gap-10 lg:flex-row lg:items-center lg:justify-between"
+      class="flex w-full max-w-5xl flex-col gap-10 px-2 lg:flex-row lg:items-center lg:justify-between"
     >
       <div class="w-full max-w-xl space-y-8">
-        <div class="flex justify-between gap-3">
+        <!-- Added ref to the container for paste anywhere -->
+        <div 
+          ref="otpContainerRef"
+          class="flex justify-between gap-3"
+        >
           <input
             v-for="(_, index) in otpDigits"
             :key="index"
@@ -274,7 +316,7 @@ const handleResend = async () => {
             inputmode="numeric"
             autocomplete="one-time-code"
             maxlength="1"
-            class="focus:border-accent-main h-14 w-14 rounded-md border border-gray-300 text-center text-lg font-medium text-gray-900 focus:ring-2 focus:ring-[#F4E4D4]"
+            class="focus:border-accent-main h-8 w-8 rounded-md border border-gray-300 text-center text-lg font-medium text-gray-900 focus:ring-2 focus:ring-[#F4E4D4] sm:h-14 sm:w-14"
             :value="otpDigits[index]"
             @input="handleDigitInput($event, index)"
             @keydown="handleKeydown($event, index)"
@@ -287,7 +329,7 @@ const handleResend = async () => {
             type="button"
             @click="handleContinue"
             :disabled="isVerifying || !isComplete"
-            class="btn--primary btn--lg disabled:btn--disabled w-full"
+            class="btn--default btn--lg disabled:btn--disabled w-full"
           >
             <span v-if="!isVerifying">Continue</span>
             <span v-else>Verifying...</span>
@@ -318,7 +360,7 @@ const handleResend = async () => {
 
         <div
           v-if="errorMessage"
-          class="bg-destructive/70 text-surface rounded-md border border-red-200 p-3 text-sm"
+          class="bg-destructive/70 text-bg rounded-md border border-red-200 p-3 text-sm"
         >
           {{ errorMessage }}
         </div>
