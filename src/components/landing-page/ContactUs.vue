@@ -182,7 +182,7 @@ const handleSubmit = async () => {
           <!-- Contact Info Items -->
           <div class="flex flex-col gap-6">
             <!-- Email -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
               <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
                 style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
@@ -190,12 +190,12 @@ const handleSubmit = async () => {
                 <img :src="EmailIcon" alt="Email" class="h-full w-full object-contain" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-base font-medium text-[#1F1F1F]">example@legalwatchdog.com</p>
+                <p class="text-base font-medium text-[#1F1F1F]">contact@legalwatch.dog</p>
               </div>
             </div>
 
             <!-- Office Address -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
               <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
                 style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
@@ -210,7 +210,7 @@ const handleSubmit = async () => {
             </div>
 
             <!-- Phone -->
-            <div class="flex items-start gap-4">
+            <div class="flex items-center gap-4">
               <div
                 class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
                 style="background: #f1a75f; border-radius: 75.92px; padding: 15.18px"
@@ -345,7 +345,7 @@ const handleSubmit = async () => {
               type="submit"
               @click="handleSubmit"
               :disabled="isSubmitting"
-              class="h-[52px] w-full rounded-lg bg-[#401903] text-base font-semibold text-white transition-colors hover:bg-[#2d1810] hover:text-white disabled:opacity-50"
+              class="btn--default btn--lg btn--full text-center"
             >
               <span v-if="!isSubmitting">Submit</span>
               <span v-else>Submitting...</span>
