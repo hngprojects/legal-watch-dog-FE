@@ -23,37 +23,77 @@
       </section>
 
       <section class="overflow-hidden pb-20">
-        <div class="scrollbar-hide flex space-x-4 overflow-x-auto whitespace-nowrap md:space-x-6">
-          <img
-            :src="blog5"
-            alt="Person typing policy document"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog2"
-            alt="Compliance charts and people in a meeting"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog3"
-            alt="Person holding a tablet with security icons"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog4"
-            alt="Abstract law, legal, and rights icons"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog1"
-            alt="Laptop displaying policy text"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
-          <img
-            :src="blog5"
-            alt="Person typing policy document"
-            class="h-32 w-40 shrink-0 rounded-xl object-cover md:h-40 md:w-64"
-          />
+        <div class="relative" @mouseenter="stopAutoSlide" @mouseleave="startAutoSlide">
+          <div
+            class="overflow-hidden rounded-2xl border border-gray-200 shadow-md"
+            @touchstart="onTouchStart"
+            @touchend="onTouchEnd"
+          >
+            <div
+              class="flex transition-transform duration-500 ease-in-out"
+              :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
+            >
+              <div v-for="(slide, idx) in slides" :key="idx" class="w-full shrink-0">
+                <div class="grid grid-cols-1 gap-3 bg-white p-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <div
+                    v-for="item in slide"
+                    :key="item.alt"
+                    class="relative overflow-hidden rounded-xl"
+                  >
+                    <img
+                      :src="item.src"
+                      :alt="item.alt"
+                      class="h-48 w-full bg-gray-50 object-cover sm:h-56 md:h-60 lg:h-64"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            class="btn--default btn--icon-only btn--icon-sm absolute top-1/2 left-3 z-10 -translate-y-1/2"
+            type="button"
+            aria-label="Previous slide"
+            @click="prevSlide"
+          >
+            <svg class="text-bg h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <button
+            class="btn--default btn--icon-only btn--icon-sm absolute top-1/2 right-3 z-10 -translate-y-1/2"
+            type="button"
+            aria-label="Next slide"
+            @click="nextSlide"
+          >
+            <svg class="text-bg h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+
+          <div class="mt-4 flex justify-center gap-2">
+            <button
+              v-for="(_, idx) in slides"
+              :key="idx"
+              type="button"
+              class="h-2 w-2 rounded-full transition-all"
+              :class="idx === currentSlide ? 'w-4 bg-[#3F1A0F]' : 'bg-gray-300'"
+              @click="goToSlide(idx)"
+              :aria-label="`Go to slide ${idx + 1}`"
+            />
+          </div>
         </div>
       </section>
 
@@ -65,7 +105,11 @@
             Blogs
           </TypographyHeading>
 
-          <div class="flex w-full items-center rounded-lg border border-gray-300 bg-gray-50 p-1">
+          <form
+            class="flex w-full items-center rounded-lg border border-gray-300 bg-gray-50 p-1"
+            role="search"
+            @submit.prevent
+          >
             <svg
               class="ml-2 h-5 w-5 text-gray-400"
               fill="none"
@@ -83,8 +127,10 @@
             <Input
               class="h-9 grow border-0 bg-transparent px-2 py-1 text-base outline-0"
               placeholder="Search Blogs..."
+              v-model="searchTerm"
             />
             <button
+              type="submit"
               class="ml-2 flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 text-gray-600 hover:bg-gray-100"
             >
               <svg
@@ -102,196 +148,51 @@
                 ></path>
               </svg>
             </button>
-          </div>
+          </form>
         </div>
 
-        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10">
-          <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
-            <img :src="underblog1" alt="Team meeting compliance" class="h-48 w-full object-cover" />
+        <div v-if="displayedPosts.length" class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10">
+          <article
+            v-for="post in displayedPosts"
+            :key="post.id"
+            class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md"
+          >
+            <img :src="post.mainImage" :alt="post.title" class="h-48 w-full object-cover" />
             <div class="p-6">
               <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]"
-                  >Policy Updates</span
-                >
-                <span class="text-gray-500">| Nov 28, 2025</span>
+                <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]">
+                  {{ post.category }}
+                </span>
+                <span class="text-gray-500">| {{ post.date }}</span>
               </div>
               <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
-                Policy Developments to Know
+                {{ post.title }}
               </TypographyHeading>
               <TypographyText class="mb-4 text-gray-600">
-                An overview of upcoming or evolving policy changes that could influence industries
-                in the near future.
+                {{ getPreview(post) }}
               </TypographyText>
-              <div
+              <RouterLink
+                :to="`/blog/${post.id}`"
                 class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
               >
-                <RouterLink :to="`/blog/${1}`">
-                  <span>Learn More</span>
-                  <span class="text-[#F79009]">→</span>
-                </RouterLink>
-              </div>
-            </div>
-          </div>
-
-          <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
-            <img
-              :src="underblog2"
-              alt="Security Incident Management"
-              class="h-48 w-full object-cover"
-            />
-            <div class="p-6">
-              <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]"
-                  >Regulatory Changes</span
-                >
-                <span class="text-gray-500">| Nov 28, 2025</span>
-              </div>
-              <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
-                New Regulations Explained
-              </TypographyHeading>
-              <TypographyText class="mb-4 text-gray-600">
-                Clear breakdown of newly issued regulations, showing what changes are expected, and
-                what organizations must do next.
-              </TypographyText>
-
-              <RouterLink :to="`/blog/${2}`">
                 <span>Learn More</span>
                 <span class="text-[#F79009]">→</span>
               </RouterLink>
             </div>
-          </div>
-
-          <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
-            <img
-              :src="underblog3"
-              alt="Computer screen with scales of justice"
-              class="h-48 w-full object-cover"
-            />
-            <div class="p-6">
-              <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]"
-                  >AI & Legal Tech</span
-                >
-                <span class="text-gray-500">| Nov 28, 2025</span>
-              </div>
-              <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
-                Tech Innovations in Law
-              </TypographyHeading>
-              <TypographyText class="mb-4 text-gray-600">
-                A look at emerging tools and technologies transforming how legal professionals
-                research, monitor, and manage compliance.
-              </TypographyText>
-              <div
-                class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
-              >
-                <RouterLink :to="`/blog/${3}`">
-                  <span>Learn More</span>
-                  <span class="text-[#F79009]">→</span>
-                </RouterLink>
-              </div>
-            </div>
-          </div>
-
-          <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
-            <img
-              src="@/assets/Images/underblog4.png"
-              alt="Market and Industry Insights charts"
-              class="h-48 w-full object-cover"
-            />
-            <div class="p-6">
-              <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]"
-                  >Industry Trends</span
-                >
-                <span class="text-gray-500">| Nov 28, 2025</span>
-              </div>
-              <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
-                Market and Industry Insights
-              </TypographyHeading>
-              <TypographyText class="mb-4 text-gray-600">
-                Clear analysis of trends shaping industries, highlighting both risks and
-                opportunities in the regulatory landscape.
-              </TypographyText>
-              <div
-                class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
-              >
-                <RouterLink :to="`/blog/${4}`">
-                  <span>Learn More</span>
-                  <span class="text-[#F79009]">→</span>
-                </RouterLink>
-              </div>
-            </div>
-          </div>
-
-          <template v-if="showMoreCards">
-            <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
-              <img
-                :src="underblog5"
-                alt="Red folder covering a person"
-                class="h-48 w-full object-cover"
-              />
-              <div class="p-6">
-                <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
-                  <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]"
-                    >Policy Alerts</span
-                  >
-                  <span class="text-gray-500">| Nov 28, 2025</span>
-                </div>
-                <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
-                  Current Policy Alerts
-                </TypographyHeading>
-                <TypographyText class="mb-4 text-gray-600">
-                  Timely updates on new or emerging policies and legislation to keep you aware of to
-                  remain compliant and prepared.
-                </TypographyText>
-                <div
-                  class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
-                >
-                  <RouterLink :to="`/blog/${5}`">
-                    <span>Learn More</span>
-                    <span class="text-[#F79009]">→</span>
-                  </RouterLink>
-                </div>
-              </div>
-            </div>
-
-            <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md">
-              <img
-                :src="underblog6"
-                alt="Infographic on compliance stages"
-                class="h-48 w-full object-cover"
-              />
-              <div class="p-6">
-                <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
-                  <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]"
-                    >Compliance Tips</span
-                  >
-                  <span class="text-gray-500">| Nov 28, 2025</span>
-                </div>
-                <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
-                  Practical Compliance Guides
-                </TypographyHeading>
-                <TypographyText class="mb-4 text-gray-600">
-                  Simple guides that help businesses avoid penalties and meet all your regulatory
-                  requirements with clarity.
-                </TypographyText>
-                <div
-                  class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
-                >
-                  <RouterLink :to="`/blog/${6}`">
-                    <span>Learn More</span>
-                    <span class="text-[#F79009]">→</span>
-                  </RouterLink>
-                </div>
-              </div>
-            </div>
-          </template>
+          </article>
         </div>
 
-        <div class="mt-12 flex justify-center text-center">
+        <div
+          v-else
+          class="rounded-xl border border-gray-100 bg-white p-10 text-center text-gray-600 shadow-md"
+        >
+          No blog posts match your search yet.
+        </div>
+
+        <div class="mt-12 flex justify-center" v-if="canToggle">
           <Button
             variant="outline"
-            class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-gray-900 transition duration-150 hover:bg-gray-50 text-center"
+            class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-center text-gray-900 transition duration-150 hover:bg-gray-50"
             @click="toggleMoreCards"
           >
             {{ showMoreCards ? 'View Less' : 'View More' }}
@@ -333,10 +234,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { TypographyHeading, TypographyText } from '../ui/typography'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { blogPosts } from '@/data/posts'
 
 import blogIcon from '@/assets/icons/blogicon.png'
 import blog1 from '@/assets/Images/blog1.png'
@@ -344,16 +246,115 @@ import blog2 from '@/assets/Images/blog2.png'
 import blog3 from '@/assets/Images/blog3.png'
 import blog4 from '@/assets/Images/blog4.png'
 import blog5 from '@/assets/Images/blog5.png'
-import underblog1 from '@/assets/Images/underblog1.png'
-import underblog2 from '@/assets/Images/underblog2.png'
-import underblog3 from '@/assets/Images/underblog3.png'
-import underblog5 from '@/assets/Images/underblog5.png'
-import underblog6 from '@/assets/Images/underblog6.png'
+import underblog4 from '@/assets/Images/underblog4.png'
 
+const carouselImages = [
+  { src: blog5, alt: 'Person typing policy document' },
+  { src: blog2, alt: 'Compliance charts and people in a meeting' },
+  { src: blog3, alt: 'Person holding a tablet with security icons' },
+  { src: blog4, alt: 'Abstract law, legal, and rights icons' },
+  { src: blog1, alt: 'Laptop displaying policy text' },
+  { src: underblog4, alt: 'Market and industry insights charts' },
+]
+
+const searchTerm = ref('')
 const showMoreCards = ref(false)
+const currentSlide = ref(0)
+const autoSlideDelay = 5000
+let autoSlideTimer: ReturnType<typeof setInterval> | null = null
+const perView = ref(1)
+
+const slides = computed(() => {
+  const chunkSize = perView.value
+  const result: Array<Array<(typeof carouselImages)[number]>> = []
+  for (let i = 0; i < carouselImages.length; i += chunkSize) {
+    result.push(carouselImages.slice(i, i + chunkSize))
+  }
+  return result
+})
+
+const filteredPosts = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase()
+  if (!term) return blogPosts
+  return blogPosts.filter((post) => post.title.toLowerCase().includes(term))
+})
+
+const displayedPosts = computed(() => {
+  const posts = filteredPosts.value
+  if (showMoreCards.value || posts.length <= 4) return posts
+  return posts.slice(0, 4)
+})
+
+const canToggle = computed(() => filteredPosts.value.length > 4)
+
 const toggleMoreCards = () => {
   showMoreCards.value = !showMoreCards.value
 }
+
+watch(filteredPosts, (posts) => {
+  if (posts.length <= 4) {
+    showMoreCards.value = false
+  }
+})
+
+watch(slides, () => {
+  if (currentSlide.value >= slides.value.length) {
+    currentSlide.value = 0
+  }
+})
+
+const getPreview = (post: (typeof blogPosts)[number]) => post.introduction?.[0] ?? ''
+
+const goToSlide = (index: number) => {
+  const total = slides.value.length
+  currentSlide.value = (index + total) % total
+  startAutoSlide()
+}
+
+const nextSlide = () => goToSlide(currentSlide.value + 1)
+const prevSlide = () => goToSlide(currentSlide.value - 1)
+
+let touchStartX = 0
+const onTouchStart = (event: TouchEvent) => {
+  touchStartX = event.touches[0]?.clientX ?? 0
+}
+
+const onTouchEnd = (event: TouchEvent) => {
+  const deltaX = (event.changedTouches[0]?.clientX ?? 0) - touchStartX
+  if (Math.abs(deltaX) < 40) return
+  if (deltaX < 0) nextSlide()
+  else prevSlide()
+}
+
+const startAutoSlide = () => {
+  stopAutoSlide()
+  autoSlideTimer = window.setInterval(() => nextSlide(), autoSlideDelay)
+}
+
+const stopAutoSlide = () => {
+  if (autoSlideTimer) {
+    clearInterval(autoSlideTimer)
+    autoSlideTimer = null
+  }
+}
+
+const setPerViewFromWidth = () => {
+  const width = window.innerWidth
+  if (width >= 1024) perView.value = 3
+  else if (width >= 640) perView.value = 2
+  else perView.value = 1
+}
+
+onMounted(() => {
+  setPerViewFromWidth()
+  window.addEventListener('resize', setPerViewFromWidth)
+  startAutoSlide()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', setPerViewFromWidth)
+  stopAutoSlide()
+})
 </script>
 
 <style scoped>

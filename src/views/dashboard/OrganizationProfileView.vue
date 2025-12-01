@@ -378,11 +378,19 @@ const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
     await Swal.fire('Role updated', `${member.name} is now ${targetRole}.`, 'success')
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    const message = !err.response
+    let message = !err.response
       ? 'Network error: Unable to reach server'
       : err.response.data?.detail?.[0]?.msg ||
         err.response.data?.message ||
         'Failed to update member role'
+
+    if (typeof message === 'string' && /through this endpoint./i.test(message)) {
+      message = message
+        .replace(/through this endpoint./gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
+      if (message && !/[.!?]$/.test(message)) message = `${message}.`
+    }
     await Swal.fire('Could not update role', message, 'error')
   } finally {
     memberActionLoading.value = null
@@ -406,11 +414,19 @@ const toggleMemberStatus = async (member: Member) => {
     await Swal.fire('Status updated', `${member.name} has been ${verb}.`, 'success')
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    const message = !err.response
+    let message = !err.response
       ? 'Network error: Unable to reach server'
       : err.response.data?.detail?.[0]?.msg ||
         err.response.data?.message ||
         'Failed to update member status'
+
+    if (typeof message === 'string' && /through this endpoint./i.test(message)) {
+      message = message
+        .replace(/through this endpoint/gi, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim()
+      if (message && !/[.!?]$/.test(message)) message = `${message}.`
+    }
     await Swal.fire('Could not update status', message, 'error')
   } finally {
     memberActionLoading.value = null
@@ -513,7 +529,7 @@ watch(
 <template>
   <main class="app-container min-h-screen flex-1 bg-gray-50 px-4 py-6 md:px-6 lg:px-0 lg:py-14">
     <div class="mx-auto flex flex-col gap-6 md:gap-8">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <p class="text-xs font-medium tracking-wide text-[#9CA3AF] uppercase md:text-sm">
             Organization Profile
@@ -530,7 +546,7 @@ watch(
       <section
         class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-8 lg:p-10"
       >
-        <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div class="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <div class="flex items-center gap-4 md:gap-6">
             <div
               class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gray-200 to-gray-100 text-lg font-bold text-gray-500 md:h-24 md:w-24 md:text-2xl"
@@ -554,9 +570,7 @@ watch(
 
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <button
-                class="flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-[#401903] text-xs font-medium text-white transition-colors hover:bg-[#401903]/90 md:h-11 md:w-auto md:px-8 md:text-sm"
-              >
+              <button class="btn--default btn--sm btn--with-icon md:btn--lg md:self-center">
                 <Settings :size="16" class="md:hidden" />
                 <Settings :size="18" class="hidden md:block" />
                 Manage
@@ -575,25 +589,17 @@ watch(
       <section
         class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
       >
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="mb-4 flex flex-wrap items-start justify-between gap-3 md:items-center">
           <div>
             <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
               Projects ({{ projects.length }})
             </p>
           </div>
-          <div class="flex items-center gap-3">
-            <button
-              @click="openCreateProject"
-              class="h-8 rounded-lg bg-[#401903] px-3 text-xs text-white transition-colors hover:bg-[#401903]/90 md:h-11 md:px-8 md:text-sm"
-            >
+          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <button @click="openCreateProject" class="btn--default btn--sm md:btn--lg">
               Add Project
             </button>
-            <button
-              @click="openProjects"
-              class="text-xs font-medium text-[#401903] hover:underline md:text-sm"
-            >
-              View all
-            </button>
+            <button @click="openProjects" class="btn--link">View all</button>
           </div>
         </div>
 
@@ -608,10 +614,7 @@ watch(
             No projects yet. Create one to start tracking changes.
           </p>
           <div class="flex justify-center">
-            <button
-              class="h-9 rounded-lg bg-[#401903] px-4 text-xs text-white transition-colors hover:bg-[#401903]/90 md:h-11 md:px-8 md:text-sm"
-              @click="openCreateProject"
-            >
+            <button class="btn--default btn--sm md:btn--lg" @click="openCreateProject">
               Add Project
             </button>
           </div>
@@ -655,7 +658,9 @@ watch(
       <section
         class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
       >
-        <div class="mb-4 flex items-center justify-between gap-2">
+        <div
+          class="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+        >
           <div class="min-w-0">
             <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
               Members
@@ -666,9 +671,7 @@ watch(
           </div>
           <Dialog v-model:open="inviteOpen">
             <DialogTrigger as-child>
-              <button
-                class="h-8 rounded-lg bg-[#401903] px-3 text-xs whitespace-nowrap text-white transition-colors hover:bg-[#401903]/90 md:h-11 md:px-8 md:text-sm"
-              >
+              <button class="btn--default btn--sm md:btn--lgy whitespace-nowrap">
                 Invite Member
               </button>
             </DialogTrigger>
@@ -713,17 +716,12 @@ watch(
 
                 <DialogFooter class="mt-2 flex items-center justify-end gap-3">
                   <DialogClose as-child>
-                    <button
-                      type="button"
-                      class="h-10 rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-700 transition-colors hover:bg-gray-50 md:h-11 md:px-8"
-                    >
-                      Cancel
-                    </button>
+                    <button type="button" class="btn--secondary btn--sm md:btn--lg">Cancel</button>
                   </DialogClose>
                   <button
                     type="submit"
                     :disabled="inviteSending"
-                    class="h-10 rounded-lg bg-[#401903] px-4 text-sm text-white transition-colors hover:bg-[#401903]/90 disabled:cursor-not-allowed disabled:opacity-70 md:h-11 md:px-8"
+                    class="btn--default btn--sm md:btn--lg"
                   >
                     <span v-if="inviteSending">Sending...</span>
                     <span v-else>Send Invite</span>
@@ -776,7 +774,7 @@ watch(
               </div>
 
               <div
-                class="flex w-full items-center justify-between gap-3 pl-[48px] sm:w-auto sm:justify-start sm:pl-0"
+                class="flex w-full items-center justify-between gap-3 pl-12 sm:w-auto sm:justify-start sm:pl-0"
               >
                 <div class="flex gap-2">
                   <Badge
@@ -798,10 +796,7 @@ watch(
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
-                    <button
-                      @click.stop
-                      class="shrink-0 rounded-full p-1.5 text-gray-500 transition hover:bg-gray-50 hover:text-gray-700 md:p-2"
-                    >
+                    <button @click.stop class="btn--icon-only btn--default btn--icon-sm">
                       <EllipsisVertical :size="16" class="md:hidden" />
                       <EllipsisVertical :size="18" class="hidden md:block" />
                     </button>

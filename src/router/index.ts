@@ -219,7 +219,7 @@ const router = createRouter({
           name: 'billing',
           component: () => import('@/views/dashboard/settings/BillingView.vue'),
         },
-        { path: 'learn-more', name: 'learn-more', component:LearnMore },
+        { path: 'learn-more', name: 'learn-more', component: LearnMore },
         {
           path: 'payment/plan',
           name: 'payment-plan',

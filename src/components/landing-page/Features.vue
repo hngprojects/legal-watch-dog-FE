@@ -12,7 +12,7 @@
 
         <TypographyHeading
           level="h1"
-          class="mb-4 text-3xl font-extrabold leading-tight text-white sm:mb-5 sm:text-4xl md:text-5xl lg:text-6xl"
+          class="mb-4 text-3xl leading-tight font-extrabold text-white sm:mb-5 sm:text-4xl md:text-5xl lg:text-6xl"
         >
           Never Miss a Legal Update Again
         </TypographyHeading>
@@ -32,15 +32,23 @@
     <main class="app-container bg-gray-50 py-12 sm:py-16 lg:pt-20 lg:pb-16">
       <div class="mx-auto">
         <div class="mx-auto mb-12 flex justify-center text-center sm:mb-16">
-          <TypographyHeading level="h2" class="text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
+          <TypographyHeading
+            level="h2"
+            class="text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl"
+          >
             Exploring the <span class="text-[#F2AB6D]">Uniqueness</span> of our Product
           </TypographyHeading>
         </div>
 
         <!-- 1. Real-Time Alerts -->
-        <div class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20">
+        <div
+          class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20"
+        >
           <div class="order-2 md:order-1">
-            <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl">
+            <TypographyHeading
+              level="h3"
+              class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl"
+            >
               Real-Time Legislative Alerts
             </TypographyHeading>
 
@@ -52,22 +60,32 @@
 
           <div class="relative order-1 md:order-2">
             <div class="overflow-hidden rounded-2xl p-4 sm:rounded-3xl sm:p-6 md:p-8 lg:p-10">
-              <img :src="feature1" alt="Dashboard" class="w-full rounded-xl shadow-xl sm:rounded-2xl" />
+              <img
+                :src="feature1"
+                alt="Dashboard"
+                class="w-full rounded-xl shadow-xl sm:rounded-2xl"
+              />
             </div>
 
             <img
               :src="featureChild1"
               alt="Notification Bell"
-              class="absolute bottom-0 right-0 z-10 h-20 w-20 -translate-x-4 -translate-y-4 rounded-xl object-cover sm:h-24 sm:w-24 sm:-translate-x-6 sm:-translate-y-6 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:-translate-x-[430px] xl:-translate-y-6"
+              class="absolute right-0 bottom-0 z-10 h-20 w-20 -translate-x-4 -translate-y-4 rounded-xl object-cover sm:h-24 sm:w-24 sm:-translate-x-6 sm:-translate-y-6 md:h-32 md:w-32 lg:h-40 lg:w-40 xl:-translate-x-[430px] xl:-translate-y-6"
             />
           </div>
         </div>
 
         <!-- 2. Customizable Watchlists -->
-        <div class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20">
+        <div
+          class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20"
+        >
           <div class="relative order-1">
             <div class="overflow-hidden rounded-2xl p-4 sm:rounded-3xl sm:p-6 md:p-8 lg:p-10">
-              <img :src="feature2" alt="Jurisdiction Modal" class="w-full rounded-xl sm:rounded-2xl" />
+              <img
+                :src="feature2"
+                alt="Jurisdiction Modal"
+                class="w-full rounded-xl sm:rounded-2xl"
+              />
             </div>
 
             <img
@@ -78,7 +96,10 @@
           </div>
 
           <div class="order-2">
-            <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl">
+            <TypographyHeading
+              level="h3"
+              class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl"
+            >
               Customizable Watchlists
             </TypographyHeading>
 
@@ -90,9 +111,14 @@
         </div>
 
         <!-- 3. AI-Powered Insights -->
-        <div class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20">
+        <div
+          class="mb-16 grid items-center gap-8 md:mb-20 md:grid-cols-2 md:gap-12 lg:mb-24 lg:gap-20"
+        >
           <div class="order-2 md:order-1">
-            <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl">
+            <TypographyHeading
+              level="h3"
+              class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl"
+            >
               AI-Powered Legal Insights
             </TypographyHeading>
 
@@ -104,7 +130,11 @@
 
           <div class="relative order-1 md:order-2">
             <div class="overflow-hidden rounded-2xl p-4 sm:rounded-3xl sm:p-6 md:p-8 lg:p-10">
-              <img :src="feature3" alt="AI Summary" class="w-full rounded-xl shadow-xl sm:rounded-2xl" />
+              <img
+                :src="feature3"
+                alt="AI Summary"
+                class="w-full rounded-xl shadow-xl sm:rounded-2xl"
+              />
             </div>
 
             <img
@@ -130,7 +160,10 @@
           </div>
 
           <div class="order-2">
-            <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl">
+            <TypographyHeading
+              level="h3"
+              class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl"
+            >
               Task Management & Ticketing
             </TypographyHeading>
 
@@ -148,7 +181,7 @@
       <div class="mx-auto max-w-5xl px-4 sm:px-6">
         <TypographyHeading
           level="h2"
-          class="mb-4 text-2xl font-bold leading-tight text-[#401903] sm:mb-5 sm:text-3xl md:text-4xl"
+          class="mb-4 text-2xl leading-tight font-bold text-[#401903] sm:mb-5 sm:text-3xl md:text-4xl"
         >
           Turn <span class="text-[#F2AB6D]"> Legal Changes </span>Into Clear Actions
         </TypographyHeading>
@@ -194,13 +227,13 @@ import { RouterLink } from 'vue-router'
   .features-page main {
     overflow-x: hidden;
   }
-  
+
   /* Ensure images don't overflow on mobile */
   img {
     max-width: 100%;
     height: auto;
   }
-  
+
   /* Better touch targets for buttons */
   button {
     min-height: 44px;
@@ -213,10 +246,10 @@ import { RouterLink } from 'vue-router'
 /* Tablet-specific adjustments */
 @media (min-width: 640px) and (max-width: 1024px) {
   /* Adjust floating image positions for tablet */
-  .relative img[alt*="Notification Bell"],
-  .relative img[alt*="AI Toolkit"],
-  .relative img[alt*="AI Brain"],
-  .relative img[alt*="Tickets"] {
+  .relative img[alt*='Notification Bell'],
+  .relative img[alt*='AI Toolkit'],
+  .relative img[alt*='AI Brain'],
+  .relative img[alt*='Tickets'] {
     transform: translateX(0) translateY(0) !important;
     position: relative !important;
     margin-top: 1rem;

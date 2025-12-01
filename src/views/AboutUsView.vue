@@ -75,7 +75,9 @@ const teamMembers = [
       ></div>
 
       <!-- Hero Section -->
-      <section class="relative z-10 flex w-full flex-col items-center justify-center pt-12 pb-8 sm:pt-16 sm:pb-12">
+      <section
+        class="relative z-10 flex w-full flex-col items-center justify-center pt-12 pb-8 sm:pt-16 sm:pb-12"
+      >
         <div class="app-container flex w-full flex-col items-center text-center">
           <TypographyHeading
             level="h1"
@@ -95,7 +97,9 @@ const teamMembers = [
           <RouterLink to="/signup" class="btn--default btn--lg mb-6 sm:mb-8">
             Get Started
           </RouterLink>
-          <div class="w-full max-w-[800px] overflow-hidden rounded-xl shadow-xl sm:max-w-[900px] lg:max-w-[1000px] lg:rounded-2xl">
+          <div
+            class="w-full max-w-[800px] overflow-hidden rounded-xl shadow-xl sm:max-w-[900px] lg:max-w-[1000px] lg:rounded-2xl"
+          >
             <img :src="aboutHeroImg" alt="Team collaborating" class="h-auto w-full object-cover" />
           </div>
         </div>
@@ -103,9 +107,14 @@ const teamMembers = [
 
       <!-- Mission & Vision -->
       <section class="app-container relative z-10 w-full py-12 sm:py-16">
-        <div class="mx-auto flex w-full flex-col items-center gap-8 md:flex-row md:gap-12 lg:max-w-[1240px]">
+        <div
+          class="mx-auto flex w-full flex-col items-center gap-8 md:flex-row md:gap-12 lg:max-w-[1240px]"
+        >
           <div class="flex-1 space-y-4 sm:space-y-6">
-            <TypographyHeading level="h2" class="text-lg font-semibold text-[#F2AB6D] sm:text-xl md:text-2xl">
+            <TypographyHeading
+              level="h2"
+              class="text-lg font-semibold text-[#F2AB6D] sm:text-xl md:text-2xl"
+            >
               Our Mission & Vision
             </TypographyHeading>
             <TypographyText class="text-base leading-relaxed text-gray-700 sm:text-lg">
@@ -115,8 +124,12 @@ const teamMembers = [
               chaos.
             </TypographyText>
           </div>
-          <div class="flex-1 w-full">
-            <img :src="missionImg" alt="Mission and Vision" class="w-full rounded-xl shadow-lg sm:rounded-2xl" />
+          <div class="w-full flex-1">
+            <img
+              :src="missionImg"
+              alt="Mission and Vision"
+              class="w-full rounded-xl shadow-lg sm:rounded-2xl"
+            />
           </div>
         </div>
       </section>
@@ -138,8 +151,10 @@ const teamMembers = [
               :key="i"
               class="flex flex-col items-start gap-3 rounded-xl border-none bg-white p-4 shadow-md transition-shadow hover:shadow-lg sm:gap-4 sm:p-6"
             >
-              <div class="flex flex-col gap-3 w-full">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#fae5d3] sm:h-12 sm:w-12">
+              <div class="flex w-full flex-col gap-3">
+                <div
+                  class="flex h-10 w-10 items-center justify-center rounded-full bg-[#fae5d3] sm:h-12 sm:w-12"
+                >
                   <img
                     :src="card.icon"
                     :alt="`${card.title} icon`"
@@ -169,13 +184,17 @@ const teamMembers = [
               Meet the dedicated minds working to bring transparency and innovation.
             </TypographyText>
           </div>
-          <div class="flex w-full flex-col items-center justify-center gap-8 sm:flex-row sm:flex-wrap sm:gap-6 lg:gap-8">
+          <div
+            class="flex w-full flex-col items-center justify-center gap-8 sm:flex-row sm:flex-wrap sm:gap-6 lg:gap-8"
+          >
             <div
               v-for="(member, i) in teamMembers"
               :key="i"
               class="flex w-full max-w-[300px] flex-col items-start sm:max-w-[280px] md:max-w-[320px] lg:max-w-[350px]"
             >
-              <div class="mb-3 h-[250px] w-full overflow-hidden rounded-lg sm:mb-4 sm:h-[280px] lg:h-[300px] lg:rounded-xl">
+              <div
+                class="mb-3 h-[250px] w-full overflow-hidden rounded-lg sm:mb-4 sm:h-[280px] lg:h-[300px] lg:rounded-xl"
+              >
                 <img
                   :src="member.image"
                   :alt="member.name"
@@ -185,7 +204,7 @@ const teamMembers = [
               <p class="mb-2 text-base leading-relaxed font-normal text-[#1F1F1F] sm:text-lg">
                 {{ member.description }}
               </p>
-              <p class="font-medium text-sm sm:text-base">
+              <p class="text-sm font-medium sm:text-base">
                 <span class="text-[#1F1F1F]">({{ member.role }})</span>
                 <span class="text-[#F2AB6D]"> {{ member.name }}</span>
               </p>
@@ -216,7 +235,8 @@ img {
 
 /* Better touch targets */
 @media (max-width: 768px) {
-  a, button {
+  a,
+  button {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
