@@ -554,9 +554,7 @@ watch(
 
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <button
-                class="btn--default btn--sm btn--with-icon md:btn--lg md:self-center"
-              >
+              <button class="btn--default btn--sm btn--with-icon md:btn--lg md:self-center">
                 <Settings :size="16" class="md:hidden" />
                 <Settings :size="18" class="hidden md:block" />
                 Manage
@@ -575,25 +573,17 @@ watch(
       <section
         class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
       >
-        <div class="mb-4 flex flex-wrap items-start md:items-center justify-between gap-3 ">
+        <div class="mb-4 flex flex-wrap items-start justify-between gap-3 md:items-center">
           <div>
             <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
               Projects ({{ projects.length }})
             </p>
           </div>
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <button
-              @click="openCreateProject"
-              class="btn--default btn--sm md:btn--lg"
-            >
+          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <button @click="openCreateProject" class="btn--default btn--sm md:btn--lg">
               Add Project
             </button>
-            <button
-              @click="openProjects"
-              class="btn--link"
-            >
-              View all
-            </button>
+            <button @click="openProjects" class="btn--link">View all</button>
           </div>
         </div>
 
@@ -608,10 +598,7 @@ watch(
             No projects yet. Create one to start tracking changes.
           </p>
           <div class="flex justify-center">
-            <button
-              class="btn--default btn--sm md:btn--lg"
-              @click="openCreateProject"
-            >
+            <button class="btn--default btn--sm md:btn--lg" @click="openCreateProject">
               Add Project
             </button>
           </div>
@@ -655,7 +642,9 @@ watch(
       <section
         class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
       >
-        <div class="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div
+          class="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+        >
           <div class="min-w-0">
             <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
               Members
@@ -666,9 +655,7 @@ watch(
           </div>
           <Dialog v-model:open="inviteOpen">
             <DialogTrigger as-child>
-              <button
-                class="btn--default btn--sm md:btn--lgy whitespace-nowrap"
-              >
+              <button class="btn--default btn--sm md:btn--lgy whitespace-nowrap">
                 Invite Member
               </button>
             </DialogTrigger>
@@ -713,12 +700,7 @@ watch(
 
                 <DialogFooter class="mt-2 flex items-center justify-end gap-3">
                   <DialogClose as-child>
-                    <button
-                      type="button"
-                      class="btn--secondary btn--sm md:btn--lg"
-                    >
-                      Cancel
-                    </button>
+                    <button type="button" class="btn--secondary btn--sm md:btn--lg">Cancel</button>
                   </DialogClose>
                   <button
                     type="submit"
@@ -798,10 +780,7 @@ watch(
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
-                    <button
-                      @click.stop
-                      class="btn--icon-only btn--default btn--icon-sm"
-                    >
+                    <button @click.stop class="btn--icon-only btn--default btn--icon-sm">
                       <EllipsisVertical :size="16" class="md:hidden" />
                       <EllipsisVertical :size="18" class="hidden md:block" />
                     </button>

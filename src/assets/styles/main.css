@@ -182,7 +182,7 @@
 }
 
 @utility btn--with-icon {
-  @apply flex items-center gap-2 justify-center;
+  @apply flex items-center justify-center gap-2;
 }
 
 @utility btn--link {

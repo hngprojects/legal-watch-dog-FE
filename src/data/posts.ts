@@ -19,16 +19,15 @@ export const blogPosts = [
           'Policymakers around the world are revisiting several core areas due to economic shifts, new technologies, and changing consumer expectations. Current focus areas include:',
         ],
         items: {
-          "AI Regulations": "AI is becoming more regulated globally...",
-          "Data Protection": "New privacy rules go into effect."
-        }
+          'AI Regulations': 'AI is becoming more regulated globally...',
+          'Data Protection': 'New privacy rules go into effect.',
+        },
       },
 
       impact: {
-        intro: 'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
-        paragraph:[
-             "Emerging policy developments can influence organizations in multiple ways:"
-        ],
+        intro:
+          'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
+        paragraph: ['Emerging policy developments can influence organizations in multiple ways:'],
 
         items: {
           'Operational changes': 'such as new reporting cycles or additional documentation.',
@@ -36,27 +35,21 @@ export const blogPosts = [
           ' Updated internal policies': 'to align with evolving expectations.',
           'Training requirements': 'for staff who must understand new obligations.',
         },
-         bottompara:[
-          "Preparing early helps reduce disruptions once changes formally take effect."
-        ]
+        bottompara: ['Preparing early helps reduce disruptions once changes formally take effect.'],
       },
 
       preparation: {
         intro: 'How to Prepare',
-         paragraph:[
-             "Businesses can stay ahead by:"
-        ],
+        paragraph: ['Businesses can stay ahead by:'],
         items: {
-            " Monitoring early-stage policy":  "discussions from regulators and government agencies.",
-            "Reviewing internal processes": "against likely future requirements.",
-            "Building flexible compliance workflows": "so updates can be implemented quickly.",
-            " Creating internal awareness": "so teams understand the direction policy may take."
-
-
+          ' Monitoring early-stage policy': 'discussions from regulators and government agencies.',
+          'Reviewing internal processes': 'against likely future requirements.',
+          'Building flexible compliance workflows': 'so updates can be implemented quickly.',
+          ' Creating internal awareness': 'so teams understand the direction policy may take.',
         },
-         bottompara:[
-          "Preparation turns potential compliance challenges into manageable transitions."
-        ]
+        bottompara: [
+          'Preparation turns potential compliance challenges into manageable transitions.',
+        ],
       },
     },
 
@@ -69,7 +62,8 @@ export const blogPosts = [
         title: 'Current Policy Alerts',
         category: 'Compliance',
         date: 'Dec 1, 2025',
-        summary: 'Timely updates on new or emerging policies and legislation to keep you aware of to remain compliant and prepared..',
+        summary:
+          'Timely updates on new or emerging policies and legislation to keep you aware of to remain compliant and prepared..',
         image: '/src/assets/Images/underblog5.png',
       },
       {
@@ -77,7 +71,8 @@ export const blogPosts = [
         title: 'Practical Compliance Guides',
         category: 'Compliance',
         date: 'Dec 1, 2025',
-        summary: 'Simple guides that help businesses avoid penalties and meet all your regulatory requirements with clarity...',
+        summary:
+          'Simple guides that help businesses avoid penalties and meet all your regulatory requirements with clarity...',
         image: '/src/assets/Images/underblog6.png',
       },
     ],
@@ -101,16 +96,16 @@ export const blogPosts = [
           'Disclosure Duties': 'Updated reporting timelines and templates across agencies.',
           'Third-Party Oversight': 'Tighter expectations for how you monitor vendors and partners.',
         },
-        bottompara:[
-          "These early signals show where attention is moving and where new regulations are likely to appear."
-        ]
+        bottompara: [
+          'These early signals show where attention is moving and where new regulations are likely to appear.',
+        ],
       },
 
       impact: {
         intro: 'Expect these immediate impacts on day-to-day work:',
         items: {
           'Project Timelines': 'Implementation windows are short, so prioritize quick wins first.',
-          'Documentation': 'Policies and SOPs need refreshing to align with the new thresholds.',
+          Documentation: 'Policies and SOPs need refreshing to align with the new thresholds.',
         },
       },
     },
@@ -132,15 +127,17 @@ export const blogPosts = [
       focusAreas: {
         intro: 'Innovation themes we are watching:',
         items: {
-          'Assistive Drafting': 'Structured prompts and templates for notices, memos, and training.',
-          'Monitoring Pipelines': 'Automated feeds that flag new bills, consultations, and enforcement.',
+          'Assistive Drafting':
+            'Structured prompts and templates for notices, memos, and training.',
+          'Monitoring Pipelines':
+            'Automated feeds that flag new bills, consultations, and enforcement.',
         },
       },
       impact: {
         intro: 'Adopting these tools has practical implications:',
         items: {
           'Change Management': 'Upskill teams to review AI outputs with a critical eye.',
-          'Governance': 'Document how models are selected, tested, and approved for use.',
+          Governance: 'Document how models are selected, tested, and approved for use.',
         },
       },
     },
@@ -169,7 +166,8 @@ export const blogPosts = [
       impact: {
         intro: 'Use these insights to recalibrate your roadmap:',
         items: {
-          'Investment Decisions': 'Prioritize markets with clearer guidance and predictable oversight.',
+          'Investment Decisions':
+            'Prioritize markets with clearer guidance and predictable oversight.',
           'Risk Appetite': 'Adjust thresholds for launching new offerings or entering new regions.',
         },
       },
@@ -199,7 +197,8 @@ export const blogPosts = [
         intro: 'Staying responsive reduces scramble later:',
         items: {
           'Stakeholder Alignment': 'Brief executives early so resource trade-offs are understood.',
-          'Evidence Gathering': 'Start collecting data and case studies to support your submissions.',
+          'Evidence Gathering':
+            'Start collecting data and case studies to support your submissions.',
         },
       },
     },
@@ -230,27 +229,21 @@ export const blogPosts = [
           'Audit Readiness': 'Documentation stays up to date and easy to share.',
           'Employee Confidence': 'Teams know exactly what to do when a risk event occurs.',
         },
-         bottompara:[
-          "Preparing early helps reduce disruptions once changes formally take effect."
-        ]
+        bottompara: ['Preparing early helps reduce disruptions once changes formally take effect.'],
       },
 
       preparation: {
         intro: 'How to Prepare',
-         paragraph:[
-             "Businesses can stay ahead by:"
-        ],
+        paragraph: ['Businesses can stay ahead by:'],
         items: {
-            " Monitoring early-stage policy":  "discussions from regulators and government agencies.",
-            "Reviewing internal processes": "against likely future requirements.",
-            "Building flexible compliance workflows": "so updates can be implemented quickly.",
-            " Creating internal awareness": "so teams understand the direction policy may take."
-
-
+          ' Monitoring early-stage policy': 'discussions from regulators and government agencies.',
+          'Reviewing internal processes': 'against likely future requirements.',
+          'Building flexible compliance workflows': 'so updates can be implemented quickly.',
+          ' Creating internal awareness': 'so teams understand the direction policy may take.',
         },
-         bottompara:[
-          "Preparation turns potential compliance challenges into manageable transitions."
-        ]
+        bottompara: [
+          'Preparation turns potential compliance challenges into manageable transitions.',
+        ],
       },
     },
 
@@ -263,7 +256,8 @@ export const blogPosts = [
         title: 'Market and Industry Insights',
         category: 'Industry Trends',
         date: 'Dec 1, 2025',
-        summary: 'Clear analysis of trends shaping industries, highlighting both risks and opportunities in the regulatory landscape..',
+        summary:
+          'Clear analysis of trends shaping industries, highlighting both risks and opportunities in the regulatory landscape..',
         image: '/src/assets/Images/underblog4.png',
       },
       {
@@ -271,7 +265,8 @@ export const blogPosts = [
         title: 'Tech Innovations in Law',
         category: 'AI & Legal Tech',
         date: 'Dec 1, 2025',
-        summary: 'A look at emerging tools and technologies transforming how legal professionals research, monitor, and manage compliance..',
+        summary:
+          'A look at emerging tools and technologies transforming how legal professionals research, monitor, and manage compliance..',
         image: '/src/assets/Images/underblog3.png',
       },
     ],
@@ -302,16 +297,15 @@ export const blogPosts = [
             'especially in digital services and online marketplaces..',
           'Financial transparency requirements': 'expected to expand across multiple sectors',
         },
-        bottompara:[
-          "These early signals show where attention is moving and where new regulations are likely to appear."
-        ]
+        bottompara: [
+          'These early signals show where attention is moving and where new regulations are likely to appear.',
+        ],
       },
 
       impact: {
-        intro: 'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
-        paragraph:[
-             "Emerging policy developments can influence organizations in multiple ways:"
-        ],
+        intro:
+          'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
+        paragraph: ['Emerging policy developments can influence organizations in multiple ways:'],
 
         items: {
           'Operational changes': 'such as new reporting cycles or additional documentation.',
@@ -319,27 +313,21 @@ export const blogPosts = [
           ' Updated internal policies': 'to align with evolving expectations.',
           'Training requirements': 'for staff who must understand new obligations.',
         },
-         bottompara:[
-          "Preparing early helps reduce disruptions once changes formally take effect."
-        ]
+        bottompara: ['Preparing early helps reduce disruptions once changes formally take effect.'],
       },
 
       preparation: {
         intro: 'How to Prepare',
-         paragraph:[
-             "Businesses can stay ahead by:"
-        ],
+        paragraph: ['Businesses can stay ahead by:'],
         items: {
-            " Monitoring early-stage policy":  "discussions from regulators and government agencies.",
-            "Reviewing internal processes": "against likely future requirements.",
-            "Building flexible compliance workflows": "so updates can be implemented quickly.",
-            " Creating internal awareness": "so teams understand the direction policy may take."
-
-
+          ' Monitoring early-stage policy': 'discussions from regulators and government agencies.',
+          'Reviewing internal processes': 'against likely future requirements.',
+          'Building flexible compliance workflows': 'so updates can be implemented quickly.',
+          ' Creating internal awareness': 'so teams understand the direction policy may take.',
         },
-         bottompara:[
-          "Preparation turns potential compliance challenges into manageable transitions."
-        ]
+        bottompara: [
+          'Preparation turns potential compliance challenges into manageable transitions.',
+        ],
       },
     },
 
@@ -352,7 +340,8 @@ export const blogPosts = [
         title: 'New Regulations Explained',
         category: 'Regulatory Changes',
         date: 'Dec 1, 2025',
-        summary: 'Clear breakdown of newly issued regulations, showing what changes are expected, and what organizations must do next.',
+        summary:
+          'Clear breakdown of newly issued regulations, showing what changes are expected, and what organizations must do next.',
         image: '/src/assets/Images/underblog2.png',
       },
       {
@@ -360,7 +349,8 @@ export const blogPosts = [
         title: 'Policy Developments to Know',
         category: 'Policy Updates',
         date: 'Dec 1, 2025',
-        summary: 'An overview of upcoming or evolving policy changes that could influence industries in the near future..',
+        summary:
+          'An overview of upcoming or evolving policy changes that could influence industries in the near future..',
         image: '/src/assets/Images/underblog1.png',
       },
     ],
@@ -391,16 +381,15 @@ export const blogPosts = [
             'especially in digital services and online marketplaces..',
           'Financial transparency requirements': 'expected to expand across multiple sectors',
         },
-        bottompara:[
-          "These early signals show where attention is moving and where new regulations are likely to appear."
-        ]
+        bottompara: [
+          'These early signals show where attention is moving and where new regulations are likely to appear.',
+        ],
       },
 
       impact: {
-        intro: 'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
-        paragraph:[
-             "Emerging policy developments can influence organizations in multiple ways:"
-        ],
+        intro:
+          'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
+        paragraph: ['Emerging policy developments can influence organizations in multiple ways:'],
 
         items: {
           'Operational changes': 'such as new reporting cycles or additional documentation.',
@@ -408,27 +397,21 @@ export const blogPosts = [
           ' Updated internal policies': 'to align with evolving expectations.',
           'Training requirements': 'for staff who must understand new obligations.',
         },
-         bottompara:[
-          "Preparing early helps reduce disruptions once changes formally take effect."
-        ]
+        bottompara: ['Preparing early helps reduce disruptions once changes formally take effect.'],
       },
 
       preparation: {
         intro: 'How to Prepare',
-         paragraph:[
-             "Businesses can stay ahead by:"
-        ],
+        paragraph: ['Businesses can stay ahead by:'],
         items: {
-            " Monitoring early-stage policy":  "discussions from regulators and government agencies.",
-            "Reviewing internal processes": "against likely future requirements.",
-            "Building flexible compliance workflows": "so updates can be implemented quickly.",
-            " Creating internal awareness": "so teams understand the direction policy may take."
-
-
+          ' Monitoring early-stage policy': 'discussions from regulators and government agencies.',
+          'Reviewing internal processes': 'against likely future requirements.',
+          'Building flexible compliance workflows': 'so updates can be implemented quickly.',
+          ' Creating internal awareness': 'so teams understand the direction policy may take.',
         },
-         bottompara:[
-          "Preparation turns potential compliance challenges into manageable transitions."
-        ]
+        bottompara: [
+          'Preparation turns potential compliance challenges into manageable transitions.',
+        ],
       },
     },
 
@@ -441,7 +424,8 @@ export const blogPosts = [
         title: 'Current Policy Alerts',
         category: 'Policy Alerts',
         date: 'Dec 1, 2025',
-        summary: 'Timely updates on new or emerging policies and legislation to keep you aware of to remain compliant and prepared.',
+        summary:
+          'Timely updates on new or emerging policies and legislation to keep you aware of to remain compliant and prepared.',
         image: '/src/assets/Images/underblog5.png',
       },
       {
@@ -449,7 +433,8 @@ export const blogPosts = [
         title: 'Practical Compliance Guides',
         category: 'Compliance Tips',
         date: 'Dec 1, 2025',
-        summary: 'Simple guides that help businesses avoid penalties and meet all your regulatory requirements with clarity.',
+        summary:
+          'Simple guides that help businesses avoid penalties and meet all your regulatory requirements with clarity.',
         image: '/src/assets/Images/underblog6.png',
       },
     ],
@@ -480,16 +465,15 @@ export const blogPosts = [
             'especially in digital services and online marketplaces..',
           'Financial transparency requirements': 'expected to expand across multiple sectors',
         },
-        bottompara:[
-          "These early signals show where attention is moving and where new regulations are likely to appear."
-        ]
+        bottompara: [
+          'These early signals show where attention is moving and where new regulations are likely to appear.',
+        ],
       },
 
       impact: {
-        intro: 'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
-        paragraph:[
-             "Emerging policy developments can influence organizations in multiple ways:"
-        ],
+        intro:
+          'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
+        paragraph: ['Emerging policy developments can influence organizations in multiple ways:'],
 
         items: {
           'Operational changes': 'such as new reporting cycles or additional documentation.',
@@ -497,27 +481,21 @@ export const blogPosts = [
           ' Updated internal policies': 'to align with evolving expectations.',
           'Training requirements': 'for staff who must understand new obligations.',
         },
-         bottompara:[
-          "Preparing early helps reduce disruptions once changes formally take effect."
-        ]
+        bottompara: ['Preparing early helps reduce disruptions once changes formally take effect.'],
       },
 
       preparation: {
         intro: 'How to Prepare',
-         paragraph:[
-             "Businesses can stay ahead by:"
-        ],
+        paragraph: ['Businesses can stay ahead by:'],
         items: {
-            " Monitoring early-stage policy":  "discussions from regulators and government agencies.",
-            "Reviewing internal processes": "against likely future requirements.",
-            "Building flexible compliance workflows": "so updates can be implemented quickly.",
-            " Creating internal awareness": "so teams understand the direction policy may take."
-
-
+          ' Monitoring early-stage policy': 'discussions from regulators and government agencies.',
+          'Reviewing internal processes': 'against likely future requirements.',
+          'Building flexible compliance workflows': 'so updates can be implemented quickly.',
+          ' Creating internal awareness': 'so teams understand the direction policy may take.',
         },
-         bottompara:[
-          "Preparation turns potential compliance challenges into manageable transitions."
-        ]
+        bottompara: [
+          'Preparation turns potential compliance challenges into manageable transitions.',
+        ],
       },
     },
 
@@ -530,7 +508,8 @@ export const blogPosts = [
         title: 'Market and Industry Insights',
         category: 'Industry Trends',
         date: 'Dec 1, 2025',
-        summary: 'Clear analysis of trends shaping industries, highlighting both risks and opportunities in the regulatory landscape...',
+        summary:
+          'Clear analysis of trends shaping industries, highlighting both risks and opportunities in the regulatory landscape...',
         image: '/src/assets/Images/underblog4.png',
       },
       {
@@ -538,7 +517,8 @@ export const blogPosts = [
         title: 'Tech Innovations in Law',
         category: 'AI & Legal Tech',
         date: 'Dec 1, 2025',
-        summary: 'A look at emerging tools and technologies transforming how legal professionals research, monitor, and manage compliance.',
+        summary:
+          'A look at emerging tools and technologies transforming how legal professionals research, monitor, and manage compliance.',
         image: '/src/assets/Images/underblog3.png',
       },
     ],
@@ -569,16 +549,15 @@ export const blogPosts = [
             'especially in digital services and online marketplaces..',
           'Financial transparency requirements': 'expected to expand across multiple sectors',
         },
-        bottompara:[
-          "These early signals show where attention is moving and where new regulations are likely to appear."
-        ]
+        bottompara: [
+          'These early signals show where attention is moving and where new regulations are likely to appear.',
+        ],
       },
 
       impact: {
-        intro: 'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
-        paragraph:[
-             "Emerging policy developments can influence organizations in multiple ways:"
-        ],
+        intro:
+          'Budget adjustments for compliance, sustainability, or data management.Updated internal policies to align with evolving expectations. Training requirements for staff who must understand new obligations.Preparing early helps reduce disruptions once changes formally take effect.',
+        paragraph: ['Emerging policy developments can influence organizations in multiple ways:'],
 
         items: {
           'Operational changes': 'such as new reporting cycles or additional documentation.',
@@ -586,27 +565,21 @@ export const blogPosts = [
           ' Updated internal policies': 'to align with evolving expectations.',
           'Training requirements': 'for staff who must understand new obligations.',
         },
-         bottompara:[
-          "Preparing early helps reduce disruptions once changes formally take effect."
-        ]
+        bottompara: ['Preparing early helps reduce disruptions once changes formally take effect.'],
       },
 
       preparation: {
         intro: 'How to Prepare',
-         paragraph:[
-             "Businesses can stay ahead by:"
-        ],
+        paragraph: ['Businesses can stay ahead by:'],
         items: {
-            " Monitoring early-stage policy":  "discussions from regulators and government agencies.",
-            "Reviewing internal processes": "against likely future requirements.",
-            "Building flexible compliance workflows": "so updates can be implemented quickly.",
-            " Creating internal awareness": "so teams understand the direction policy may take."
-
-
+          ' Monitoring early-stage policy': 'discussions from regulators and government agencies.',
+          'Reviewing internal processes': 'against likely future requirements.',
+          'Building flexible compliance workflows': 'so updates can be implemented quickly.',
+          ' Creating internal awareness': 'so teams understand the direction policy may take.',
         },
-         bottompara:[
-          "Preparation turns potential compliance challenges into manageable transitions."
-        ]
+        bottompara: [
+          'Preparation turns potential compliance challenges into manageable transitions.',
+        ],
       },
     },
 
@@ -619,7 +592,8 @@ export const blogPosts = [
         title: 'Policy Developments to Know',
         category: 'Policy Updates',
         date: 'Dec 1, 2025',
-        summary: 'An overview of upcoming or evolving policy changes that could influence industries in the near future..',
+        summary:
+          'An overview of upcoming or evolving policy changes that could influence industries in the near future..',
         image: '/src/assets/Images/underblog1.png',
       },
       {
@@ -627,11 +601,10 @@ export const blogPosts = [
         title: 'New Regulations Explained',
         category: 'Regulatory Changes',
         date: 'Dec 1, 2025',
-        summary: 'Clear breakdown of newly issued regulations, showing what changes are expected, and what organizations must do next..',
+        summary:
+          'Clear breakdown of newly issued regulations, showing what changes are expected, and what organizations must do next..',
         image: '/src/assets/Images/underblog2.png',
       },
     ],
   },
-
-
 ]

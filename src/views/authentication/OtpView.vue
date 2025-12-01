@@ -78,7 +78,7 @@ onMounted(() => {
     return
   }
   startTimer()
-  
+
   // Add paste event listener to the container
   if (otpContainerRef.value) {
     otpContainerRef.value.addEventListener('paste', handleContainerPaste)
@@ -142,7 +142,7 @@ const handlePaste = (event: ClipboardEvent, index: number) => {
   event.preventDefault()
   const paste = event.clipboardData?.getData('text') ?? ''
   const digits = paste.replace(/\D/g, '').split('')
-  
+
   // Fill all digits starting from the current index
   for (let i = 0; i < DIGIT_COUNT; i++) {
     const targetIndex = index + i
@@ -159,7 +159,7 @@ const handlePaste = (event: ClipboardEvent, index: number) => {
       }
     }
   }
-  
+
   // Focus on the last input or the next empty input
   const lastFilledIndex = Math.min(index + digits.length, DIGIT_COUNT - 1)
   digitInputs.value[lastFilledIndex]?.focus()
@@ -170,7 +170,7 @@ const handleContainerPaste = (event: ClipboardEvent) => {
   event.preventDefault()
   const paste = event.clipboardData?.getData('text') ?? ''
   const digits = paste.replace(/\D/g, '').split('').slice(0, DIGIT_COUNT)
-  
+
   // Fill all digits from the beginning
   for (let i = 0; i < DIGIT_COUNT; i++) {
     const digit = digits[i]
@@ -178,10 +178,11 @@ const handleContainerPaste = (event: ClipboardEvent) => {
     const input = digitInputs.value[i]
     if (input) input.value = digit || ''
   }
-  
+
   // Focus on the next empty input or the last one
-  const firstEmptyIndex = otpDigits.value.findIndex(digit => !digit)
-  const focusIndex = firstEmptyIndex === -1 ? DIGIT_COUNT - 1 : Math.min(firstEmptyIndex, DIGIT_COUNT - 1)
+  const firstEmptyIndex = otpDigits.value.findIndex((digit) => !digit)
+  const focusIndex =
+    firstEmptyIndex === -1 ? DIGIT_COUNT - 1 : Math.min(firstEmptyIndex, DIGIT_COUNT - 1)
   digitInputs.value[focusIndex]?.focus()
 }
 
@@ -304,10 +305,7 @@ const handleResend = async () => {
     >
       <div class="w-full max-w-xl space-y-8">
         <!-- Added ref to the container for paste anywhere -->
-        <div 
-          ref="otpContainerRef"
-          class="flex justify-between gap-3"
-        >
+        <div ref="otpContainerRef" class="flex justify-between gap-3">
           <input
             v-for="(_, index) in otpDigits"
             :key="index"

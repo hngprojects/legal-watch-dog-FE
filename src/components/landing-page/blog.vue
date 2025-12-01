@@ -35,7 +35,11 @@
             >
               <div v-for="(slide, idx) in slides" :key="idx" class="w-full shrink-0">
                 <div class="grid grid-cols-1 gap-3 bg-white p-3 sm:grid-cols-2 lg:grid-cols-3">
-                  <div v-for="item in slide" :key="item.alt" class="relative overflow-hidden rounded-xl">
+                  <div
+                    v-for="item in slide"
+                    :key="item.alt"
+                    class="relative overflow-hidden rounded-xl"
+                  >
                     <img
                       :src="item.src"
                       :alt="item.alt"
@@ -49,23 +53,33 @@
           </div>
 
           <button
-            class="absolute left-3 top-1/2 z-10 -translate-y-1/2 btn--default btn--icon-only btn--icon-sm"
+            class="btn--default btn--icon-only btn--icon-sm absolute top-1/2 left-3 z-10 -translate-y-1/2"
             type="button"
             aria-label="Previous slide"
             @click="prevSlide"
           >
-            <svg class="h-5 w-5 text-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            <svg class="text-bg h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <button
-            class="absolute right-3 top-1/2 z-10 -translate-y-1/2 btn--default btn--icon-only btn--icon-sm"
+            class="btn--default btn--icon-only btn--icon-sm absolute top-1/2 right-3 z-10 -translate-y-1/2"
             type="button"
             aria-label="Next slide"
             @click="nextSlide"
           >
-            <svg class="h-5 w-5 text-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            <svg class="text-bg h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
 
@@ -75,7 +89,7 @@
               :key="idx"
               type="button"
               class="h-2 w-2 rounded-full transition-all"
-              :class="idx === currentSlide ? 'bg-[#3F1A0F] w-4' : 'bg-gray-300'"
+              :class="idx === currentSlide ? 'w-4 bg-[#3F1A0F]' : 'bg-gray-300'"
               @click="goToSlide(idx)"
               :aria-label="`Go to slide ${idx + 1}`"
             />
@@ -137,10 +151,7 @@
           </form>
         </div>
 
-        <div
-          v-if="displayedPosts.length"
-          class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10"
-        >
+        <div v-if="displayedPosts.length" class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10">
           <article
             v-for="post in displayedPosts"
             :key="post.id"
@@ -181,7 +192,7 @@
         <div class="mt-12 flex justify-center" v-if="canToggle">
           <Button
             variant="outline"
-            class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-gray-900 transition duration-150 hover:bg-gray-50 text-center"
+            class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-center text-gray-900 transition duration-150 hover:bg-gray-50"
             @click="toggleMoreCards"
           >
             {{ showMoreCards ? 'View Less' : 'View Mor' }}

@@ -360,7 +360,7 @@ watch(
 
           <p class="text-fg text-[14px] leading-snug sm:text-[16px]">
             Hiring a specialist give you the best possible result.
-        
+
             <RouterLink :to="{ name: 'learn-more' }">
               <span class="cursor-pointer underline">learn more about a specialist</span>
             </RouterLink>
