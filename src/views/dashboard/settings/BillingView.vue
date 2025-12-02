@@ -32,11 +32,11 @@ onMounted(async () => {
 
   if (subscriptionStatus?.trial_starts_at && subscriptionStatus?.trial_ends_at) {
     isFreeTrial.value = true
-    endDate.value = subscriptionStatus.trial_ends_at
+    endDate.value = new Date(subscriptionStatus.trial_ends_at)
   } else if (subscriptionStatus?.current_plan && subscriptionStatus.current_period_end) {
     isFreeTrial.value = false
     currentPlan.value = subscriptionStatus.current_plan
-    endDate.value = subscriptionStatus.current_period_end
+    endDate.value = new Date(subscriptionStatus.current_period_end)
   }
 
   cancelled.value = subscriptionStatus?.cancel_at_period_end || false
@@ -46,10 +46,9 @@ onMounted(async () => {
   }
 })
 
-const calculateDaysLeft = (endDate: string | Date): string => {
+const calculateDaysLeft = (endDate: Date): string => {
   const today = new Date()
-  const end = new Date(endDate)
-  const diffTime = end.getTime() - today.getTime()
+  const diffTime = endDate.getTime() - today.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
   if (diffDays > 0) {
@@ -82,10 +81,15 @@ const calculateDaysLeft = (endDate: string | Date): string => {
         </p>
       </template>
       <template v-else-if="currentPlan">
-        <h3 class="mb-4 text-3xl font-semibold">{{ currentPlan.label }}</h3>
-        <p class="text-red-main mb-2 rounded-full bg-red-200 p-2 text-sm" v-if="cancelled">
-          Cancelled
-        </p>
+        <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center">
+          <h3 class="text-3xl font-semibold">{{ currentPlan.label }}</h3>
+          <p
+            class="text-red-main mb-2 w-fit rounded-md bg-red-100 px-2 py-1 text-sm"
+            v-if="cancelled"
+          >
+            Cancelled
+          </p>
+        </div>
         <p class="mb-10 text-gray-600">{{ currentPlan.description }}</p>
       </template>
 
@@ -96,15 +100,20 @@ const calculateDaysLeft = (endDate: string | Date): string => {
         >
           Upgrade Plan
         </RouterLink>
-        <CancelSubscriptionModal :endDate="endDate" :currentPlan="currentPlan!">
-          <button
-            class="btn--md btn--secondary border-accent-main border text-center"
-            :class="[isFreeTrial && 'btn--disabled']"
-            :disabled="isFreeTrial"
-          >
-            Cancel Subscription
-          </button>
-        </CancelSubscriptionModal>
+        <template v-if="currentPlan && endDate">
+          <CancelSubscriptionModal :endDate="endDate" :currentPlan="currentPlan">
+            <button
+              class="btn--md btn--secondary"
+              :class="[isFreeTrial && 'btn--disabled']"
+              :disabled="isFreeTrial"
+            >
+              Cancel Subscription
+            </button>
+          </CancelSubscriptionModal>
+        </template>
+        <template v-else>
+          <button class="btn--md btn--disabled rounded-md" disabled>Cancel Subscription</button>
+        </template>
       </div>
     </article>
 

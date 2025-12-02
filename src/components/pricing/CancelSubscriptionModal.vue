@@ -10,16 +10,36 @@ import DialogTitle from '../ui/dialog/DialogTitle.vue'
 import DialogTrigger from '../ui/dialog/DialogTrigger.vue'
 import XIcon from '@/assets/icons/checkmark-circle-2.svg'
 import type { BillingPlan } from '@/types/billing'
+import Swal from '@/lib/swal'
 
 const {} = defineProps<{
-  endDate?: Date
+  endDate: Date
   currentPlan: BillingPlan
 }>()
+
+const formatPrice = (amount: number) => {
+  return (amount / 100).toFixed(2)
+}
+
+const formatCurrentPlan = (currentPlan: BillingPlan) => {
+  const billingPeriodText = currentPlan.interval === 'month' ? 'Monthly' : 'Yearly'
+  return `${currentPlan.label} Plan - ${billingPeriodText} ($${formatPrice(currentPlan.amount)}/${currentPlan.interval})`
+}
 
 const handleCancelSubscription = async () => {
   const billingStore = useBillingStore()
 
-  billingStore.cancelSubscription()
+  await billingStore.cancelSubscription()
+
+  if (billingStore.error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'An error occurred',
+      text: billingStore.error,
+    })
+  }
+
+  window.location.reload()
 }
 </script>
 
@@ -35,18 +55,24 @@ const handleCancelSubscription = async () => {
         <DialogTitle> Cancel your subscription? </DialogTitle>
         <DialogDescription class="py-4">
           You'll lose premium access at the end of your billing period on
-          {{ endDate ? endDate.toLocaleDateString() : '' }}.
+          {{
+            endDate.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })
+          }}.
         </DialogDescription>
       </DialogHeader>
       <section class="bg-peach-amber-100 border-peach-amber-200 rounded-md border px-10 py-4">
-        <h3 class="mb-4">Current Plan</h3>
-        <p class="text-xs">{{ currentPlan.label }}/p></p>
+        <h3 class="mb-2">Current Plan</h3>
+        <p class="text-xs">{{ formatCurrentPlan(currentPlan) }}</p>
       </section>
 
       <section class="my-4">
         <h3>What You'll Lose:</h3>
         <ul class="space-y-2 px-4 py-2 *:list-disc">
-          <li :key="i" v-for="(feat, i) in currentPlan.features">{{ feat }}</li>
+          <li :key="i" v-for="(feat, i) in currentPlan.features.slice(-5)">{{ feat }}</li>
         </ul>
       </section>
 
