@@ -3,7 +3,7 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import { blogPosts } from '@/data/posts'
 import TypographyHeading from '@/components/ui/typography/TypographyHeading.vue'
-import TypographyText from '@/components/ui/typography/TypographyText.vue'
+// import TypographyText from '@/components/ui/typography/TypographyText.vue'
 
 const route = useRoute()
 
@@ -104,8 +104,6 @@ const blogPost = computed(() =>
           {{ blogPost.summary }}
         </p>
       </section>
-
-      <!-- Newsletter -->
       <!-- <section class="pt-16 pb-20 text-center">
         <TypographyHeading
           level="h2"
@@ -134,7 +132,6 @@ const blogPost = computed(() =>
           </Button>
         </div>
       </section> -->
-
       <!-- Related Posts -->
       <section v-if="blogPost.relatedPosts?.length" class="mt-16 border-t border-gray-200 pt-8">
         <TypographyHeading level="h2" class="mb-8 text-2xl font-bold">

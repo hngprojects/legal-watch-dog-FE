@@ -382,7 +382,7 @@ onMounted(async () => {
         @click.self="closeCreateModal"
       >
         <div class="relative w-full max-w-[540px] rounded-2xl bg-white shadow-xl">
-          <div class="p-20">
+          <div class="p-5 sm:p-20">
             <div class="mb-6">
               <h3 class="mb-2 text-xl font-bold text-[#080808]">Set up new Organization</h3>
               <p class="text-sm text-[#6B7280]">
