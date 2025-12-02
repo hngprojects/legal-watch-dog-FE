@@ -13,8 +13,8 @@ const layoutProps = computed(
 
 <template>
   <div class="bg-white">
+     <MainHeader />
     <div class="container--wide">
-      <MainHeader />
       <AuthShell v-bind="layoutProps">
         <router-view />
       </AuthShell>

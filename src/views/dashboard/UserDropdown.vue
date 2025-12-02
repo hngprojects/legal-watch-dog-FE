@@ -7,7 +7,12 @@ import { RouterLink } from 'vue-router'
 
 const emit = defineEmits<{
   (e: 'logout'): void
+  (e: 'navigate'): void
 }>()
+
+const handleNavigate = () => {
+  emit('navigate')
+}
 </script>
 
 <template>
@@ -17,13 +22,13 @@ const emit = defineEmits<{
     </DropdownMenuTrigger>
     <DropdownMenuContent>
       <DropdownMenuItem asChild>
-        <RouterLink :to="{ name: 'profile' }"> Profile </RouterLink>
+        <RouterLink :to="{ name: 'profile' }" @click="handleNavigate"> Profile </RouterLink>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <RouterLink :to="{ name: 'organizations' }"> Organizations </RouterLink>
+        <RouterLink :to="{ name: 'organizations' }" @click="handleNavigate"> Organizations </RouterLink>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <RouterLink :to="{ name: 'billing' }"> Billing </RouterLink>
+        <RouterLink :to="{ name: 'billing' }" @click="handleNavigate"> Billing </RouterLink>
       </DropdownMenuItem>
       <DropdownMenuItem @click="emit('logout')">Logout</DropdownMenuItem>
     </DropdownMenuContent>
