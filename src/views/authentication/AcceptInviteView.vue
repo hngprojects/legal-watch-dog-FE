@@ -4,35 +4,15 @@ import { useRoute, useRouter } from 'vue-router'
 import Swal from '@/lib/swal'
 import { useAuthStore } from '@/stores/auth-store'
 import { useInvitationStore } from '@/stores/invitation-store'
+import { useInvitationPrompt } from '@/composables/useInvitationPrompt'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const invitationStore = useInvitationStore()
+const { promptToAcceptInvite } = useInvitationPrompt()
 
 const accepting = ref(false)
-
-const processInvite = async (token: string, silent = false) => {
-  accepting.value = true
-  try {
-    const result = await invitationStore.acceptInvitation(token)
-    if (!silent) {
-      await Swal.fire('Invitation Accepted', result, 'success')
-    }
-    router.replace({ name: 'organizations' })
-  } catch (err) {
-    void err
-    if (!silent) {
-      await Swal.fire(
-        'Could not accept invitation',
-        invitationStore.error || 'Something went wrong',
-        'error',
-      )
-    }
-  } finally {
-    accepting.value = false
-  }
-}
 
 onMounted(async () => {
   const token = typeof route.params.token === 'string' ? route.params.token : ''
@@ -43,21 +23,32 @@ onMounted(async () => {
   }
 
   invitationStore.setToken(token)
+  authStore.syncAuthFromStorage()
 
   if (authStore.isAuthenticated) {
-    await processInvite(token, true)
+    await promptToAcceptInvite(token, {
+      onProcessingChange: (isProcessing) => {
+        accepting.value = isProcessing
+      },
+    })
     return
   }
 
   const result = await Swal.fire({
     title: 'Sign in to accept invite',
-    text: 'Login or create an account to accept and view your invitations.',
+    text: 'To accept this invitation, please sign in. If you already have an account, log in; otherwise create one.',
     icon: 'info',
     showDenyButton: true,
     showCancelButton: true,
     confirmButtonText: 'Login',
     denyButtonText: 'Sign up',
     cancelButtonText: 'Maybe later',
+    customClass: {
+      actions: 'flex flex-wrap gap-2',
+      denyButton: 'btn--default btn--sm md:btn--lg',
+      confirmButton: 'btn--default btn--sm md:btn--lg',
+      cancelButton: 'btn--secondary btn--sm md:btn--lg',
+    }
   })
 
   if (result.isConfirmed) {
