@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 import { blogPosts } from '@/data/posts'
 import TypographyHeading from '@/components/ui/typography/TypographyHeading.vue'
 // import TypographyText from '@/components/ui/typography/TypographyText.vue'
 
 const route = useRoute()
-const blogId = Number(route.params.id)
 
-const blogPost = blogPosts.find((post) => post.id === blogId)
+// reactively watch route changes
+const blogId = computed(() => Number(route.params.id))
+
+const blogPost = computed(() =>
+  blogPosts.find((post) => post.id === blogId.value)
+)
 </script>
-
 <template>
   <div v-if="blogPost" class="min-h-screen bg-gray-50 py-16">
     <div class="mx-auto max-w-4xl px-6">
@@ -27,21 +31,29 @@ const blogPost = blogPosts.find((post) => post.id === blogId)
 
       <img :src="blogPost.mainImage" class="mb-10 w-full rounded-xl object-cover" />
 
+      <!-- Introduction -->
       <section>
         <TypographyHeading level="h2" class="mb-4 text-center text-2xl font-bold">
           Introduction
         </TypographyHeading>
-        <p v-for="(para, i) in blogPost.introduction" :key="i" class="mb-6 leading-7 text-gray-700">
+        <p
+          v-for="(para, i) in blogPost.introduction"
+          :key="i"
+          class="mb-6 leading-7 text-gray-700"
+        >
           {{ para }}
         </p>
       </section>
 
+      <!-- Emerging Focus Areas -->
       <section v-if="blogPost.sections.focusAreas" class="mt-12">
         <TypographyHeading level="h2" class="mb-4 text-center text-2xl font-bold">
           Emerging Focus Areas
         </TypographyHeading>
 
-        <p class="mb-4 text-gray-700">{{ blogPost.sections.focusAreas.intro }}</p>
+        <p class="mb-4 text-gray-700">
+          {{ blogPost.sections.focusAreas.intro }}
+        </p>
 
         <ul class="list-disc pl-6 text-gray-700">
           <li v-for="(value, key) in blogPost.sections.focusAreas.items" :key="key">
@@ -50,12 +62,15 @@ const blogPost = blogPosts.find((post) => post.id === blogId)
         </ul>
       </section>
 
+      <!-- Impact -->
       <section v-if="blogPost.sections.impact" class="mt-12">
         <TypographyHeading level="h2" class="mb-4 text-center text-2xl font-bold">
           Potential Impact on Businesses
         </TypographyHeading>
 
-        <p class="mb-4 text-gray-700">{{ blogPost.sections.impact.intro }}</p>
+        <p class="mb-4 text-gray-700">
+          {{ blogPost.sections.impact.intro }}
+        </p>
 
         <ul class="list-disc pl-6 text-gray-700">
           <li v-for="(value, key) in blogPost.sections.impact.items" :key="key">
@@ -64,6 +79,7 @@ const blogPost = blogPosts.find((post) => post.id === blogId)
         </ul>
       </section>
 
+      <!-- Preparation -->
       <section v-if="blogPost.sections.preparation" class="mt-12">
         <TypographyHeading level="h2" class="mb-4 text-center text-2xl font-bold">
           How to Prepare
@@ -93,8 +109,9 @@ const blogPost = blogPosts.find((post) => post.id === blogId)
           level="h2"
           class="mb-4 text-center text-3xl font-extrabold text-gray-900 md:text-4xl"
         >
-          Stay ahead of legal changes by <span class="text-[#F2AB6D]"> subscribing</span> to our
-          newsletter.
+          Stay ahead of legal changes by
+          <span class="text-[#F2AB6D]"> subscribing</span>
+          to our newsletter.
         </TypographyHeading>
 
         <TypographyText class="mx-auto max-w-2xl text-center text-gray-600">
@@ -126,7 +143,7 @@ const blogPost = blogPosts.find((post) => post.id === blogId)
             v-for="post in blogPost.relatedPosts"
             :key="post.id"
             class="cursor-pointer rounded-xl border bg-white shadow-md transition hover:shadow-lg"
-            @click="$router.push(`/blogs/${post.id}`)"
+            @click="$router.push(`/blog/${post.id}`)"
           >
             <img :src="post.image" class="h-48 w-full rounded-t-xl object-cover" />
 
@@ -141,5 +158,7 @@ const blogPost = blogPosts.find((post) => post.id === blogId)
     </div>
   </div>
 
-  <div v-else class="py-40 text-center text-xl text-gray-600">Blog post not found.</div>
+  <div v-else class="py-40 text-center text-xl text-gray-600">
+    Blog post not found.
+  </div>
 </template>
