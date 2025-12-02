@@ -2,7 +2,7 @@
 import { useRoute } from 'vue-router'
 import { blogPosts } from '@/data/posts'
 import TypographyHeading from '@/components/ui/typography/TypographyHeading.vue'
-import TypographyText from '@/components/ui/typography/TypographyText.vue'
+// import TypographyText from '@/components/ui/typography/TypographyText.vue'
 
 const route = useRoute()
 const blogId = Number(route.params.id)
