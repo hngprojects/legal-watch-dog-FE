@@ -241,8 +241,8 @@ watch(
 
     <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
       <button
-        @click="onCancel"
-        class="w-full rounded-lg border border-[#D0D5DD] bg-white px-5 py-2.5 text-sm font-medium text-[#344054] hover:bg-gray-50 sm:w-auto"
+        @click="emit('cancel')"
+        class="rounded-lg border border-[#D0D5DD] bg-white px-5 py-2.5 text-sm font-medium text-[#344054] hover:bg-gray-50"
       >
         Cancel
       </button>
