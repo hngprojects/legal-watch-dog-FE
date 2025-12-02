@@ -96,7 +96,7 @@
     </article>
 
     <!-- Newsletter CTA -->
-    <section class="my-12 rounded-xl bg-gray-50/50 py-16 text-center">
+    <!-- <section class="my-12 rounded-xl bg-gray-50/50 py-16 text-center">
       <div class="mx-auto max-w-xl px-6">
         <TypographyHeading
           level="h3"
@@ -117,7 +117,6 @@
             placeholder="Enter your email"
             class="mb-4 w-full rounded-lg border-gray-300 bg-white p-3 text-center shadow-sm focus-visible:ring-[#F79009] focus-visible:ring-offset-0"
           />
-          <!-- The Button component needs to be imported or globally available -->
           <button
             class="w-full rounded-lg bg-[#5D2D18] py-3 font-semibold text-white transition duration-200 hover:bg-[#3F1A0F]"
           >
@@ -125,7 +124,7 @@
           </button>
         </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- Related Posts Section (Dynamic content) -->
     <section class="mt-16 border-t border-gray-200 pt-8" v-if="blogPost.relatedPosts?.length">

@@ -150,7 +150,7 @@ const companies = [
 
 const supports = [
   { label: 'Getting started', path: '/how-it-works' },
-  { label: 'Help center', path: '/help-center' },
+  // { label: 'Help center', path: '/help-center' },
   { label: 'Contact support', path: '/contact-us' },
 ]
 
