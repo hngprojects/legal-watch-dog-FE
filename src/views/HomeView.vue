@@ -27,7 +27,7 @@ import HomeFrame from '@/components/landing-page/HomeFrame.vue'
       <DashboardPreview />
       <HowItWorks />
       <HomeFrame />
-      <FeaturesSection />
+      <!-- <FeaturesSection /> -->
       <!-- <Monitor /> -->
       <GlobalStatsSection />
     </main>

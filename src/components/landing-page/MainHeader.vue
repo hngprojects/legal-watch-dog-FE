@@ -89,8 +89,9 @@ onUnmounted(() => {
   <header
     class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
+    <!-- CHANGED: Removed flex-col and added items-center to keep items side by side -->
     <div
-      class="app-container mx-auto flex w-full flex-col items-center justify-between gap-8 px-3 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
+      class="app-container mx-auto flex w-full items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:py-5"
     >
       <!-- LOGO -->
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
