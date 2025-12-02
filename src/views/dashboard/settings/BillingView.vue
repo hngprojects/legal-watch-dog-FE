@@ -63,9 +63,9 @@ const calculateDaysLeft = (endDate: string | Date): string => {
 </script>
 
 <template>
-  <h1 class="mb-8 text-3xl font-semibold">Billing & Subscription</h1>
+  <h1 class="app-container mb-8 text-3xl font-semibold">Billing & Subscription</h1>
   <section
-    class="mb-10 flex flex-col gap-6 *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
+    class="mb-10 flex flex-col gap-6 app-container *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
   >
     <article>
       <div class="mb-5 flex items-center justify-between">
@@ -122,7 +122,7 @@ const calculateDaysLeft = (endDate: string | Date): string => {
     </article>
   </section>
 
-  <section>
+  <section class="app-container">
     <h2 class="mb-6 text-2xl font-semibold">Payment History</h2>
 
     <div

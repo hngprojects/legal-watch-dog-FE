@@ -81,7 +81,7 @@ onMounted(async () => {
             @click="() => (activeBillingCycle = 'year')"
           >
             <div
-              class="bg-accent-main absolute -top-2 -right-2 z-10 rounded-full p-1.5 sm:-top-3 sm:-right-3 sm:p-2"
+              class="bg-accent-main absolute -top-4 -right-2 z-10 rounded-full p-1.5 sm:-top-5 sm:-right-3 sm:p-2"
             >
               <p class="text-[10px] font-medium whitespace-nowrap text-white sm:text-xs">
                 Save 20%

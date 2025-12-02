@@ -216,7 +216,7 @@ const handleGoogleLogin = async () => {
         @click="handleGoogleLogin"
       >
         <img src="/images/google.png" alt="Google" class="h-5 w-5" />
-        <span>{{ isGoogleLoading ? 'Connecting...' : 'Google' }}</span>
+        <span>{{ isGoogleLoading ? 'Connecting...' : 'Continue with Google' }}</span>
       </button>
 
       <!-- <button

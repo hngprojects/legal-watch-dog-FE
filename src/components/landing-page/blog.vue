@@ -261,7 +261,7 @@ const searchTerm = ref('')
 const showMoreCards = ref(false)
 const currentSlide = ref(0)
 const autoSlideDelay = 5000
-let autoSlideTimer: ReturnType<typeof setInterval> | null = null
+let autoSlideTimer: number | null = null
 const perView = ref(1)
 
 const slides = computed(() => {
@@ -332,7 +332,7 @@ const startAutoSlide = () => {
 }
 
 const stopAutoSlide = () => {
-  if (autoSlideTimer) {
+  if (autoSlideTimer !== null) {
     clearInterval(autoSlideTimer)
     autoSlideTimer = null
   }

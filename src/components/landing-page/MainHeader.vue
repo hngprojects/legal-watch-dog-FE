@@ -17,6 +17,7 @@ type NavLink = {
 }
 
 const isMenuOpen = ref(false)
+const isMobileDropdownOpen = ref(false)
 
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -56,10 +57,14 @@ const toggleBodyScroll = (lock: boolean) => {
 
 watch(isMenuOpen, (newVal) => {
   toggleBodyScroll(newVal)
+  if (!newVal) {
+    isMobileDropdownOpen.value = false
+  }
 })
 
 const closeMenu = () => {
   isMenuOpen.value = false
+  isMobileDropdownOpen.value = false
 }
 
 const handleLogout = async () => {
@@ -90,7 +95,7 @@ onUnmounted(() => {
     class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="app-container mx-auto flex w-full flex-col items-center justify-between gap-8 px-3 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
+      class="app-container mx-auto flex w-full items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:py-5"
     >
       <!-- LOGO -->
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
@@ -245,29 +250,41 @@ onUnmounted(() => {
         <!-- Action Buttons -->
         <div class="space-y-3 border-t p-4 sm:space-y-4 sm:p-6">
           <template v-if="isAuthenticated">
-            <!-- User info on mobile/tablet -->
-            <div class="mb-4 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
-              <UserAvatar :name="displayName" :size="40" />
-              <div class="min-w-0 flex-1">
-                <p class="truncate text-sm font-semibold text-gray-800">{{ displayName }}</p>
-                <p class="text-xs text-gray-500">Logged in</p>
-              </div>
+            <!-- User Dropdown on Mobile/Tablet -->
+            <div class="mb-4">
+              <UserDropdown @logout="handleLogout" @navigate="closeMenu">
+                <button
+                  class="flex w-full items-center gap-3 rounded-lg bg-gray-50 p-3 hover:bg-gray-100 transition-colors"
+                >
+                  <UserAvatar :name="displayName" :size="40" />
+                  <div class="min-w-0 flex-1 text-left">
+                    <p class="truncate text-sm font-semibold text-gray-800">{{ displayName }}</p>
+                    <p class="text-xs text-gray-500">View profile & settings</p>
+                  </div>
+                  <svg
+                    class="h-5 w-5 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+              </UserDropdown>
             </div>
 
             <Button
               :as="RouterLink"
               :to="{ name: 'organizations' }"
               @click="closeMenu"
-              class="btn--default btn--sm sm:btn--lg"
+              class="btn--default btn--sm sm:btn--lg w-full"
             >
               Go to Dashboard
-            </Button>
-            <Button
-              variant="outline"
-              @click="handleLogout"
-              class="btn--secondary btn--sm sm:btn--lg mt-6"
-            >
-              Logout
             </Button>
           </template>
 
@@ -277,7 +294,7 @@ onUnmounted(() => {
               :to="{ path: '/login' }"
               @click="closeMenu"
               variant="outline"
-              class="mr-2 w-full"
+              class="w-full mr-2"
             >
               Sign In
             </Button>
