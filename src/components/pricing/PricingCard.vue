@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Icon from '@/components/reusable/Icon.vue'
+import Swal from '@/lib/swal'
 import { useBillingStore } from '@/stores/billing-store'
 import type { BillingPlan } from '@/types/billing'
 import {
@@ -26,9 +27,15 @@ const formatPrice = (amount: number) => {
 const handlePay = async () => {
   const checkoutUrl = await billingStore.checkoutPlan(plan.id)
 
-  console.log(checkoutUrl)
-
-  if (checkoutUrl) window.location.replace(checkoutUrl)
+  if (billingStore.error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'An error occurred',
+      text: billingStore.error,
+    })
+  } else if (checkoutUrl) {
+    window.location.replace(checkoutUrl)
+  }
 }
 </script>
 
