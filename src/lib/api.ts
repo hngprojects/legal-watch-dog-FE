@@ -1,4 +1,5 @@
 import axios from 'axios'
+import router from '@/router'
 import { useAuthStore } from '@/stores/auth-store'
 import themedSwal from '@/lib/swal'
 
@@ -42,11 +43,11 @@ api.interceptors.response.use(
        if (!isSessionExpiredAlertActive) {
          isSessionExpiredAlertActive = true
          void themedSwal
-           .fire({
-             title: 'Session expired',
-             text: 'Your session has expired. Please log in again to continue.',
-             icon: 'warning',
-             confirmButtonText: 'Login again',
+            .fire({
+              title: 'Session timed out',
+              text: 'Your session timed out. Please log in again to continue.',
+              icon: 'warning',
+              confirmButtonText: 'Login again',
              allowOutsideClick: false,
              allowEscapeKey: false,
              allowEnterKey: true,
@@ -54,10 +55,12 @@ api.interceptors.response.use(
            })
            .finally(() => {
              isSessionExpiredAlertActive = false
-             window.location.href = '/login'
+             const redirectPath =
+               window.location.pathname + window.location.search + window.location.hash
+             void router.push({ name: 'login', query: { redirect: redirectPath } })
            })
        }
-    }
+     }
     return Promise.reject(error)
   },
 )
