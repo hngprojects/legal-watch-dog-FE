@@ -172,6 +172,7 @@ export const useBillingStore = defineStore('billing', {
 
     async cancelSubscription() {
       this.setError(null)
+      this.setLoading(true)
       const orgId = await this.getOrganizationId()
 
       if (!orgId) return
@@ -181,6 +182,8 @@ export const useBillingStore = defineStore('billing', {
         return res.data.data
       } catch (error) {
         this.setError((error as BillingErrorResponse).message)
+      } finally {
+        this.setLoading(false)
       }
     },
 

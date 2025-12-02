@@ -17,6 +17,8 @@ const {} = defineProps<{
   currentPlan: BillingPlan
 }>()
 
+const billingStore = useBillingStore()
+
 const formatPrice = (amount: number) => {
   return (amount / 100).toFixed(2)
 }
@@ -27,8 +29,6 @@ const formatCurrentPlan = (currentPlan: BillingPlan) => {
 }
 
 const handleCancelSubscription = async () => {
-  const billingStore = useBillingStore()
-
   await billingStore.cancelSubscription()
 
   if (billingStore.error) {
@@ -80,7 +80,12 @@ const handleCancelSubscription = async () => {
         <DialogClose>
           <button class="btn--secondary btn--lg">Keep My Plan</button>
         </DialogClose>
-        <button class="btn--default btn--lg" @click="handleCancelSubscription">
+        <button
+          @click="handleCancelSubscription"
+          class="btn--default btn--lg"
+          :class="billingStore.loading && 'btn--disabled'"
+          :disabled="billingStore.loading"
+        >
           Cancel Subscription
         </button>
       </DialogFooter>
