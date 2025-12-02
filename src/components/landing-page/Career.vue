@@ -22,93 +22,74 @@
         Discover exciting opportunities and grow your career in a thriving environment.
       </p>
     </section>
-
-    <!-- CAREERS GRID -->
     <section class="app-container relative z-10 mx-auto bg-transparent px-4 py-12 md:py-20 lg:px-6">
-      <!-- UNIFORM RESPONSIVE GRID -->
       <div class="grid grid-cols-1 place-items-center gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- WRAPPER (keeps alignment and responsiveness) -->
-        <div class="flex items-center justify-center">
-          <div class="flex h-[239px] w-[383px] flex-col rounded-2xl bg-[#E3E3E3] p-[50px]">
-            <p class="text-sm leading-relaxed text-gray-600">
-              It is more than a job, it's a place you learn and grow.
-            </p>
-            <div class="flex items-center space-x-3 py-3">
-              <img :src="small1" class="h-10 w-10 rounded-full object-cover" />
-              <div>
-                <p class="font-semibold text-gray-900">Piro</p>
-                <p class="text-sm text-gray-500">UI/UX Designer</p>
-              </div>
+        <div
+          class="career-box flex h-[260px] w-full max-w-[380px] flex-col justify-between rounded-2xl bg-[#E3E3E3] p-6"
+        >
+          <p class="text-sm leading-relaxed text-gray-600">
+            It is more than a job, it's a place you learn and grow.
+          </p>
+          <div class="flex items-center space-x-3">
+            <img :src="small1" class="h-10 w-10 rounded-full object-cover" />
+            <div>
+              <p class="font-semibold text-gray-900">Piro</p>
+              <p class="text-sm text-gray-500">UI/UX Designer</p>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-center">
-          <div class="h-[239px] w-[383px]">
-            <img :src="career1" class="h-full w-full rounded-2xl object-cover" />
-          </div>
+        <!-- IMAGE CARD -->
+        <div class="career-img-box h-[260px] w-full max-w-[380px]">
+          <img :src="career1" class="h-full w-full rounded-2xl object-cover" />
         </div>
 
-        <div class="flex items-center justify-center">
-          <div class="h-[239px] w-[383px]">
-            <img :src="career3" class="h-full w-full rounded-2xl object-cover" />
-          </div>
+        <div class="career-img-box h-[260px] w-full max-w-[380px]">
+          <img :src="career3" class="h-full w-full rounded-2xl object-cover" />
         </div>
 
-        <div class="flex">
-          <div class="h-[239px] w-[300px]">
-            <img :src="career2" class="h-full w-full rounded-2xl object-cover" />
-          </div>
+        <div class="career-img-box h-[260px] w-full max-w-[380px]">
+          <img :src="career2" class="h-full w-full rounded-2xl object-cover" />
         </div>
 
-        <div class="flex items-center justify-center">
-          <div
-            class="flex h-[239px] w-[457px] flex-col justify-center rounded-2xl bg-[#E3E3E3] p-6 lg:mr-6"
-          >
-            <p class="mb-4 text-sm leading-relaxed text-gray-600">
-              Discover something new and valuable
-            </p>
-            <div class="flex items-center space-x-3">
-              <img :src="small2" class="h-10 w-10 rounded-full object-cover" />
-              <div>
-                <p class="font-semibold text-gray-900">Anna</p>
-                <p class="text-sm text-gray-500">Product Manager</p>
-              </div>
+        <!-- SECOND TEXT CARD -->
+        <div
+          class="career-box flex h-[260px] w-full max-w-[380px] flex-col justify-between rounded-2xl bg-[#E3E3E3] p-6"
+        >
+          <p class="text-sm leading-relaxed text-gray-600">Discover something new and valuable</p>
+          <div class="flex items-center space-x-3">
+            <img :src="small2" class="h-10 w-10 rounded-full object-cover" />
+            <div>
+              <p class="font-semibold text-gray-900">Anna</p>
+              <p class="text-sm text-gray-500">Product Manager</p>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-center">
-          <div class="h-[239px] w-[383px]">
-            <img :src="career4" class="h-full w-full rounded-2xl object-cover" />
-          </div>
+        <div class="career-img-box h-[260px] w-full max-w-[380px]">
+          <img :src="career4" class="h-full w-full rounded-2xl object-cover" />
         </div>
 
-        <div class="flex items-center justify-center">
-          <div class="h-[239px] w-[329px]">
-            <img :src="career5" class="h-full w-full rounded-2xl object-cover" />
-          </div>
+        <div class="career-img-box h-[260px] w-full max-w-[380px]">
+          <img :src="career5" class="h-full w-full rounded-2xl object-cover" />
         </div>
 
-        <div class="flex items-center justify-center">
-          <div class="h-[239px] w-[478px]">
-            <img :src="career6" class="h-full w-full rounded-2xl object-cover" />
-          </div>
+        <div class="career-img-box h-[260px] w-full max-w-[380px]">
+          <img :src="career6" class="h-full w-full rounded-2xl object-cover" />
         </div>
 
-        <div class="flex items-center justify-center">
-          <div
-            class="flex h-[239px] w-[342px] flex-col justify-center rounded-2xl bg-[#E3E3E3] p-6"
-          >
-            <p class="mb-4 text-sm leading-relaxed text-gray-600">
-              It is more than a job, it's a place you learn and grow.
-            </p>
-            <div class="flex items-center space-x-3">
-              <img :src="small3" class="h-10 w-10 rounded-full object-cover" />
-              <div>
-                <p class="font-semibold text-gray-900">Yemi</p>
-                <p class="text-sm text-gray-500">UI/UX Designer</p>
-              </div>
+        <!-- THIRD TEXT CARD -->
+        <div
+          class="career-box flex h-[260px] w-full max-w-[380px] flex-col justify-between rounded-2xl bg-[#E3E3E3] p-6"
+        >
+          <p class="text-sm leading-relaxed text-gray-600">
+            It is more than a job, it's a place you learn and grow.
+          </p>
+          <div class="flex items-center space-x-3">
+            <img :src="small3" class="h-10 w-10 rounded-full object-cover" />
+            <div>
+              <p class="font-semibold text-gray-900">Yemi</p>
+              <p class="text-sm text-gray-500">UI/UX Designer</p>
             </div>
           </div>
         </div>
