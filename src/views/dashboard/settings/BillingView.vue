@@ -3,7 +3,7 @@ import CancelSubscriptionModal from '@/components/pricing/CancelSubscriptionModa
 import Icon from '@/components/reusable/Icon.vue'
 import Swal from '@/lib/swal'
 import { useBillingStore } from '@/stores/billing-store'
-import type { BillingPlan } from '@/types/billing'
+import type { BillingHistoryEntry, BillingPlan } from '@/types/billing'
 import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -11,8 +11,9 @@ import { RouterLink } from 'vue-router'
 const hasHistory = ref(false)
 const isFreeTrial = ref(true)
 const cancelled = ref(false)
-const currentPlan = ref<BillingPlan | null>(null)
+const currentPlan = ref<BillingPlan | undefined>(undefined)
 const endDate = ref<Date | undefined>(undefined)
+const invoice = ref<BillingHistoryEntry[] | undefined>(undefined)
 
 const billingStore = useBillingStore()
 
@@ -43,6 +44,7 @@ onMounted(async () => {
 
   if (history && history.length > 0) {
     hasHistory.value = true
+    invoice.value = history
   }
 })
 
@@ -142,7 +144,41 @@ const calculateDaysLeft = (endDate: Date): string => {
       class="flex min-h-[356px] rounded-lg bg-white"
       :class="[hasHistory ? '' : 'items-center justify-center px-6 text-center']"
     >
-      <div v-if="hasHistory"></div>
+      <div v-if="hasHistory" class="w-full overflow-x-auto px-4 py-8 md:px-8">
+        <table class="w-full table-auto">
+          <thead>
+            <tr class="bg-peach-amber-100 uppercase *:min-w-40 *:font-semibold">
+              <th class="rounded-l-md px-4 py-3 text-left">Date</th>
+              <th class="px-4 py-3 text-left">Amount</th>
+              <th class="px-4 py-3 text-left">Status</th>
+              <th class="rounded-r-md px-4 py-3 text-left">Plan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="entry in invoice" :key="entry.id" class="*:text-gray-600 first:*:pt-6">
+              <td class="px-4 py-3">
+                {{
+                  new Date(entry.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                }}
+              </td>
+              <td class="px-4 py-3">${{ (entry.amount_paid / 100).toFixed(2) }}</td>
+              <td class="px-4 py-3 capitalize">
+                <template v-if="entry.status === 'PAID'">
+                  <span class="text-green-main rounded-full bg-green-100 px-4 py-1">PAID</span>
+                </template>
+                <template v-else>
+                  <span class="text-red-main rounded-full bg-red-100 px-4 py-1">FAILED</span>
+                </template>
+              </td>
+              <td class="px-4 py-3">{{ entry.plan_label }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div v-else class="flex flex-col items-center justify-center gap-2">
         <div class="mb-2 w-fit rounded-full border border-gray-300 p-6">
           <Icon :icon="FileNotFoundIcon" :size="33" color="var(--gray-300)" />
