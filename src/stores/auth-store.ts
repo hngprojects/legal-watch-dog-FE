@@ -178,6 +178,24 @@ export const useAuthStore = defineStore('auth', {
       clearStoredValue(EMAIL_KEY)
     },
 
+    syncAuthFromStorage() {
+      const storedToken = getStoredValue(TOKEN_KEY)
+      if (!storedToken) {
+        this.accessToken = null
+        this.user = null
+        this.organisation = null
+      }
+
+      if (!this.accessToken) {
+        this.accessToken = storedToken
+      }
+
+      const storedEmail = getStoredValue(EMAIL_KEY)
+      if (storedEmail && !this.email) {
+        this.email = storedEmail
+      }
+    },
+
     handleLoginSuccess(token: string, rememberMe: boolean, user?: User) {
       this.setRememberPreference(rememberMe)
       this.setAccessToken(token, rememberMe)

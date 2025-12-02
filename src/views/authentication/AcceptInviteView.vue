@@ -4,33 +4,32 @@ import { useRoute, useRouter } from 'vue-router'
 import Swal from '@/lib/swal'
 import { useAuthStore } from '@/stores/auth-store'
 import { useInvitationStore } from '@/stores/invitation-store'
+import { useInvitationPrompt } from '@/composables/useInvitationPrompt'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const invitationStore = useInvitationStore()
+const { promptToAcceptInvite } = useInvitationPrompt()
 
 const accepting = ref(false)
+const invitedEmail = ref<string | null>(null)
 
-const processInvite = async (token: string, silent = false) => {
-  accepting.value = true
+const extractInvitedEmail = (token: string) => {
   try {
-    const result = await invitationStore.acceptInvitation(token)
-    if (!silent) {
-      await Swal.fire('Invitation Accepted', result, 'success')
-    }
-    router.replace({ name: 'organizations' })
-  } catch (err) {
-    void err
-    if (!silent) {
-      await Swal.fire(
-        'Could not accept invitation',
-        invitationStore.error || 'Something went wrong',
-        'error',
-      )
-    }
-  } finally {
-    accepting.value = false
+    const [, payload] = token.split('.')
+    if (!payload) return null
+    const decoded = JSON.parse(atob(payload))
+    return (
+      decoded?.email ||
+      decoded?.invited_email ||
+      decoded?.invitation_email ||
+      decoded?.invitedUserEmail ||
+      null
+    )
+  } catch (error) {
+    void error
+    return null
   }
 }
 
@@ -43,20 +42,55 @@ onMounted(async () => {
   }
 
   invitationStore.setToken(token)
+  authStore.syncAuthFromStorage()
+  invitedEmail.value = extractInvitedEmail(token)
 
   if (authStore.isAuthenticated) {
-    await processInvite(token, true)
+    const currentEmail =
+      authStore.user?.email?.toLowerCase() ?? authStore.email?.toLowerCase() ?? null
+    if (invitedEmail.value && currentEmail && invitedEmail.value.toLowerCase() !== currentEmail) {
+      const decision = await Swal.fire({
+        title: 'Switch account to accept',
+        text: `This invitation was sent to ${invitedEmail.value}, but you're signed in as ${currentEmail}. Please switch to the invited account to continue.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Switch account',
+        cancelButtonText: 'Stay here',
+        reverseButtons: true,
+      })
+
+      if (decision.isConfirmed) {
+        await authStore.logout()
+        authStore.setUserEmail(invitedEmail.value)
+        router.replace({ name: 'login', query: { redirect: route.fullPath } })
+      } else {
+        router.replace({ name: 'organizations' })
+      }
+      return
+    }
+
+    const accepted = await promptToAcceptInvite(token, {
+      onProcessingChange: (isProcessing) => {
+        accepting.value = isProcessing
+      },
+    })
+    if (!accepted) {
+      router.replace({ name: 'organizations' })
+    }
     return
   }
 
   const result = await Swal.fire({
-    title: 'Sign in to accept invite',
-    text: 'Login or create an account to accept and view your invitations.',
+    title: 'Sign in or sign up',
+    text:
+      invitedEmail.value && invitedEmail.value.length > 0
+        ? `This invitation is for ${invitedEmail.value}. Sign in with that email if you already have an account, or create one now.`
+        : 'To accept this invitation, sign in if you already have an account or create one now.',
     icon: 'info',
     showDenyButton: true,
     showCancelButton: true,
-    confirmButtonText: 'Login',
-    denyButtonText: 'Sign up',
+    confirmButtonText: 'Sign in',
+    denyButtonText: 'Create account',
     cancelButtonText: 'Maybe later',
   })
 
