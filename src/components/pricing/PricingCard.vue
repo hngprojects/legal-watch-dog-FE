@@ -19,13 +19,16 @@ const { i, activeBillingCycle, plan } = defineProps<{
 
 const route = useRoute()
 const billingStore = useBillingStore()
+const isActivePlan = billingStore.current_plan_id === plan.id
 
 const formatPrice = (amount: number) => {
   return (amount / 100).toFixed(2)
 }
 
 const handlePay = async () => {
-  const checkoutUrl = await billingStore.checkoutPlan(plan.id)
+  if (isActivePlan) return
+
+  const result = await billingStore.handlePlanChange(plan.id)
 
   if (billingStore.error) {
     Swal.fire({
@@ -33,8 +36,12 @@ const handlePay = async () => {
       title: 'An error occurred',
       text: billingStore.error,
     })
-  } else if (checkoutUrl) {
-    window.location.replace(checkoutUrl)
+  } else if (result) {
+    if (typeof result === 'string' && result.startsWith('http')) {
+      window.location.href = result
+    } else {
+      await billingStore.getSubscriptionStatus()
+    }
   }
 }
 </script>
@@ -71,10 +78,14 @@ const handlePay = async () => {
     <template v-if="route.name === 'payment-plan'">
       <button
         @click="handlePay"
+        :disabled="isActivePlan || billingStore.loading"
         class="btn--secondary btn--xl block w-full border text-center"
-        :class="[i == 1 && 'btn--default hover:text-white']"
+        :class="[
+          i == 1 && 'btn--default hover:text-white',
+          (isActivePlan || billingStore.loading) && 'btn--disabled',
+        ]"
       >
-        {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
+        {{ isActivePlan ? 'Active plan' : i == 1 ? 'Get started now' : 'Choose this plan' }}
       </button>
     </template>
     <template v-else>
