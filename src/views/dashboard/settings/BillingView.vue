@@ -35,6 +35,7 @@ onMounted(async () => {
     endDate.value = subscriptionStatus.trial_ends_at
   } else if (subscriptionStatus?.current_plan && subscriptionStatus.current_period_end) {
     isFreeTrial.value = false
+    currentPlan.value = subscriptionStatus.current_plan
     endDate.value = subscriptionStatus.current_period_end
   }
 
@@ -46,7 +47,6 @@ onMounted(async () => {
 })
 
 const calculateDaysLeft = (endDate: string | Date): string => {
-  console.log(endDate)
   const today = new Date()
   const end = new Date(endDate)
   const diffTime = end.getTime() - today.getTime()
@@ -65,7 +65,7 @@ const calculateDaysLeft = (endDate: string | Date): string => {
 <template>
   <h1 class="app-container mb-8 text-3xl font-semibold">Billing & Subscription</h1>
   <section
-    class="mb-10 flex flex-col gap-6 app-container *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
+    class="app-container mb-10 flex flex-col gap-6 *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
   >
     <article>
       <div class="mb-5 flex items-center justify-between">
@@ -81,7 +81,7 @@ const calculateDaysLeft = (endDate: string | Date): string => {
           You're currently on a free trial. No charges until your trial ends.
         </p>
       </template>
-      <template v-else-if="currentPlan && !isFreeTrial">
+      <template v-else-if="currentPlan">
         <h3 class="mb-4 text-3xl font-semibold">{{ currentPlan.label }}</h3>
         <p class="text-red-main mb-2 rounded-full bg-red-200 p-2 text-sm" v-if="cancelled">
           Cancelled
