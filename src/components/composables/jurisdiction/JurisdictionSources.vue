@@ -45,7 +45,7 @@ const handleAddAi = () => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
     <div>
       <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
       <p class="text-xs text-gray-500">Trigger scraping per source and view results.</p>
@@ -53,22 +53,24 @@ const handleAddAi = () => {
 
     <div class="relative">
       <button
-        class="btn--lg btn--default btn--with-icon"
         @click.stop="showHeaderMenu = !showHeaderMenu"
+        class="btn--default btn--with-icon btn--sm md:btn--lg"
       >
-        <Plus :size="16" /> Add Source
+        <Plus :size="16" class="sm:size-[18px]" />
+        <span class="hidden sm:inline">Add Source</span>
+        <span class="sm:hidden">Add</span>
       </button>
 
       <div
         v-if="showHeaderMenu"
-        class="absolute top-full right-0 z-50 mt-2 w-60 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5"
+        class="absolute top-full z-50 mt-2 w-60 space-y-2 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0"
       >
-        <button @click="handleAddManual" class="btn btn--lg btn--with-icon">
+        <button @click="handleAddManual" class="btn--secondary btn--sm lg:btn--lg btn--with-icon">
           <FilePlus :size="18" />
           Add Source Manually
         </button>
 
-        <button @click="handleAddAi" class="btn btn--md btn--with-icon">
+        <button @click="handleAddAi" class="btn--secondary btn--sm md:btn--lg btn--with-icon">
           <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
           AI Suggested sources
         </button>
@@ -94,10 +96,12 @@ const handleAddAi = () => {
 
       <div class="relative mt-4 inline-block">
         <button
-          class="btn--sm btn--default btn--with-icon"
           @click.stop="showEmptyStateMenu = !showEmptyStateMenu"
+          class="btn--default btn--sm md:btn--lg btn--with-icon"
         >
-          <Plus :size="16" /> Add Source
+          <Plus :size="16" />
+          <span class="hidden sm:inline">Add Source</span>
+          <span class="sm:hidden">Add</span>
         </button>
 
         <div
@@ -126,41 +130,52 @@ const handleAddAi = () => {
         :key="source.id"
         class="rounded-lg border border-gray-100 bg-white px-4 py-3 shadow-sm"
       >
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <p class="text-sm font-semibold text-gray-900">{{ source.name }}</p>
-            <p class="text-xs text-gray-500">{{ source.url }}</p>
-            <p class="text-[11px] tracking-wide text-gray-400 uppercase">
+        <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <!-- Source Info - full width on mobile, constrained on larger screens -->
+          <div class="min-w-0 flex-1">
+            <!-- min-w-0 enables text truncation -->
+            <p class="truncate text-sm font-semibold text-gray-900 sm:text-base">
+              {{ source.name }}
+            </p>
+            <p class="text-xs text-gray-500 sm:truncate sm:text-sm">
+              {{ source.url }}
+            </p>
+            <p class="mt-1 text-[11px] tracking-wide text-gray-400 uppercase">
               {{ source.source_type }} • {{ source.scrape_frequency }}
             </p>
           </div>
 
-          <div class="flex flex-wrap items-center justify-end gap-2">
+          <!-- Action Buttons - stacked & centered on mobile, inline on desktop -->
+          <div class="flex flex-wrap justify-start gap-2 sm:justify-end">
             <button
-              class="btn--sm btn--default"
+              class="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm"
+              :class="
+                scraping[source.id]
+                  ? 'cursor-not-allowed bg-gray-100 text-gray-500'
+                  : 'bg-[#401903] text-white hover:bg-[#301403]'
+              "
               :disabled="scraping[source.id]"
               @click="emit('scrape', source)"
             >
-              <span v-if="scraping[source.id]">Scraping...</span>
-              <span v-else>Scrape Now</span>
+              {{ scraping[source.id] ? 'Scraping...' : 'Scrape Now' }}
             </button>
 
             <button
-              class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+              class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 sm:px-3.5 sm:py-2 sm:text-sm"
               @click="emit('toggle-source', source.id)"
             >
-              {{ expandedSources[source.id] ? 'Hide History' : 'View History' }}
+              {{ expandedSources[source.id] ? 'Hide' : 'History' }}
             </button>
 
             <button
-              class="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+              class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 sm:px-3.5 sm:py-2 sm:text-sm"
               @click="emit('edit', source)"
             >
               Edit
             </button>
 
             <button
-              class="rounded-lg border border-red-100 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+              class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 sm:px-3.5 sm:py-2 sm:text-sm"
               @click="emit('delete', source)"
             >
               Delete

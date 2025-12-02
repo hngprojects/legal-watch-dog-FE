@@ -20,12 +20,13 @@ const projectStore = useProjectStore()
 const organizationStore = useOrganizationStore()
 const authStore = useAuthStore()
 const { projects, loading, error } = storeToRefs(projectStore)
-const { organizations, loading: orgLoading } = storeToRefs(organizationStore)
+const { organizations } = storeToRefs(organizationStore)
 const router = useRouter()
 const route = useRoute()
 
 const showProjectModal = ref(false)
 const projectModalMode = ref<'create' | 'edit'>('create')
+const organizationsRequested = ref(false)
 
 const inviteForm = ref({
   email: '',
@@ -50,13 +51,14 @@ const organizationOptions = computed(() =>
 )
 
 const ensureOrganizations = async () => {
-  if (organizations.value.length || orgLoading.value) return
+  if (organizations.value.length || organizationsRequested.value) return
   let userId = authStore.user?.id
   if (!userId) {
     const loaded = await authStore.loadCurrentUser?.()
     userId = loaded?.id
   }
   if (userId) {
+    organizationsRequested.value = true
     await organizationStore.fetchOrganizations(userId)
   }
 }
@@ -208,7 +210,7 @@ watch(
 </script>
 
 <template>
-  <main class="app-container min-h-screen flex-1 bg-gray-50 px-6 py-10 lg:px-0 lg:py-14">
+  <main class="app-container min-h-screen flex-1 bg-gray-50 px-0 py-10 lg:py-14">
     <div
       v-if="!organizationId"
       class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-gray-100"
@@ -351,7 +353,9 @@ watch(
 
           <div v-else class="space-y-8">
             <!-- Header with Create Button -->
-            <div class="flex items-center justify-between">
+            <div
+              class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+            >
               <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">
                 {{ organizationName || 'Organization' }}'s Projects
               </h1>

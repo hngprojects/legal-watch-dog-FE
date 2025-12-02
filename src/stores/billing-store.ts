@@ -4,10 +4,17 @@ import { billingService } from '@/api/billing'
 import type { AxiosError } from 'axios'
 import { useAuthStore } from './auth-store'
 import { useRouter } from 'vue-router'
+import type {
+  BillingErrorResponse,
+  BillingHistoryEntry,
+  BillingPlan,
+  BillingSubscriptionStatus,
+} from '@/types/billing'
 
 interface State {
   billing: number
-  hasSubscribed: boolean
+  account_id: string | null
+  current_plan_id: string | null
   loading: boolean
   error: string | null
 }
@@ -15,7 +22,8 @@ interface State {
 export const useBillingStore = defineStore('billing', {
   state: (): State => ({
     billing: 0,
-    hasSubscribed: false,
+    account_id: null,
+    current_plan_id: null,
     loading: false,
     error: null,
   }),
@@ -29,64 +37,88 @@ export const useBillingStore = defineStore('billing', {
       this.loading = value
     },
 
+    async fetchPlans() {
+      this.setError(null)
+      this.setLoading(true)
+
+      try {
+        const res = await billingService.getPlans()
+
+        return res.data.data as BillingPlan[]
+      } catch (error) {
+        this.setError((error as BillingErrorResponse).message)
+      } finally {
+        this.setLoading(false)
+      }
+    },
+
     async getOrganizationId() {
       const router = useRouter()
-      const { user } = useAuthStore()
-      const { fetchOrganizations, currentOrganizationId } = useOrganizationStore()
+      const authStore = useAuthStore()
+      const organizationStore = useOrganizationStore()
 
+      let user = authStore.user
       if (!user) {
-        this.setError('No user found. Proceed to login')
+        user = await authStore.loadCurrentUser()
+      }
+
+      if (!user?.id) {
+        this.setError('Could not determine user. Please log in again.')
         router.push({ name: 'login' })
         return null
       }
 
-      await fetchOrganizations(user.id)
+      if (!organizationStore.currentOrganizationId) {
+        await organizationStore.fetchOrganizations(user.id)
+      }
 
-      // if (!hasOrganizations) {
-      //   this.setError('No organization found')
-      //   router.push({ name: 'dashboard' })
-      //   return null
-      // }
+      if (!organizationStore.hasOrganizations) {
+        this.setError('No organization found')
+        router.push({ name: 'dashboard' })
+        return null
+      }
 
-      console.log(currentOrganizationId)
+      if (!this.account_id) {
+        if (!organizationStore.currentOrganizationId) return null
+        const hasAccount = await this.hasBillingAccount(organizationStore.currentOrganizationId)
 
-      return currentOrganizationId
+        if (!hasAccount) {
+          await this.createBillingAccount(organizationStore.currentOrganizationId)
+        }
+      }
+
+      return organizationStore.currentOrganizationId
     },
 
-    async hasBillingAccount() {
+    async hasBillingAccount(organizationId: string) {
       this.setError(null)
-      const orgId = await this.getOrganizationId()
-
-      if (!orgId) return
-
       try {
-        const res = await billingService.getOrganizationBillingAccount(orgId)
+        const res = await billingService.getOrganizationBillingAccount(organizationId)
 
-        if (res.status === 200) return true
+        if (res.status === 200) {
+          this.account_id = res.data.data.id
+          return true
+        }
       } catch (error) {
-        if ((error as AxiosError).status === 404) return false
+        if ((error as AxiosError).status === 404) {
+          return false
+        }
       }
 
       return false
     },
 
-    async createBillingAccount() {
+    async createBillingAccount(organizationId: string) {
       this.setError(null)
-
-      const orgId = await this.getOrganizationId()
-
-      if (!orgId) return
-
       try {
-        const res = await billingService.createOrganizationBillingAccount(orgId)
+        const res = await billingService.createOrganizationBillingAccount(organizationId)
 
-        if (res.status === 200) return true
+        if (res.status === 201) {
+          this.account_id = res.data.data.id
+        }
       } catch (error) {
-        this.setError('Failed to create billing account.')
-        console.error(error)
+        this.setError((error as BillingErrorResponse).message)
       }
-
-      return false
     },
 
     async getSubscriptionStatus() {
@@ -97,43 +129,44 @@ export const useBillingStore = defineStore('billing', {
       try {
         const res = await billingService.getOrganizationSubscriptionStatus(orgId)
 
-        if (res.status === 200) {
-          this.hasSubscribed = res.data.data.has_subscribed
+        const status = res.data.data as BillingSubscriptionStatus
+
+        if (status.current_plan) {
+          this.current_plan_id = status.current_plan.id
         }
+        return status
       } catch (error) {
-        this.setError('Failed to get subscription status.')
-        console.error(error)
+        this.setError((error as BillingErrorResponse).message)
       }
     },
 
-    async getBillingPlans() {
-      this.setError(null)
-      const orgId = await this.getOrganizationId()
-
-      if (!orgId) return
-      try {
-        const res = await billingService.getOrganizationBillingPlans(orgId)
-
-        return res.data.data
-      } catch (error) {
-        console.error('Failed to load billing plans', error)
-        this.setError('Failed to load billing plans.')
-      }
-    },
-
-    async checkoutPlan(plan: string) {
+    async checkoutPlan(plan_id: string) {
       this.setError(null)
       const orgId = await this.getOrganizationId()
 
       if (!orgId) return
 
       try {
-        const res = await billingService.checkout(orgId, plan)
+        const res = await billingService.checkout(orgId, plan_id)
 
         return res.data.data.checkout_url
       } catch (error) {
-        console.error('Checkout failed', error)
-        this.setError('Failed to start checkout.')
+        this.setError((error as BillingErrorResponse).message)
+      }
+    },
+
+    async getPaymentHistory() {
+      this.setError(null)
+      const orgId = await this.getOrganizationId()
+
+      if (!orgId) return
+
+      try {
+        const res = await billingService.getOrganizationPaymentHistory(orgId)
+
+        return res.data.data as BillingHistoryEntry[]
+      } catch (error) {
+        this.setError((error as BillingErrorResponse).message)
       }
     },
 
@@ -143,12 +176,11 @@ export const useBillingStore = defineStore('billing', {
 
       if (!orgId) return
       try {
-        const res = await billingService.cancelOrganizationSubscription(orgId)
+        const res = await billingService.cancelOrganizationSubscriptionAtPeriodEnd(orgId)
 
         return res.data.data
       } catch (error) {
-        console.error('Cancel subscription failed', error)
-        this.setError('Failed to cancel subscription.')
+        this.setError((error as BillingErrorResponse).message)
       }
     },
   },
