@@ -137,7 +137,7 @@ const teamMembers = [
       <!-- Core Values -->
       <section class="app-container relative z-10 w-full bg-transparent py-12 sm:py-16">
         <div class="mx-auto flex w-full flex-col items-center gap-8 sm:gap-12">
-          <div class="space-y-3 text-center sm:space-y-4">
+          <div class="flex flex-col items-center justify-center space-y-3 text-center sm:space-y-4">
             <TypographyHeading level="h2" class="text-2xl font-bold sm:text-3xl md:text-4xl">
               Our <span class="text-[#F2AB6D]">Core</span> Values
             </TypographyHeading>
@@ -158,7 +158,7 @@ const teamMembers = [
                   <img
                     :src="card.icon"
                     :alt="`${card.title} icon`"
-                    class="h-5 w-5 object-contain sm:h-6 sm:w-6"
+                    class="h-15 w-15 object-contain sm:h-15 sm:w-15"
                   />
                 </div>
                 <h3 class="text-lg font-bold text-gray-900 sm:text-xl">
@@ -176,14 +176,16 @@ const teamMembers = [
       <!-- Meet Our Team -->
       <section class="app-container relative z-10 w-full py-12 sm:py-16">
         <div class="mx-auto flex w-full flex-col items-center gap-8 sm:gap-12">
-          <div class="space-y-3 text-center sm:space-y-4">
+          <div class="flex flex-col items-center justify-center space-y-3 text-center sm:space-y-4">
             <TypographyHeading level="h2" class="text-2xl font-bold sm:text-3xl md:text-4xl">
               Meet <span class="text-[#F2AB6D]">Our</span> Team
             </TypographyHeading>
-            <TypographyText tone="muted" align="center" class="text-sm sm:text-base">
+
+            <TypographyText tone="muted" align="center" class="max-w-2xl text-sm sm:text-base">
               Meet the dedicated minds working to bring transparency and innovation.
             </TypographyText>
           </div>
+
           <div
             class="flex w-full flex-col items-center justify-center gap-8 sm:flex-row sm:flex-wrap sm:gap-6 lg:gap-8"
           >
@@ -201,9 +203,11 @@ const teamMembers = [
                   class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                 />
               </div>
+
               <p class="mb-2 text-base leading-relaxed font-normal text-[#1F1F1F] sm:text-lg">
                 {{ member.description }}
               </p>
+
               <p class="text-sm font-medium sm:text-base">
                 <span class="text-[#1F1F1F]">({{ member.role }})</span>
                 <span class="text-[#F2AB6D]"> {{ member.name }}</span>
@@ -212,7 +216,6 @@ const teamMembers = [
           </div>
         </div>
       </section>
-
       <GlobalStatsSection />
     </main>
   </div>
@@ -227,13 +230,11 @@ const teamMembers = [
   }
 }
 
-/* Ensure images maintain aspect ratio */
 img {
   max-width: 100%;
   height: auto;
 }
 
-/* Better touch targets */
 @media (max-width: 768px) {
   a,
   button {
@@ -244,14 +245,12 @@ img {
   }
 }
 
-/* Prevent content from being too wide on large screens */
 @media (min-width: 1536px) {
   .app-container {
     max-width: 1280px;
   }
 }
 
-/* Smooth transitions */
 .transition-shadow {
   transition: box-shadow 0.3s ease;
 }
