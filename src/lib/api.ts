@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth-store'
+import themedSwal from '@/lib/swal'
 
 // Default to staging; override via VITE_API_BASE_URL for prod or other environments.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.legalwatch.dog/api/v1'
@@ -27,6 +28,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
+let isSessionExpiredAlertActive = false
+
 api.interceptors.response.use(
   (res) => res,
   (error) => {
@@ -35,6 +38,25 @@ api.interceptors.response.use(
     if (status === 401) {
       const auth = useAuthStore()
       auth.clearAuthState()
+
+       if (!isSessionExpiredAlertActive) {
+         isSessionExpiredAlertActive = true
+         void themedSwal
+           .fire({
+             title: 'Session expired',
+             text: 'Your session has expired. Please log in again to continue.',
+             icon: 'warning',
+             confirmButtonText: 'Login again',
+             allowOutsideClick: false,
+             allowEscapeKey: false,
+             allowEnterKey: true,
+             showCancelButton: false,
+           })
+           .finally(() => {
+             isSessionExpiredAlertActive = false
+             window.location.href = '/login'
+           })
+       }
     }
     return Promise.reject(error)
   },
