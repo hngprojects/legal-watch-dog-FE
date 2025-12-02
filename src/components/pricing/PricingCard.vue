@@ -19,6 +19,10 @@ const { i, activeBillingCycle, plan } = defineProps<{
 const route = useRoute()
 const billingStore = useBillingStore()
 
+const formatPrice = (amount: number) => {
+  return (amount / 100).toFixed(2)
+}
+
 const handlePay = async () => {
   const checkoutUrl = await billingStore.checkoutPlan(plan.id)
 
@@ -51,7 +55,7 @@ const handlePay = async () => {
       <p class="text-gray-600">{{ plan.description }}</p>
     </div>
     <p>
-      <span class="text-3xl font-medium">${{ plan.amount }}</span
+      <span class="text-3xl font-medium">${{ formatPrice(plan.amount) }}</span
       ><span class="text-gray-500">
         {{ activeBillingCycle === 'month' ? '/month' : '/year' }}
       </span>
