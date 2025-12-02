@@ -31,7 +31,16 @@ const handleSubmit = async () => {
   serverError.value = ''
 
   try {
-    await authStore.requestPasswordReset(sanitizedEmail)
+    const response = await authStore.requestPasswordReset(sanitizedEmail)
+    const statusCode = (response as { status_code?: number })?.status_code
+    if (typeof statusCode === 'number' && statusCode >= 400) {
+      serverError.value =
+        (response as { message?: string })?.message ?? 'Unable to send reset email. Please try again.'
+      return
+    }
+
+    authStore.setUserEmail(sanitizedEmail)
+    authStore.setOtpPurpose('password-reset')
     router.push({ name: 'otp', query: { flow: 'password-reset' } })
   } catch (error) {
     if (isAxiosError(error)) {
