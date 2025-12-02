@@ -192,7 +192,7 @@ const handleSubmit = async () => {
                 <img :src="EmailIcon" alt="Email" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base mt-3 lg:mt-0">
                   contact@legalwatch.dog
                 </p>
               </div>
@@ -207,7 +207,7 @@ const handleSubmit = async () => {
                 <img :src="OfficeIcon" alt="Office" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base mt-3 lg:mt-0">
                   2972 Westheimer Rd. Santa Ana,<br />Illinois 85486
                 </p>
               </div>
@@ -222,7 +222,7 @@ const handleSubmit = async () => {
                 <img :src="PhoneIcon" alt="Phone" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">+44 123 654 7890</p>
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base mt-3 lg:mt-0">+44 123 654 7890</p>
               </div>
             </div>
           </div>
