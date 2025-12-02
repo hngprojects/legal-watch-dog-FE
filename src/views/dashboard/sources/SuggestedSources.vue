@@ -146,8 +146,8 @@ watch(
 </script>
 
 <template>
-  <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-    <div class="mb-6 flex items-center justify-between">
+  <div class="rounded-sm border border-gray-100 bg-white p-1 shadow-sm">
+    <div class="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-3">
         <div class="flex h-8 w-8 items-center justify-center rounded bg-[#401903]">
           <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain brightness-0 invert" />
@@ -188,12 +188,12 @@ watch(
       <div
         v-for="item in suggestions"
         :key="item.id"
-        class="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50/50 p-4 hover:border-gray-200"
+        class="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50/50 hover:border-gray-200"
       >
-        <div class="flex items-start justify-between gap-3">
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <h4 class="font-medium text-gray-900">{{ item.title }}</h4>
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+          <div class="flex-1 space-y-1 min-w-0">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <h4 class="text-sm sm:text-2xl font-medium text-gray-900">{{ item.title }}</h4>
               <span
                 v-if="item.is_official"
                 class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
@@ -204,17 +204,17 @@ watch(
             <a
               :href="item.url"
               target="_blank"
-              class="text-sm text-[#401903] underline hover:no-underline"
+              class="wrap-break-word text-sm text-[#401903] underline hover:no-underline"
             >
               {{ item.url }}
             </a>
-            <p class="mt-1 text-xs text-gray-600 italic">{{ item.snippet }}</p>
-            <p class="mt-2 text-xs text-gray-500">
+            <p class="mt-1 text-xs text-gray-600 italic wrap-break-word">{{ item.snippet }}</p>
+            <p class="mt-2 text-xs text-gray-500 wrap-break-word">
               <span class="font-medium">Reason:</span> {{ item.confidence_reason }}
             </p>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 self-end sm:self-auto">
             <button @click="removeSuggestion(item.id)" class="text-gray-400 hover:text-red-600">
               <X :size="18" />
             </button>
@@ -225,7 +225,7 @@ watch(
               :class="
                 item.added
                   ? 'bg-[#12B76A] text-white'
-                  : 'border border-gray-300 bg-white text-[#401903] hover:bg-gray-50'
+                  : 'btn--secondary btn--sm'
               "
             >
               {{ item.added ? 'Added' : 'Add' }}
@@ -239,16 +239,16 @@ watch(
       No suggestions generated. Try adjusting the jurisdiction description.
     </div>
 
-    <div class="mt-8 flex justify-end gap-3">
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
       <button
         @click="onCancel"
-        class="rounded-lg border border-[#D0D5DD] bg-white px-5 py-2.5 text-sm font-medium text-[#344054] hover:bg-gray-50"
+        class="w-full rounded-lg border border-[#D0D5DD] bg-white px-5 py-2.5 text-sm font-medium text-[#344054] hover:bg-gray-50 sm:w-auto"
       >
         Cancel
       </button>
       <button
         @click="saveSelected"
-        class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#401903]/90 disabled:opacity-60"
+        class="w-full rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#401903]/90 disabled:opacity-60 sm:w-auto"
         :disabled="suggestions.filter((s) => s.added).length === 0"
       >
         Save Selected ({{ suggestions.filter((s) => s.added).length }})
