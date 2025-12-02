@@ -241,7 +241,7 @@ watch(
 
     <div class="mt-8 flex justify-end gap-3">
       <button
-        @click="onCancel"
+        @click="emit('cancel')"
         class="rounded-lg border border-[#D0D5DD] bg-white px-5 py-2.5 text-sm font-medium text-[#344054] hover:bg-gray-50"
       >
         Cancel
