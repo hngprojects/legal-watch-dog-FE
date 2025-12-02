@@ -716,12 +716,12 @@ watch(
 
                 <DialogFooter class="mt-2 flex items-center justify-end gap-3">
                   <DialogClose as-child>
-                    <button type="button" class="btn--secondary btn--sm md:btn--lg">Cancel</button>
+                    <button type="button" class="btn--secondary btn--sm md:btn--lg btn--full">Cancel</button>
                   </DialogClose>
                   <button
                     type="submit"
                     :disabled="inviteSending"
-                    class="btn--default btn--sm md:btn--lg"
+                    class="btn--default btn--sm md:btn--lg btn--full"
                   >
                     <span v-if="inviteSending">Sending...</span>
                     <span v-else>Send Invite</span>
