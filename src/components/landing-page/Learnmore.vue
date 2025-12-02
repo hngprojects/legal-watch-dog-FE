@@ -1,11 +1,8 @@
 <template>
   <div class="min-h-screen bg-[#F8FAFC]">
-    <!-- Main Content Area with Layout Grid -->
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:py-16 lg:px-8">
       <div class="flex flex-col lg:space-x-12">
-        <!-- LEFT COLUMN: Hero, Specialist Cards, Security/Pricing (Approx. 70%) -->
         <div class="space-y-12 md:space-y-16 lg:w-[70%]">
-          <!-- 2. Hero Section -->
           <section>
             <TypographyHeading
               level="h1"
@@ -20,7 +17,6 @@
             </TypographyText>
           </section>
 
-          <!-- 3. What Specialists Do (4 Cards) -->
           <section>
             <TypographyHeading
               level="h2"
@@ -50,7 +46,6 @@
                 :key="index"
                 class="flex items-start space-x-4"
               >
-                <!-- Numbered Circle -->
                 <div
                   class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#401903] text-sm font-bold text-white"
                 >
@@ -64,9 +59,7 @@
             </div>
           </section>
 
-          <!-- 5. Security & Pricing (Bottom Section - Left Side) -->
           <section class="space-y-10">
-            <!-- Security & Privacy -->
             <div>
               <TypographyHeading level="h2" class="mb-4 text-2xl font-bold text-[#401903]">
                 Security & Privacy
@@ -100,18 +93,124 @@
         </div>
         <div class="flex flex-col items-center py-4 sm:items-end">
           <button
-            class="cursor-pointer rounded-[8px] bg-[#401903] p-4 text-center text-white capitalize"
+            @click="openHireSpecialistModal"
+            class="cursor-pointer rounded-[8px] bg-[#401903] px-8 py-4 text-center text-lg font-medium text-white capitalize shadow-md transition-all hover:bg-[#301403] hover:shadow-lg"
           >
-            hire a specialist
+            Hire a Specialist
           </button>
         </div>
       </div>
     </div>
+    <Dialog
+      :open="showHireSpecialistModal"
+      @update:open="(value) => !value && closeHireSpecialistModal()"
+    "
+    >
+      <DialogScrollContent class="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Hire a Specialist</DialogTitle>
+        </DialogHeader>
+
+        <form @submit.prevent="submitHireForm" class="space-y-6">
+          <div>
+            <label for="companyName" class="mb-2 block text-sm font-semibold text-gray-900">
+              Company Name
+            </label>
+            <input
+              placeholder="United UI"
+              id="companyName"
+              type="text"
+              required
+              class="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
+            />
+          </div>
+
+          <div>
+            <label for="companyEmail" class="mb-2 block text-sm font-semibold text-gray-900">
+              Company Email Address
+            </label>
+            <input
+              placeholder="olivia@untitledui.com"
+              type="email"
+              required
+              class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
+            />
+          </div>
+
+          <div>
+            <label for="industry" class="mb-2 block text-sm font-semibold text-gray-900">
+              Industry
+            </label>
+            <div class="relative">
+              <select
+                id="industry"
+                class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0"
+              >
+                <option value="Immigration & Global Mobility">Immigration & Global Mobility</option>
+                <option value="Finance">Finance</option>
+                <option value="Healthcare">Healthcare</option>
+              </select>
+              <ChevronDown
+                :size="16"
+                class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 transform text-gray-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="description" class="mb-2 block text-sm font-semibold text-gray-900">
+              Brief Description
+            </label>
+            <textarea
+              placeholder="Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states"
+              id="description"
+              rows="3"
+              required
+              class="h-24 w-full resize-none rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
+            />
+          </div>
+
+          <DialogFooter class="flex justify-end gap-2 pt-4">
+            <button type="button" @click="closeHireSpecialistModal" class="btn--secondary btn--lg">
+              Cancel
+            </button>
+            <button type="submit" class="btn--default btn--lg">Hire Specialist</button>
+          </DialogFooter>
+        </form>
+      </DialogScrollContent>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { TypographyHeading, TypographyText } from '../ui/typography'
+import {
+  Dialog,
+  DialogHeader,
+  DialogTitle,
+  DialogScrollContent,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { ChevronDown } from 'lucide-vue-next'
+import Swal from '@/lib/swal'
+
+// Modal state
+const showHireSpecialistModal = ref(false)
+
+const openHireSpecialistModal = () => {
+  showHireSpecialistModal.value = true
+}
+
+const closeHireSpecialistModal = () => {
+  showHireSpecialistModal.value = false
+}
+
+const submitHireForm = async () => {
+  closeHireSpecialistModal()
+  await Swal.fire('Request Submitted', 'Your specialist request is being reviewed.', 'success')
+}
+
 const specialistTasks = [
   {
     title: 'Document Analysis',

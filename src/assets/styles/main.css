@@ -126,7 +126,7 @@
 }
 
 @utility btn {
-  @apply cursor-pointer rounded-sm disabled:cursor-not-allowed;
+  @apply cursor-pointer rounded-sm text-center disabled:cursor-not-allowed;
 }
 
 @utility btn--sm {
@@ -165,6 +165,10 @@
   @apply w-full;
 }
 
+@utility btn--compact {
+  @apply w-auto self-start;
+}
+
 @utility btn--default {
   @apply btn bg-accent-main hover:bg-accent-subtle text-bg disabled:bg-raised disabled:text-raised-fg;
 }
@@ -173,8 +177,16 @@
   @apply btn text-accent-main border-accent-main hover:text-accent-subtle hover:border-accent-subtle border bg-transparent;
 }
 
+@utility btn--contrast {
+  @apply btn bg-accent-subtle hover:bg-accent text-bg;
+}
+
+@utility btn--danger {
+  @apply btn text-destructive border-destructive hover:bg-destructive hover:text-destructive-fg border bg-transparent;
+}
+
 @utility btn--with-icon {
-  @apply flex items-center gap-2;
+  @apply btn flex items-center justify-center gap-2;
 }
 
 @utility btn--link {
