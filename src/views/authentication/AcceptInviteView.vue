@@ -13,25 +13,6 @@ const invitationStore = useInvitationStore()
 const { promptToAcceptInvite } = useInvitationPrompt()
 
 const accepting = ref(false)
-const invitedEmail = ref<string | null>(null)
-
-const extractInvitedEmail = (token: string) => {
-  try {
-    const [, payload] = token.split('.')
-    if (!payload) return null
-    const decoded = JSON.parse(atob(payload))
-    return (
-      decoded?.email ||
-      decoded?.invited_email ||
-      decoded?.invitation_email ||
-      decoded?.invitedUserEmail ||
-      null
-    )
-  } catch (error) {
-    void error
-    return null
-  }
-}
 
 onMounted(async () => {
   const token = typeof route.params.token === 'string' ? route.params.token : ''
@@ -43,55 +24,31 @@ onMounted(async () => {
 
   invitationStore.setToken(token)
   authStore.syncAuthFromStorage()
-  invitedEmail.value = extractInvitedEmail(token)
 
   if (authStore.isAuthenticated) {
-    const currentEmail =
-      authStore.user?.email?.toLowerCase() ?? authStore.email?.toLowerCase() ?? null
-    if (invitedEmail.value && currentEmail && invitedEmail.value.toLowerCase() !== currentEmail) {
-      const decision = await Swal.fire({
-        title: 'Switch account to accept',
-        text: `This invitation was sent to ${invitedEmail.value}, but you're signed in as ${currentEmail}. Please switch to the invited account to continue.`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Switch account',
-        cancelButtonText: 'Stay here',
-        reverseButtons: true,
-      })
-
-      if (decision.isConfirmed) {
-        await authStore.logout()
-        authStore.setUserEmail(invitedEmail.value)
-        router.replace({ name: 'login', query: { redirect: route.fullPath } })
-      } else {
-        router.replace({ name: 'organizations' })
-      }
-      return
-    }
-
-    const accepted = await promptToAcceptInvite(token, {
+    await promptToAcceptInvite(token, {
       onProcessingChange: (isProcessing) => {
         accepting.value = isProcessing
       },
     })
-    if (!accepted) {
-      router.replace({ name: 'organizations' })
-    }
     return
   }
 
   const result = await Swal.fire({
-    title: 'Sign in or sign up',
-    text:
-      invitedEmail.value && invitedEmail.value.length > 0
-        ? `This invitation is for ${invitedEmail.value}. Sign in with that email if you already have an account, or create one now.`
-        : 'To accept this invitation, sign in if you already have an account or create one now.',
+    title: 'Sign in to accept invite',
+    text: 'To accept this invitation, please sign in. If you already have an account, log in; otherwise create one.',
     icon: 'info',
     showDenyButton: true,
     showCancelButton: true,
-    confirmButtonText: 'Sign in',
-    denyButtonText: 'Create account',
+    confirmButtonText: 'Login',
+    denyButtonText: 'Sign up',
     cancelButtonText: 'Maybe later',
+    customClass: {
+      actions: 'flex flex-wrap gap-2',
+      denyButton: 'btn--default btn--sm md:btn--lg',
+      confirmButton: 'btn--default btn--sm md:btn--lg',
+      cancelButton: 'btn--secondary btn--sm md:btn--lg',
+    }
   })
 
   if (result.isConfirmed) {
