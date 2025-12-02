@@ -174,7 +174,9 @@ const handleSubmit = async () => {
             Contact Us
           </h1>
 
-          <p class="mb-8 max-w-md text-sm leading-relaxed text-[#6B7280] sm:mb-10 sm:text-base lg:mb-12">
+          <p
+            class="mb-8 max-w-md text-sm leading-relaxed text-[#6B7280] sm:mb-10 sm:text-base lg:mb-12"
+          >
             Have any enquiry? you have come to the right place. Get in touch with us through the
             form and we will get back to you as soon as possible
           </p>
@@ -190,7 +192,7 @@ const handleSubmit = async () => {
                 <img :src="EmailIcon" alt="Email" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base mt-3 lg:mt-0">
                   contact@legalwatch.dog
                 </p>
               </div>
@@ -205,7 +207,7 @@ const handleSubmit = async () => {
                 <img :src="OfficeIcon" alt="Office" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base mt-3 lg:mt-0">
                   2972 Westheimer Rd. Santa Ana,<br />Illinois 85486
                 </p>
               </div>
@@ -220,9 +222,7 @@ const handleSubmit = async () => {
                 <img :src="PhoneIcon" alt="Phone" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
-                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base">
-                  +44 123 654 7890
-                </p>
+                <p class="text-sm font-medium text-[#1F1F1F] sm:text-base mt-3 lg:mt-0">+44 123 654 7890</p>
               </div>
             </div>
           </div>
@@ -296,9 +296,11 @@ const handleSubmit = async () => {
                 :maxlength="maxCharacters"
                 rows="5"
                 placeholder="Add message"
-                class="w-full resize-none rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#1F1F1F] placeholder-[#9CA3AF] transition-all outline-none focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:rows-6"
+                class="sm:rows-6 w-full resize-none rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#1F1F1F] placeholder-[#9CA3AF] transition-all outline-none focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
               ></textarea>
-              <div class="mt-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0">
+              <div
+                class="mt-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0"
+              >
                 <div class="order-2 sm:order-1">
                   <p v-if="errors.message" class="text-sm text-red-600">
                     {{ errors.message }}
@@ -370,16 +372,16 @@ const handleSubmit = async () => {
     padding-left: 1rem;
     padding-right: 1rem;
   }
-  
+
   /* Stack character count below error message on mobile */
   .sm\:flex-row {
     flex-direction: column;
   }
-  
+
   .sm\:order-1 {
     order: 2;
   }
-  
+
   .sm\:order-2 {
     order: 1;
   }
@@ -417,12 +419,12 @@ img {
   textarea {
     font-size: 16px !important; /* Prevents iOS zoom on focus */
   }
-  
+
   input,
   textarea {
     min-height: 44px; /* Better touch target */
   }
-  
+
   .h-\[48px\] {
     height: 44px;
   }

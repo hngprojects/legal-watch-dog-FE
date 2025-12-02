@@ -19,7 +19,7 @@ const faqs = [
   {
     question: 'Who can use Legal WatchDog?',
     answer:
-      'The platform is built for enterprises. Whether you\'re part of a legal team, compliance team, risk team, policy team, or simply need to monitor updates across different regions, Legal WatchDog can support your work.',
+      "The platform is built for enterprises. Whether you're part of a legal team, compliance team, risk team, policy team, or simply need to monitor updates across different regions, Legal WatchDog can support your work.",
   },
   {
     question: 'How do I get started?',
@@ -32,9 +32,9 @@ const faqs = [
       'Yes. You can choose the regions, countries, or specific areas you want the platform to monitor. You can also organise them neatly inside each project.',
   },
   {
-    question: 'How do I know when there\'s an update or change?',
+    question: "How do I know when there's an update or change?",
     answer:
-      'Whenever something new is found, you\'ll receive a clear alert inside the platform. You can review what changed, see the details, and decide what action your team needs to take next.',
+      "Whenever something new is found, you'll receive a clear alert inside the platform. You can review what changed, see the details, and decide what action your team needs to take next.",
   },
   {
     question: 'Can I invite my colleagues or external partners?',
@@ -44,32 +44,32 @@ const faqs = [
   {
     question: 'Is my data safe?',
     answer:
-      'Yes. Your organisation\'s information is stored securely, and only people you approve can access it. External guests only see the discussion they were invited to.',
+      "Yes. Your organisation's information is stored securely, and only people you approve can access it. External guests only see the discussion they were invited to.",
   },
   {
     question: 'How does Legal WatchDog keep my projects up to date?',
     answer:
-      'The platform automatically reviews the areas you\'re monitoring and updates your projects when something changes. It highlights what\'s new, adds the update to the right project, and helps your team stay current without doing the manual work yourself.',
+      "The platform automatically reviews the areas you're monitoring and updates your projects when something changes. It highlights what's new, adds the update to the right project, and helps your team stay current without doing the manual work yourself.",
   },
   {
     question: 'How does the free trial work?',
     answer:
-      'When you create your first project, your free trial starts automatically. You\'ll get full access to explore the platform, and you can see how many days you have left on your Billing page. You won\'t be charged until you choose a plan.',
+      "When you create your first project, your free trial starts automatically. You'll get full access to explore the platform, and you can see how many days you have left on your Billing page. You won't be charged until you choose a plan.",
   },
   {
     question: 'What happens when my trial ends?',
     answer:
-      'If you don\'t subscribe before the trial ends, your account becomes inactive and premium features will be locked. You can regain access anytime by choosing a plan on the Billing page.',
+      "If you don't subscribe before the trial ends, your account becomes inactive and premium features will be locked. You can regain access anytime by choosing a plan on the Billing page.",
   },
   {
     question: 'How do I pay for a subscription?',
     answer:
-      'You can choose a Monthly or Yearly plan on the Billing page. When you proceed, you\'ll be redirected to a secure payment page where you can enter your card details. Once the payment is successful, your subscription becomes active immediately.',
+      "You can choose a Monthly or Yearly plan on the Billing page. When you proceed, you'll be redirected to a secure payment page where you can enter your card details. Once the payment is successful, your subscription becomes active immediately.",
   },
   {
     question: 'Can I cancel my subscription?',
     answer:
-      'Yes. You can cancel at any time. After cancellation, your plan stays active until the end of the current billing cycle. Once it expires, you\'ll lose premium access, but you can re-subscribe whenever you\'re ready.',
+      "Yes. You can cancel at any time. After cancellation, your plan stays active until the end of the current billing cycle. Once it expires, you'll lose premium access, but you can re-subscribe whenever you're ready.",
   },
 ]
 
@@ -107,7 +107,9 @@ function copyEmail() {
         <!-- FAQ Section -->
         <section class="mb-12 w-full sm:mb-16">
           <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:max-w-4xl">
-            <h1 class="mb-4 text-2xl font-bold text-primary sm:mb-5 sm:text-3xl md:text-4xl lg:text-preset-display-md">
+            <h1
+              class="text-primary lg:text-preset-display-md mb-4 text-2xl font-bold sm:mb-5 sm:text-3xl md:text-4xl"
+            >
               Frequently Asked Questions
             </h1>
             <p class="mb-10 text-sm text-gray-600 sm:mb-12 sm:text-base md:mb-16 md:text-lg">
@@ -116,7 +118,9 @@ function copyEmail() {
             </p>
           </div>
 
-          <div class="mx-auto w-full max-w-3xl rounded-lg bg-white p-4 shadow-sm sm:p-6 md:p-8 lg:p-10 xl:max-w-5xl">
+          <div
+            class="mx-auto w-full max-w-3xl rounded-lg bg-white p-4 shadow-sm sm:p-6 md:p-8 lg:p-10 xl:max-w-5xl"
+          >
             <template :key="i" v-for="(faq, i) in faqs">
               <Accordion type="single" collapsible class="mb-2 last:mb-0">
                 <AccordionItem :value="faq.question">
@@ -135,7 +139,9 @@ function copyEmail() {
         <!-- Contact Section -->
         <section class="w-full">
           <div class="mx-auto max-w-md px-4 sm:px-6">
-            <h2 class="mb-3 text-lg font-bold text-primary sm:mb-4 sm:text-xl md:text-2xl lg:text-preset-heading-lg">
+            <h2
+              class="text-primary lg:text-preset-heading-lg mb-3 text-lg font-bold sm:mb-4 sm:text-xl md:text-2xl"
+            >
               Have any other question?
             </h2>
             <p class="mb-4 text-xs text-gray-600 sm:mb-5 sm:text-sm md:mb-6 md:text-base">
@@ -144,7 +150,9 @@ function copyEmail() {
             <div
               class="mx-auto flex w-full max-w-md flex-col items-center gap-3 rounded-md bg-white p-3 shadow-sm sm:max-w-lg sm:flex-row sm:justify-between sm:gap-4 sm:p-4"
             >
-              <p class="text-sm font-medium break-all text-center sm:text-left sm:text-base md:text-lg">
+              <p
+                class="text-center text-sm font-medium break-all sm:text-left sm:text-base md:text-lg"
+              >
                 {{ EMAIL }}
               </p>
               <button
@@ -189,7 +197,7 @@ function copyEmail() {
     align-items: center;
     justify-content: center;
   }
-  
+
   /* Improve readability for FAQ content */
   .AccordionContent {
     line-height: 1.6;
@@ -207,7 +215,9 @@ function copyEmail() {
 
 /* Smooth transitions */
 button {
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 button:hover {

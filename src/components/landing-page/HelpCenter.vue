@@ -2,7 +2,7 @@
   <div class="help-center-page font-inter min-h-screen bg-white">
     <main class="bg-[#F8FAFC] py-12 md:py-20 lg:py-24">
       <!-- Main Titles -->
-      <div class="mb-12 px-4 text-center sm:px-6 lg:px-8 lg:mb-16">
+      <div class="mb-12 px-4 text-center sm:px-6 lg:mb-16 lg:px-8">
         <TypographyHeading
           level="h1"
           class="mb-3 text-center text-4xl font-extrabold tracking-tight text-[#5D2D18] sm:text-5xl md:text-6xl lg:text-7xl"
@@ -10,17 +10,19 @@
           Help Center
         </TypographyHeading>
 
-        <TypographyText class="block text-center text-base font-medium text-gray-700 sm:text-lg md:text-xl">
+        <TypographyText
+          class="block text-center text-base font-medium text-gray-700 sm:text-lg md:text-xl"
+        >
           How can we help you today?
         </TypographyText>
       </div>
 
       <!-- Hero Section (3 Action Cards) -->
-      <div class="app-container mx-auto mb-16 px-4 sm:px-6 lg:px-8 lg:mb-24">
-        <div class="grid grid-cols-1 gap-6 text-center sm:grid-cols-2 lg:grid-cols-3 sm:gap-8">
+      <div class="app-container mx-auto mb-16 px-4 sm:px-6 lg:mb-24 lg:px-8">
+        <div class="grid grid-cols-1 gap-6 text-center sm:grid-cols-2 sm:gap-8 lg:grid-cols-3">
           <!-- Card 1: Contact Support -->
           <RouterLink
-            to="/coming-soon"
+            to="/contact-us"
             class="flex h-[180px] flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-6 shadow-lg transition duration-300 hover:shadow-2xl sm:h-[200px] sm:p-8"
           >
             <div class="mb-4 h-10 w-4 sm:h-12 sm:w-5">
@@ -41,7 +43,7 @@
 
           <!-- Card 2: Search Articles -->
           <RouterLink
-            to="/coming-soon"
+            to="/blog"
             class="flex h-[180px] flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-6 text-center shadow-lg transition duration-300 hover:shadow-2xl sm:h-[200px] sm:p-8"
           >
             <div class="mb-4 h-10 w-4 sm:h-12 sm:w-5">
@@ -50,7 +52,7 @@
 
             <TypographyHeading
               level="h3"
-              class="mb-3 text-center text-lg font-semibold text-gray-900 sm:text-xl sm:mb-4"
+              class="mb-3 text-center text-lg font-semibold text-gray-900 sm:mb-4 sm:text-xl"
             >
               Search Articles
             </TypographyHeading>
@@ -58,7 +60,7 @@
 
           <!-- Card 3: User Guide -->
           <RouterLink
-            to="/coming-soon"
+            to="/how-it-works"
             class="flex h-[180px] flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-6 shadow-lg transition duration-300 hover:shadow-2xl sm:h-[200px] sm:p-8"
           >
             <div class="mb-4 h-10 w-4 sm:h-12 sm:w-5">
@@ -88,7 +90,9 @@
           Need Help?
         </TypographyHeading>
 
-        <TypographyText class="mx-auto block max-w-2xl text-center text-sm text-gray-700 sm:text-base md:text-lg">
+        <TypographyText
+          class="mx-auto block max-w-2xl text-center text-sm text-gray-700 sm:text-base md:text-lg"
+        >
           Get answers, find support, and learn how to make the most of Legal Watchdog.
         </TypographyText>
       </div>
@@ -113,12 +117,15 @@
             </div>
 
             <!-- Title -->
-            <TypographyHeading level="h3" class="mb-2 text-center text-lg font-bold text-gray-900 sm:text-xl">
+            <TypographyHeading
+              level="h3"
+              class="mb-2 text-center text-lg font-bold text-gray-900 sm:text-xl"
+            >
               {{ feature.title }}
             </TypographyHeading>
 
             <!-- Description -->
-            <TypographyText class="mb-3 block text-center text-xs text-gray-600 sm:text-sm sm:mb-4">
+            <TypographyText class="mb-3 block text-center text-xs text-gray-600 sm:mb-4 sm:text-sm">
               {{ feature.description }}
             </TypographyText>
           </div>
@@ -211,7 +218,8 @@ img {
 }
 
 /* Smooth transitions */
-a, div[class*="hover:shadow"] {
+a,
+div[class*='hover:shadow'] {
   transition: all 0.3s ease;
 }
 

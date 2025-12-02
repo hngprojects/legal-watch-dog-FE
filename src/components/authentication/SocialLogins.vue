@@ -6,7 +6,7 @@ import { ref } from 'vue'
 // import { useRouter } from 'vue-router'
 
 const baseButtonClass =
-  'flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 shadow-[0_1px_0_rgba(16,24,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-sm sm:w-auto sm:min-w-[180px] cursor-pointer'
+  'btn--with-icon border border-gray-200 bg-white btn--sm font-medium text-gray-800 shadow-[0_1px_0_rgba(16,24,40,0.04)] transition hover:-translate-y-0.5 hover:shadow-sm sm:w-auto'
 
 const props = defineProps<{
   rememberMe?: boolean
@@ -216,7 +216,7 @@ const handleGoogleLogin = async () => {
         @click="handleGoogleLogin"
       >
         <img src="/images/google.png" alt="Google" class="h-5 w-5" />
-        <span>{{ isGoogleLoading ? 'Connecting...' : 'Google' }}</span>
+        <span>{{ isGoogleLoading ? 'Connecting...' : 'Continue with Google' }}</span>
       </button>
 
       <!-- <button

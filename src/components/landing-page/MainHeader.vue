@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth-store'
 
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 import UserAvatar from '@/components/dashboard/UserAvatar.vue'
+import Swal from '@/lib/swal'
 
 const router = useRouter()
 
@@ -16,6 +17,7 @@ type NavLink = {
 }
 
 const isMenuOpen = ref(false)
+const isMobileDropdownOpen = ref(false)
 
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -55,13 +57,29 @@ const toggleBodyScroll = (lock: boolean) => {
 
 watch(isMenuOpen, (newVal) => {
   toggleBodyScroll(newVal)
+  if (!newVal) {
+    isMobileDropdownOpen.value = false
+  }
 })
 
 const closeMenu = () => {
   isMenuOpen.value = false
+  isMobileDropdownOpen.value = false
 }
 
 const handleLogout = async () => {
+  const result = await Swal.fire({
+    icon: 'warning',
+    title: 'Log out?',
+    text: 'You will need to sign in again to access your dashboard.',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, log me out',
+    cancelButtonText: 'Stay logged in',
+    confirmButtonColor: '#DC2626',
+  })
+
+  if (!result.isConfirmed) return
+
   isMenuOpen.value = false
   await authStore.logout()
   router.replace({ name: 'login' })
@@ -77,7 +95,7 @@ onUnmounted(() => {
     class="text-text-main sticky top-0 z-50 w-full border-b border-white/80 bg-white/90 backdrop-blur-md"
   >
     <div
-      class="app-container mx-auto flex w-full items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-4 sm:py-4 lg:py-5"
+      class="app-container mx-auto flex w-full items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:py-5"
     >
       <!-- LOGO -->
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
@@ -112,14 +130,14 @@ onUnmounted(() => {
           >
             Sign In
           </Button>
-          
+
           <!-- Sign Up button - smaller on mobile -->
           <Button
             :as="RouterLink"
             :to="{ path: '/signup' }"
             variant="default"
             size="default"
-            class="text-sm sm:text-base"
+            class="hidden text-sm sm:block sm:text-base"
           >
             Sign Up
           </Button>
@@ -129,9 +147,13 @@ onUnmounted(() => {
         <div v-else class="hidden items-center gap-3 sm:gap-5 lg:flex">
           <div class="flex items-center space-x-4">
             <UserDropdown @logout="handleLogout">
-              <button class="btn btn--with-icon flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-gray-100">
+              <button
+                class="btn btn--with-icon flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-gray-100"
+              >
                 <UserAvatar :name="displayName" :size="38" />
-                <span class="max-w-[100px] truncate text-sm font-semibold text-gray-800 xl:max-w-[140px]">
+                <span
+                  class="max-w-[100px] truncate text-sm font-semibold text-gray-800 xl:max-w-[140px]"
+                >
                   {{ displayName }}
                 </span>
               </button>
@@ -142,7 +164,7 @@ onUnmounted(() => {
         <!-- MOBILE/TABLET MENU BUTTON -->
         <button
           @click="isMenuOpen = !isMenuOpen"
-          class="text-text-main inline-flex items-center justify-center rounded-lg border p-2 hover:bg-gray-50 lg:hidden"
+          class="btn--icon-only btn--icon-sm btn--default lg:hidden"
           aria-label="Toggle menu"
         >
           <svg
@@ -159,7 +181,13 @@ onUnmounted(() => {
               d="M4 6h16M4 12h16M4 18h16"
             />
           </svg>
-          <svg v-else class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            v-else
+            class="h-5 w-5 sm:h-6 sm:w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -190,7 +218,11 @@ onUnmounted(() => {
           <RouterLink to="/" @click="closeMenu">
             <BrandLogo class="h-8 w-auto sm:h-10" />
           </RouterLink>
-          <button @click="closeMenu" class="rounded-lg p-1 hover:bg-gray-100" aria-label="Close menu">
+          <button
+            @click="closeMenu"
+            class="btn--icon-only btn--icon-sm btn--default"
+            aria-label="Close menu"
+          >
             <svg class="h-6 w-6" fill="none" stroke="currentColor">
               <path
                 stroke-linecap="round"
@@ -218,25 +250,41 @@ onUnmounted(() => {
         <!-- Action Buttons -->
         <div class="space-y-3 border-t p-4 sm:space-y-4 sm:p-6">
           <template v-if="isAuthenticated">
-            <!-- User info on mobile/tablet -->
-            <div class="mb-4 flex items-center gap-3 rounded-lg bg-gray-50 p-3">
-              <UserAvatar :name="displayName" :size="40" />
-              <div class="flex-1 min-w-0">
-                <p class="truncate text-sm font-semibold text-gray-800">{{ displayName }}</p>
-                <p class="text-xs text-gray-500">Logged in</p>
-              </div>
+            <!-- User Dropdown on Mobile/Tablet -->
+            <div class="mb-4">
+              <UserDropdown @logout="handleLogout" @navigate="closeMenu">
+                <button
+                  class="flex w-full items-center gap-3 rounded-lg bg-gray-50 p-3 hover:bg-gray-100 transition-colors"
+                >
+                  <UserAvatar :name="displayName" :size="40" />
+                  <div class="min-w-0 flex-1 text-left">
+                    <p class="truncate text-sm font-semibold text-gray-800">{{ displayName }}</p>
+                    <p class="text-xs text-gray-500">View profile & settings</p>
+                  </div>
+                  <svg
+                    class="h-5 w-5 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+              </UserDropdown>
             </div>
-            
+
             <Button
               :as="RouterLink"
               :to="{ name: 'organizations' }"
               @click="closeMenu"
-              class="w-full text-white"
+              class="btn--default btn--sm sm:btn--lg w-full"
             >
               Go to Dashboard
-            </Button>
-           <Button variant="outline" @click="handleLogout" class="w-full">
-              Logout
             </Button>
           </template>
 

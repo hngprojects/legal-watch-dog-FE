@@ -61,23 +61,29 @@ const showVideo = ref(false)
           );
         "
       ></div>
-      
+
       <!-- Hero Section -->
-      <section class="app-container relative z-10 mb-16 space-y-8 text-center sm:mb-20 sm:space-y-10 lg:mb-24">
+      <section
+        class="app-container relative z-10 mb-16 space-y-8 text-center sm:mb-20 sm:space-y-10 lg:mb-24"
+      >
         <PillTag>
-          <span class="text-sm font-normal text-gray-600 sm:text-base">AI-Powered Regulatory Intelligence</span>
+          <span class="text-sm font-normal text-gray-600 sm:text-base"
+            >AI-Powered Regulatory Intelligence</span
+          >
         </PillTag>
-        
+
         <div class="space-y-4 sm:space-y-5">
-          <h1 class="text-3xl font-bold text-primary sm:text-4xl md:text-5xl lg:text-preset-display-md">
+          <h1
+            class="text-primary lg:text-preset-display-md text-3xl font-bold sm:text-4xl md:text-5xl"
+          >
             How Legal Watch Dog Works
           </h1>
-          <p class="text-base text-gray-600 sm:text-lg md:text-xl lg:text-preset-body-xx-lg">
+          <p class="lg:text-preset-body-xx-lg text-base text-gray-600 sm:text-lg md:text-xl">
             Stay ahead of legal changes with AI-powered monitoring.<br class="hidden sm:block" />
             Never miss an important update across any jurisdiction.
           </p>
         </div>
-        
+
         <!-- Video Button -->
         <Button
           variant="secondary"
@@ -87,7 +93,7 @@ const showVideo = ref(false)
         >
           <Icon :icon="PlayIcon" class="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Watch 2-minute Demo
         </Button>
-        
+
         <!-- Video Modal -->
         <Teleport to="body">
           <div
@@ -97,7 +103,7 @@ const showVideo = ref(false)
           >
             <div class="relative w-full max-w-3xl sm:max-w-4xl lg:max-w-5xl">
               <button
-                class="absolute -top-10 right-0 z-10 cursor-pointer select-none text-4xl font-light leading-none text-white transition-colors duration-200 hover:text-gray-300 sm:-top-12 sm:text-5xl"
+                class="absolute -top-10 right-0 z-10 cursor-pointer text-4xl leading-none font-light text-white transition-colors duration-200 select-none hover:text-gray-300 sm:-top-12 sm:text-5xl"
                 @click="showVideo = false"
               >
                 ×
@@ -120,10 +126,12 @@ const showVideo = ref(false)
       <!-- Steps Section -->
       <section class="app-container relative z-10 text-center">
         <div class="mb-16 sm:mb-20 lg:mb-28">
-          <h2 class="text-2xl font-semibold sm:text-3xl md:text-4xl lg:text-preset-display-sm">
+          <h2 class="lg:text-preset-display-sm text-2xl font-semibold sm:text-3xl md:text-4xl">
             5 <span class="text-peach-amber-main">Simple Steps</span> to Stay Informed
           </h2>
-          <p class="mt-2 text-base text-gray-600 sm:mt-3 sm:text-lg md:text-xl lg:text-preset-body-xx-lg">
+          <p
+            class="lg:text-preset-body-xx-lg mt-2 text-base text-gray-600 sm:mt-3 sm:text-lg md:text-xl"
+          >
             From setups to alerts in minutes
           </p>
         </div>
@@ -136,31 +144,27 @@ const showVideo = ref(false)
             :class="{ 'lg:flex-row-reverse': i % 2 !== 0 }"
           >
             <!-- Content Column -->
-            <div 
+            <div
               class="w-full max-w-md space-y-4 md:max-w-lg lg:max-w-none lg:basis-1/2 lg:space-y-5 lg:self-center"
-              :class="[
-                i % 2 !== 0 ? 'lg:pl-10 xl:pl-14' : 'lg:pr-10 xl:pr-14'
-              ]"
+              :class="[i % 2 !== 0 ? 'lg:pl-10 xl:pl-14' : 'lg:pr-10 xl:pr-14']"
             >
               <!-- Step Indicator -->
-              <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
+              <div
+                class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"
+              >
                 <div class="flex items-center justify-center p-3 sm:p-4">
-                  <img 
-                    :src="workIcon" 
-                    alt="icon" 
-                    class="h-10 w-10 sm:h-12 sm:w-12"
-                  />
+                  <img :src="workIcon" alt="icon" class="h-10 w-10 sm:h-12 sm:w-12" />
                 </div>
                 <div class="flex items-center gap-3">
-                  <h3 class="text-lg font-semibold text-peach-amber-main sm:text-xl md:text-2xl">
+                  <h3 class="text-peach-amber-main text-lg font-semibold sm:text-xl md:text-2xl">
                     Step {{ i + 1 }}
                   </h3>
                 </div>
               </div>
-              
+
               <!-- Title & Description -->
               <div class="space-y-3">
-                <h4 class="text-xl font-bold sm:text-2xl md:text-3xl lg:text-preset-heading-lg">
+                <h4 class="lg:text-preset-heading-lg text-xl font-bold sm:text-2xl md:text-3xl">
                   {{ step.title }}
                 </h4>
                 <p class="text-sm font-medium text-gray-600 sm:text-base md:text-lg lg:pt-1">
@@ -170,9 +174,9 @@ const showVideo = ref(false)
             </div>
 
             <!-- Image Column -->
-            <div class="w-full max-w-md md:max-w-lg lg:basis-1/2 lg:max-w-none">
-              <img 
-                :src="step.image" 
+            <div class="w-full max-w-md md:max-w-lg lg:max-w-none lg:basis-1/2">
+              <img
+                :src="step.image"
                 :alt="step.title"
                 class="w-full rounded-2xl shadow-lg sm:rounded-3xl"
               />
@@ -198,12 +202,12 @@ const showVideo = ref(false)
   article {
     flex-direction: column !important;
   }
-  
+
   /* Center content on mobile */
   .lg\:text-start {
     text-align: center;
   }
-  
+
   .lg\:justify-start {
     justify-content: center;
   }

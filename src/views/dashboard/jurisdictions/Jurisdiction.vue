@@ -531,7 +531,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-6 py-8 lg:px-10 lg:py-12">
+  <main class="min-h-screen flex-1 bg-[#F8F7F5] px-4 py-6 sm:px-6 lg:px-10 lg:py-12">
     <div v-if="loading" class="mx-auto max-w-6xl">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
@@ -629,8 +629,11 @@ onMounted(() => {
 
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button type="button" class="btn--default btn--sm">
-              <Settings :size="18" />
+            <button
+              type="button"
+              class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 sm:h-10 sm:w-10"
+            >
+              <Settings :size="17" class="sm:size-[18px]" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" class="w-48">
@@ -647,7 +650,7 @@ onMounted(() => {
           <p class="text-xs font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
             Jurisdiction
           </p>
-          <h1 class="text-3xl font-bold text-[#1F1F1F]">{{ jurisdiction.name }}</h1>
+          <h1 class="text-2xl font-bold text-[#1F1F1F] sm:text-3xl">{{ jurisdiction.name }}</h1>
           <p v-if="jurisdiction.description" class="text-base leading-relaxed text-[#4B5563]">
             {{ jurisdiction.description }}
           </p>
@@ -662,7 +665,9 @@ onMounted(() => {
               @click="activeTab = 'sources'"
               :class="[
                 'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'sources' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
+                activeTab === 'sources'
+                  ? 'text-[#1F1F1F]'
+                  : 'hover:text-[#1F1F1F cursor-pointer text-gray-500',
               ]"
             >
               Sources
@@ -676,7 +681,9 @@ onMounted(() => {
               @click="activeTab = 'analysis'"
               :class="[
                 'relative pb-4 text-sm font-semibold transition-colors',
-                activeTab === 'analysis' ? 'text-[#1F1F1F]' : 'text-gray-500 hover:text-[#1F1F1F]',
+                activeTab === 'analysis'
+                  ? 'text-[#1F1F1F]'
+                  : 'cursor-pointer text-gray-500 hover:text-[#1F1F1F]',
               ]"
             >
               Analysis
@@ -727,10 +734,15 @@ onMounted(() => {
       </section>
 
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-        <div class="mb-4 flex items-center justify-between gap-4">
+        <div
+          class="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+        >
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
-          <button class="btn--default btn--with-icon btn--lg" @click="openSubJurisdictionModal">
+          <button
+            class="btn--default btn--with-icon btn--sm sm-btn--lg"
+            @click="openSubJurisdictionModal"
+          >
             <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>

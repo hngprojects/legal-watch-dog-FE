@@ -16,6 +16,7 @@ import Features from '@/views/FeaturesView.vue'
 import BlogView from '@/views/BlogView.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
+import LearnMore from '@/views/LearnMore.vue'
 import OnboardingView from '@/views/OnboardingView.vue'
 import PrivacyPolicyView from '@/views/PrivacyPolicyView.vue'
 
@@ -78,6 +79,7 @@ const router = createRouter({
         },
         { path: 'features', name: 'features', component: Features },
         { path: 'waitlist', name: 'waitlist', component: WaitlistView },
+
         {
           path: 'how-it-works',
           name: 'how-it-works',
@@ -217,6 +219,7 @@ const router = createRouter({
           name: 'billing',
           component: () => import('@/views/dashboard/settings/BillingView.vue'),
         },
+        { path: 'learn-more', name: 'learn-more', component: LearnMore },
         {
           path: 'payment/plan',
           name: 'payment-plan',
@@ -236,14 +239,18 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
+  auth.syncAuthFromStorage()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const isAuthRoute = to.name === 'login' || to.name === 'signup'
+  const isOtpRoute = to.name === 'otp'
 
   if (to.name === 'auth-status') {
     const issued = to.query.issued === 'true'
     if (auth.isAuthenticated || issued) return true
     return { name: 'login', query: { redirect: to.fullPath } }
   }
+
+  if (isOtpRoute) return true
 
   if (isAuthRoute && auth.isAuthenticated) {
     return { name: 'dashboard' }

@@ -3,6 +3,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useOrganizationStore } from '@/stores/organization-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
@@ -30,6 +31,8 @@ const router = useRouter()
 const projectStore = useProjectStore()
 const jurisdictionStore = useJurisdictionStore()
 const organizationStore = useOrganizationStore()
+const authStore = useAuthStore()
+const organizationsRequested = ref(false)
 const projectId = route.params.id as string
 const organizationId = computed(
   () => (route.params.organizationId as string) || project.value?.org_id || '',
@@ -45,16 +48,16 @@ const showAddJurisdictionModal = ref(false)
 const jurisdictionForm = ref({ name: '', description: '' })
 const selected = ref('AI')
 
-const showHireSpecialistModal = ref(false)
-const hireForm = ref({
-  companyName: 'Untitled UI',
-  companyEmail: 'olivia@untitledui.com',
+// Default form structure for Hire Specialist
+const defaultHireForm = {
   industry: 'Immigration & Global Mobility',
-  description:
-    'Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states',
-})
+}
+
+const showHireSpecialistModal = ref(false)
+const hireForm = ref({ ...defaultHireForm })
 
 const openHireSpecialistModal = () => {
+  hireForm.value = { ...defaultHireForm }
   showHireSpecialistModal.value = true
 }
 
@@ -139,7 +142,22 @@ const goToJurisdiction = (jurisdictionId: string) => {
   })
 }
 
+const ensureOrganizations = async () => {
+  if (organizationStore.organizations.length || organizationsRequested.value) return
+  let userId = authStore.user?.id
+  if (!userId) {
+    const loaded = await authStore.loadCurrentUser?.()
+    userId = loaded?.id
+  }
+  if (userId) {
+    organizationsRequested.value = true
+    await organizationStore.fetchOrganizations(userId)
+  }
+}
+
 onMounted(async () => {
+  void ensureOrganizations()
+
   const existingProject = projectStore.projects.find((p) => p.id === projectId)
 
   if (existingProject) {
@@ -269,7 +287,7 @@ watch(
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-gray-50 p-6 lg:p-10">
+  <main class="min-h-screen flex-1 bg-gray-50 p-2 lg:p-10">
     <div v-if="loading" class="mx-auto max-w-7xl">
       <div class="animate-pulse">
         <div class="mb-8 h-6 w-64 rounded bg-gray-200"></div>
@@ -286,7 +304,7 @@ watch(
     </div>
 
     <div v-else class="app-container mx-auto">
-      <div class="mb-8 flex items-center justify-between">
+      <div class="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -324,25 +342,19 @@ watch(
         </Breadcrumb>
 
         <div class="relative">
-          <button
-            @click.stop="toggleSettingsMenu"
-            class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
-          >
+          <button @click.stop="toggleSettingsMenu" class="btn--default btn--icon-sm btn--icon-only">
             <Settings :size="18" />
           </button>
 
           <div
             v-if="showSettingsMenu"
             @click.stop
-            class="absolute right-0 z-50 mt-2 w-44 rounded-md bg-white shadow-lg ring-1 ring-black/5"
+            class="absolute z-50 mt-2 w-44 space-y-1 rounded-md bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0"
           >
-            <button @click="startEdit" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50">
+            <button @click="startEdit" class="btn--secondary btn--full btn--sm">
               Edit Project
             </button>
-            <button
-              @click="deleteProject"
-              class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-            >
+            <button @click="deleteProject" class="btn--danger btn--full btn--sm">
               Delete Project
             </button>
           </div>
@@ -360,7 +372,10 @@ watch(
 
           <p class="text-fg text-[14px] leading-snug sm:text-[16px]">
             Hiring a specialist give you the best possible result.
-            <!-- <span class="cursor-pointer underline">learn more about a specialist</span> -->
+
+            <RouterLink :to="{ name: 'learn-more' }">
+              <span class="cursor-pointer underline">learn more about a specialist</span>
+            </RouterLink>
           </p>
         </div>
         <button
@@ -403,16 +418,11 @@ watch(
               <button
                 type="button"
                 @click="showInlineEdit = false"
-                class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
+                class="btn--secondary btn--sm md:btn--lg"
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#2a1102]"
-              >
-                Save Changes
-              </button>
+              <button type="submit" class="btn--default btn--sm md:btn--lg">Save Changes</button>
             </div>
           </form>
         </template>
@@ -471,9 +481,13 @@ watch(
             View Archive
           </button> -->
 
-          <button @click="openAddJurisdictionModal" class="btn--default btn--with-icon btn--lg">
-            <Plus :size="18" />
-            Add Jurisdiction
+          <button
+            @click="openAddJurisdictionModal"
+            class="btn--default btn--with-icon btn--sm md:btn--lg"
+          >
+            <Plus :size="18" class="sm:size-5" />
+            <span class="hidden sm:inline">Add Jurisdiction</span>
+            <span class="sm:hidden">Add</span>
           </button>
         </div>
       </div>
@@ -577,10 +591,6 @@ watch(
       <DialogScrollContent class="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Hire a Specialist</DialogTitle>
-          <DialogDescription>
-            Monitor changes to EU travel rules, visa requirements, entry conditions, and policy
-            updates across all Schengen and EU member states
-          </DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="submitHireForm" class="space-y-6">
@@ -589,7 +599,7 @@ watch(
               Company Name
             </label>
             <input
-              v-model="hireForm.companyName"
+              placeholder="United UI"
               id="companyName"
               type="text"
               required
@@ -602,8 +612,7 @@ watch(
               Company Email Address
             </label>
             <input
-              v-model="hireForm.companyEmail"
-              id="companyEmail"
+              placeholder="olivia@untitledui.com"
               type="email"
               required
               class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
@@ -616,7 +625,6 @@ watch(
             </label>
             <div class="relative">
               <select
-                v-model="hireForm.industry"
                 id="industry"
                 class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0"
               >
@@ -636,7 +644,7 @@ watch(
               Brief Description
             </label>
             <textarea
-              v-model="hireForm.description"
+              placeholder="Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states"
               id="description"
               rows="3"
               required

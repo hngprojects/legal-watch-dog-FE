@@ -12,7 +12,9 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
 
 <template>
   <section id="hero" class="relative flex w-full flex-1 items-center justify-center">
-    <div class="mx-auto flex w-full max-w-[900px] flex-col items-center px-4 pt-12 text-center sm:px-6 sm:pt-16 lg:pt-20">
+    <div
+      class="mx-auto flex w-full max-w-[900px] flex-col items-center px-4 pt-12 text-center sm:px-6 sm:pt-16 lg:pt-20"
+    >
       <!-- Badge -->
       <Badge
         variant="secondary"
@@ -20,17 +22,17 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
       >
         AI-Powered Regulatory Intelligence
       </Badge>
-      
+
       <!-- Heading -->
-      <TypographyHeading 
-        level="h1" 
+      <TypographyHeading
+        level="h1"
         align="center"
         class="mt-6 text-3xl leading-tight sm:mt-8 sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight lg:text-6xl lg:leading-tight"
       >
         Automate Legal Monitoring,<br class="hidden sm:inline" />
         <span class="sm:hidden"> </span>Never Miss A Critical Update
       </TypographyHeading>
-      
+
       <!-- Description -->
       <TypographyText
         class="mx-auto mt-4 max-w-[280px] text-sm leading-6 font-semibold text-gray-600 sm:mt-5 sm:max-w-[500px] sm:text-base sm:leading-7 lg:mt-6 lg:max-w-[900px] lg:text-lg"
@@ -40,7 +42,7 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
         LegalWatchDog uses AI to track all changes on any website, from Visa portals to employment
         laws and delivers concise actionable summaries.
       </TypographyText>
-      
+
       <!-- CTA Button -->
       <Button
         :as="RouterLink"
