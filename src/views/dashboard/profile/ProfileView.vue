@@ -47,6 +47,22 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 const uploadingImage = ref(false)
 const isSaving = ref(false)
 
+const normalizeRoleLabel = (role?: string) => {
+  const normalized = role?.toString().trim().toLowerCase()
+  switch (normalized) {
+    case 'owner':
+      return 'Owner'
+    case 'admin':
+      return 'Admin'
+    case 'manager':
+      return 'Manager'
+    case 'member':
+      return 'Member'
+    default:
+      return 'Member'
+  }
+}
+
 const fallbackNameFromEmail = computed(() => {
   const email = userProfile.value?.email || ''
   if (!email) return ''
@@ -69,11 +85,11 @@ const fullName = computed(() => {
 })
 
 const primaryRole = computed(() => {
-  return (
+  return normalizeRoleLabel(
     userProfile.value?.role ||
-    organizations.value[0]?.user_role ||
-    userProfile.value?.organizations?.[0]?.role ||
-    'Member'
+      organizations.value[0]?.user_role ||
+      userProfile.value?.organizations?.[0]?.role ||
+      'Member',
   )
 })
 
@@ -508,7 +524,7 @@ const saveEdits = async () => {
                 <span
                   class="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-[#C35A11]"
                 >
-                  {{ org.user_role || 'Member' }}
+                  {{ normalizeRoleLabel(org.user_role) }}
                 </span>
               </div>
             </article>
