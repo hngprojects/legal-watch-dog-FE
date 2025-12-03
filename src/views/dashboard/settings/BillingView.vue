@@ -3,7 +3,7 @@ import CancelSubscriptionModal from '@/components/pricing/CancelSubscriptionModa
 import Icon from '@/components/reusable/Icon.vue'
 import Swal from '@/lib/swal'
 import { useBillingStore } from '@/stores/billing-store'
-import type { BillingPlan } from '@/types/billing'
+import type { BillingHistoryEntry, BillingPlan } from '@/types/billing'
 import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
@@ -11,8 +11,9 @@ import { RouterLink } from 'vue-router'
 const hasHistory = ref(false)
 const isFreeTrial = ref(true)
 const cancelled = ref(false)
-const currentPlan = ref<BillingPlan | null>(null)
+const currentPlan = ref<BillingPlan | undefined>(undefined)
 const endDate = ref<Date | undefined>(undefined)
+const invoice = ref<BillingHistoryEntry[] | undefined>(undefined)
 
 const billingStore = useBillingStore()
 
@@ -32,24 +33,24 @@ onMounted(async () => {
 
   if (subscriptionStatus?.trial_starts_at && subscriptionStatus?.trial_ends_at) {
     isFreeTrial.value = true
-    endDate.value = subscriptionStatus.trial_ends_at
+    endDate.value = new Date(subscriptionStatus.trial_ends_at)
   } else if (subscriptionStatus?.current_plan && subscriptionStatus.current_period_end) {
     isFreeTrial.value = false
-    endDate.value = subscriptionStatus.current_period_end
+    currentPlan.value = subscriptionStatus.current_plan
+    endDate.value = new Date(subscriptionStatus.current_period_end)
   }
 
   cancelled.value = subscriptionStatus?.cancel_at_period_end || false
 
   if (history && history.length > 0) {
     hasHistory.value = true
+    invoice.value = history
   }
 })
 
-const calculateDaysLeft = (endDate: string | Date): string => {
-  console.log(endDate)
+const calculateDaysLeft = (endDate: Date): string => {
   const today = new Date()
-  const end = new Date(endDate)
-  const diffTime = end.getTime() - today.getTime()
+  const diffTime = endDate.getTime() - today.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
   if (diffDays > 0) {
@@ -65,7 +66,7 @@ const calculateDaysLeft = (endDate: string | Date): string => {
 <template>
   <h1 class="app-container mb-8 text-3xl font-semibold">Billing & Subscription</h1>
   <section
-    class="mb-10 flex flex-col gap-6 app-container *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
+    class="app-container mb-10 flex flex-col gap-6 *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
   >
     <article>
       <div class="mb-5 flex items-center justify-between">
@@ -81,11 +82,16 @@ const calculateDaysLeft = (endDate: string | Date): string => {
           You're currently on a free trial. No charges until your trial ends.
         </p>
       </template>
-      <template v-else-if="currentPlan && !isFreeTrial">
-        <h3 class="mb-4 text-3xl font-semibold">{{ currentPlan.label }}</h3>
-        <p class="text-red-main mb-2 rounded-full bg-red-200 p-2 text-sm" v-if="cancelled">
-          Cancelled
-        </p>
+      <template v-else-if="currentPlan">
+        <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center">
+          <h3 class="text-3xl font-semibold">{{ currentPlan.label }}</h3>
+          <p
+            class="text-red-main mb-2 w-fit rounded-md bg-red-100 px-2 py-1 text-sm"
+            v-if="cancelled"
+          >
+            Cancelled
+          </p>
+        </div>
         <p class="mb-10 text-gray-600">{{ currentPlan.description }}</p>
       </template>
 
@@ -96,11 +102,20 @@ const calculateDaysLeft = (endDate: string | Date): string => {
         >
           Upgrade Plan
         </RouterLink>
-        <CancelSubscriptionModal :endDate="endDate">
-          <button class="btn--md btn--secondary border-accent-main border text-center">
-            Cancel Subscription
-          </button>
-        </CancelSubscriptionModal>
+        <template v-if="currentPlan && endDate">
+          <CancelSubscriptionModal :endDate="endDate" :currentPlan="currentPlan">
+            <button
+              class="btn--md btn--secondary"
+              :class="[isFreeTrial && 'btn--disabled']"
+              :disabled="isFreeTrial"
+            >
+              Cancel Subscription
+            </button>
+          </CancelSubscriptionModal>
+        </template>
+        <template v-else>
+          <button class="btn--md btn--disabled rounded-md" disabled>Cancel Subscription</button>
+        </template>
       </div>
     </article>
 
@@ -129,7 +144,41 @@ const calculateDaysLeft = (endDate: string | Date): string => {
       class="flex min-h-[356px] rounded-lg bg-white"
       :class="[hasHistory ? '' : 'items-center justify-center px-6 text-center']"
     >
-      <div v-if="hasHistory"></div>
+      <div v-if="hasHistory" class="w-full overflow-x-auto px-4 py-8 md:px-8">
+        <table class="w-full table-auto">
+          <thead>
+            <tr class="bg-peach-amber-100 uppercase *:min-w-40 *:font-semibold">
+              <th class="rounded-l-md px-4 py-3 text-left">Date</th>
+              <th class="px-4 py-3 text-left">Amount</th>
+              <th class="px-4 py-3 text-left">Status</th>
+              <th class="rounded-r-md px-4 py-3 text-left">Plan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="entry in invoice" :key="entry.id" class="*:text-gray-600 first:*:pt-6">
+              <td class="px-4 py-3">
+                {{
+                  new Date(entry.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                }}
+              </td>
+              <td class="px-4 py-3">${{ (entry.amount_paid / 100).toFixed(2) }}</td>
+              <td class="px-4 py-3 capitalize">
+                <template v-if="entry.status === 'PAID'">
+                  <span class="text-green-main rounded-full bg-green-100 px-4 py-1">PAID</span>
+                </template>
+                <template v-else>
+                  <span class="text-red-main rounded-full bg-red-100 px-4 py-1">FAILED</span>
+                </template>
+              </td>
+              <td class="px-4 py-3">{{ entry.plan_label }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div v-else class="flex flex-col items-center justify-center gap-2">
         <div class="mb-2 w-fit rounded-full border border-gray-300 p-6">
           <Icon :icon="FileNotFoundIcon" :size="33" color="var(--gray-300)" />

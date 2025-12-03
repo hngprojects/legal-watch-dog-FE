@@ -172,6 +172,7 @@ export const useBillingStore = defineStore('billing', {
 
     async cancelSubscription() {
       this.setError(null)
+      this.setLoading(true)
       const orgId = await this.getOrganizationId()
 
       if (!orgId) return
@@ -181,6 +182,41 @@ export const useBillingStore = defineStore('billing', {
         return res.data.data
       } catch (error) {
         this.setError((error as BillingErrorResponse).message)
+      } finally {
+        this.setLoading(false)
+      }
+    },
+
+    async changeSubscriptionPlan(plan_id: string) {
+      this.setError(null)
+      const orgId = await this.getOrganizationId()
+
+      if (!orgId) return
+      try {
+        const res = await billingService.changeOrganizationSubscription(orgId, plan_id)
+
+        return res.data.data
+      } catch (error) {
+        this.setError((error as BillingErrorResponse).message)
+      }
+    },
+
+    async handlePlanChange(plan_id: string) {
+      this.setError(null)
+      this.setLoading(true)
+
+      try {
+        await this.getSubscriptionStatus()
+
+        if (this.current_plan_id) {
+          // User has an active subscription, so change it
+          return await this.changeSubscriptionPlan(plan_id)
+        } else {
+          // User has no active subscription, proceed to checkout
+          return await this.checkoutPlan(plan_id)
+        }
+      } finally {
+        this.setLoading(false)
       }
     },
   },
