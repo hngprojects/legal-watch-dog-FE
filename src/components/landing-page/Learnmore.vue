@@ -104,7 +104,6 @@
     <Dialog
       :open="showHireSpecialistModal"
       @update:open="(value) => !value && closeHireSpecialistModal()"
-    "
     >
       <DialogScrollContent class="max-w-2xl">
         <DialogHeader>

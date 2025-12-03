@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { AxiosRequestConfig } from 'axios'
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth-store'
 import themedSwal from '@/lib/swal'
@@ -69,11 +69,9 @@ api.interceptors.response.use(
 
       if (hasRefreshToken && !originalRequest?._retry && !isRefreshRequest) {
         if (!refreshPromise) {
-          refreshPromise = auth
-            .refreshTokens()
-            .finally(() => {
-              refreshPromise = null
-            })
+          refreshPromise = auth.refreshTokens().finally(() => {
+            refreshPromise = null
+          })
         }
 
         try {
