@@ -15,12 +15,9 @@ const archivedJurisdictions = computed(() => {
 })
 
 onMounted(() => {
-  console.log('🏢 Archived component mounted')
-
   // Use initializeArchived instead of syncArchivedFromLocalStorage
   jurisdictionStore.initializeArchived()
 
-  console.log('📊 Archived items:', jurisdictionStore.archivedJurisdictions)
 })
 
 const restoreJurisdiction = async (jurisdictionId: string) => {
