@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Icon from '@/components/reusable/Icon.vue'
+import Swal from '@/lib/swal'
 import { useBillingStore } from '@/stores/billing-store'
 import type { BillingPlan } from '@/types/billing'
 import {
@@ -18,13 +19,30 @@ const { i, activeBillingCycle, plan } = defineProps<{
 
 const route = useRoute()
 const billingStore = useBillingStore()
+const isActivePlan = billingStore.current_plan_id === plan.id
+
+const formatPrice = (amount: number) => {
+  return (amount / 100).toFixed(2)
+}
 
 const handlePay = async () => {
-  const checkoutUrl = await billingStore.checkoutPlan(plan.id)
+  if (isActivePlan) return
 
-  console.log(checkoutUrl)
+  const result = await billingStore.handlePlanChange(plan.id)
 
-  if (checkoutUrl) window.location.replace(checkoutUrl)
+  if (billingStore.error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'An error occurred',
+      text: billingStore.error,
+    })
+  } else if (result) {
+    if (typeof result === 'string' && result.startsWith('http')) {
+      window.location.href = result
+    } else {
+      await billingStore.getSubscriptionStatus()
+    }
+  }
 }
 </script>
 
@@ -51,7 +69,7 @@ const handlePay = async () => {
       <p class="text-gray-600">{{ plan.description }}</p>
     </div>
     <p>
-      <span class="text-3xl font-medium">${{ plan.amount }}</span
+      <span class="text-3xl font-medium">${{ formatPrice(plan.amount) }}</span
       ><span class="text-gray-500">
         {{ activeBillingCycle === 'month' ? '/month' : '/year' }}
       </span>
@@ -60,10 +78,14 @@ const handlePay = async () => {
     <template v-if="route.name === 'payment-plan'">
       <button
         @click="handlePay"
+        :disabled="isActivePlan || billingStore.loading"
         class="btn--secondary btn--xl block w-full border text-center"
-        :class="[i == 1 && 'btn--default hover:text-white']"
+        :class="[
+          i == 1 && 'btn--default hover:text-white',
+          (isActivePlan || billingStore.loading) && 'btn--disabled',
+        ]"
       >
-        {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
+        {{ isActivePlan ? 'Active plan' : i == 1 ? 'Get started now' : 'Choose this plan' }}
       </button>
     </template>
     <template v-else>

@@ -42,8 +42,6 @@ onMounted(async () => {
     </section>
 
     <template v-if="billingStore.loading">
-      <!-- create skeletons with divs and .animate-pulse class for the components in the v-else section. Don't use SkeletonBlock-->
-
       <div
         class="mx-auto mb-16 flex w-fit animate-pulse items-center justify-center gap-2 rounded-md bg-white p-1 ring-1 ring-[#D9DBE9] *:rounded-md *:p-3"
       >
@@ -80,12 +78,8 @@ onMounted(async () => {
             :class="{ 'bg-chocolate-brown-main text-white': activeBillingCycle === 'year' }"
             @click="() => (activeBillingCycle = 'year')"
           >
-            <div
-              class="bg-accent-main absolute -top-4 -right-2 z-10 rounded-full p-1.5 sm:-top-5 sm:-right-3 sm:p-2"
-            >
-              <p class="text-[10px] font-medium whitespace-nowrap text-white sm:text-xs">
-                Save 20%
-              </p>
+            <div class="bg-accent-main absolute -top-5 -right-3 z-10 rounded-full p-2">
+              <p class="text-xs text-[10px] font-medium whitespace-nowrap text-white">Save 20%</p>
             </div>
             Yearly
           </button>
@@ -94,7 +88,7 @@ onMounted(async () => {
 
       <section class="w-full">
         <div
-          class="grid grid-cols-1 gap-8 text-start sm:gap-10 md:grid-cols-2 lg:grid-cols-3 lg:gap-8 xl:flex xl:flex-nowrap xl:items-stretch xl:justify-center xl:gap-6"
+          class="grid grid-cols-1 gap-8 text-start sm:gap-10 md:grid-cols-2 *:first:md:justify-self-end *:last:md:col-span-2 *:last:md:mx-auto xl:flex xl:flex-nowrap xl:items-center xl:justify-center xl:gap-6"
         >
           <template
             :key="i"
@@ -114,14 +108,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .app-container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
 /* Better touch targets for mobile */
 @media (max-width: 768px) {
   button {
@@ -130,65 +116,6 @@ onMounted(async () => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-  }
-
-  /* Ensure the badge is fully visible */
-  .overflow-visible {
-    overflow: visible !important;
-  }
-
-  /* Prevent badge from being cut off */
-  .relative:last-child {
-    overflow: visible;
-  }
-}
-
-/* Ensure badge is visible on all screens */
-.relative {
-  overflow: visible;
-}
-
-/* Make sure badge has proper z-index */
-.bg-accent-main {
-  z-index: 10;
-}
-
-/* Tablet layout (2 columns) */
-@media (min-width: 768px) and (max-width: 1024px) {
-  .md\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  /* Center the two-column layout */
-  .md\:grid-cols-2 > *:last-child:nth-child(odd) {
-    grid-column: span 2;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-/* Desktop layout (3 columns) */
-@media (min-width: 1024px) and (max-width: 1280px) {
-  .lg\:grid-cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-/* Large desktop (flex row) */
-@media (min-width: 1280px) {
-  /* Ensure cards maintain consistent width */
-  .xl\:flex > * {
-    flex: 1;
-    max-width: 380px;
-    min-width: 320px;
-  }
-}
-
-/* Prevent content from being too wide on large screens */
-@media (min-width: 1536px) {
-  .app-container {
-    max-width: 1280px;
   }
 }
 </style>
