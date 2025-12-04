@@ -1,7 +1,16 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
-const notifications = ref([
+interface Notification {
+  iconType: 'regulatory' | 'alert'
+  title: string
+  message: string
+  time: string
+  severity: 'normal' | 'high'
+  read: boolean
+}
+
+const notifications = ref<Notification[]>([
   {
     iconType: "regulatory",
     title: "Regulatory Update",
