@@ -161,8 +161,8 @@ onUnmounted(() => {
       </RouterLink>
       <div class="hidden items-center lg:flex">
         <!-- Horizaintal divider -->
-        <div class="mx-4 h-10 w-0.5 bg-gray-300"></div>
-        <div>
+        <div class="flex">
+          <div class="mx-4 h-10 w-0.5 bg-gray-300"></div>
           <OrganizationSwitcher v-if="isAuthenticated" />
         </div>
       </div>
