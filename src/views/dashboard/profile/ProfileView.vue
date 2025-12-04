@@ -435,7 +435,7 @@ const saveEdits = async () => {
               <div class="flex flex-col items-center gap-2">
                 <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
                 <p
-                  v-if="!(primaryRole === 'Member' && primaryOrg === 'Member')"
+                  v-if="primaryRole !== 'Member' || primaryOrg !== 'Member'"
                   class="text-xl text-[#1F1F1F]"
                 >
                   {{ primaryRole }} - {{ primaryOrg }}
