@@ -7,9 +7,6 @@ import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { toast } from "vue-sonner"
-import { useConfirmDialog } from "@/composables/useConfirmDialog"
-
-const { confirm: openConfirm } = useConfirmDialog()
 
 const hasHistory = ref(false)
 const isFreeTrial = ref(true)
