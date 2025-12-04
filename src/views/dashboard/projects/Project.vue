@@ -323,7 +323,7 @@ watch(
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organization-projects', params: { organizationId } }">
+                <RouterLink :to="{ name: 'organization-profile', params: { organizationId } }">
                   {{ organizationName || 'Organization' }}
                 </RouterLink>
               </BreadcrumbLink>
