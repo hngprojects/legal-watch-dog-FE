@@ -434,7 +434,12 @@ const saveEdits = async () => {
               <!-- <div class="space-y-3"> -->
               <div class="flex flex-col items-center gap-2">
                 <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
-                <p class="text-xl text-[#1F1F1F]">{{ primaryRole }} - {{ primaryOrg }}</p>
+                <p
+                  v-if="primaryRole !== 'Member' || primaryOrg !== 'Member'"
+                  class="text-xl text-[#1F1F1F]"
+                >
+                  {{ primaryRole }} - {{ primaryOrg }}
+                </p>
                 <p class="text-lg text-[#6B7280]">{{ userEmail }}</p>
               </div>
               <!-- </div> -->
@@ -604,17 +609,14 @@ const saveEdits = async () => {
           </div>
           <div class="space-y-3">
             <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
-            <Select v-model="editForm.role" required>
+            <Select :model-value="primaryRole" disabled>
               <SelectTrigger
                 class="h-12 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
               >
-                <SelectValue placeholder="Select Role" />
+                <SelectValue :placeholder="primaryRole" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Admin">Admin</SelectItem>
-                <!-- <SelectItem value="Member">Member</SelectItem> -->
-                <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
-                <!-- <SelectItem value="Editor">Editor</SelectItem> -->
+                <SelectItem :value="primaryRole">{{ primaryRole }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
