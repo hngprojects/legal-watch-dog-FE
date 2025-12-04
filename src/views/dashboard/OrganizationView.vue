@@ -22,6 +22,7 @@ import { useInvitationStore } from '@/stores/invitation-store'
 import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
 import illustrationImg from '@/assets/Images/dashboardillustration.png'
 import type { Organization } from '@/types/organization'
+import { toast } from 'vue-sonner'
 
 const organizationStore = useOrganizationStore()
 const { organizations, loading, error } = storeToRefs(organizationStore)
@@ -68,8 +69,10 @@ const handleCreateOrganization = async () => {
   organizationStore.setError(null)
 
   if (!formData.value.name.trim())
-    return organizationStore.setError('Organization name is required')
-  if (!formData.value.industry.trim()) return organizationStore.setError('Industry is required')
+    return toast.error("Organization name is required")
+
+  if (!formData.value.industry.trim())
+    return toast.error("Industry is required")
 
   const created = await organizationStore.addOrganization({
     name: formData.value.name.trim(),
@@ -78,11 +81,8 @@ const handleCreateOrganization = async () => {
 
   if (created) {
     closeCreateModal()
-    await Swal.fire(
-      'Organization created',
-      'You can now add projects under this organization.',
-      'success',
-    )
+
+    toast.success("Organization created successfully")
 
     const userId = await ensureUserId()
     if (userId) {
@@ -90,6 +90,7 @@ const handleCreateOrganization = async () => {
     }
   }
 }
+
 
 const goToOrganization = (organizationId: string) => {
   router.push({ name: 'organization-profile', params: { organizationId } })
