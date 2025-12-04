@@ -11,7 +11,7 @@ import type { OrganizationErrorResponse } from '@/types/organization'
 import type { Organization, RawOrganization } from '@/types/organization'
 import type { Invitation } from '@/types/invitation'
 import type { UserProfile } from '@/types/user'
-import Swal from '@/lib/swal'
+import { toast } from "vue-sonner"
 import {
   Dialog,
   DialogClose,
@@ -155,7 +155,8 @@ const handleProjectSave = async (payload: {
     })
     projectModalOpen.value = false
     editingProject.value = null
-    await Swal.fire('Updated', 'Project updated successfully.', 'success')
+
+    toast.success("Project updated successfully")
     await loadProjects()
     return
   }
@@ -165,27 +166,23 @@ const handleProjectSave = async (payload: {
     description: payload.description,
     organization_id: orgForAction,
   })
+
   if (created) {
     projectModalOpen.value = false
-    await Swal.fire('Created', 'Project created successfully.', 'success')
+    toast.success("Project created successfully")
     await loadProjects()
   }
 }
 
+
 const deleteProject = async (projectId?: string) => {
   if (!projectId || !orgId.value) return
-  const confirm = await Swal.fire({
-    title: 'Delete Project?',
-    text: 'This action cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#d33',
-  })
-  if (!confirm.isConfirmed) return
+
+  const confirmed = confirm("Delete this project? This action cannot be undone.")
+  if (!confirmed) return
+
   await projectStore.deleteProject(projectId, orgId.value)
-  await Swal.fire('Deleted', 'Project successfully deleted.', 'success')
+  toast.success("Project successfully deleted")
   await loadProjects()
 }
 
@@ -197,6 +194,7 @@ const openEditOrganization = () => {
 
 const handleOrgSave = async (payload: { name: string; industry: string }) => {
   if (!orgId.value) return
+
   orgEditSaving.value = true
   orgEditError.value = null
 
@@ -204,35 +202,32 @@ const handleOrgSave = async (payload: { name: string; industry: string }) => {
 
   if (updated) {
     orgEditDialogOpen.value = false
-
-    await Swal.fire('Updated', 'Organization updated successfully.', 'success')
+    toast.success("Organization updated successfully")
   } else if (organizationStore.error) {
     orgEditError.value = organizationStore.error
+    toast.error(organizationStore.error)
   }
 
   orgEditSaving.value = false
 }
 
+
 const confirmDeleteOrganization = async () => {
   if (!orgId.value || !organization.value) return
-  const result = await Swal.fire({
-    title: 'Delete organization?',
-    text: 'This action cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#d33',
-  })
-  if (!result.isConfirmed) return
+
+  const confirmed = confirm("Delete this organization? This action cannot be undone.")
+  if (!confirmed) return
+
   const deleted = await organizationStore.deleteOrganization(orgId.value)
+
   if (deleted) {
-    await Swal.fire('Deleted', 'Organization removed successfully.', 'success')
+    toast.success("Organization removed successfully")
     router.push({ name: 'organizations' })
   } else if (organizationStore.error) {
-    await Swal.fire('Could not delete', organizationStore.error, 'error')
+    toast.error(organizationStore.error)
   }
 }
+
 
 const initials = (name: string) =>
   name
@@ -379,85 +374,94 @@ const memberActionLoading = ref<string | null>(null)
 
 const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
   if (!orgId.value || member.role === targetRole) return
+
   if (targetRole === 'Owner') {
-    await Swal.fire('Not allowed', 'Only the creator can be the Owner.', 'info')
+    toast.info("Only the creator can be the Owner")
     return
   }
+
   if (member.role === 'Owner') {
-    await Swal.fire('Not allowed', 'The Owner role cannot be changed.', 'info')
+    toast.info("The Owner role cannot be changed")
     return
   }
+
   if (!member.id) {
-    await Swal.fire('Missing user', 'Cannot update role: user ID unavailable.', 'error')
+    toast.error("Cannot update role: missing user ID")
     return
   }
+
   memberActionLoading.value = `${member.id}-role`
+
   try {
     await organizationService.updateMemberRole(orgId.value, member.id, targetRole)
+
     members.value = members.value.map((item) =>
-      item.id === member.id ? { ...item, role: targetRole } : item,
+      item.id === member.id ? { ...item, role: targetRole } : item
     )
-    await Swal.fire('Role updated', `${member.name} is now ${targetRole}.`, 'success')
+
+    toast.success(`${member.name} is now ${targetRole}`)
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    let message = !err.response
-      ? 'Network error: Unable to reach server'
-      : err.response.data?.detail?.[0]?.msg ||
-        err.response.data?.message ||
-        'Failed to update member role'
 
-    if (typeof message === 'string' && /through this endpoint./i.test(message)) {
-      message = message
-        .replace(/through this endpoint./gi, '')
-        .replace(/\s{2,}/g, ' ')
-        .trim()
-      if (message && !/[.!?]$/.test(message)) message = `${message}.`
-    }
-    await Swal.fire('Could not update role', message, 'error')
+    let message = !err.response
+      ? "Network error: Unable to reach server"
+      : err.response.data?.detail?.[0]?.msg ||
+      err.response.data?.message ||
+      "Failed to update role"
+
+    toast.error(message)
   } finally {
     memberActionLoading.value = null
   }
 }
+
 
 const toggleMemberStatus = async (member: Member) => {
   if (!orgId.value) return
+
   if (member.role === 'Owner') {
-    await Swal.fire('Not allowed', 'The Owner cannot be deactivated.', 'info')
+    toast.info("The Owner cannot be deactivated")
     return
   }
+
   if (!member.id) {
-    await Swal.fire('Missing user', 'Cannot update status: user ID unavailable.', 'error')
+    toast.error("Cannot update status: missing user ID")
     return
   }
-  const targetStatus: MemberStatus = member.status === 'Active' ? 'Inactive' : 'Active'
+
+  const targetStatus: MemberStatus =
+    member.status === "Active" ? "Inactive" : "Active"
+
   memberActionLoading.value = `${member.id}-status`
+
   try {
-    await organizationService.updateMemberStatus(orgId.value, member.id, targetStatus === 'Active')
-    members.value = members.value.map((item) =>
-      item.id === member.id ? { ...item, status: targetStatus } : item,
+    await organizationService.updateMemberStatus(
+      orgId.value,
+      member.id,
+      targetStatus === "Active"
     )
-    const verb = targetStatus === 'Active' ? 'activated' : 'deactivated'
-    await Swal.fire('Status updated', `${member.name} has been ${verb}.`, 'success')
+
+    members.value = members.value.map((item) =>
+      item.id === member.id ? { ...item, status: targetStatus } : item
+    )
+
+    const verb = targetStatus === "Active" ? "activated" : "deactivated"
+    toast.success(`${member.name} has been ${verb}`)
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    let message = !err.response
-      ? 'Network error: Unable to reach server'
-      : err.response.data?.detail?.[0]?.msg ||
-        err.response.data?.message ||
-        'Failed to update member status'
 
-    if (typeof message === 'string' && /through this endpoint./i.test(message)) {
-      message = message
-        .replace(/through this endpoint/gi, '')
-        .replace(/\s{2,}/g, ' ')
-        .trim()
-      if (message && !/[.!?]$/.test(message)) message = `${message}.`
-    }
-    await Swal.fire('Could not update status', message, 'error')
+    let message = !err.response
+      ? "Network error: Unable to reach server"
+      : err.response.data?.detail?.[0]?.msg ||
+      err.response.data?.message ||
+      "Failed to update status"
+
+    toast.error(message)
   } finally {
     memberActionLoading.value = null
   }
 }
+
 
 const fetchMembers = async () => {
   if (!orgId.value) return
@@ -489,39 +493,45 @@ const openProjects = () => {
 const sendInvitation = async () => {
   inviteError.value = null
   inviteMessage.value = null
+
   if (!orgId.value) {
-    inviteError.value = 'Select an organization before inviting teammates.'
+    toast.error("Select an organization before inviting teammates")
     return
   }
+
   if (!inviteForm.value.email.trim()) {
-    inviteError.value = 'Email is required'
+    toast.error("Email is required")
     return
   }
 
   inviteSending.value = true
+
   try {
     const { data } = await organizationService.inviteMember(orgId.value, {
       invited_email: inviteForm.value.email.trim(),
       role_name: inviteForm.value.role,
     })
-    inviteMessage.value = data.message || data.data?.message || 'Invitation sent successfully.'
+
+    inviteMessage.value = data.message || data.data?.message || "Invitation sent"
     inviteOpen.value = false
+
     await loadOrganizationInvitations()
-    await Swal.fire('Invitation sent', inviteMessage.value, 'success')
-    inviteForm.value.email = ''
-    inviteForm.value.role = 'Member'
+
+    toast.success(inviteMessage.value)
+
+    inviteForm.value.email = ""
+    inviteForm.value.role = "Member"
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    if (!err.response) {
-      inviteError.value = 'Network error: Unable to reach server'
-    } else {
-      inviteError.value =
-        err.response.data?.detail?.[0]?.msg ||
-        err.response.data?.message ||
-        'Failed to send invitation'
-    }
+
+    let message = !err.response
+      ? "Network error: Unable to reach server"
+      : err.response.data?.detail?.[0]?.msg ||
+      err.response.data?.message ||
+      "Failed to send invitation"
+
     inviteOpen.value = false
-    await Swal.fire('Could not send invite', inviteError.value, 'error')
+    toast.error(message)
   } finally {
     inviteSending.value = false
   }
@@ -561,28 +571,20 @@ watch(
             Organization Profile
           </p>
         </div>
-        <RouterLink
-          to="/dashboard/organizations"
-          class="text-xs text-[#401903] underline md:text-sm"
-        >
+        <RouterLink to="/dashboard/organizations" class="text-xs text-[#401903] underline md:text-sm">
           Back to organizations
         </RouterLink>
       </div>
 
-      <section
-        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-8 lg:p-10"
-      >
+      <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-8 lg:p-10">
         <div class="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
           <div class="flex items-center gap-4 md:gap-6">
             <div
-              class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gray-200 to-gray-100 text-lg font-bold text-gray-500 md:h-24 md:w-24 md:text-2xl"
-            >
+              class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gray-200 to-gray-100 text-lg font-bold text-gray-500 md:h-24 md:w-24 md:text-2xl">
               {{ initials(organization?.name || 'Org') || 'Org' }}
             </div>
             <div class="min-w-0 flex-1">
-              <p
-                class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs"
-              >
+              <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
                 Organization
               </p>
               <h2 class="truncate text-lg font-bold text-gray-900 md:text-2xl">
@@ -612,9 +614,7 @@ watch(
         </div>
       </section>
 
-      <section
-        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
-      >
+      <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6">
         <div class="mb-4 flex flex-wrap items-start justify-between gap-3 md:items-center">
           <div>
             <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
@@ -632,10 +632,8 @@ watch(
         <div v-if="projectsLoading" class="space-y-3">
           <div class="h-16 animate-pulse rounded-xl bg-gray-100 md:h-20"></div>
         </div>
-        <div
-          v-else-if="!projects.length"
-          class="space-y-3 rounded-xl border border-dashed border-gray-200 p-6 text-center"
-        >
+        <div v-else-if="!projects.length"
+          class="space-y-3 rounded-xl border border-dashed border-gray-200 p-6 text-center">
           <p class="text-xs text-gray-600 md:text-sm">
             No projects yet. Create one to start tracking changes.
           </p>
@@ -646,12 +644,9 @@ watch(
           </div>
         </div>
         <div v-else class="space-y-2 md:space-y-3">
-          <article
-            v-for="project in projects"
-            :key="project.id"
+          <article v-for="project in projects" :key="project.id"
             class="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3 transition hover:bg-white md:gap-4 md:rounded-xl md:p-5"
-            @click="goToProject(project.id)"
-          >
+            @click="goToProject(project.id)">
             <div class="min-w-0 flex-1">
               <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">
                 {{ project.title }}
@@ -662,10 +657,8 @@ watch(
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <button
-                  @click.stop
-                  class="shrink-0 rounded-full p-1.5 text-gray-500 transition hover:bg-white hover:text-gray-700 md:p-2"
-                >
+                <button @click.stop
+                  class="shrink-0 rounded-full p-1.5 text-gray-500 transition hover:bg-white hover:text-gray-700 md:p-2">
                   <EllipsisVertical :size="16" class="md:hidden" />
                   <EllipsisVertical :size="18" class="hidden md:block" />
                 </button>
@@ -681,12 +674,8 @@ watch(
         </div>
       </section>
 
-      <section
-        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
-      >
-        <div
-          class="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
-        >
+      <section class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6">
+        <div class="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
           <div class="min-w-0">
             <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
               Members
@@ -711,22 +700,14 @@ watch(
               <form class="space-y-4" @submit.prevent="sendInvitation">
                 <div class="space-y-2">
                   <label class="text-sm font-medium text-gray-900" for="invite-email">Email</label>
-                  <input
-                    id="invite-email"
-                    v-model="inviteForm.email"
-                    type="email"
-                    placeholder="teammate@company.com"
+                  <input id="invite-email" v-model="inviteForm.email" type="email" placeholder="teammate@company.com"
                     required
-                    class="h-10 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none md:h-11"
-                  />
+                    class="h-10 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none md:h-11" />
                 </div>
                 <div class="space-y-2">
                   <label class="text-sm font-medium text-gray-900" for="invite-role">Role</label>
-                  <select
-                    id="invite-role"
-                    v-model="inviteForm.role"
-                    class="h-10 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none md:h-11"
-                  >
+                  <select id="invite-role" v-model="inviteForm.role"
+                    class="h-10 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none md:h-11">
                     <option value="Admin">Admin</option>
                     <option value="Manager">Manager</option>
                     <option value="Member">Member</option>
@@ -744,11 +725,7 @@ watch(
                   <DialogClose as-child>
                     <button type="button" class="btn--secondary btn--sm md:btn--lg btn--full">Cancel</button>
                   </DialogClose>
-                  <button
-                    type="submit"
-                    :disabled="inviteSending"
-                    class="btn--default btn--sm md:btn--lg btn--full"
-                  >
+                  <button type="submit" :disabled="inviteSending" class="btn--default btn--sm md:btn--lg btn--full">
                     <span v-if="inviteSending">Sending...</span>
                     <span v-else>Send Invite</span>
                   </button>
@@ -780,15 +757,11 @@ watch(
           </div>
 
           <template v-else>
-            <article
-              v-for="member in members"
-              :key="member.id"
-              class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
-            >
+            <article v-for="member in members" :key="member.id"
+              class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
               <div class="flex min-w-0 flex-1 items-center gap-3">
                 <div
-                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f4dfcd] text-xs font-semibold text-[#5c2a05] md:h-10 md:w-10 md:text-sm"
-                >
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f4dfcd] text-xs font-semibold text-[#5c2a05] md:h-10 md:w-10 md:text-sm">
                   {{ initials(member.name) }}
                 </div>
                 <div class="min-w-0 flex-1 pr-2">
@@ -799,24 +772,18 @@ watch(
                 </div>
               </div>
 
-              <div
-                class="flex w-full items-center justify-between gap-3 pl-12 sm:w-auto sm:justify-start sm:pl-0"
-              >
+              <div class="flex w-full items-center justify-between gap-3 pl-12 sm:w-auto sm:justify-start sm:pl-0">
                 <div class="flex gap-2">
-                  <Badge
-                    :class="[
-                      'border px-2 py-0.5 text-[10px] font-semibold md:px-3 md:py-1 md:text-xs',
-                      roleClass(member.role),
-                    ]"
-                  >
+                  <Badge :class="[
+                    'border px-2 py-0.5 text-[10px] font-semibold md:px-3 md:py-1 md:text-xs',
+                    roleClass(member.role),
+                  ]">
                     {{ member.role }}
                   </Badge>
-                  <Badge
-                    :class="[
-                      'border px-2 py-0.5 text-[10px] font-semibold md:px-3 md:py-1 md:text-xs',
-                      statusClass(member.status),
-                    ]"
-                  >
+                  <Badge :class="[
+                    'border px-2 py-0.5 text-[10px] font-semibold md:px-3 md:py-1 md:text-xs',
+                    statusClass(member.status),
+                  ]">
                     {{ member.status }}
                   </Badge>
                 </div>
@@ -828,40 +795,27 @@ watch(
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      :disabled="
-                        memberActionLoading === `${member.id}-role` ||
-                        member.role === 'Admin' ||
-                        member.role === 'Owner'
-                      "
-                      @click.stop="updateMemberRole(member, 'Admin')"
-                    >
+                    <DropdownMenuItem :disabled="memberActionLoading === `${member.id}-role` ||
+                      member.role === 'Admin' ||
+                      member.role === 'Owner'
+                      " @click.stop="updateMemberRole(member, 'Admin')">
                       Admin
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      :disabled="
-                        memberActionLoading === `${member.id}-role` ||
-                        member.role === 'Manager' ||
-                        member.role === 'Owner'
-                      "
-                      @click.stop="updateMemberRole(member, 'Manager')"
-                    >
+                    <DropdownMenuItem :disabled="memberActionLoading === `${member.id}-role` ||
+                      member.role === 'Manager' ||
+                      member.role === 'Owner'
+                      " @click.stop="updateMemberRole(member, 'Manager')">
                       Manager
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      :disabled="
-                        memberActionLoading === `${member.id}-role` ||
-                        member.role === 'Member' ||
-                        member.role === 'Owner'
-                      "
-                      @click.stop="updateMemberRole(member, 'Member')"
-                    >
+                    <DropdownMenuItem :disabled="memberActionLoading === `${member.id}-role` ||
+                      member.role === 'Member' ||
+                      member.role === 'Owner'
+                      " @click.stop="updateMemberRole(member, 'Member')">
                       Member
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       :disabled="memberActionLoading === `${member.id}-status` || member.role === 'Owner'"
-                      @click.stop="toggleMemberStatus(member)"
-                    >
+                      @click.stop="toggleMemberStatus(member)">
                       {{ member.status === 'Active' ? 'Deactivate' : 'Activate' }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -871,25 +825,17 @@ watch(
           </template>
         </div>
 
-        <div
-          class="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-3 md:mt-8 md:p-4"
-        >
+        <div class="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-3 md:mt-8 md:p-4">
           <div class="mb-3 flex items-center justify-between">
             <div>
-              <p
-                class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs"
-              >
+              <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
                 Pending invitations
               </p>
               <p class="text-xs text-gray-600 md:text-sm">Invites sent for this organization.</p>
             </div>
           </div>
           <div v-if="orgInvitationsLoading" class="space-y-2">
-            <div
-              v-for="n in 3"
-              :key="n"
-              class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm"
-            >
+            <div v-for="n in 3" :key="n" class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm">
               <div class="h-3 w-24 animate-pulse rounded bg-gray-200"></div>
               <div class="h-3 w-12 animate-pulse rounded bg-gray-200"></div>
             </div>
@@ -901,11 +847,8 @@ watch(
             No pending invitations.
           </div>
           <div v-else class="space-y-2">
-            <div
-              v-for="invite in orgInvitations"
-              :key="invite.token"
-              class="flex flex-col gap-2 rounded-lg bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
-            >
+            <div v-for="invite in orgInvitations" :key="invite.token"
+              class="flex flex-col gap-2 rounded-lg bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <div class="min-w-0">
                 <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">
                   {{ invite.organization_name || organization?.name || 'Organization' }}
@@ -915,8 +858,7 @@ watch(
                 </p>
               </div>
               <span
-                class="self-start rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 sm:self-auto md:px-3 md:py-1 md:text-xs"
-              >
+                class="self-start rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 sm:self-auto md:px-3 md:py-1 md:text-xs">
                 {{ invite.role_name || invite.role || 'Member' }}
               </span>
             </div>
@@ -925,10 +867,8 @@ watch(
       </section>
     </div>
 
-    <div
-      v-if="!organization && !orgLoading"
-      class="mx-auto mt-10 max-w-3xl rounded-xl bg-white p-8 text-center shadow-sm"
-    >
+    <div v-if="!organization && !orgLoading"
+      class="mx-auto mt-10 max-w-3xl rounded-xl bg-white p-8 text-center shadow-sm">
       <p class="text-lg font-semibold text-gray-900">Organization not found</p>
       <p class="mt-2 text-sm text-gray-600">Return to organizations to choose a valid profile.</p>
       <RouterLink to="/dashboard/organizations" class="mt-4 inline-block text-[#401903] underline">
@@ -936,27 +876,12 @@ watch(
       </RouterLink>
     </div>
 
-    <OrganizationFormDialog
-      v-if="organization"
-      v-model:open="orgEditDialogOpen"
-      :initial-name="organization.name"
-      :initial-industry="organization.industry || ''"
-      title="Edit organization"
-      submit-label="Save changes"
-      :loading="orgEditSaving"
-      :error="orgEditError"
-      @save="handleOrgSave"
-    />
+    <OrganizationFormDialog v-if="organization" v-model:open="orgEditDialogOpen" :initial-name="organization.name"
+      :initial-industry="organization.industry || ''" title="Edit organization" submit-label="Save changes"
+      :loading="orgEditSaving" :error="orgEditError" @save="handleOrgSave" />
   </main>
 
-  <ProjectFormModal
-    :open="projectModalOpen"
-    :mode="projectModalMode"
-    :organizations="organizationOptions"
-    :default-organization-id="orgId"
-    :project="editingProject || undefined"
-    :error="projectError"
-    @close="closeProjectModal"
-    @save="handleProjectSave"
-  />
+  <ProjectFormModal :open="projectModalOpen" :mode="projectModalMode" :organizations="organizationOptions"
+    :default-organization-id="orgId" :project="editingProject || undefined" :error="projectError"
+    @close="closeProjectModal" @save="handleProjectSave" />
 </template>
