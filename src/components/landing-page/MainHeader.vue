@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 import UserAvatar from '@/components/dashboard/UserAvatar.vue'
 import Swal from '@/lib/swal'
+import OrganizationSwitcher from '@/components/dashboard/OrganizationSwitcher.vue'
 
 const router = useRouter()
 
@@ -103,24 +104,33 @@ onUnmounted(() => {
     <div
       class="app-container mx-auto flex w-full items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:py-5"
     >
-      <!-- LOGO -->
+      <!-- LOGO | Org Switch-->
       <RouterLink to="/" aria-label="Homepage" class="shrink-0">
         <BrandLogo class="h-8 w-auto sm:h-10" />
       </RouterLink>
+      <div class="hidden lg:flex items-center">
+        <!-- Horizaintal divider -->
+        <div class="mx-4 w-0.5 bg-gray-300 h-10"></div>
+        <div>
+          <OrganizationSwitcher v-if="isAuthenticated" />
+        </div>
+      </div>
 
-      <!-- DESKTOP NAV -->
-      <nav aria-label="Primary" class="hidden flex-1 lg:flex lg:items-center lg:justify-center">
-        <ul class="flex items-center gap-6 xl:gap-8">
-          <li v-for="link in navLinks" :key="link.name">
-            <RouterLink
-              :to="link.to"
-              class="hover:text-accent-main text-sm font-medium text-gray-500 transition-colors xl:text-base"
-            >
-              {{ link.name }}
-            </RouterLink>
-          </li>
-        </ul>
-      </nav>
+      <!-- DESKTOP NAV ICON-->
+      <div class="hidden flex-1 items-center justify-center gap-6 lg:flex">
+        <nav aria-label="Primary" class="flex items-center justify-`center">
+          <ul class="flex items-center gap-6 xl:gap-8">
+            <li v-for="link in navLinks" :key="link.name">
+              <RouterLink
+                :to="link.to"
+                class="hover:text-accent-main text-sm font-medium text-gray-500 transition-colors xl:text-base"
+              >
+                {{ link.name }}
+              </RouterLink>
+            </li>
+          </ul>
+        </nav>
+      </div>
 
       <!-- RIGHT SIDE -->
       <div class="relative flex items-center gap-2 sm:gap-3">
@@ -164,6 +174,9 @@ onUnmounted(() => {
                 </span>
               </button>
             </UserDropdown>
+          </div>
+          <div class="lg:hidden">
+            <OrganizationSwitcher />
           </div>
         </div>
 
@@ -254,13 +267,13 @@ onUnmounted(() => {
         </nav>
 
         <!-- Action Buttons -->
-        <div class="space-y-3 border-t p-4 sm:space-y-4 sm:p-6">
+        <div class="space-y-5 border-t p-4 sm:space-y-4 sm:p-6">
           <template v-if="isAuthenticated">
             <!-- User Dropdown on Mobile/Tablet -->
             <div class="mb-4">
               <UserDropdown @logout="handleLogout" @navigate="closeMenu">
                 <button
-                  class="flex w-full items-center gap-3 rounded-lg bg-gray-50 p-3 hover:bg-gray-100 transition-colors"
+                  class="flex w-full items-center gap-3 rounded-lg bg-gray-50 p-3 transition-colors cursor-pointer hover:bg-accent-main/20"
                 >
                   <UserAvatar :name="displayName" :image-url="avatarUrl" :size="40" />
                   <div class="min-w-0 flex-1 text-left">
@@ -284,11 +297,15 @@ onUnmounted(() => {
               </UserDropdown>
             </div>
 
+            <div class="mb-4">
+              <OrganizationSwitcher />
+            </div>
+
             <Button
               :as="RouterLink"
-              :to="{ name: 'organizations' }"
+              :to="{ name: 'dashboard' }"
               @click="closeMenu"
-              class="btn--default btn--sm sm:btn--lg w-full"
+              class="btn--default btn--sm sm:btn--lg w-full block"
             >
               Go to Dashboard
             </Button>
