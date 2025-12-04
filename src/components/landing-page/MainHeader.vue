@@ -91,7 +91,63 @@ const handleLogout = async () => {
   router.replace({ name: 'login' })
 }
 
+/* -----------------------------
+   Notification popup logic
+   ----------------------------- */
+const isNotificationsOpen = ref(false)
+const notificationsButtonRef = ref<HTMLElement | null>(null)
+const notificationsPopupRef = ref<HTMLElement | null>(null)
+
+/**
+ * unreadCount: wire this to your notifications in the store later.
+ * e.g. computed(() => authStore.notifications.filter(n => !n.read).length)
+ */
+const unreadCount = ref(0) // <-- replace with real computed from store when available
+
+const toggleNotifications = () => {
+  isNotificationsOpen.value = !isNotificationsOpen.value
+  // optionally close mobile menu when opening notifications
+  if (isNotificationsOpen.value) {
+    isMenuOpen.value = false
+  }
+}
+
+const closeNotifications = () => {
+  isNotificationsOpen.value = false
+}
+
+const onDocumentClick = (e: MouseEvent) => {
+  const target = e.target as Node
+  const btn = notificationsButtonRef.value
+  const popup = notificationsPopupRef.value
+
+  if (!btn || !popup) return
+
+  if (btn.contains(target)) {
+    // clicked the button itself -> let toggle handler handle it
+    return
+  }
+
+  if (!popup.contains(target)) {
+    // click outside popup -> close it
+    isNotificationsOpen.value = false
+  }
+}
+
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    isNotificationsOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', onDocumentClick)
+  document.addEventListener('keydown', onKeydown)
+})
+
 onUnmounted(() => {
+  document.removeEventListener('click', onDocumentClick)
+  document.removeEventListener('keydown', onKeydown)
   toggleBodyScroll(false)
 })
 </script>
@@ -149,8 +205,94 @@ onUnmounted(() => {
           </Button>
         </template>
 
-        <!-- LOGGED IN VIEW -->
         <div v-else class="hidden items-center gap-3 sm:gap-5 lg:flex">
+          <!-- Notification bell (left of user) -->
+          <div class="relative flex items-center">
+            <button
+              ref="notificationsButtonRef"
+              @click="toggleNotifications"
+              aria-expanded="false"
+              aria-label="Open notifications"
+              class="btn--icon-only btn--icon-sm btn--default flex items-center justify-center transition"
+            >
+              <!-- Bell icon -->
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.8"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+
+              <!-- unread badge -->
+              <span
+                v-if="unreadCount > 0"
+                class="pointer-events-none absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full border-2 border-white bg-red-600 px-1 text-xs leading-none text-white"
+              >
+                {{ unreadCount }}
+              </span>
+            </button>
+
+            <!-- Notification popup placeholder -->
+            <transition
+              enter-active-class="transition ease-out duration-200"
+              enter-from-class="opacity-0 translate-y-1"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition ease-in duration-150"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 translate-y-1"
+            >
+              <div
+                v-if="isNotificationsOpen"
+                ref="notificationsPopupRef"
+                class="absolute left-0 top-full z-50 mt-3 w-80 origin-top-right rounded-lg border bg-white shadow-lg"
+              >
+                <!-- Replace this block with your NotificationPopup.vue component later -->
+                <div class="p-3">
+                  <div class="flex items-center justify-between pb-2">
+                    <h4 class="text-sm font-semibold text-gray-800">Notifications</h4>
+                    <button
+                      @click="isNotificationsOpen = false"
+                      aria-label="Close notifications"
+                      class="text-gray-400 hover:text-gray-600"
+                    >
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <!-- example list (replace with real notifications) -->
+                  <div class="max-h-64 divide-y overflow-auto">
+                    <div class="py-2 text-sm text-gray-600">No notifications yet — this is a placeholder.</div>
+                    <!-- Example item -->
+                    <!--
+                    <div class="flex gap-3 py-3">
+                      <div class="h-8 w-8 shrink-0 rounded-full bg-gray-100"></div>
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate text-sm font-medium text-gray-800">New comment on your post</p>
+                        <p class="text-xs text-gray-500">2 hours ago</p>
+                      </div>
+                    </div>
+                    -->
+                  </div>
+
+                  <!-- View all (optional) -->
+                  <div class="mt-3 border-t pt-3 text-center">
+                    <button
+                      @click="() => { /* optionally route to notifications screen if you ever add one */ }"
+                      class="text-sm font-medium text-accent-main hover:underline"
+                    >
+                      View all notifications
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </transition>
+          </div>
+
+          <!-- User dropdown -->
           <div class="flex items-center space-x-4">
             <UserDropdown @logout="handleLogout">
               <button
