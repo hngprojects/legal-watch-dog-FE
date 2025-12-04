@@ -420,18 +420,18 @@ watch(
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
             <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
 
-            <div
-              class="relative flex h-12 w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-60">
-              <select v-model="selected"
-                class="w-full cursor-pointer appearance-none bg-transparent text-[16px] font-medium text-[#374151] focus:outline-none">
-                <option value="AI">AI</option>
-                <option value="Manual">Manual</option>
-                <option value="Hybrid">Hybrid</option>
-              </select>
-              <svg class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+            <div @click="openHireSpecialistModal"
+              class="flex cursor-pointer items-center rounded-lg p-2 transition-colors hover:bg-gray-100 sm:ml-6">
+              
+              <div class="h-8 w-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center mr-2">
+                <!-- <img src="/path/to/specialist/avatar.jpg" alt="Specialist Avatar" class="h-full w-full object-cover" /> -->
+                </div>
+              
+              <div class="flex flex-col text-sm leading-tight">
+                <span class="font-semibold text-gray-900">Hire Specialist</span>
+                <span class="text-gray-500">Professional support, anytime.</span>
+              </div>
+              
             </div>
           </div>
         </template>
