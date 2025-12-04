@@ -68,6 +68,26 @@ const fullName = computed(() => {
   return name || fallbackNameFromEmail.value || 'User'
 })
 
+const userRoles = computed(() => {
+  // Get all unique roles from organizations
+  const roles = new Set<string>()
+  
+  // From organizations store
+  organizations.value.forEach(org => {
+    if (org.user_role) roles.add(org.user_role)
+  })
+  
+  // From user profile organizations
+  userProfile.value?.organizations?.forEach(org => {
+    if (org.role) roles.add(org.role)
+  })
+  
+  // Fallback to profile role
+  if (userProfile.value?.role) roles.add(userProfile.value.role)
+  
+  return Array.from(roles)
+})
+
 const primaryRole = computed(() => {
   return (
     userProfile.value?.role ||
@@ -198,9 +218,9 @@ const openEditModal = () => {
   showEditModal.value = true
 }
 
-// const triggerFileInput = () => {
-//   fileInputRef.value?.click()
-// }
+const triggerFileInput = () => {
+  fileInputRef.value?.click()
+}
 
 const handleImageUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -517,7 +537,7 @@ const saveEdits = async () => {
       </template>
     </div>
 
-    <Dialog :open="showEditModal" @update:open="(value) => !value && closeEditModal()">
+    <Dialog :open="showEditModal" @update:open="(value) => !value && closeEditModal()" class="z-10!">
       <DialogScrollContent class="sm:max-w-xl">
         <DialogHeader class="mb-6">
           <DialogTitle class="text-2xl font-semibold text-[#0F172A]">Edit Profile</DialogTitle>
@@ -538,8 +558,8 @@ const saveEdits = async () => {
             <div
               class="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#401903]"
               :class="{ 'cursor-not-allowed opacity-50': uploadingImage }"
+              @click="uploadingImage ? null : triggerFileInput()"
             >
-              <!-- @click="uploadingImage ? null : triggerFileInput()" -->
               <svg
                 v-if="uploadingImage"
                 class="h-4 w-4 animate-spin text-white"
@@ -585,17 +605,14 @@ const saveEdits = async () => {
           </div>
           <div class="space-y-3">
             <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
-            <Select v-model="editForm.role" required>
+            <Select v-model="editForm.role">
               <SelectTrigger
                 class="h-12 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
               >
-                <SelectValue placeholder="Select Role" />
+                <SelectValue :placeholder="primaryRole" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Admin">Admin</SelectItem>
-                <!-- <SelectItem value="Member">Member</SelectItem> -->
-                <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
-                <!-- <SelectItem value="Editor">Editor</SelectItem> -->
+                <SelectItem v-for="role in userRoles" :key="role" :value="role">{{ role }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
