@@ -33,6 +33,7 @@ import ComponentCatalogueView from '@/views/ComponentCatalogueView.vue'
 
 // Dashboard pages
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
+import DashboardEntryView from '@/views/dashboard/DashboardEntryView.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
 
@@ -165,7 +166,7 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          redirect: { name: 'organizations' },
+          component: DashboardEntryView,
         },
         {
           path: 'organizations',

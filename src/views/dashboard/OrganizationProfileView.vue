@@ -742,7 +742,9 @@ watch(
 
                 <DialogFooter class="mt-2 flex items-center justify-end gap-3">
                   <DialogClose as-child>
-                    <button type="button" class="btn--secondary btn--sm md:btn--lg btn--full">Cancel</button>
+                    <button type="button" class="btn--secondary btn--sm md:btn--lg btn--full">
+                      Cancel
+                    </button>
                   </DialogClose>
                   <button
                     type="submit"
@@ -859,7 +861,9 @@ watch(
                       Member
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      :disabled="memberActionLoading === `${member.id}-status` || member.role === 'Owner'"
+                      :disabled="
+                        memberActionLoading === `${member.id}-status` || member.role === 'Owner'
+                      "
                       @click.stop="toggleMemberStatus(member)"
                     >
                       {{ member.status === 'Active' ? 'Deactivate' : 'Activate' }}

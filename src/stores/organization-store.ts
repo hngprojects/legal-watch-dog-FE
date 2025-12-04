@@ -18,8 +18,8 @@ const mapRawOrganization = (org: RawOrganization): Organization => ({
     org.project_count ??
     org.projects_count ??
     (Array.isArray(org.projects) ? org.projects.length : undefined),
-  created_at: org.created_at,
-  updated_at: org.updated_at,
+  created_at: org.created_at || (org as { createdAt?: string }).createdAt,
+  updated_at: org.updated_at || (org as { updatedAt?: string }).updatedAt,
 })
 
 const isRawOrganization = (value: unknown): value is RawOrganization =>
@@ -192,6 +192,31 @@ const mapAndFilterOrganizations = (rawList: RawOrganization[]): Organization[] =
   return cleaned
 }
 
+const orderOrganizations = (orgs: Organization[]): Organization[] => {
+  return orgs
+    .map((org, index) => ({ org, index }))
+    .sort((a, b) => {
+      const parse = (value?: string) => {
+        const time = value ? Date.parse(value) : NaN
+        return Number.isFinite(time) ? time : null
+      }
+      const aCreated = parse(a.org.created_at)
+      const bCreated = parse(b.org.created_at)
+      if (aCreated !== null && bCreated !== null && aCreated !== bCreated) {
+        return bCreated - aCreated
+      }
+      const aUpdated = parse(a.org.updated_at)
+      const bUpdated = parse(b.org.updated_at)
+      if (aUpdated !== null && bUpdated !== null && aUpdated !== bUpdated) {
+        return bUpdated - aUpdated
+      }
+      const nameCompare = (a.org.name || '').localeCompare(b.org.name || '')
+      if (nameCompare !== 0) return nameCompare
+      return a.index - b.index
+    })
+    .map(({ org }) => org)
+}
+
 const mergeOrganizations = (
   current: Organization[],
   rawList: RawOrganization[],
@@ -221,7 +246,7 @@ interface State {
 export const useOrganizationStore = defineStore('organizations', {
   state: (): State => ({
     organizations: [],
-    loading: true,
+    loading: false,
     loadingMore: false,
     page: 1,
     limit: 10,
@@ -253,7 +278,7 @@ export const useOrganizationStore = defineStore('organizations', {
         const response = await organizationService.listOrganizations(this.page, this.limit)
         const payload = response?.data?.data ?? response?.data
         const rawList = parseRawOrganizations(payload)
-        this.organizations = mapAndFilterOrganizations(rawList)
+        this.organizations = orderOrganizations(mapAndFilterOrganizations(rawList))
         this.totalPages = resolveTotalPages(payload, this.limit)
 
         // Backend occasionally returns empty `organizations` despite meta showing data.
@@ -267,7 +292,7 @@ export const useOrganizationStore = defineStore('organizations', {
           const fallbackPayload = fallback?.data?.data ?? fallback?.data
           const fallbackList = parseRawOrganizations(fallbackPayload)
           if (fallbackList.length) {
-            this.organizations = mapAndFilterOrganizations(fallbackList)
+            this.organizations = orderOrganizations(mapAndFilterOrganizations(fallbackList))
             this.totalPages = resolveTotalPages(fallbackPayload, this.limit)
           }
         }
@@ -284,7 +309,9 @@ export const useOrganizationStore = defineStore('organizations', {
             const next = await organizationService.listOrganizations(nextPage, this.limit)
             const nextPayload = next?.data?.data ?? next?.data
             const nextList = parseRawOrganizations(nextPayload)
-            this.organizations = mergeOrganizations(this.organizations, nextList)
+            this.organizations = orderOrganizations(
+              mergeOrganizations(this.organizations, nextList),
+            )
             this.page = nextPage
             const nextTotalPages = resolveTotalPages(nextPayload, this.limit)
             if (nextTotalPages > this.totalPages) {
@@ -324,7 +351,7 @@ export const useOrganizationStore = defineStore('organizations', {
         const response = await organizationService.listOrganizations(nextPage, this.limit)
         const payload = response?.data?.data ?? response?.data
         const rawList = parseRawOrganizations(payload)
-        this.organizations = mergeOrganizations(this.organizations, rawList)
+        this.organizations = orderOrganizations(mergeOrganizations(this.organizations, rawList))
         this.page = nextPage
         this.totalPages = resolveTotalPages(payload, this.limit)
       } catch (error) {
@@ -378,8 +405,8 @@ export const useOrganizationStore = defineStore('organizations', {
           this.setError('Organization updated but could not be parsed from response')
           return null
         }
-        this.organizations = this.organizations.map((org) =>
-          org.id === updated.id ? updated : org,
+        this.organizations = orderOrganizations(
+          this.organizations.map((org) => (org.id === updated.id ? updated : org)),
         )
         return updated
       } catch (error) {
@@ -416,6 +443,16 @@ export const useOrganizationStore = defineStore('organizations', {
         }
         return false
       }
+    },
+
+    setCurrentOrganization(organizationId: string) {
+      if (!organizationId) return
+      const index = this.organizations.findIndex((org) => org.id === organizationId)
+      if (index <= 0) return
+      const next = [...this.organizations]
+      const [selected] = next.splice(index, 1)
+      if (!selected) return
+      this.organizations = [selected, ...next]
     },
   },
   getters: {

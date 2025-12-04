@@ -25,7 +25,9 @@ const handleNavigate = () => {
         <RouterLink :to="{ name: 'profile' }" @click="handleNavigate"> Profile </RouterLink>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <RouterLink :to="{ name: 'organizations' }" @click="handleNavigate"> Organizations </RouterLink>
+        <RouterLink :to="{ name: 'organizations' }" @click="handleNavigate">
+          Organizations
+        </RouterLink>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
         <RouterLink :to="{ name: 'billing' }" @click="handleNavigate"> Billing </RouterLink>
