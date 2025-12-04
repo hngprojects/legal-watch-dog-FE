@@ -604,17 +604,14 @@ const saveEdits = async () => {
           </div>
           <div class="space-y-3">
             <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
-            <Select v-model="editForm.role" required>
+            <Select :model-value="primaryRole" disabled>
               <SelectTrigger
-                class="h-12 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
+                class="h-12 w-full cursor-not-allowed rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
               >
-                <SelectValue placeholder="Select Role" />
+                <SelectValue :placeholder="primaryRole" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Admin">Admin</SelectItem>
-                <!-- <SelectItem value="Member">Member</SelectItem> -->
-                <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
-                <!-- <SelectItem value="Editor">Editor</SelectItem> -->
+                <SelectItem :value="primaryRole">{{ primaryRole }}</SelectItem>
               </SelectContent>
             </Select>
           </div>
