@@ -8,7 +8,7 @@ import { computed, ref, onMounted, watch } from 'vue'
 import type { Project, ProjectErrorResponse } from '@/types/project'
 import type { Jurisdiction } from '@/api/jurisdiction'
 import { ArrowLeftIcon, Plus, Settings, ChevronDown, CheckSquare } from 'lucide-vue-next'
-import Swal from '@/lib/swal'
+import { toast } from "vue-sonner"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -69,7 +69,7 @@ const closeHireSpecialistModal = () => {
 
 const submitHireForm = async () => {
   closeHireSpecialistModal()
-  await Swal.fire('Request Submitted', 'Your specialist request is being reviewed.', 'success')
+  toast.success("Your specialist request is being reviewed.")
 }
 
 const projectJurisdictions = computed<Jurisdiction[]>(() =>
@@ -110,10 +110,10 @@ const handleCreateJurisdiction = async () => {
   jurisdictionStore.setError(null)
 
   if (!jurisdictionForm.value.name.trim()) {
-    return jurisdictionStore.setError('Jurisdiction name is required')
+    return toast.error("Jurisdiction name is required")
   }
   if (!jurisdictionForm.value.description.trim()) {
-    return jurisdictionStore.setError('Description is required')
+    return toast.error("Description is required")
   }
 
   try {
@@ -128,17 +128,13 @@ const handleCreateJurisdiction = async () => {
 
     if (newJurisdiction) {
       closeAddJurisdictionModal()
-      await Swal.fire('Created', 'Jurisdiction created successfully.', 'success')
+      toast.success("Jurisdiction created successfully")
     }
   } catch (error) {
-    void error
-    await Swal.fire(
-      'Create failed',
-      jurisdictionStore.error || 'Could not create jurisdiction',
-      'error',
-    )
+    toast.error(jurisdictionStore.error || "Could not create jurisdiction")
   }
 }
+
 
 const goToJurisdiction = (jurisdictionId: string) => {
   router.push({
@@ -204,32 +200,17 @@ const closeSettingsMenu = () => {
 const deleteProject = async () => {
   closeSettingsMenu()
 
-  const confirm = await Swal.fire({
-    title: 'Delete Project?',
-    text: 'This action cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#d33',
-  })
-
-  if (!confirm.isConfirmed) return
+  const confirmed = confirm("Delete Project? This action cannot be undone.")
+  if (!confirmed) return
 
   if (!organizationId.value) {
-    projectStore.setError('Organization context missing. Please navigate from Organizations.')
+    projectStore.setError("Organization context missing. Please navigate from Organizations.")
     return
   }
 
   await projectStore.deleteProject(projectId, organizationId.value)
 
-  await Swal.fire({
-    title: 'Deleted!',
-    text: 'Project successfully deleted.',
-    icon: 'success',
-    timer: 1500,
-    showConfirmButton: false,
-  })
+  toast.success("Project deleted successfully")
 
   if (organizationId.value) {
     router.push({ name: 'organization-projects', params: { organizationId: organizationId.value } })
@@ -237,6 +218,7 @@ const deleteProject = async () => {
     router.push({ name: 'organizations' })
   }
 }
+
 
 const startEdit = () => {
   editForm.value = {
@@ -264,25 +246,18 @@ const saveEdit = async () => {
       project.value.master_prompt = editForm.value.master_prompt
     }
 
-    await Swal.fire({
-      title: 'Updated!',
-      text: 'Project updated successfully.',
-      icon: 'success',
-      timer: 1500,
-      showConfirmButton: false,
-    })
+    toast.success("Project updated successfully")
 
     showInlineEdit.value = false
   } catch (err) {
-    Swal.fire(
-      'Error',
+    toast.error(
       projectStore.error ||
       (err as ProjectErrorResponse).response?.data?.detail?.[0]?.msg ||
-      'Failed to update project',
-      'error',
+      "Failed to update project"
     )
   }
 }
+
 
 watch(
   () => projectStore.projects,
@@ -365,7 +340,7 @@ watch(
           </div>
         </div>
       </div>
-      
+
       <div class="mb-8 flex flex-col gap-5 rounded-[10px] bg-white p-5">
         <template v-if="showInlineEdit">
           <form @submit.prevent="saveEdit" class="w-full space-y-4">
@@ -401,7 +376,7 @@ watch(
           <p class="text-sm leading-5 font-normal text-[#4B5563]">{{ project.description }}</p>
 
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            
+
             <div class="flex items-center gap-3">
               <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
               <div
@@ -412,8 +387,8 @@ watch(
                   <option value="Manual">Manual</option>
                   <option value="Hybrid">Hybrid</option>
                 </select>
-                <svg class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
-                  stroke-width="2" viewBox="0 0 24 24">
+                <svg class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500" fill="none"
+                  stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
@@ -421,21 +396,21 @@ watch(
 
             <div @click="openHireSpecialistModal"
               class="flex cursor-pointer items-center rounded-lg p-2 transition-colors hover:bg-gray-100 sm:ml-6">
-              
+
               <div class="h-8 w-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center mr-2">
                 <img :src="profile" alt="Specialist Avatar" class="h-full w-full object-cover" />
-                </div>
-              
+              </div>
+
               <div class="flex flex-col text-sm leading-tight">
                 <span class="font-semibold text-gray-900">Hire HNG Specialist</span>
                 <span class="text-gray-500">Professional support, anytime.</span>
               </div>
-              
+
             </div>
           </div>
         </template>
       </div>
-      
+
       <div class="mb-8 flex items-end justify-between md:mt-[88px]">
         <div class="flex w-auto gap-8 border-b border-gray-200">
           <button @click="activeTab = 'jurisdictions'" :class="[
@@ -478,7 +453,8 @@ watch(
             <div class="text-center">
               <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
                 <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m-4 4h8a2 2 0 002-2V6a2 2 0 00-2-2H8a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-3-3v6m-4 4h8a2 2 0 002-2V6a2 2 0 00-2-2H8a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
               <h3 class="mt-2 text-sm font-medium text-gray-900">No Jurisdictions added</h3>
