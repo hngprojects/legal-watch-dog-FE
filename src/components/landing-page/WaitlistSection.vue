@@ -12,7 +12,7 @@ import BrainIcon from '@/assets/icons/brain.svg'
 import CheckedIcon from '@/assets/icons/checked.svg'
 import GlobeIcon from '@/assets/icons/globe.svg'
 import GlobeIcon2 from '@/assets/icons/globe2.svg'
-import Swal from 'sweetalert2'
+import Swal from '@/lib/swal'
 // import BackLeft from '@/assets/Images/backleft.png'
 // import BackRight from '@/assets/Images/backright.png'
 import earlyAccessBg from '@/assets/Images/earlyAccess-bg.png'
@@ -41,7 +41,6 @@ const earlyAccessErrors = reactive({
 })
 
 const isSubmitting = ref(false)
-
 
 const handleSubmit = async () => {
   if (isSubmitting.value) return
@@ -78,7 +77,7 @@ const handleSubmit = async () => {
     //   type: 'error',
     //   message: errorMessage,
     // }
-     Swal.fire({
+    Swal.fire({
       icon: 'error',
       title: 'Oops...',
       text: errorMessage,
@@ -248,7 +247,7 @@ const testimonials = [
         </p>
 
         <!-- TOP FORM -->
-         <div class="mx-auto mb-2 flex max-w-[496px] flex-col justify-center gap-3">
+        <div class="mx-auto mb-2 flex max-w-[496px] flex-col justify-center gap-3">
           <!-- Name Input -->
           <div class="relative w-full">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -285,14 +284,12 @@ const testimonials = [
           <Button
             @click="handleSubmit"
             :disabled="isSubmitting"
-            class="flex h-full items-center gap-2 bg-[#3a1f14] px-6 py-3 whitespace-nowrap text-white hover:text-white hover:bg-[#2d1810]"
+            class="flex h-full items-center gap-2 bg-[#3a1f14] px-6 py-3 whitespace-nowrap text-white hover:bg-[#2d1810] hover:text-white"
           >
             <span v-if="!isSubmitting">Join the Waitlist</span>
             <span v-else>Submitting...</span>
           </Button>
         </div>
-
-        
 
         <!-- Dashboard Mockup -->
         <div class="mx-auto mt-24 max-w-5xl">
@@ -332,7 +329,7 @@ const testimonials = [
           <Card
             v-for="(feature, idx) in features"
             :key="idx"
-            class="rounded-2xl border-0 gap-6 bg-white px-6 pt-8 pb-11.5 text-left transition hover:shadow-md"
+            class="gap-6 rounded-2xl border-0 bg-white px-6 pt-8 pb-11.5 text-left transition hover:shadow-md"
           >
             <!-- <div
               class="flex h-14 w-14 items-center justify-center rounded-full bg-[#FCEBD8] text-2xl text-white"
@@ -344,7 +341,7 @@ const testimonials = [
             </div>
             <!-- <h3 class="mb-2 text-lg font-bold text-[#1F1F1F]">{{ feature.title }}</h3>
             <p class="text-sm leading-relaxed text-[#6B7280]">{{ feature.description }}</p> -->
-             <div class="flex flex-col gap-2 text-left">
+            <div class="flex flex-col gap-2 text-left">
               <h3 class="text-lg font-bold text-gray-900">{{ feature.title }}</h3>
               <p class="text-sm text-gray-600">{{ feature.description }}</p>
             </div>
@@ -364,7 +361,7 @@ const testimonials = [
           Everything you need to stay compliant in one clean, intuitive platform
         </p>
         <div class="grid grid-cols-1 gap-9 sm:grid-cols-2 lg:grid-cols-3">
-           <!-- Active Projects -->
+          <!-- Active Projects -->
           <div class="rounded-md bg-white p-6 text-left shadow-sm transition hover:shadow-md">
             <div class="mb-6 flex items-center justify-between">
               <h4 class="text-lg font-bold">Active Projects</h4>
@@ -407,7 +404,7 @@ const testimonials = [
                   {{ update.value }}
                 </span>
               </Card>
-          </div>
+            </div>
           </div>
 
           <!-- Jurisdictions -->
@@ -473,7 +470,7 @@ const testimonials = [
                   placeholder="John Doe"
                   class="w-full rounded-md bg-transparent!"
                 />
-               <p v-if="earlyAccessErrors.organization_name" class="mt-1 text-xs text-red-600">
+                <p v-if="earlyAccessErrors.organization_name" class="mt-1 text-xs text-red-600">
                   {{ earlyAccessErrors.organization_name }}
                 </p>
               </div>
@@ -495,17 +492,15 @@ const testimonials = [
               </div>
             </div>
 
-
             <!-- Footer Button -->
             <Button
               @click="handleEarlyAccessSubmit"
               :disabled="isSubmitting"
-              class="flex w-full items-center justify-center gap-2 bg-[#3a1f14] px-6 py-3 text-white cursor-pointer"
+              class="flex w-full cursor-pointer items-center justify-center gap-2 bg-[#3a1f14] px-6 py-3 text-white"
             >
               <span v-if="!isSubmitting">Get Early Access →</span>
               <span v-else>Submitting...</span>
             </Button>
-            
 
             <p class="mt-4 text-xs text-[#9CA3AF]">
               We respect your privacy. No spam, unsubscribe anytime.
@@ -514,44 +509,44 @@ const testimonials = [
         </div>
       </section>
 
-    <!-- TESTIMONIALS -->
-    <section class="bg-[#F2AB6D] px-4 py-32 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-6xl text-center">
-        <h2 class="mb-16 text-4xl font-bold text-[#1F1F1F] sm:text-5xl">
-          Trusted by Compliance Professionals
-        </h2>
-        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <Card
-            v-for="(testimonial, idx) in testimonials"
-            :key="idx"
-            class="flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:shadow-md"
-          >
-            <div>
-              <div class="mb-4 flex items-center gap-1 text-[#FCD34D]">
-                <span class="text-lg">⭐</span>
-                <span class="text-lg">⭐</span>
-                <span class="text-lg">⭐</span>
-                <span class="text-lg">⭐</span>
-                <span class="text-lg">⭐</span>
-              </div>
-              <p class="mb-6 text-sm leading-relaxed text-[#6B7280]">"{{ testimonial.quote }}"</p>
-            </div>
-            <div class="flex items-center gap-3">
-              <div
-                class="flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold"
-                style="background: #3c2610; color: #d4af37"
-              >
-                {{ testimonial.initials }}
-              </div>
+      <!-- TESTIMONIALS -->
+      <section class="bg-[#F2AB6D] px-4 py-32 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-6xl text-center">
+          <h2 class="mb-16 text-4xl font-bold text-[#1F1F1F] sm:text-5xl">
+            Trusted by Compliance Professionals
+          </h2>
+          <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <Card
+              v-for="(testimonial, idx) in testimonials"
+              :key="idx"
+              class="flex flex-col justify-between rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:shadow-md"
+            >
               <div>
-                <h4 class="text-sm font-bold text-[#1F1F1F]">{{ testimonial.name }}</h4>
-                <p class="text-xs text-[#9CA3AF]">{{ testimonial.title }}</p>
+                <div class="mb-4 flex items-center gap-1 text-[#FCD34D]">
+                  <span class="text-lg">⭐</span>
+                  <span class="text-lg">⭐</span>
+                  <span class="text-lg">⭐</span>
+                  <span class="text-lg">⭐</span>
+                  <span class="text-lg">⭐</span>
+                </div>
+                <p class="mb-6 text-sm leading-relaxed text-[#6B7280]">"{{ testimonial.quote }}"</p>
               </div>
-            </div>
-          </Card>
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold"
+                  style="background: #3c2610; color: #d4af37"
+                >
+                  {{ testimonial.initials }}
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-[#1F1F1F]">{{ testimonial.name }}</h4>
+                  <p class="text-xs text-[#9CA3AF]">{{ testimonial.title }}</p>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
     </section>
   </div>
 </template>

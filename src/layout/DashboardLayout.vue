@@ -3,9 +3,9 @@ import MainHeader from '@/components/landing-page/MainHeader.vue'
 </script>
 
 <template>
-  <div class="container--wide flex flex-col bg-gray-50 min-h-screen">
+  <div class="flex min-h-screen flex-col bg-gray-50">
     <MainHeader />
-    <main class="flex-1 overflow-y-auto p-6">
+    <main class="flex-1 overflow-y-auto py-6 container--wide ">
       <router-view />
     </main>
   </div>

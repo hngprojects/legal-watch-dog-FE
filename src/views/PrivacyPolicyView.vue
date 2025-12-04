@@ -60,7 +60,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex min-h-screen flex-col bg-[#F7F4EF] text-gray-800">
-
     <main class="relative flex-1">
       <div
         class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px]"
@@ -76,7 +75,7 @@ onBeforeUnmount(() => {
       ></div>
 
       <section
-        class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-14 sm:px-6 lg:flex-row lg:gap-14 lg:py-20 xl:max-w-7xl"
+        class="app-container mx-auto flex w-full flex-col gap-10 px-4 py-14 sm:px-6 lg:flex-row lg:gap-14 lg:py-20"
       >
         <aside
           class="sticky top-24 z-10 hidden w-64 shrink-0 self-start lg:block"
@@ -107,7 +106,7 @@ onBeforeUnmount(() => {
           </nav>
         </aside>
 
-        <div class="w-full space-y-10 lg:max-w-3xl">
+        <div class="app-container w-full space-y-10">
           <header class="space-y-3">
             <div>
               <h1 class="text-foregroud text-4xl font-bold sm:text-[60px]">Privacy Policy</h1>
@@ -118,7 +117,7 @@ onBeforeUnmount(() => {
             </div>
           </header>
 
-          <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)]">
+          <div class="policy-content grid gap-10 lg:grid-cols-[minmax(0,1fr)]">
             <nav class="lg:hidden" aria-label="Privacy policy sections (mobile)">
               <div
                 class="flex flex-col gap-2 overflow-x-auto rounded-xl border border-[#f4e4d7] bg-white/90 p-3"
@@ -392,6 +391,17 @@ onBeforeUnmount(() => {
         </div>
       </section>
     </main>
-
   </div>
 </template>
+
+<style scoped>
+.policy-content section {
+  scroll-margin-top: 140px;
+}
+
+@media (min-width: 1024px) {
+  .policy-content section {
+    scroll-margin-top: 180px;
+  }
+}
+</style>

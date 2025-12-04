@@ -9,7 +9,7 @@ import type {
 } from '@/types/organization'
 
 const mapRawOrganization = (org: RawOrganization): Organization => ({
-  id: org.organization_id || org.id || (org as { _id?: string })._id || '',
+  id: org.organization_id || org.organizationId || org.id || (org as { _id?: string })._id || '',
   name: org.name,
   industry: org.industry,
   is_active: org.is_active,
@@ -51,17 +51,21 @@ const extractOrgArray = (value: unknown): RawOrganization[] => {
 
 const parseRawOrganizations = (payload: unknown): RawOrganization[] => {
   if (!payload || typeof payload !== 'object') return []
-  const maybePayload = payload as { organisations?: unknown; organizations?: unknown; data?: unknown }
+  const maybePayload = payload as {
+    organisations?: unknown
+    organizations?: unknown
+    data?: unknown
+  }
   const candidates = [
     maybePayload.organisations,
     maybePayload.organizations,
     maybePayload.data,
-    (maybePayload.data && typeof maybePayload.data === 'object'
+    maybePayload.data && typeof maybePayload.data === 'object'
       ? (maybePayload.data as { organisations?: unknown }).organisations
-      : undefined),
-    (maybePayload.data && typeof maybePayload.data === 'object'
+      : undefined,
+    maybePayload.data && typeof maybePayload.data === 'object'
       ? (maybePayload.data as { organizations?: unknown }).organizations
-      : undefined),
+      : undefined,
   ]
 
   for (const candidate of candidates) {
@@ -75,6 +79,31 @@ const parseRawOrganizations = (payload: unknown): RawOrganization[] => {
   }
 
   return []
+}
+
+const deepFindOrganization = (
+  payload: unknown,
+  seen: WeakSet<object> = new WeakSet(),
+): RawOrganization | null => {
+  if (!payload) return null
+  if (isRawOrganization(payload)) return payload
+  if (typeof payload !== 'object') return null
+  if (seen.has(payload as object)) return null
+  seen.add(payload as object)
+
+  if (Array.isArray(payload)) {
+    for (const item of payload) {
+      const found = deepFindOrganization(item, seen)
+      if (found) return found
+    }
+    return null
+  }
+
+  for (const value of Object.values(payload as Record<string, unknown>)) {
+    const found = deepFindOrganization(value, seen)
+    if (found) return found
+  }
+  return null
 }
 
 const parseSingleOrganization = (payload: unknown): RawOrganization | null => {
@@ -103,7 +132,7 @@ const parseSingleOrganization = (payload: unknown): RawOrganization | null => {
     }
   }
 
-  return null
+  return deepFindOrganization(payload)
 }
 
 const resolveTotalPages = (payload: unknown, fallbackLimit: number): number => {
@@ -123,9 +152,7 @@ const resolveTotalPages = (payload: unknown, fallbackLimit: number): number => {
 
     const innerData = (payload as { data?: unknown }).data
     if (innerData && typeof innerData === 'object') {
-      const inner = compute(
-        innerData as { total_pages?: number; total?: number; limit?: number },
-      )
+      const inner = compute(innerData as { total_pages?: number; total?: number; limit?: number })
       if (inner) return inner
     }
   }
@@ -150,6 +177,37 @@ const resolveMetaNumber = (
   return null
 }
 
+const mapAndFilterOrganizations = (rawList: RawOrganization[]): Organization[] => {
+  const seen = new Set<string>()
+  const cleaned: Organization[] = []
+  for (const raw of rawList) {
+    const mapped = mapRawOrganization(raw)
+    const key = mapped.id || mapped.name
+    if (!key) continue
+    if (mapped.is_active === false) continue
+    if (seen.has(key)) continue
+    seen.add(key)
+    cleaned.push(mapped)
+  }
+  return cleaned
+}
+
+const mergeOrganizations = (
+  current: Organization[],
+  rawList: RawOrganization[],
+): Organization[] => {
+  const incoming = mapAndFilterOrganizations(rawList)
+  const seen = new Set(current.map((org) => org.id || org.name).filter(Boolean) as string[])
+  const merged = [...current]
+  for (const org of incoming) {
+    const key = org.id || org.name
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    merged.push(org)
+  }
+  return merged
+}
+
 interface State {
   organizations: Organization[]
   loading: boolean
@@ -166,7 +224,7 @@ export const useOrganizationStore = defineStore('organizations', {
     loading: true,
     loadingMore: false,
     page: 1,
-    limit: 9,
+    limit: 10,
     totalPages: 1,
     error: null,
   }),
@@ -195,39 +253,46 @@ export const useOrganizationStore = defineStore('organizations', {
         const response = await organizationService.listOrganizations(this.page, this.limit)
         const payload = response?.data?.data ?? response?.data
         const rawList = parseRawOrganizations(payload)
-        this.organizations = rawList.map((org) => mapRawOrganization(org))
+        this.organizations = mapAndFilterOrganizations(rawList)
         this.totalPages = resolveTotalPages(payload, this.limit)
 
         // Backend occasionally returns empty `organizations` despite meta showing data.
         const announcedTotal = resolveMetaNumber(payload, 'total')
-        if (!this.organizations.length && !options?.skipFallback && (announcedTotal === null || announcedTotal > 0)) {
+        if (
+          !this.organizations.length &&
+          !options?.skipFallback &&
+          (announcedTotal === null || announcedTotal > 0)
+        ) {
           const fallback = await organizationService.listOrganizations()
           const fallbackPayload = fallback?.data?.data ?? fallback?.data
           const fallbackList = parseRawOrganizations(fallbackPayload)
           if (fallbackList.length) {
-            this.organizations = fallbackList.map((org) => mapRawOrganization(org))
+            this.organizations = mapAndFilterOrganizations(fallbackList)
             this.totalPages = resolveTotalPages(fallbackPayload, this.limit)
           }
         }
 
-        // Prefetch page 2 by default when more data is available.
-        if (this.totalPages > 1 && this.page === 1 && options?.prefetchSecondPage !== false) {
+        const targetCount = 10
+        // Load subsequent pages until we have at least targetCount active orgs or exhaust pages.
+        while (
+          this.organizations.length < targetCount &&
+          this.page < this.totalPages &&
+          options?.prefetchSecondPage !== false
+        ) {
           try {
-            const prefetchPage = 2
-            const next = await organizationService.listOrganizations(prefetchPage, this.limit)
+            const nextPage = this.page + 1
+            const next = await organizationService.listOrganizations(nextPage, this.limit)
             const nextPayload = next?.data?.data ?? next?.data
             const nextList = parseRawOrganizations(nextPayload)
-            if (nextList.length) {
-              const mapped = nextList.map((org) => mapRawOrganization(org))
-              this.organizations = [...this.organizations, ...mapped]
-              this.page = prefetchPage
-              const nextTotalPages = resolveTotalPages(nextPayload, this.limit)
-              if (nextTotalPages > this.totalPages) {
-                this.totalPages = nextTotalPages
-              }
+            this.organizations = mergeOrganizations(this.organizations, nextList)
+            this.page = nextPage
+            const nextTotalPages = resolveTotalPages(nextPayload, this.limit)
+            if (nextTotalPages > this.totalPages) {
+              this.totalPages = nextTotalPages
             }
           } catch (prefetchError) {
             void prefetchError
+            break
           }
         }
       } catch (error) {
@@ -259,8 +324,7 @@ export const useOrganizationStore = defineStore('organizations', {
         const response = await organizationService.listOrganizations(nextPage, this.limit)
         const payload = response?.data?.data ?? response?.data
         const rawList = parseRawOrganizations(payload)
-        const mapped = rawList.map((org) => mapRawOrganization(org))
-        this.organizations = [...this.organizations, ...mapped]
+        this.organizations = mergeOrganizations(this.organizations, rawList)
         this.page = nextPage
         this.totalPages = resolveTotalPages(payload, this.limit)
       } catch (error) {
@@ -282,20 +346,9 @@ export const useOrganizationStore = defineStore('organizations', {
     async addOrganization(payload: CreateOrganizationPayload) {
       this.setError(null)
       try {
-        const { data } = await organizationService.createOrganization(payload)
-        const raw =
-          parseSingleOrganization(data?.data) ||
-          parseSingleOrganization(data) ||
-          parseRawOrganizations(data?.data)?.[0] ||
-          parseRawOrganizations(data)?.[0]
-
-        const newOrg = raw ? mapRawOrganization(raw) : null
-        if (newOrg) {
-          this.organizations.unshift(newOrg)
-        } else {
-          this.setError('Organization created but could not be parsed from response')
-        }
-        return newOrg
+        await organizationService.createOrganization(payload)
+        // Do not rely on response body shape; caller will refetch list.
+        return true
       } catch (error) {
         const err = error as OrganizationErrorResponse
         if (!err.response) {
@@ -307,7 +360,7 @@ export const useOrganizationStore = defineStore('organizations', {
               'Failed to create organization',
           )
         }
-        return null
+        return false
       }
     },
 

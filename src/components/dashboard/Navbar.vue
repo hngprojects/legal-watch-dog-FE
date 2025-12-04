@@ -5,6 +5,7 @@ import BrandLogo from '../reusable/BrandLogo.vue'
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 import UserAvatar from '@/components/dashboard/UserAvatar.vue'
 import { computed, onMounted } from 'vue'
+import Swal from '@/lib/swal'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -17,6 +18,12 @@ const displayName = computed(() => {
   if (user.email) return user.email.split('@')[0] || 'User'
   return 'User'
 })
+const avatarUrl = computed(
+  () =>
+    authStore.user?.avatar_url ||
+    (authStore.user as { profile_picture_url?: string })?.profile_picture_url ||
+    '',
+)
 
 onMounted(async () => {
   if (!authStore.user && authStore.accessToken) {
@@ -25,6 +32,18 @@ onMounted(async () => {
 })
 
 const handleLogout = async () => {
+  const result = await Swal.fire({
+    icon: 'warning',
+    title: 'Log out?',
+    text: 'You will need to sign in again to access your dashboard.',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, log me out',
+    cancelButtonText: 'Stay logged in',
+    confirmButtonColor: '#DC2626',
+  })
+
+  if (!result.isConfirmed) return
+
   await authStore.logout()
   router.replace({ name: 'login' })
 }
@@ -64,10 +83,10 @@ const handleLogout = async () => {
           />
         </svg>
       </button>
-      <UserDropdown>
+      <UserDropdown @logout="handleLogout">
         <button class="btn btn--with-icon">
-          <UserAvatar :name="displayName" :size="40" />
-          <span class="text-sm font-semibold text-gray-800 truncate max-w-[140px]">
+          <UserAvatar :name="displayName" :image-url="avatarUrl" :size="40" />
+          <span class="max-w-[140px] truncate text-sm font-semibold text-gray-800">
             {{ displayName }}
           </span>
         </button>

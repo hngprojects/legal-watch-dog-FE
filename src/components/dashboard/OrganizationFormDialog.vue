@@ -2,10 +2,10 @@
 import { computed, reactive, watch } from 'vue'
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogScrollContent,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Field, FieldContent, FieldLabel } from '@/components/ui/field'
@@ -84,7 +84,7 @@ const handleSubmit = () => {
 
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
-    <DialogContent class="sm:max-w-[520px]">
+    <DialogScrollContent class="sm:max-w-[520px]">
       <DialogHeader>
         <DialogTitle>{{ title || 'Organization' }}</DialogTitle>
         <DialogDescription>Update organization details.</DialogDescription>
@@ -94,11 +94,7 @@ const handleSubmit = () => {
         <Field>
           <FieldLabel class="text-sm font-medium text-gray-900">Name</FieldLabel>
           <FieldContent>
-            <Input
-              v-model="form.name"
-              placeholder="Organization name"
-              class="h-11"
-            />
+            <Input v-model="form.name" placeholder="Organization name" class="h-11" />
           </FieldContent>
         </Field>
 
@@ -124,7 +120,7 @@ const handleSubmit = () => {
       <DialogFooter class="pt-4">
         <button
           type="button"
-          class="h-10 rounded-lg border border-gray-200 px-4 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+          class="btn--secondary btn--lg"
           @click="emit('update:open', false)"
           :disabled="loading"
         >
@@ -132,7 +128,7 @@ const handleSubmit = () => {
         </button>
         <button
           type="button"
-          class="h-10 rounded-lg bg-[#401903] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2a1102] disabled:cursor-not-allowed disabled:opacity-60"
+          class="btn--default btn--lg disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="!isValid || loading"
           @click="handleSubmit"
         >
@@ -140,6 +136,6 @@ const handleSubmit = () => {
           <span v-else>{{ submitLabel || 'Save' }}</span>
         </button>
       </DialogFooter>
-    </DialogContent>
+    </DialogScrollContent>
   </Dialog>
 </template>

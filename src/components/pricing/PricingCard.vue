@@ -1,31 +1,63 @@
 <script setup lang="ts">
 import Icon from '@/components/reusable/Icon.vue'
-import Button from '@/components/ui/button/Button.vue'
-import { CheckmarkSquare02Icon } from '@hugeicons/core-free-icons'
-import { RouterLink } from 'vue-router'
+import Swal from '@/lib/swal'
+import { useBillingStore } from '@/stores/billing-store'
+import type { BillingPlan } from '@/types/billing'
+import {
+  CheckmarkSquare02Icon,
+  Briefcase01Icon,
+  Building03Icon,
+  Target01Icon,
+} from '@hugeicons/core-free-icons'
+import { RouterLink, useRoute } from 'vue-router'
 
 const { i, activeBillingCycle, plan } = defineProps<{
   i: number
-  activeBillingCycle: 'monthly' | 'yearly'
-  plan: {
-    title: string
-    description: string
-    icon: typeof CheckmarkSquare02Icon
-    price: number
-    yearly: number
-    benefits: string[]
-  }
+  activeBillingCycle: 'month' | 'year'
+  plan: BillingPlan
 }>()
+
+const route = useRoute()
+const billingStore = useBillingStore()
+const isActivePlan = billingStore.current_plan_id === plan.id
+
+const formatPrice = (amount: number) => {
+  return (amount / 100).toFixed(2)
+}
+
+const handlePay = async () => {
+  if (isActivePlan) return
+
+  const result = await billingStore.handlePlanChange(plan.id)
+
+  if (billingStore.error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'An error occurred',
+      text: billingStore.error,
+    })
+  } else if (result) {
+    if (typeof result === 'string' && result.startsWith('http')) {
+      window.location.href = result
+    } else {
+      await billingStore.getSubscriptionStatus()
+    }
+  }
+}
 </script>
 
 <template>
   <article
-    class="card-gradient relative w-sm space-y-8 overflow-hidden rounded-4xl bg-white px-6 pt-10 pb-4 shadow-md"
+    class="card-gradient relative w-auto max-w-sm min-w-3xs space-y-8 overflow-hidden rounded-4xl bg-white px-6 pt-10 pb-4 shadow-md"
     :class="[i === 1 && 'card-gradient--popular lg:py-12']"
   >
     <div class="text flex items-center justify-between">
       <div class="bg-chocolate-brown-main size-fit rounded-full p-4">
-        <Icon :icon="plan.icon" :size="24" color="var(--peach-amber-200)" />
+        <Icon
+          :icon="i === 0 ? Briefcase01Icon : i === 1 ? Target01Icon : Building03Icon"
+          :size="24"
+          color="var(--peach-amber-200)"
+        />
       </div>
 
       <p v-if="i === 1" class="bg-chocolate-brown-main rounded-md px-2 py-1 text-sm text-white">
@@ -33,33 +65,45 @@ const { i, activeBillingCycle, plan } = defineProps<{
       </p>
     </div>
     <div class="space-y-5">
-      <h2 class="text-2xl font-medium">{{ plan.title }}</h2>
+      <h2 class="text-2xl font-medium">{{ plan.label }}</h2>
       <p class="text-gray-600">{{ plan.description }}</p>
     </div>
     <p>
-      <span class="text-3xl font-medium"
-        >${{ activeBillingCycle === 'monthly' ? plan.price : plan.yearly }}</span
+      <span class="text-3xl font-medium">${{ formatPrice(plan.amount) }}</span
       ><span class="text-gray-500">
-        {{ activeBillingCycle === 'monthly' ? '/month' : '/year' }}
+        {{ activeBillingCycle === 'month' ? '/month' : '/year' }}
       </span>
     </p>
 
-    <Button asChild :variant="i == 1 ? 'default' : 'outline'" class="w-full">
+    <template v-if="route.name === 'payment-plan'">
+      <button
+        @click="handlePay"
+        :disabled="isActivePlan || billingStore.loading"
+        class="btn--secondary btn--xl block w-full border text-center"
+        :class="[
+          i == 1 && 'btn--default hover:text-white',
+          (isActivePlan || billingStore.loading) && 'btn--disabled',
+        ]"
+      >
+        {{ isActivePlan ? 'Active plan' : i == 1 ? 'Get started now' : 'Choose this plan' }}
+      </button>
+    </template>
+    <template v-else>
       <RouterLink
         :to="{
-          name: 'payment-method',
-          params: { plan: plan.title.toLowerCase() },
-          query: { cycle: activeBillingCycle },
+          name: 'dashboard',
         }"
+        class="btn--secondary btn--xl block w-full border text-center"
+        :class="[i == 1 && 'btn--default hover:text-white']"
       >
         {{ i == 1 ? 'Get started now' : 'Choose this plan' }}
       </RouterLink>
-    </Button>
+    </template>
 
     <ul class="space-y-5 pt-4">
-      <li :key="i" v-for="(benefit, i) in plan.benefits" class="flex items-center gap-2">
+      <li :key="i" v-for="(feature, i) in plan.features" class="flex items-center gap-2">
         <Icon :icon="CheckmarkSquare02Icon" :size="20" color="var(--chocolate-brown-main)" />
-        <span class="text-gray-600">{{ benefit }}</span>
+        <span class="text-gray-600">{{ feature }}</span>
       </li>
     </ul>
   </article>

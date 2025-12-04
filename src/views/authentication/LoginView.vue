@@ -4,11 +4,15 @@ import AuthCard from '@/components/authentication/AuthCard.vue'
 import FormControl from '@/components/composables/FormControl.vue'
 import { useAuthStore } from '@/stores/auth-store'
 import { isAxiosError } from 'axios'
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useInvitationStore } from '@/stores/invitation-store'
+import { useInvitationPrompt } from '@/composables/useInvitationPrompt'
 
 const authStore = useAuthStore()
+const invitationStore = useInvitationStore()
 const router = useRouter()
+const { promptToAcceptInvite } = useInvitationPrompt()
 
 const email = ref('')
 const password = ref('')
@@ -21,6 +25,18 @@ const isSubmitting = ref(false)
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MIN_PASSWORD_LENGTH = 8
 const sanitize = (value: string) => value.trim()
+
+onMounted(() => {
+  rememberMe.value = authStore.rememberMePreference
+  if (authStore.email) {
+    email.value = authStore.email
+  }
+})
+
+watch(
+  () => rememberMe.value,
+  (val) => authStore.setRememberPreference(val),
+)
 
 const handleLogin = async () => {
   const sanitizedEmail = sanitize(email.value).toLowerCase()
@@ -43,6 +59,7 @@ const handleLogin = async () => {
 
   isSubmitting.value = true
   serverError.value = ''
+  authStore.setRememberPreference(rememberMe.value)
 
   try {
     const success = await authStore.login(
@@ -54,7 +71,16 @@ const handleLogin = async () => {
     )
 
     if (success) {
-      router.push({ name: 'organizations' })
+      const redirectQuery = router.currentRoute.value.query.redirect
+      const redirectTarget =
+        (typeof redirectQuery === 'string' && redirectQuery) || { name: 'organizations' }
+
+      await router.push(redirectTarget)
+
+      // If user came without a redirect but has a pending invite token, prompt after we leave the login screen
+      if (!redirectQuery && invitationStore.token) {
+        await promptToAcceptInvite()
+      }
     }
   } catch (error) {
     if (isAxiosError(error)) {
@@ -72,9 +98,7 @@ const handleLogin = async () => {
 <template>
   <AuthCard header-text="Welcome Back">
     <template v-slot:desc>
-      <p>
-        Don't have an account? <RouterLink to="/signup" class="btn--link">Sign up</RouterLink>
-      </p>
+      <p>Don't have an account? <RouterLink to="/signup" class="btn--link">Sign up</RouterLink></p>
     </template>
     <form @submit.prevent="handleLogin" class="space-y-6">
       <div
@@ -97,7 +121,7 @@ const handleLogin = async () => {
         v-model="email"
         type="email"
         label="Company Email"
-        placeholder="Enter your company's email"
+        placeholder="Enter your registered email"
         required
       />
 
@@ -128,13 +152,7 @@ const handleLogin = async () => {
                 d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
               />
             </svg>
-            <svg
-              v-else
-              class="me-4 h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg v-else class="me-4 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -166,11 +184,7 @@ const handleLogin = async () => {
         <RouterLink to="/forgot-password" class="btn--link">Forgot password?</RouterLink>
       </div>
 
-      <button
-        type="submit"
-        :disabled="isSubmitting"
-        class="bg-accent-subtle mt-3 w-full cursor-pointer rounded-md px-5 py-4 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#2a1b0b] disabled:cursor-not-allowed disabled:opacity-70"
-      >
+      <button type="submit" :disabled="isSubmitting" class="btn--default btn--lg btn--full">
         <span v-if="!isSubmitting">Login</span>
         <span v-else>Checking credentials...</span>
       </button>
@@ -184,7 +198,7 @@ const handleLogin = async () => {
         </div>
       </div>
 
-      <SocialLogins />
+      <SocialLogins :remember-me="rememberMe" />
     </form>
   </AuthCard>
 </template>

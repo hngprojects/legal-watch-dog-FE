@@ -86,6 +86,9 @@ const targetRoute = computed(() => {
 
 const isNavigating = ref(false)
 
+const issuedFromFlow = computed(() => getQueryValue(route.query.issued) === 'true')
+const showCta = computed(() => issuedFromFlow.value)
+
 const handleRedirect = () => {
   if (isNavigating.value) return
   isNavigating.value = true
@@ -146,13 +149,17 @@ const isSuccess = computed(() => statusType.value === 'success')
 
       <div class="space-y-3">
         <button
+          v-if="showCta"
           type="button"
           @click="handleRedirect"
-          class="btn btn--primary w-full"
+          class="btn--default btn--lg w-full"
           :disabled="isNavigating"
         >
           <span>{{ isNavigating ? 'Redirecting...' : statusCopy.cta }}</span>
         </button>
+        <p v-else class="text-sm text-gray-500">
+          This page is only available immediately after an action such as sign up or password reset.
+        </p>
       </div>
     </div>
   </div>

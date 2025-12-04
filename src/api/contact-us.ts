@@ -8,7 +8,6 @@ type ApiResponse<T> = {
   data?: T
 }
 
-
 export async function submitContactForm(payload: ContactUsApiPayload) {
   return api.post<ApiResponse<{ message?: string }>>(`/contact-us`, payload)
 }

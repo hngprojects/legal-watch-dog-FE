@@ -9,6 +9,17 @@ interface State {
   error: string | null
 }
 
+const INVITE_TOKEN_KEY = 'lwd_invite_token'
+
+const getStoredToken = () => localStorage.getItem(INVITE_TOKEN_KEY)
+const setStoredToken = (token: string | null) => {
+  if (token) {
+    localStorage.setItem(INVITE_TOKEN_KEY, token)
+  } else {
+    localStorage.removeItem(INVITE_TOKEN_KEY)
+  }
+}
+
 const normalizeInvitations = (payload: unknown): Invitation[] => {
   if (Array.isArray(payload)) {
     return payload.map((item) => ({
@@ -41,7 +52,7 @@ const normalizeInvitations = (payload: unknown): Invitation[] => {
 export const useInvitationStore = defineStore('invitations', {
   state: (): State => ({
     invitations: [],
-    token: null,
+    token: getStoredToken(),
     loading: false,
     error: null,
   }),
@@ -49,6 +60,7 @@ export const useInvitationStore = defineStore('invitations', {
   actions: {
     setToken(token: string | null) {
       this.token = token
+      setStoredToken(token)
     },
 
     setError(message: string | null) {
@@ -67,7 +79,9 @@ export const useInvitationStore = defineStore('invitations', {
           this.error = 'Network error: Unable to reach server'
         } else {
           this.error =
-            err.response.data?.detail?.[0]?.msg || err.response.data?.message || 'Failed to load invitations'
+            err.response.data?.detail?.[0]?.msg ||
+            err.response.data?.message ||
+            'Failed to load invitations'
         }
       } finally {
         this.loading = false
@@ -79,6 +93,7 @@ export const useInvitationStore = defineStore('invitations', {
       try {
         const { data } = await invitationService.acceptInvitation(token)
         this.invitations = this.invitations.filter((item) => item.token !== token)
+        this.setToken(null)
         return data.message || 'Invitation accepted'
       } catch (error) {
         const err = error as InvitationErrorResponse
@@ -86,7 +101,9 @@ export const useInvitationStore = defineStore('invitations', {
           this.error = 'Network error: Unable to reach server'
         } else {
           this.error =
-            err.response.data?.detail?.[0]?.msg || err.response.data?.message || 'Failed to accept invitation'
+            err.response.data?.detail?.[0]?.msg ||
+            err.response.data?.message ||
+            'Failed to accept invitation'
         }
         throw error
       }

@@ -1,5 +1,5 @@
 <template>
-  <div class="container--wide">
+  <div class="">
     <MainHeader />
 
     <main>
@@ -11,10 +11,10 @@
 </template>
 
 <script lang="ts">
-import MainHeader from "@/components/landing-page/MainHeader.vue";
-import MainFooter from "@/components/landing-page/MainFooter.vue";
+import MainHeader from '@/components/landing-page/MainHeader.vue'
+import MainFooter from '@/components/landing-page/MainFooter.vue'
 
 export default {
-  components: { MainHeader, MainFooter }
-};
+  components: { MainHeader, MainFooter },
+}
 </script>

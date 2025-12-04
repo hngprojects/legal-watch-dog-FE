@@ -28,6 +28,7 @@ type User = UserProfile & {
 
 interface State {
   accessToken: string | null
+  refreshToken: string | null
   user: User | null
   email: string | null
   organisation: Organisation | null
@@ -35,6 +36,7 @@ interface State {
   resetToken: string | null
   signupDraft: SignupDraft | null
   resetPasswordDraft: ResetPasswordDraft | null
+  rememberMePreference: boolean
 }
 
 interface ApiTokenData {
@@ -71,7 +73,9 @@ interface ResetPasswordDraft {
 }
 
 const TOKEN_KEY = 'lwd_access_token'
+const REFRESH_TOKEN_KEY = 'lwd_refresh_token'
 const EMAIL_KEY = 'lwd_user_email'
+const REMEMBER_ME_KEY = 'lwd_remember_me'
 
 const getStoredValue = (key: string) => localStorage.getItem(key) ?? sessionStorage.getItem(key)
 
@@ -85,9 +89,21 @@ const setStoredValue = (key: string, value: string, persist: boolean) => {
   ;(persist ? localStorage : sessionStorage).setItem(key, value)
 }
 
+const getStoredRememberPreference = () => {
+  const stored =
+    localStorage.getItem(REMEMBER_ME_KEY) ?? sessionStorage.getItem(REMEMBER_ME_KEY) ?? 'false'
+  return stored === 'true'
+}
+
+const setStoredRememberPreference = (remember: boolean) => {
+  localStorage.setItem(REMEMBER_ME_KEY, String(remember))
+  sessionStorage.setItem(REMEMBER_ME_KEY, String(remember))
+}
+
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
     accessToken: getStoredValue(TOKEN_KEY),
+    refreshToken: getStoredValue(REFRESH_TOKEN_KEY),
     user: null,
     email: getStoredValue(EMAIL_KEY),
     organisation: null,
@@ -95,6 +111,7 @@ export const useAuthStore = defineStore('auth', {
     resetToken: null,
     signupDraft: null,
     resetPasswordDraft: null,
+    rememberMePreference: getStoredRememberPreference(),
   }),
 
   getters: {
@@ -102,22 +119,39 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setAccessToken(token: string | null, rememberMe = true) {
+    setAccessToken(token: string | null, rememberMe?: boolean) {
+      const persist = rememberMe ?? this.rememberMePreference ?? true
       this.accessToken = token
       if (token) {
-        setStoredValue(TOKEN_KEY, token, rememberMe)
+        setStoredValue(TOKEN_KEY, token, persist)
       } else {
         clearStoredValue(TOKEN_KEY)
       }
     },
 
-    setUserEmail(email: string | null, rememberMe = true) {
+    setRefreshToken(token: string | null, rememberMe?: boolean) {
+      const persist = rememberMe ?? this.rememberMePreference ?? true
+      this.refreshToken = token
+      if (token) {
+        setStoredValue(REFRESH_TOKEN_KEY, token, persist)
+      } else {
+        clearStoredValue(REFRESH_TOKEN_KEY)
+      }
+    },
+
+    setUserEmail(email: string | null, rememberMe?: boolean) {
+      const persist = rememberMe ?? this.rememberMePreference ?? true
       this.email = email
       if (email) {
-        setStoredValue(EMAIL_KEY, email, rememberMe)
+        setStoredValue(EMAIL_KEY, email, persist)
       } else {
         clearStoredValue(EMAIL_KEY)
       }
+    },
+
+    setRememberPreference(rememberMe: boolean) {
+      this.rememberMePreference = rememberMe
+      setStoredRememberPreference(rememberMe)
     },
 
     setOtpPurpose(purpose: 'signup' | 'password-reset' | null) {
@@ -149,16 +183,43 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       this.organisation = null
       this.accessToken = null
+      this.refreshToken = null
       this.otpPurpose = null
       this.resetToken = null
       this.signupDraft = null
       this.resetPasswordDraft = null
       clearStoredValue(TOKEN_KEY)
+      clearStoredValue(REFRESH_TOKEN_KEY)
       clearStoredValue(EMAIL_KEY)
     },
 
-    handleLoginSuccess(token: string, rememberMe: boolean, user?: User) {
+    syncAuthFromStorage() {
+      const storedToken = getStoredValue(TOKEN_KEY)
+      if (!storedToken) {
+        this.accessToken = null
+        this.user = null
+        this.organisation = null
+      }
+
+      if (!this.accessToken) {
+        this.accessToken = storedToken
+      }
+
+      const storedRefreshToken = getStoredValue(REFRESH_TOKEN_KEY)
+      if (storedRefreshToken && !this.refreshToken) {
+        this.refreshToken = storedRefreshToken
+      }
+
+      const storedEmail = getStoredValue(EMAIL_KEY)
+      if (storedEmail && !this.email) {
+        this.email = storedEmail
+      }
+    },
+
+    handleLoginSuccess(token: string, rememberMe: boolean, user?: User, refreshToken?: string) {
+      this.setRememberPreference(rememberMe)
       this.setAccessToken(token, rememberMe)
+      this.setRefreshToken(refreshToken ?? null, rememberMe)
       if (user) {
         this.user = user
       }
@@ -173,7 +234,7 @@ export const useAuthStore = defineStore('auth', {
       this.setResetToken(null)
       return responseBody
     },
-    async login(payload: LoginPayload, rememberMe = false) {
+    async login(payload: LoginPayload, rememberMe?: boolean) {
       const response = await authService.login(payload)
       const responseBody = response.data as unknown as LoginApiResponse
       const authData = responseBody.data
@@ -182,8 +243,14 @@ export const useAuthStore = defineStore('auth', {
         throw new Error('Login response missing access token.')
       }
 
-      this.handleLoginSuccess(authData.access_token, rememberMe, authData.user)
-      this.setUserEmail(payload.email, rememberMe)
+      const persist = rememberMe ?? this.rememberMePreference ?? false
+      this.handleLoginSuccess(
+        authData.access_token,
+        persist,
+        authData.user as User | undefined,
+        authData.refresh_token,
+      )
+      this.setUserEmail(payload.email, persist)
 
       return true
     },
@@ -196,10 +263,16 @@ export const useAuthStore = defineStore('auth', {
       const responseBody = response.data as VerifyOtpResponse
       const authData = responseBody.data ?? responseBody.login_data
 
-      this.setUserEmail(payload.email)
+      const persist = this.rememberMePreference ?? true
+      this.setUserEmail(payload.email, persist)
 
       if (authData?.access_token) {
-        this.handleLoginSuccess(authData.access_token, true, authData.user as User | undefined)
+        this.handleLoginSuccess(
+          authData.access_token,
+          persist,
+          authData.user as User | undefined,
+          authData.refresh_token,
+        )
       }
 
       this.setOtpPurpose(null)
@@ -272,6 +345,27 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.clearAuthState()
       }
+    },
+
+    async refreshTokens() {
+      const refreshToken = this.refreshToken
+      if (!refreshToken) {
+        throw new Error('No refresh token available')
+      }
+
+      const response = await authService.refreshToken({ refresh_token: refreshToken })
+      const payload = response.data
+      const data = payload?.data ?? payload
+      const newAccess = data?.access_token
+      const newRefresh = data?.refresh_token
+
+      if (!newAccess || !newRefresh) {
+        throw new Error('Failed to obtain refreshed tokens')
+      }
+
+      const persist = this.rememberMePreference ?? true
+      this.handleLoginSuccess(newAccess, persist, this.user ?? undefined, newRefresh)
+      return newAccess
     },
   },
 })

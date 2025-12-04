@@ -7,6 +7,8 @@ export interface UserProfile {
   email: string
   role?: string
   phone_number?: string
+  avatar_url?: string
+  profile_picture_url?: string
   is_verified?: boolean
   is_active?: boolean
   created_at?: string

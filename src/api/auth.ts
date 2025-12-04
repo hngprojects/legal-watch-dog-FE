@@ -9,6 +9,7 @@ import type {
   PasswordResetRequestResponse,
   PasswordResetVerifyPayload,
   PasswordResetVerifyResponse,
+  RefreshTokenPayload,
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
@@ -19,9 +20,11 @@ import type {
   ResendOtpResponse,
   VerifyOTPPayload,
   VerifyOtpResponse,
+  GoogleProfileResponse,
 } from '@/types/auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.staging.legalwatch.dog/api/v1'
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? 'https://api.staging.legalwatch.dog/api/v1'
 
 const http = axios.create({
   baseURL: API_BASE_URL,
@@ -56,12 +59,17 @@ export const authService = {
   confirmPasswordReset: (payload: PasswordResetConfirmPayload) =>
     http.post<PasswordResetConfirmResponse>('/auth/password/resets/confirmation', payload),
 
-  refreshToken: () => http.post<RefreshTokenResponse>('/auth/token/refresh', {}),
+  refreshToken: (payload: RefreshTokenPayload) =>
+    http.post<RefreshTokenResponse>('/auth/token/refresh', payload),
 
   getMicrosoftLoginUrl: (redirectUri?: string | null) =>
     http.get<MicrosoftOAuthLoginResponse>('/oauth/microsoft/login', {
       params: redirectUri ? { redirect_uri: redirectUri } : undefined,
     }),
+
+  getGoogleLoginUrl: () => `${API_BASE_URL}/oauth/google/login`,
+
+  getGoogleProfile: () => http.get<GoogleProfileResponse>('/oauth/google/profile'),
 
   appleSignIn: (payload: AppleSignInPayload) =>
     http.post<AppleSignInResponse>('/auth/apple/signin', payload),
