@@ -434,7 +434,7 @@ const saveEdits = async () => {
               <!-- <div class="space-y-3"> -->
               <div class="flex flex-col items-center gap-2">
                 <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
-                <p class="text-xl text-[#1F1F1F]">{{ primaryRole }} - {{ primaryOrg }}</p>
+                <p v-if="!(primaryRole === 'Member' && primaryOrg === 'Member')" class="text-xl text-[#1F1F1F]">{{ primaryRole }} - {{ primaryOrg }}</p>
                 <p class="text-lg text-[#6B7280]">{{ userEmail }}</p>
               </div>
               <!-- </div> -->
