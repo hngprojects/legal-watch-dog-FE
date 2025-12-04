@@ -36,10 +36,7 @@ const selectedOrganizationId = computed({
     if (!value) return
     organizationStore.setCurrentOrganization(value)
 
-    if (
-      route.name === 'organization-projects' &&
-      route.params.organizationId === value
-    ) {
+    if (route.name === 'organization-projects' && route.params.organizationId === value) {
       return
     }
 
@@ -90,10 +87,12 @@ watch(
   <div class="flex items-center gap-2">
     <Select v-model="selectedOrganizationId" :disabled="loading || !hasOrganizations">
       <SelectTrigger
-        class="h-10 w-full text-sm font-semibold text-gray-800 hover:border-accent-main focus:border-accent-main focus:ring-1 focus:ring-accent-main/20 lg:w-60 cursor-pointer border border-transparent hover:border-2 hover:shadow-md rounded-sm"
+        class="hover:border-accent-main focus:border-accent-main focus:ring-accent-main/20 h-10 w-full cursor-pointer rounded-sm border border-transparent text-sm font-semibold text-gray-800 hover:border-2 hover:shadow-md focus:ring-1 lg:w-60"
       >
         <SelectValue
-          :placeholder="loading ? 'Loading...' : hasOrganizations ? 'Select organization' : 'No organizations'"
+          :placeholder="
+            loading ? 'Loading...' : hasOrganizations ? 'Select organization' : 'No organizations'
+          "
         />
       </SelectTrigger>
       <SelectContent align="start" class="w-60">
@@ -101,7 +100,7 @@ watch(
           v-for="org in organizations"
           :key="org.id"
           :value="org.id"
-          class="font-medium text-gray-800 cursor-pointer"
+          class="cursor-pointer font-medium text-gray-800"
         >
           {{ org.name || 'Organization' }}
         </SelectItem>

@@ -449,9 +449,10 @@ export const useOrganizationStore = defineStore('organizations', {
       if (!organizationId) return
       const index = this.organizations.findIndex((org) => org.id === organizationId)
       if (index <= 0) return
-      const selected = this.organizations[index]
-      const reordered = [selected, ...this.organizations.filter((_, i) => i !== index)]
-      this.organizations = reordered
+      const next = [...this.organizations]
+      const [selected] = next.splice(index, 1)
+      if (!selected) return
+      this.organizations = [selected, ...next]
     },
   },
   getters: {
