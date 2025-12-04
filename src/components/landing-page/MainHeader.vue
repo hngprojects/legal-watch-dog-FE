@@ -21,6 +21,12 @@ const isMobileDropdownOpen = ref(false)
 
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
+const avatarUrl = computed(
+  () =>
+    authStore.user?.avatar_url ||
+    (authStore.user as { profile_picture_url?: string })?.profile_picture_url ||
+    '',
+)
 const displayName = computed(() => {
   const user = authStore.user
   if (!user) return 'User'
@@ -150,7 +156,7 @@ onUnmounted(() => {
               <button
                 class="btn btn--with-icon flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-gray-100"
               >
-                <UserAvatar :name="displayName" :size="38" />
+                <UserAvatar :name="displayName" :image-url="avatarUrl" :size="38" />
                 <span
                   class="max-w-[100px] truncate text-sm font-semibold text-gray-800 xl:max-w-[140px]"
                 >
@@ -256,7 +262,7 @@ onUnmounted(() => {
                 <button
                   class="flex w-full items-center gap-3 rounded-lg bg-gray-50 p-3 hover:bg-gray-100 transition-colors"
                 >
-                  <UserAvatar :name="displayName" :size="40" />
+                  <UserAvatar :name="displayName" :image-url="avatarUrl" :size="40" />
                   <div class="min-w-0 flex-1 text-left">
                     <p class="truncate text-sm font-semibold text-gray-800">{{ displayName }}</p>
                     <p class="text-xs text-gray-500">View profile & settings</p>

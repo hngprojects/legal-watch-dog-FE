@@ -258,7 +258,7 @@ const handleSubmit = async () => {
                   id="phoneNumber"
                   v-model="form.phoneNumber"
                   type="tel"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+15550000000"
                   class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
                 />
               </div>
