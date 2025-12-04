@@ -569,7 +569,7 @@ onMounted(() => {
               <BreadcrumbLink as-child>
                 <RouterLink
                   :to="{
-                    name: 'organization-projects',
+                    name: 'organization-profile',
                     params: { organizationId: activeOrganizationId },
                   }"
                 >

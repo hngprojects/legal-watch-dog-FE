@@ -30,6 +30,7 @@ const { invitations, loading: inviteLoading, error: inviteError } = storeToRefs(
 const router = useRouter()
 const authStore = useAuthStore()
 
+const pageLoading = ref(true)
 const showCreateModal = ref(false)
 const formData = ref({
   name: '',
@@ -171,16 +172,29 @@ onMounted(async () => {
   const userId = await ensureUserId()
   if (!userId) {
     organizationStore.setError('User information missing. Please re-login.')
+    pageLoading.value = false
     return
   }
-  await organizationStore.fetchOrganizations(userId)
-  await refreshInvitations()
+  await Promise.all([organizationStore.fetchOrganizations(userId), refreshInvitations()])
+  pageLoading.value = false
 })
 </script>
 
 <template>
   <main class="app-container min-h-screen flex-1 bg-gray-50">
-    <div v-if="inviteLoading || inviteError || invitations.length" class="mb-8">
+    <div v-if="pageLoading" class="mx-auto w-full space-y-6 py-8">
+      <div class="">
+        <div class="animate-pulse rounded-2xl bg-white p-8 shadow-sm">
+          <div class="mb-4 h-6 w-3/4 rounded bg-gray-200"></div>
+          <div class="space-y-2">
+            <div class="h-4 w-full rounded bg-gray-200"></div>
+            <div class="h-4 w-5/6 rounded bg-gray-200"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="inviteLoading || inviteError || invitations.length" class="mb-8">
       <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
         <div class="mb-4 flex items-center justify-between">
           <div>
@@ -300,8 +314,8 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-
-      <div v-else-if="error" class="py-12 text-center">
+      <!-- Error Comp -->
+      <div v-else-if="!loading && error && organizations.length === 0" class="py-12 text-center">
         <p class="text-red-600">{{ error }}</p>
         <button
           @click="authStore.user?.id && organizationStore.fetchOrganizations(authStore.user.id)"

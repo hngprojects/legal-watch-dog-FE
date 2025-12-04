@@ -41,6 +41,7 @@ export interface BillingHistoryEntry {
   stripe_invoice_id: string
   hosted_invoice_url: string
   invoice_pdf_url: string
+  plan_label: string
   plan_code: string
   plan_interval: 'month' | 'year'
   created_at: Date

@@ -78,6 +78,9 @@ const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
   projectJurisdictions.value.filter((item) => !item.parent_id),
 )
 
+// archive count
+const archiveCount = computed(() => jurisdictionStore.archivedJurisdictions.length)
+
 const goBack = () => {
   if (organizationId.value) {
     router.push({
@@ -173,6 +176,9 @@ onMounted(async () => {
   }
 
   await jurisdictionStore.fetchJurisdictions(projectId, organizationId.value)
+
+  jurisdictionStore.initializeArchived()
+
   loading.value = false
 })
 
@@ -269,8 +275,8 @@ const saveEdit = async () => {
     Swal.fire(
       'Error',
       projectStore.error ||
-        (err as ProjectErrorResponse).response?.data?.detail?.[0]?.msg ||
-        'Failed to update project',
+      (err as ProjectErrorResponse).response?.data?.detail?.[0]?.msg ||
+      'Failed to update project',
       'error',
     )
   }
@@ -317,7 +323,7 @@ watch(
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organization-projects', params: { organizationId } }">
+                <RouterLink :to="{ name: 'organization-profile', params: { organizationId } }">
                   {{ organizationName || 'Organization' }}
                 </RouterLink>
               </BreadcrumbLink>
@@ -346,11 +352,8 @@ watch(
             <Settings :size="18" />
           </button>
 
-          <div
-            v-if="showSettingsMenu"
-            @click.stop
-            class="absolute z-50 mt-2 w-44 space-y-1 rounded-md bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0"
-          >
+          <div v-if="showSettingsMenu" @click.stop
+            class="absolute z-50 mt-2 w-44 space-y-1 rounded-md bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0">
             <button @click="startEdit" class="btn--secondary btn--full btn--sm">
               Edit Project
             </button>
@@ -361,12 +364,10 @@ watch(
         </div>
       </div>
       <div
-        class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5"
-      >
+        class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5">
         <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
           <div
-            class="border-fg flex h-10 w-10 items-center justify-center rounded-[8px] border bg-[#1F1F1F1A] p-1 sm:h-12 sm:w-12"
-          >
+            class="border-fg flex h-10 w-10 items-center justify-center rounded-[8px] border bg-[#1F1F1F1A] p-1 sm:h-12 sm:w-12">
             <CheckSquare class="text-fg h-5 w-5 sm:h-6 sm:w-6" />
           </div>
 
@@ -378,10 +379,8 @@ watch(
             </RouterLink>
           </p>
         </div>
-        <button
-          @click="openHireSpecialistModal"
-          class="h-10 w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-11 sm:w-auto sm:px-6 sm:text-[15px]"
-        >
+        <button @click="openHireSpecialistModal"
+          class="h-10 w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-11 sm:w-auto sm:px-6 sm:text-[15px]">
           Hire a Specialist
         </button>
       </div>
@@ -390,36 +389,24 @@ watch(
           <form @submit.prevent="saveEdit" class="w-full space-y-4">
             <div>
               <label class="text-sm font-medium text-[#1F1F1F]">Project Name</label>
-              <input
-                v-model="editForm.title"
-                class="h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-              />
+              <input v-model="editForm.title"
+                class="h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20" />
             </div>
 
             <div>
               <label class="text-sm font-medium text-[#1F1F1F]">Description</label>
-              <textarea
-                v-model="editForm.description"
-                rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-              ></textarea>
+              <textarea v-model="editForm.description" rows="3"
+                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"></textarea>
             </div>
 
             <div>
               <label class="text-sm font-medium text-[#1F1F1F]">Master Prompt</label>
-              <textarea
-                v-model="editForm.master_prompt"
-                rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-              ></textarea>
+              <textarea v-model="editForm.master_prompt" rows="3"
+                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"></textarea>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                @click="showInlineEdit = false"
-                class="btn--secondary btn--sm md:btn--lg"
-              >
+              <button type="button" @click="showInlineEdit = false" class="btn--secondary btn--sm md:btn--lg">
                 Cancel
               </button>
               <button type="submit" class="btn--default btn--sm md:btn--lg">Save Changes</button>
@@ -434,23 +421,15 @@ watch(
             <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
 
             <div
-              class="relative flex h-12 w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-60"
-            >
-              <select
-                v-model="selected"
-                class="w-full cursor-pointer appearance-none bg-transparent text-[16px] font-medium text-[#374151] focus:outline-none"
-              >
+              class="relative flex h-12 w-full items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm sm:w-60">
+              <select v-model="selected"
+                class="w-full cursor-pointer appearance-none bg-transparent text-[16px] font-medium text-[#374151] focus:outline-none">
                 <option value="AI">AI</option>
                 <option value="Manual">Manual</option>
                 <option value="Hybrid">Hybrid</option>
               </select>
-              <svg
-                class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
+              <svg class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </div>
@@ -460,31 +439,26 @@ watch(
 
       <div class="mb-8 flex items-end justify-between md:mt-[88px]">
         <div class="flex w-auto gap-8 border-b border-gray-200">
-          <button
-            @click="activeTab = 'jurisdictions'"
-            :class="[
-              'relative pb-4 text-sm font-medium transition-colors',
-              activeTab === 'jurisdictions' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
-            ]"
-          >
+          <button @click="activeTab = 'jurisdictions'" :class="[
+            'relative pb-4 text-sm font-medium transition-colors',
+            activeTab === 'jurisdictions' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
+          ]">
             Jurisdictions
-            <div
-              v-if="activeTab === 'jurisdictions'"
-              class="absolute right-0 bottom-0 left-0 h-0.5 bg-[#401903]"
-            ></div>
+            <div v-if="activeTab === 'jurisdictions'" class="absolute right-0 bottom-0 left-0 h-0.5 bg-[#401903]"></div>
           </button>
         </div>
 
         <div class="mb-3 flex items-center gap-3">
-          <!-- <button @click="router.push({ name: 'jurisdictions-archive', query: { organizationId: organizationId } })"
+          <button @click="router.push({ name: 'jurisdictions-archive', query: { organizationId } })"
             class="flex items-center gap-2 rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] shadow-sm transition-all hover:bg-orange-50">
-            View Archive
-          </button> -->
+            <span>Archive</span>
+            <span v-if="archiveCount > 0"
+              class="rounded-full bg-[#401903] px-2 py-0.5 text-xs font-semibold text-white">
+              {{ archiveCount }}
+            </span>
+          </button>
 
-          <button
-            @click="openAddJurisdictionModal"
-            class="btn--default btn--with-icon btn--sm md:btn--lg"
-          >
+          <button @click="openAddJurisdictionModal" class="btn--default btn--with-icon btn--sm md:btn--lg">
             <Plus :size="18" class="sm:size-5" />
             <span class="hidden sm:inline">Add Jurisdiction</span>
             <span class="sm:hidden">Add</span>
@@ -500,24 +474,17 @@ watch(
             </div>
           </div>
 
-          <div
-            v-else-if="projectJurisdictions.length === 0"
-            class="flex flex-col items-center justify-center bg-white py-20"
-          >
+          <div v-else-if="projectJurisdictions.length === 0"
+            class="flex flex-col items-center justify-center bg-white py-20">
             <p class="text-sm text-gray-500">No jurisdictions yet for this project.</p>
             <p class="mt-2 text-xs text-gray-400">Add one to start monitoring changes.</p>
           </div>
 
           <div v-else class="space-y-3">
-            <article
-              v-for="jurisdiction in topLevelJurisdictions"
-              :key="jurisdiction.id"
+            <article v-for="jurisdiction in topLevelJurisdictions" :key="jurisdiction.id"
               @click="goToJurisdiction(jurisdiction.id)"
-              class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
-            >
-              <h3
-                class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
-              >
+              class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10">
+              <h3 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]">
                 {{ jurisdiction.name }}
               </h3>
               <p class="text-sm leading-relaxed text-gray-600">
@@ -532,10 +499,7 @@ watch(
       </div>
     </div>
 
-    <Dialog
-      :open="showAddJurisdictionModal"
-      @update:open="(value) => !value && closeAddJurisdictionModal()"
-    >
+    <Dialog :open="showAddJurisdictionModal" @update:open="(value) => !value && closeAddJurisdictionModal()">
       <DialogScrollContent class="sm:max-w-[540px]">
         <DialogHeader>
           <DialogTitle>Define your Jurisdiction</DialogTitle>
@@ -547,27 +511,17 @@ watch(
             <label for="jurisdictionName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
               Jurisdiction Name
             </label>
-            <input
-              v-model="jurisdictionForm.name"
-              id="jurisdictionName"
-              placeholder="e.g United Kingdom"
-              required
-              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            />
+            <input v-model="jurisdictionForm.name" id="jurisdictionName" placeholder="e.g United Kingdom" required
+              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
           </div>
 
           <div>
             <label for="jurisdictionDesc" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
               Description
             </label>
-            <textarea
-              v-model="jurisdictionForm.description"
-              id="jurisdictionDesc"
-              rows="3"
-              placeholder="What legal areas will you monitor?"
-              required
-              class="h-[130px] w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            />
+            <textarea v-model="jurisdictionForm.description" id="jurisdictionDesc" rows="3"
+              placeholder="What legal areas will you monitor?" required
+              class="h-[130px] w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
           </div>
 
           <div v-if="jurisdictionStore.error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
@@ -584,10 +538,7 @@ watch(
       </DialogScrollContent>
     </Dialog>
 
-    <Dialog
-      :open="showHireSpecialistModal"
-      @update:open="(value) => !value && closeHireSpecialistModal()"
-    >
+    <Dialog :open="showHireSpecialistModal" @update:open="(value) => !value && closeHireSpecialistModal()">
       <DialogScrollContent class="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Hire a Specialist</DialogTitle>
@@ -598,25 +549,16 @@ watch(
             <label for="companyName" class="mb-2 block text-sm font-semibold text-gray-900">
               Company Name
             </label>
-            <input
-              placeholder="United UI"
-              id="companyName"
-              type="text"
-              required
-              class="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
-            />
+            <input placeholder="United UI" id="companyName" type="text" required
+              class="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
           </div>
 
           <div>
             <label for="companyEmail" class="mb-2 block text-sm font-semibold text-gray-900">
               Company Email Address
             </label>
-            <input
-              placeholder="olivia@untitledui.com"
-              type="email"
-              required
-              class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
-            />
+            <input placeholder="olivia@untitledui.com" type="email" required
+              class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
           </div>
 
           <div>
@@ -624,18 +566,14 @@ watch(
               Industry
             </label>
             <div class="relative">
-              <select
-                id="industry"
-                class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0"
-              >
+              <select id="industry"
+                class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0">
                 <option value="Immigration & Global Mobility">Immigration & Global Mobility</option>
                 <option value="Finance">Finance</option>
                 <option value="Healthcare">Healthcare</option>
               </select>
-              <ChevronDown
-                :size="16"
-                class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 transform text-gray-500"
-              />
+              <ChevronDown :size="16"
+                class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 transform text-gray-500" />
             </div>
           </div>
 
@@ -645,11 +583,8 @@ watch(
             </label>
             <textarea
               placeholder="Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states"
-              id="description"
-              rows="3"
-              required
-              class="h-24 w-full resize-none rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
-            />
+              id="description" rows="3" required
+              class="h-24 w-full resize-none rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0" />
           </div>
 
           <DialogFooter class="flex justify-end gap-2 pt-4">

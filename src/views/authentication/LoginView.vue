@@ -6,9 +6,13 @@ import { useAuthStore } from '@/stores/auth-store'
 import { isAxiosError } from 'axios'
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useInvitationStore } from '@/stores/invitation-store'
+import { useInvitationPrompt } from '@/composables/useInvitationPrompt'
 
 const authStore = useAuthStore()
+const invitationStore = useInvitationStore()
 const router = useRouter()
+const { promptToAcceptInvite } = useInvitationPrompt()
 
 const email = ref('')
 const password = ref('')
@@ -67,7 +71,16 @@ const handleLogin = async () => {
     )
 
     if (success) {
-      router.push({ name: 'organizations' })
+      const redirectQuery = router.currentRoute.value.query.redirect
+      const redirectTarget =
+        (typeof redirectQuery === 'string' && redirectQuery) || { name: 'organizations' }
+
+      await router.push(redirectTarget)
+
+      // If user came without a redirect but has a pending invite token, prompt after we leave the login screen
+      if (!redirectQuery && invitationStore.token) {
+        await promptToAcceptInvite()
+      }
     }
   } catch (error) {
     if (isAxiosError(error)) {
