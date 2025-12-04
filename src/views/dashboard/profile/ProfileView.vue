@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import Swal from '@/lib/swal'
+import type { SweetAlertOptions } from 'sweetalert2'
 import { Input } from '@/components/ui/input'
 import { userService, type UpdateProfilePayload } from '@/api/user'
 import { useAuthStore } from '@/stores/auth-store'
@@ -36,6 +37,14 @@ const profileLoading = ref(true)
 const profileError = ref<string | null>(null)
 const userProfile = ref<UserProfile | null>(null)
 const showEditModal = ref(false)
+
+const showSwal = async (options: SweetAlertOptions) => {
+  const shouldReopenModal = showEditModal.value
+  if (shouldReopenModal) showEditModal.value = false
+  const result = await Swal.fire(options)
+  if (shouldReopenModal) showEditModal.value = true
+  return result
+}
 
 const editForm = ref({
   name: '',
@@ -154,6 +163,8 @@ const fetchProfile = async () => {
 
     userProfile.value = {
       ...apiUser,
+      avatar_url:
+        apiUser.avatar_url || (apiUser as { profile_picture_url?: string }).profile_picture_url,
       // fallbacks for readable display when name fields are missing
       name: apiUser.name || apiUser.first_name || fallbackNameFromEmail.value || 'User',
     }
@@ -167,6 +178,8 @@ const fetchProfile = async () => {
         last_name: apiUser.last_name,
         email: apiUser.email,
         role: apiUser.role,
+        avatar_url:
+          apiUser.avatar_url || (apiUser as { profile_picture_url?: string }).profile_picture_url,
       }
     }
   } catch (error) {
@@ -214,40 +227,38 @@ const openEditModal = () => {
   showEditModal.value = true
 }
 
-// const triggerFileInput = () => {
-//   fileInputRef.value?.click()
-// }
+const triggerFileInput = () => {
+  if (uploadingImage.value) return
+  fileInputRef.value?.click()
+}
 
 const handleImageUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
 
   if (!file) return
-  isSaving.value = true
 
   // Validate file type
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
   if (!validTypes.includes(file.type)) {
-    Swal.fire({
+    await showSwal({
       icon: 'error',
       title: 'Invalid File Type',
       text: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP).',
       confirmButtonColor: '#401903',
     })
-    isSaving.value = false
     return
   }
 
   // Validate file size (max 5MB)
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
-    Swal.fire({
+    await showSwal({
       icon: 'error',
       title: 'File Too Large',
       text: 'Image size must be less than 5MB.',
       confirmButtonColor: '#401903',
     })
-    isSaving.value = false
     return
   }
 
@@ -275,7 +286,7 @@ const handleImageUpload = async (event: Event) => {
         }
       }
 
-      Swal.fire({
+      await showSwal({
         icon: 'success',
         title: 'Profile Picture Updated',
         text: 'Your profile picture has been successfully uploaded.',
@@ -290,7 +301,7 @@ const handleImageUpload = async (event: Event) => {
       err?.response?.data?.error ||
       'Failed to upload profile picture. Please try again.'
 
-    Swal.fire({
+    await showSwal({
       icon: 'error',
       title: 'Upload Failed',
       text: errorMessage,
@@ -298,7 +309,6 @@ const handleImageUpload = async (event: Event) => {
     })
   } finally {
     uploadingImage.value = false
-    isSaving.value = false
     // Reset file input
     if (target) target.value = ''
   }
@@ -311,7 +321,7 @@ const closeEditModal = () => {
 const saveEdits = async () => {
   try {
     if (!editForm.value.name.trim()) {
-      Swal.fire({
+      await showSwal({
         icon: 'error',
         title: 'Validation Error',
         text: 'Name is required.',
@@ -344,7 +354,7 @@ const saveEdits = async () => {
       }
     }
 
-    Swal.fire({
+    await showSwal({
       icon: 'success',
       title: 'Profile Updated',
       text: 'Your profile has been successfully updated.',
@@ -362,7 +372,7 @@ const saveEdits = async () => {
       err?.response?.data?.error ||
       'Failed to update profile. Please try again.'
 
-    Swal.fire({
+    await showSwal({
       icon: 'error',
       title: 'Update Failed',
       text: errorMessage,
@@ -421,13 +431,6 @@ const saveEdits = async () => {
                   <img :src="editIcon" alt="Edit Icon" />
                 </div>
               </div>
-              <!-- <input
-                ref="fileInputRef"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="handleImageUpload"
-              /> -->
               <!-- <div class="space-y-3"> -->
               <div class="flex flex-col items-center gap-2">
                 <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
@@ -554,8 +557,8 @@ const saveEdits = async () => {
             <div
               class="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#401903]"
               :class="{ 'cursor-not-allowed opacity-50': uploadingImage }"
+              @click="triggerFileInput"
             >
-              <!-- @click="uploadingImage ? null : triggerFileInput()" -->
               <svg
                 v-if="uploadingImage"
                 class="h-4 w-4 animate-spin text-white"

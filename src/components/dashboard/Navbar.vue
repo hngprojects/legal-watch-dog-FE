@@ -18,6 +18,12 @@ const displayName = computed(() => {
   if (user.email) return user.email.split('@')[0] || 'User'
   return 'User'
 })
+const avatarUrl = computed(
+  () =>
+    authStore.user?.avatar_url ||
+    (authStore.user as { profile_picture_url?: string })?.profile_picture_url ||
+    '',
+)
 
 onMounted(async () => {
   if (!authStore.user && authStore.accessToken) {
@@ -79,7 +85,7 @@ const handleLogout = async () => {
       </button>
       <UserDropdown @logout="handleLogout">
         <button class="btn btn--with-icon">
-          <UserAvatar :name="displayName" :size="40" />
+          <UserAvatar :name="displayName" :image-url="avatarUrl" :size="40" />
           <span class="max-w-[140px] truncate text-sm font-semibold text-gray-800">
             {{ displayName }}
           </span>
