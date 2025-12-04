@@ -7,6 +7,7 @@ import DOMPurify from 'dompurify'
 import { toast } from "vue-sonner"
 import type { Jurisdiction } from '@/api/jurisdiction'
 import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
+import { useConfirmDialog } from "@/composables/useConfirmDialog"
 
 import {
   Breadcrumb,
@@ -45,6 +46,7 @@ interface NestedJurisdiction extends Jurisdiction {
 
 const route = useRoute()
 const router = useRouter()
+const { confirm: openConfirm } = useConfirmDialog()
 
 const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
@@ -343,15 +345,19 @@ const saveEditedSource = async () => {
     toast.success("Source updated")
   }
 }
+
 const deleteSource = async (src: Source) => {
-  const confirmed = confirm("Delete this source?")
-  if (!confirmed) return
-
-  const ok = await sourceStore.deleteSource(src.id)
-
-  if (ok) toast.success("Source deleted")
+  openConfirm({
+    title: "Delete Source?",
+    description: `Are you sure you want to delete "${src.name}"? This action cannot be undone.`,
+    confirmText: "Delete",
+    cancelText: "Cancel",
+    async onConfirm() {
+      const ok = await sourceStore.deleteSource(src.id)
+      if (ok) toast.success("Source deleted")
+    },
+  })
 }
-
 
 const goBack = () => {
   router.push({
@@ -398,14 +404,19 @@ const saveEdit = async () => {
 }
 
 const deleteJurisdiction = async () => {
-  const confirmed = confirm("Delete this jurisdiction?")
-  if (!confirmed) return
-
-  await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
-
-  toast.success("Jurisdiction deleted")
-  goBack()
+  openConfirm({
+    title: "Delete Jurisdiction?",
+    description: `Are you sure you want to delete "${jurisdiction.value?.name}"?`,
+    confirmText: "Delete",
+    cancelText: "Cancel",
+    async onConfirm() {
+      await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
+      toast.success("Jurisdiction deleted")
+      goBack()
+    },
+  })
 }
+
 
 
 const parentJurisdiction = computed(() => {

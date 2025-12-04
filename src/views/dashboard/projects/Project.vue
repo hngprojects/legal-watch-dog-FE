@@ -27,7 +27,10 @@ import {
 } from '@/components/ui/dialog'
 
 import profile from "@/assets/icons/profile.webp"
+import { useConfirmDialog } from "@/composables/useConfirmDialog"
 
+
+const confirmDialog = useConfirmDialog()
 const route = useRoute()
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -197,27 +200,34 @@ const closeSettingsMenu = () => {
   showSettingsMenu.value = false
 }
 
-const deleteProject = async () => {
+const deleteProject = () => {
   closeSettingsMenu()
 
-  const confirmed = confirm("Delete Project? This action cannot be undone.")
-  if (!confirmed) return
+  confirmDialog.confirm({
+    title: "Delete Project?",
+    description: "This action cannot be undone.",
+    onConfirm: async () => {
+      if (!organizationId.value) {
+        projectStore.setError("Organization context missing. Please navigate from Organizations.")
+        return
+      }
 
-  if (!organizationId.value) {
-    projectStore.setError("Organization context missing. Please navigate from Organizations.")
-    return
-  }
+      await projectStore.deleteProject(projectId, organizationId.value)
 
-  await projectStore.deleteProject(projectId, organizationId.value)
+      toast.success("Project deleted successfully")
 
-  toast.success("Project deleted successfully")
-
-  if (organizationId.value) {
-    router.push({ name: 'organization-projects', params: { organizationId: organizationId.value } })
-  } else {
-    router.push({ name: 'organizations' })
-  }
+      if (organizationId.value) {
+        router.push({
+          name: 'organization-projects',
+          params: { organizationId: organizationId.value }
+        })
+      } else {
+        router.push({ name: 'organizations' })
+      }
+    }
+  })
 }
+
 
 
 const startEdit = () => {
