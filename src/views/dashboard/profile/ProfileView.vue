@@ -434,7 +434,12 @@ const saveEdits = async () => {
               <!-- <div class="space-y-3"> -->
               <div class="flex flex-col items-center gap-2">
                 <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
-                <p v-if="!(primaryRole === 'Member' && primaryOrg === 'Member')" class="text-xl text-[#1F1F1F]">{{ primaryRole }} - {{ primaryOrg }}</p>
+                <p
+                  v-if="!(primaryRole === 'Member' && primaryOrg === 'Member')"
+                  class="text-xl text-[#1F1F1F]"
+                >
+                  {{ primaryRole }} - {{ primaryOrg }}
+                </p>
                 <p class="text-lg text-[#6B7280]">{{ userEmail }}</p>
               </div>
               <!-- </div> -->
@@ -606,7 +611,7 @@ const saveEdits = async () => {
             <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
             <Select :model-value="primaryRole" disabled>
               <SelectTrigger
-                class="h-12 w-full cursor-not-allowed rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
+                class="h-12 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
               >
                 <SelectValue :placeholder="primaryRole" />
               </SelectTrigger>
