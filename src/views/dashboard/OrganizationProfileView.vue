@@ -32,7 +32,7 @@ import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue
 import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
 import { Settings } from 'lucide-vue-next'
 
-type MemberRole = 'Admin' | 'Manager' | 'Member'
+type MemberRole = 'Owner' | 'Admin' | 'Manager' | 'Member'
 type MemberStatus = 'Active' | 'Pending' | 'Inactive'
 
 type Member = {
@@ -251,6 +251,8 @@ const statusClass = (status: MemberStatus) =>
 
 const roleClass = (role: MemberRole) => {
   switch (role) {
+    case 'Owner':
+      return 'text-[#0f5132] bg-[#e7f5ed] border-[#c6e8d6]'
     case 'Admin':
       return 'text-[#9b3413] bg-[#fbeadd] border-[#f1d2b8]'
     case 'Manager':
@@ -345,13 +347,25 @@ const mapUserToMember = (user: UserProfile): Member => {
   const orgRole = orgRecord?.role || user.role || ''
   const normalizedRole = orgRole?.toLowerCase()
   const role: MemberRole =
-    normalizedRole === 'admin' ? 'Admin' : normalizedRole === 'manager' ? 'Manager' : 'Member'
+    normalizedRole === 'owner'
+      ? 'Owner'
+      : normalizedRole === 'admin'
+        ? 'Admin'
+        : normalizedRole === 'manager'
+          ? 'Manager'
+          : 'Member'
   const orgActive = user.organizations?.find((org) => org.organization_id === orgId.value)
   const effectiveActive =
     orgActive?.is_active ??
     (typeof orgActive?.is_active === 'undefined' ? user.is_active : orgActive?.is_active)
   const status: MemberStatus =
-    effectiveActive === false ? 'Inactive' : effectiveActive === true ? 'Active' : 'Pending'
+    role === 'Owner'
+      ? 'Active'
+      : effectiveActive === false
+        ? 'Inactive'
+        : effectiveActive === true
+          ? 'Active'
+          : 'Pending'
   return {
     id: memberId,
     name: fullName || 'Member',
@@ -365,6 +379,14 @@ const memberActionLoading = ref<string | null>(null)
 
 const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
   if (!orgId.value || member.role === targetRole) return
+  if (targetRole === 'Owner') {
+    await Swal.fire('Not allowed', 'Only the creator can be the Owner.', 'info')
+    return
+  }
+  if (member.role === 'Owner') {
+    await Swal.fire('Not allowed', 'The Owner role cannot be changed.', 'info')
+    return
+  }
   if (!member.id) {
     await Swal.fire('Missing user', 'Cannot update role: user ID unavailable.', 'error')
     return
@@ -399,6 +421,10 @@ const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
 
 const toggleMemberStatus = async (member: Member) => {
   if (!orgId.value) return
+  if (member.role === 'Owner') {
+    await Swal.fire('Not allowed', 'The Owner cannot be deactivated.', 'info')
+    return
+  }
   if (!member.id) {
     await Swal.fire('Missing user', 'Cannot update status: user ID unavailable.', 'error')
     return
@@ -804,7 +830,9 @@ watch(
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
                       :disabled="
-                        memberActionLoading === `${member.id}-role` || member.role === 'Admin'
+                        memberActionLoading === `${member.id}-role` ||
+                        member.role === 'Admin' ||
+                        member.role === 'Owner'
                       "
                       @click.stop="updateMemberRole(member, 'Admin')"
                     >
@@ -812,7 +840,9 @@ watch(
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       :disabled="
-                        memberActionLoading === `${member.id}-role` || member.role === 'Manager'
+                        memberActionLoading === `${member.id}-role` ||
+                        member.role === 'Manager' ||
+                        member.role === 'Owner'
                       "
                       @click.stop="updateMemberRole(member, 'Manager')"
                     >
@@ -820,14 +850,16 @@ watch(
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       :disabled="
-                        memberActionLoading === `${member.id}-role` || member.role === 'Member'
+                        memberActionLoading === `${member.id}-role` ||
+                        member.role === 'Member' ||
+                        member.role === 'Owner'
                       "
                       @click.stop="updateMemberRole(member, 'Member')"
                     >
                       Member
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      :disabled="memberActionLoading === `${member.id}-status`"
+                      :disabled="memberActionLoading === `${member.id}-status` || member.role === 'Owner'"
                       @click.stop="toggleMemberStatus(member)"
                     >
                       {{ member.status === 'Active' ? 'Deactivate' : 'Activate' }}

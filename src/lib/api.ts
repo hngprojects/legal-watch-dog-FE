@@ -1,10 +1,10 @@
 import axios from 'axios'
-import type { AxiosRequestConfig, AxiosResponse } from 'axios'
+import type { AxiosRequestConfig } from 'axios'
 import router from '@/router'
 import { useAuthStore } from '@/stores/auth-store'
 import themedSwal from '@/lib/swal'
 
-// Default to staging; override via VITE_API_BASE_URL for prod or other environments.
+// Default to prod; override via VITE_API_BASE_URL for prod or other environments.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.legalwatch.dog/api/v1'
 
 const api = axios.create({

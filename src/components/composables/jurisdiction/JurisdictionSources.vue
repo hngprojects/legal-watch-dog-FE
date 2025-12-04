@@ -132,12 +132,13 @@ const handleAddAi = () => {
       >
         <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
           <!-- Source Info - full width on mobile, constrained on larger screens -->
-          <div class="min-w-0 flex-1">
-            <!-- min-w-0 enables text truncation -->
-            <p class="truncate text-sm font-semibold text-gray-900 sm:text-base">
+          <div class="max-w-full min-w-0 flex-1 sm:max-w-none">
+            <p class="truncate text-xs font-semibold text-gray-900 sm:text-sm md:text-base">
               {{ source.name }}
             </p>
-            <p class="text-xs text-gray-500 sm:truncate sm:text-sm">
+            <p
+              class="truncate text-[11px] break-all text-gray-500 sm:text-xs sm:break-normal md:text-sm"
+            >
               {{ source.url }}
             </p>
             <p class="mt-1 text-[11px] tracking-wide text-gray-400 uppercase">

@@ -338,23 +338,16 @@ export const useJurisdictionStore = defineStore('jurisdiction', () => {
     const orgId = getOrgId(organizationId)
 
     try {
-      console.log('🔄 Restoring jurisdiction via update endpoint (fallback)')
-
-      const response = await jurisdictionApi.update(orgId, jurisdictionId, {
-        is_deleted: false,
-        deleted_at: null,
-      } as Partial<Jurisdiction>)
+      const response = await jurisdictionApi.restore(orgId, jurisdictionId)
 
       const restored = response.data?.data?.jurisdiction as Jurisdiction
-      console.log('✅ Restore successful via update endpoint')
 
       archivedJurisdictions.value = archivedJurisdictions.value.filter(
         (j) => j.id !== jurisdictionId,
       )
+      removeArchivedJurisdiction(jurisdictionId)
 
       jurisdictions.value = uniqById([...jurisdictions.value, cloneJurisdiction(restored)])
-
-      removeArchivedJurisdiction(jurisdictionId)
 
       return restored
     } catch (err) {
