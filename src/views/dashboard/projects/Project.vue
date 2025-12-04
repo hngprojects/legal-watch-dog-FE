@@ -26,6 +26,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
+import profile from "@/assets/icons/profile.webp"
+
 const route = useRoute()
 const router = useRouter()
 const projectStore = useProjectStore()
@@ -363,27 +365,7 @@ watch(
           </div>
         </div>
       </div>
-      <div
-        class="mb-5 flex w-full flex-col items-start justify-between gap-4 rounded-[12px] bg-[#EFA75E] px-4 py-4 sm:h-[72px] sm:flex-row sm:items-center sm:px-5">
-        <div class="flex w-full items-start gap-4 sm:w-auto sm:items-center">
-          <div
-            class="border-fg flex h-10 w-10 items-center justify-center rounded-[8px] border bg-[#1F1F1F1A] p-1 sm:h-12 sm:w-12">
-            <CheckSquare class="text-fg h-5 w-5 sm:h-6 sm:w-6" />
-          </div>
-
-          <p class="text-fg text-[14px] leading-snug sm:text-[16px]">
-            Hiring a specialist give you the best possible result.
-
-            <RouterLink :to="{ name: 'learn-more' }">
-              <span class="cursor-pointer underline">learn more about a specialist</span>
-            </RouterLink>
-          </p>
-        </div>
-        <button @click="openHireSpecialistModal"
-          class="h-10 w-full cursor-pointer rounded-[10px] bg-white px-4 text-[14px] font-semibold text-[#3A2B1B] shadow-sm sm:h-11 sm:w-auto sm:px-6 sm:text-[15px]">
-          Hire a Specialist
-        </button>
-      </div>
+      
       <div class="mb-8 flex flex-col gap-5 rounded-[10px] bg-white p-5">
         <template v-if="showInlineEdit">
           <form @submit.prevent="saveEdit" class="w-full space-y-4">
@@ -417,18 +399,35 @@ watch(
         <template v-else>
           <h1 class="text-2xl leading-[30px] font-bold text-gray-900">{{ project.title }}</h1>
           <p class="text-sm leading-5 font-normal text-[#4B5563]">{{ project.description }}</p>
+
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
+            
+            <div class="flex items-center gap-3">
+              <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
+              <div
+                class="relative flex h-12 w-32 items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm">
+                <select v-model="selected"
+                  class="w-full cursor-pointer appearance-none bg-transparent text-[16px] font-medium text-[#374151] focus:outline-none">
+                  <option value="AI">AI</option>
+                  <option value="Manual">Manual</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+                <svg class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500" fill="none" stroke="currentColor"
+                  stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
 
             <div @click="openHireSpecialistModal"
               class="flex cursor-pointer items-center rounded-lg p-2 transition-colors hover:bg-gray-100 sm:ml-6">
               
               <div class="h-8 w-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center mr-2">
-                <!-- <img src="/path/to/specialist/avatar.jpg" alt="Specialist Avatar" class="h-full w-full object-cover" /> -->
+                <img :src="profile" alt="Specialist Avatar" class="h-full w-full object-cover" />
                 </div>
               
               <div class="flex flex-col text-sm leading-tight">
-                <span class="font-semibold text-gray-900">Hire Specialist</span>
+                <span class="font-semibold text-gray-900">Hire HNG Specialist</span>
                 <span class="text-gray-500">Professional support, anytime.</span>
               </div>
               
@@ -436,7 +435,7 @@ watch(
           </div>
         </template>
       </div>
-
+      
       <div class="mb-8 flex items-end justify-between md:mt-[88px]">
         <div class="flex w-auto gap-8 border-b border-gray-200">
           <button @click="activeTab = 'jurisdictions'" :class="[
@@ -476,8 +475,17 @@ watch(
 
           <div v-else-if="projectJurisdictions.length === 0"
             class="flex flex-col items-center justify-center bg-white py-20">
-            <p class="text-sm text-gray-500">No jurisdictions yet for this project.</p>
-            <p class="mt-2 text-xs text-gray-400">Add one to start monitoring changes.</p>
+            <div class="text-center">
+              <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m-4 4h8a2 2 0 002-2V6a2 2 0 00-2-2H8a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No Jurisdictions added</h3>
+              <p class="mt-1 text-sm text-gray-500">
+                Search source or Click add sources to get started.
+              </p>
+            </div>
           </div>
 
           <div v-else class="space-y-3">
