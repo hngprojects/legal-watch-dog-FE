@@ -14,11 +14,13 @@ const router = useRouter()
 
 type NavLink = {
   name: string
-  to: string | { path: string; hash?: string }
+  to?: string | { path: string; hash?: string }
+  dropdown?: Array<{ name: string; to: string; description?: string }>
 }
 
 const isMenuOpen = ref(false)
 const isMobileDropdownOpen = ref(false)
+const activeDropdown = ref<string | null>(null)
 
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -44,9 +46,28 @@ onMounted(async () => {
 })
 
 const navLinks: NavLink[] = [
-  { name: 'Home', to: '/' },
-  { name: 'How it Works', to: { path: '/how-it-works' } },
-  { name: 'Contact Us', to: { path: '/contact-us' } },
+  {
+    name: 'Industries',
+    dropdown: [
+      { name: 'Healthcare', to: '/coming-soon', description: 'Solutions for healthcare providers' },
+      { name: 'Finance', to: '/coming-soon', description: 'Financial services solutions' },
+      { name: 'Retail', to: '/coming-soon', description: 'Retail and e-commerce' },
+      { name: 'Manufacturing', to: '/coming-soon', description: 'Manufacturing solutions' },
+      { name: 'Education', to: '/coming-soon', description: 'Educational institutions' },
+    ],
+  },
+  { name: 'Pricing', to: '/pricing' },
+  {
+    name: 'Resources',
+    dropdown: [
+      { name: 'Blog', to: '/coming-soon', description: 'Latest articles and insights' },
+      { name: 'Documentation', to: '/coming-soon', description: 'Technical documentation' },
+      { name: 'Case Studies', to: '/coming-soon', description: 'Success stories' },
+      { name: 'Guides', to: '/coming-soon', description: 'How-to guides and tutorials' },
+      { name: 'Webinars', to: '/coming-soon', description: 'Live and recorded sessions' },
+    ],
+  },
+  { name: 'Partners', to: '/coming-soon' },
 ]
 
 let bodyOverflow: string | null = null
@@ -72,6 +93,19 @@ watch(isMenuOpen, (newVal) => {
 const closeMenu = () => {
   isMenuOpen.value = false
   isMobileDropdownOpen.value = false
+  activeDropdown.value = null
+}
+
+const toggleDropdown = (linkName: string) => {
+  if (activeDropdown.value === linkName) {
+    activeDropdown.value = null
+  } else {
+    activeDropdown.value = linkName
+  }
+}
+
+const closeDropdown = () => {
+  activeDropdown.value = null
 }
 
 const handleLogout = async () => {
@@ -96,10 +130,6 @@ const isNotificationsOpen = ref(false)
 const notificationsButtonRef = ref<HTMLElement | null>(null)
 const notificationsPopupRef = ref<HTMLElement | null>(null)
 
-/**
- * unreadCount: wire this to your notifications in the store later.
- * e.g. computed(() => authStore.notifications.filter(n => !n.read).length)
- */
 const unreadCount = ref(0)
 
 const toggleNotifications = () => {
@@ -132,6 +162,7 @@ const onDocumentClick = (e: MouseEvent) => {
 const onKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
     isNotificationsOpen.value = false
+    activeDropdown.value = null
   }
 }
 
@@ -158,9 +189,64 @@ onUnmounted(() => {
       <!-- DESKTOP NAV -->
       <nav aria-label="Primary" class="hidden flex-1 lg:flex lg:items-center lg:justify-center">
         <ul class="flex items-center gap-6 xl:gap-8">
-          <li v-for="link in navLinks" :key="link.name">
-            <RouterLink :to="link.to"
-              class="hover:text-accent-main text-sm font-medium text-gray-500 transition-colors xl:text-base">
+          <li v-for="link in navLinks" :key="link.name" class="relative">
+            <!-- Dropdown Link -->
+            <template v-if="link.dropdown">
+              <button
+                @click="toggleDropdown(link.name)"
+                @mouseenter="activeDropdown = link.name"
+                class="hover:text-accent-main flex items-center gap-1 text-sm font-medium text-gray-500 transition-colors xl:text-base"
+              >
+                {{ link.name }}
+                <svg
+                  class="h-4 w-4 transition-transform"
+                  :class="{ 'rotate-180': activeDropdown === link.name }"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <Transition
+                enter-active-class="transition ease-out duration-200"
+                enter-from-class="opacity-0 translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition ease-in duration-150"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-1"
+              >
+                <div
+                  v-if="activeDropdown === link.name"
+                  @mouseleave="closeDropdown"
+                  class="absolute left-1/2 top-full z-50 mt-2 w-72 -translate-x-1/2 rounded-lg border border-gray-200 bg-white shadow-lg"
+                >
+                  <div class="p-2">
+                    <RouterLink
+                      v-for="item in link.dropdown"
+                      :key="item.name"
+                      :to="item.to"
+                      @click="closeDropdown"
+                      class="block rounded-md px-4 py-3 transition-colors hover:bg-gray-50"
+                    >
+                      <div class="font-medium text-gray-900">{{ item.name }}</div>
+                      <div v-if="item.description" class="mt-0.5 text-sm text-gray-500">
+                        {{ item.description }}
+                      </div>
+                    </RouterLink>
+                  </div>
+                </div>
+              </Transition>
+            </template>
+
+            <!-- Regular Link -->
+            <RouterLink
+              v-else
+              :to="link.to!"
+              class="hover:text-accent-main text-sm font-medium text-gray-500 transition-colors xl:text-base"
+            >
               {{ link.name }}
             </RouterLink>
           </li>
@@ -200,13 +286,13 @@ onUnmounted(() => {
               </span>
             </button>
 
-            <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 translate-y-1"
+            <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 translate-y-1"
               enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150"
               leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 translate-y-1">
               <div v-if="isNotificationsOpen" ref="notificationsPopupRef" class="absolute left-0 top-full z-50 mt-3">
                 <Notification />
               </div>
-            </transition>
+            </Transition>
 
           </div>
 
@@ -241,7 +327,7 @@ onUnmounted(() => {
       enter-to-class="translate-x-0" leave-active-class="transition-transform duration-300 ease-in-out"
       leave-from-class="translate-x-0" leave-to-class="-translate-x-full">
       <div v-if="isMenuOpen" id="mobile-menu"
-        class="fixed top-0 left-0 z-50 h-screen w-full max-w-xs bg-white shadow-2xl sm:max-w-sm lg:hidden">
+        class="fixed top-0 left-0 z-50 h-screen w-full max-w-xs overflow-y-auto bg-white shadow-2xl sm:max-w-sm lg:hidden">
         <!-- Menu Header -->
         <div class="flex items-center justify-between border-b p-4 sm:p-6">
           <RouterLink to="/" @click="closeMenu">
@@ -256,10 +342,58 @@ onUnmounted(() => {
 
         <!-- Navigation Links -->
         <nav class="flex flex-col gap-1 bg-white p-4 sm:gap-2 sm:p-6">
-          <RouterLink v-for="link in navLinks" :key="link.name" :to="link.to" @click="closeMenu"
-            class="rounded-lg px-3 py-2.5 text-base text-gray-600 transition-colors hover:bg-gray-100 sm:text-lg">
-            {{ link.name }}
-          </RouterLink>
+          <template v-for="link in navLinks" :key="link.name">
+            <!-- Dropdown in Mobile -->
+            <div v-if="link.dropdown" class="space-y-1">
+              <button
+                @click="toggleDropdown(link.name)"
+                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-base text-gray-600 transition-colors hover:bg-gray-100 sm:text-lg"
+              >
+                {{ link.name }}
+                <svg
+                  class="h-5 w-5 transition-transform"
+                  :class="{ 'rotate-180': activeDropdown === link.name }"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Mobile Dropdown Items -->
+              <Transition
+                enter-active-class="transition-all duration-200"
+                enter-from-class="opacity-0 max-h-0"
+                enter-to-class="opacity-100 max-h-96"
+                leave-active-class="transition-all duration-200"
+                leave-from-class="opacity-100 max-h-96"
+                leave-to-class="opacity-0 max-h-0"
+              >
+                <div v-if="activeDropdown === link.name" class="ml-4 space-y-1 overflow-hidden">
+                  <RouterLink
+                    v-for="item in link.dropdown"
+                    :key="item.name"
+                    :to="item.to"
+                    @click="closeMenu"
+                    class="block rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50"
+                  >
+                    {{ item.name }}
+                  </RouterLink>
+                </div>
+              </Transition>
+            </div>
+
+            <!-- Regular Link in Mobile -->
+            <RouterLink
+              v-else
+              :to="link.to!"
+              @click="closeMenu"
+              class="rounded-lg px-3 py-2.5 text-base text-gray-600 transition-colors hover:bg-gray-100 sm:text-lg"
+            >
+              {{ link.name }}
+            </RouterLink>
+          </template>
         </nav>
 
         <!-- Action Buttons -->
@@ -300,7 +434,6 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <!-- Backdrop overlay for mobile menu -->
     <Transition enter-active-class="transition-opacity duration-300" enter-from-class="opacity-0"
       enter-to-class="opacity-100" leave-active-class="transition-opacity duration-300" leave-from-class="opacity-100"
       leave-to-class="opacity-0">
