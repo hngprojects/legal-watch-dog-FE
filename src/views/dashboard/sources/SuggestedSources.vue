@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { Check, X, Loader2 } from 'lucide-vue-next'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
 import aiIcon from '@/assets/icons/ai_icon.png'
 import { sourceApi } from '@/api/source'
 import type { SuggestedSource, SuggestSourcesRequest } from '@/types/source'
@@ -103,16 +103,12 @@ const saveSelected = async () => {
     })
 
     const count = toSave.length
+
     emit('sources-added')
     emit('save', count)
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Done!',
-      text: `${count} source${count > 1 ? 's' : ''} added and will be monitored.`,
-      timer: 2500,
-      showConfirmButton: false,
-    })
+    toast.success(`${count} source${count > 1 ? 's' : ''} added and will be monitored.`)
+
   } catch (err) {
     const message =
       typeof err === 'object' && err && 'response' in err
@@ -121,9 +117,10 @@ const saveSelected = async () => {
           ? err.message
           : null
 
-    Swal.fire('Error', message || 'Failed to add sources', 'error')
+    toast.error(message || 'Failed to add sources')
   }
 }
+
 
 onMounted(() => loadSuggestions())
 
