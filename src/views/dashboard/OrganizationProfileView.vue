@@ -619,7 +619,7 @@ watch(
               Projects ({{ projects.length }})
             </p>
           </div>
-          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
             <button @click="openCreateProject" class="btn--default btn--sm md:btn--lg">
               Add Project
             </button>
@@ -637,11 +637,6 @@ watch(
           <p class="text-xs text-gray-600 md:text-sm">
             No projects yet. Create one to start tracking changes.
           </p>
-          <div class="flex justify-center">
-            <button class="btn--default btn--sm md:btn--lg" @click="openCreateProject">
-              Add Project
-            </button>
-          </div>
         </div>
         <div v-else class="space-y-2 md:space-y-3">
           <article
