@@ -1,27 +1,51 @@
 import './assets/styles/main.css'
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-
 import App from './App.vue'
-import router from './router'
+import { routes } from './router'
+import { createPinia } from 'pinia'
+import { ViteSSG } from 'vite-ssg'
+import { useAuthStore } from './stores/auth-store'
+import { setRouter } from './router/instance'
 import 'vue-sonner/style.css'
 import { createConfirmDialog } from '@/composables/useConfirmDialog'
 
-const pinia = createPinia()
-const app = createApp(App)
+export const createApp = ViteSSG(
+  App,
+  { routes, scrollBehavior: () => ({ top: 0 }) },
+  ({ app, router }) => {
+    const pinia = createPinia()
+    setRouter(router)
+    app.use(pinia)
+    app.use(createConfirmDialog())
 
-app.use(pinia)
-app.use(router)
-app.use(createConfirmDialog())
+    router.beforeEach(async (to) => {
+      const auth = useAuthStore()
 
-app.mount('#app')
+      if (!import.meta.env.SSR) {
+        auth.syncAuthFromStorage()
+      }
 
-const loadingScreen = document.getElementById('loading-screen')
-if (loadingScreen) {
-  loadingScreen.style.opacity = '0'
-  loadingScreen.style.transition = 'opacity 0.3s ease-out'
-  setTimeout(() => {
-    loadingScreen.remove()
-  }, 300)
-}
+      const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+      const isAuthRoute = to.name === 'login' || to.name === 'signup'
+      const isOtpRoute = to.name === 'otp'
+
+      if (to.name === 'auth-status') {
+        const issued = to.query.issued === 'true'
+        if (auth.isAuthenticated || issued) return true
+        return { name: 'login', query: { redirect: to.fullPath } }
+      }
+
+      if (isOtpRoute) return true
+
+      if (isAuthRoute && auth.isAuthenticated) {
+        return { name: 'dashboard' }
+      }
+
+      if (!requiresAuth) return true
+
+      if (auth.isAuthenticated) return true
+
+      return { name: 'login', query: { redirect: to.fullPath } }
+    })
+  },
+)

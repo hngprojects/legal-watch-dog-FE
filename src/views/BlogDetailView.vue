@@ -7,7 +7,6 @@ import TypographyHeading from '@/components/ui/typography/TypographyHeading.vue'
 
 const route = useRoute()
 
-// reactively watch route changes
 const blogId = computed(() => Number(route.params.id))
 
 const blogPost = computed(() => blogPosts.find((post) => post.id === blogId.value))
