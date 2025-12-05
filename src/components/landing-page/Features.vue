@@ -12,13 +12,13 @@
 
         <TypographyHeading
           level="h1"
-          class="mb-4 text-3xl leading-tight font-extrabold text-white sm:mb-5 sm:text-4xl md:text-5xl lg:text-6xl"
+          class="mb-4 text-center text-3xl leading-tight font-extrabold text-white sm:mb-5 sm:text-4xl md:text-5xl lg:text-6xl"
         >
           Never Miss a Regulatory Update Again
         </TypographyHeading>
 
         <TypographyText
-          class="mx-auto mb-8 max-w-3xl text-sm text-gray-300 sm:mb-10 sm:text-base md:text-lg lg:text-xl"
+          class="mx-auto mb-8 max-w-3xl text-center text-sm text-gray-300 sm:mb-10 sm:text-base md:text-lg lg:text-xl"
         >
           Stay ahead of regulatory change by automating the monitoring process and saving hours of
           manual research every week.
@@ -29,8 +29,8 @@
     </section>
 
     <!-- Main Features -->
-    <main class="app-container bg-gray-50 py-12 sm:py-16 lg:pt-20 lg:pb-16">
-      <div class="mx-auto">
+    <main class="app-container bg-gray-50 px-4 py-12 sm:px-6 sm:py-16 lg:pt-20 lg:pb-16">
+      <div class="mx-auto max-w-6xl">
         <div class="mx-auto mb-12 flex justify-center text-center sm:mb-16">
           <TypographyHeading
             level="h2"
@@ -212,28 +212,17 @@ import { RouterLink } from 'vue-router'
 </script>
 
 <style scoped>
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .app-container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-/* Mobile-specific adjustments */
 @media (max-width: 768px) {
   .features-page section,
   .features-page main {
     overflow-x: hidden;
   }
 
-  /* Ensure images don't overflow on mobile */
   img {
     max-width: 100%;
     height: auto;
   }
 
-  /* Better touch targets for buttons */
   button {
     min-height: 44px;
     display: inline-flex;
@@ -244,7 +233,6 @@ import { RouterLink } from 'vue-router'
 
 /* Tablet-specific adjustments */
 @media (min-width: 640px) and (max-width: 1024px) {
-  /* Adjust floating image positions for tablet */
   .relative img[alt*='Notification Bell'],
   .relative img[alt*='AI Toolkit'],
   .relative img[alt*='AI Brain'],
@@ -258,7 +246,7 @@ import { RouterLink } from 'vue-router'
   }
 }
 
-/* Ensure content doesn't become too wide on large screens */
+/* Large screens */
 @media (min-width: 1536px) {
   .app-container {
     max-width: 1280px;
