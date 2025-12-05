@@ -145,7 +145,7 @@ const cancel = () => {
       <div class="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100">
         <div class="mb-8">
           <h1 class="text-3xl font-bold text-[#1F1F1F]">Add Source</h1>
-          <p class="mt-2 text-base text-[#6B7280]">Connect a source to monitor legal changes.</p>
+          <p class="mt-2 text-base text-[#6B7280]">Connect a source to monitor changes.</p>
         </div>
 
         <form @submit.prevent="saveSources" class="space-y-6">

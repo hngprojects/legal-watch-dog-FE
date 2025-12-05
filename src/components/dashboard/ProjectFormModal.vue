@@ -128,7 +128,7 @@ const handleSubmit = () => {
             v-model="formState.description"
             id="desc"
             rows="3"
-            placeholder="What legal areas will you monitor?"
+            placeholder="What areas will you monitor?"
             required
             class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
           />

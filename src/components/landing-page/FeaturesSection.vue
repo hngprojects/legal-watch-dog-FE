@@ -49,7 +49,7 @@ import Timeline from '@/assets/Images/Timeline.png'
             <p
               class="max-w-full text-sm leading-relaxed font-semibold text-white/80 sm:max-w-sm sm:text-base lg:text-[1.05rem]"
             >
-              Turn Complex legal jargon into plain English summaries you can act on immediately
+              Turn Complex jargon into plain English summaries you can act on immediately
             </p>
           </div>
 

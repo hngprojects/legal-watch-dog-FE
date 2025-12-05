@@ -184,9 +184,7 @@ const goToProject = (id: string) => {
       <DialogScrollContent class="sm:max-w-[640px]">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
-          <DialogDescription>
-            Set up a new project to track legal and regulatory changes
-          </DialogDescription>
+          <DialogDescription> Set up a new project to track regulatory changes </DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="handleCreateProject" class="space-y-6">
@@ -215,7 +213,7 @@ const goToProject = (id: string) => {
                 v-model="formData.description"
                 id="desc"
                 rows="4"
-                placeholder="What legal areas will you monitor?"
+                placeholder="What regulatory areas will you monitor?"
                 required
                 class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               />
@@ -255,7 +253,7 @@ const goToProject = (id: string) => {
                     v-model="formData.description"
                     id="desc"
                     rows="4"
-                    placeholder="What legal areas will you monitor?"
+                    placeholder="What regulatory areas will you monitor?"
                     required
                     class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
                   />

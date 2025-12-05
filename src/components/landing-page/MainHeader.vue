@@ -7,11 +7,13 @@ import { useAuthStore } from '@/stores/auth-store'
 
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 import UserAvatar from '@/components/dashboard/UserAvatar.vue'
-import Swal from '@/lib/swal'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { toast } from 'vue-sonner'
 import OrganizationSwitcher from '@/components/dashboard/OrganizationSwitcher.vue'
 import Notification from '@/components/dashboard/Notification.vue'
 
 const router = useRouter()
+const { confirm: openConfirm } = useConfirmDialog()
 const route = useRoute()
 
 type NavLink = {
@@ -117,22 +119,21 @@ const closeDropdown = () => {
   activeDropdown.value = null
 }
 
-const handleLogout = async () => {
-  const result = await Swal.fire({
-    icon: 'warning',
+const handleLogout = () => {
+  openConfirm({
     title: 'Log out?',
-    text: 'You will need to sign in again to access your dashboard.',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, log me out',
-    cancelButtonText: 'Stay logged in',
-    confirmButtonColor: '#DC2626',
+    description: 'You will need to sign in again to access your dashboard.',
+    confirmText: 'Log out',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      isMenuOpen.value = false
+
+      await authStore.logout()
+      toast.success('You have been logged out')
+
+      router.replace({ name: 'login' })
+    },
   })
-
-  if (!result.isConfirmed) return
-
-  isMenuOpen.value = false
-  await authStore.logout()
-  router.replace({ name: 'login' })
 }
 
 const isNotificationsOpen = ref(false)
