@@ -110,21 +110,12 @@ const calculateDaysLeft = (endDate: Date): string => {
       </div>
     </article>
 
-    <article class="flex flex-col justify-end">
-      <h2 class="mb-6 text-2xl font-medium">Payment Method</h2>
+    <article class="flex flex-col">
+      <h2 class="mt-4 mb-6 text-2xl font-medium">Payment Method</h2>
       <p class="mb-10">
         You don't have a payment method on file yet. Add one to seamlessly activate your plan after
         trial.
       </p>
-
-      <AddPaymentModal>
-        <RouterLink
-          :to="{ name: 'payment-plan', params: { plan: 'professional' } }"
-          class="btn--md btn--secondary block w-fit text-center"
-        >
-          Add Payment Method
-        </RouterLink>
-      </AddPaymentModal>
     </article>
   </section>
 
