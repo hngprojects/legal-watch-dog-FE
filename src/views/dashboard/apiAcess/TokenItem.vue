@@ -22,7 +22,7 @@ const getInitials = (name: string) => {
 
 <template>
   <div
-    class="flex flex-col gap-4 rounded-t-md last-of-type:rounded-b-md border-b last-of-type:border-0 border-gray-200 p-6 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
+    class="flex flex-col gap-4 rounded-t-md border-b border-gray-200 p-6 last-of-type:rounded-b-md last-of-type:border-0 hover:shadow-sm sm:flex-row sm:items-center sm:justify-between"
   >
     <div class="flex items-center gap-4">
       <div
@@ -57,14 +57,12 @@ const getInitials = (name: string) => {
             <span class="text-[#BF6A02] underline">This token has expired</span>
           </div>
         </div>
-
       </div>
     </div>
 
-
     <Button
       variant="outline"
-      class="whitespace-nowrap border-[#FCA5A5] text-[#DC2626] hover:bg-[#FEE2E2] hover:text-[#DC2626]"
+      class="border-[#FCA5A5] whitespace-nowrap text-[#DC2626] hover:bg-[#FEE2E2] hover:text-[#DC2626]"
     >
       Delete
     </Button>
