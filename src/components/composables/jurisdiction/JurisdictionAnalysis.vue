@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Source } from '@/types/source'
 import type { SourceRevision } from '@/types/source'
+import RevisionTicketAction from './RevisionTicketAction.vue'
 
 defineProps<{
   sources: Source[]
@@ -97,17 +98,12 @@ const emit = defineEmits<{
         class="prose prose-sm max-w-none text-gray-800"
         v-html="renderSummary(revisionA.ai_markdown_summary || revisionA.ai_summary)"
       />
-      <div
+      <RevisionTicketAction
         v-if="revisionA?.was_change_detected"
-        class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <p class="text-xs text-gray-500">
-          Change detected. Create or open a ticket to collaborate.
-        </p>
-        <button class="btn--default btn--sm" @click="emit('open-ticket', { revision: revisionA })">
-          {{ ticketForRevision && ticketForRevision(revisionA.id) ? 'View ticket' : 'Open ticket' }}
-        </button>
-      </div>
+        :revision="revisionA"
+        :ticket-for-revision="ticketForRevision"
+        @open-ticket="emit('open-ticket', $event)"
+      />
       <p v-else class="text-sm text-gray-500">Choose a revision to display.</p>
     </div>
 
@@ -132,17 +128,12 @@ const emit = defineEmits<{
         class="prose prose-sm max-w-none text-gray-800"
         v-html="renderSummary(revisionB.ai_markdown_summary || revisionB.ai_summary)"
       />
-      <div
+      <RevisionTicketAction
         v-if="revisionB?.was_change_detected"
-        class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <p class="text-xs text-gray-500">
-          Change detected. Create or open a ticket to collaborate.
-        </p>
-        <button class="btn--default btn--sm" @click="emit('open-ticket', { revision: revisionB })">
-          {{ ticketForRevision && ticketForRevision(revisionB.id) ? 'View ticket' : 'Open ticket' }}
-        </button>
-      </div>
+        :revision="revisionB"
+        :ticket-for-revision="ticketForRevision"
+        @open-ticket="emit('open-ticket', $event)"
+      />
       <p v-else class="text-sm text-gray-500">Choose a revision to display.</p>
     </div>
   </div>

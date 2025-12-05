@@ -117,7 +117,7 @@ export const useTicketStore = defineStore('ticket', () => {
     try {
       const now = new Date().toISOString()
       const ticket: Ticket = {
-        id: payload.title ? `T-${Date.now()}` : `T-${Date.now()}`,
+        id: `T-${Date.now()}`,
         title: payload.title,
         summary: payload.summary,
         status: 'open',

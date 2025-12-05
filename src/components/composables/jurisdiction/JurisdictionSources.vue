@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Plus, FilePlus } from 'lucide-vue-next'
 import aiIcon from '@/assets/icons/ai_icon.png'
 import type { Source, SourceRevision } from '@/types/source'
@@ -30,6 +30,22 @@ const emit = defineEmits<{
 
 const showHeaderMenu = ref(false)
 const showEmptyStateMenu = ref(false)
+
+const latestRevisionBySource = computed<Record<string, SourceRevision | undefined>>(() => {
+  const map: Record<string, SourceRevision | undefined> = {}
+  props.sources.forEach((source) => {
+    map[source.id] = props.latestRevision(source.id)
+  })
+  return map
+})
+
+const formatLatestRevisionLabel = (revision?: SourceRevision) =>
+  revision ? props.formatRevisionLabel(revision) : ''
+
+const openTicket = (source: Source, revision?: SourceRevision) => {
+  if (!revision) return
+  emit('open-ticket', { source, revision })
+}
 
 const closeMenus = () => {
   showHeaderMenu.value = false
@@ -198,29 +214,31 @@ const hasTicket = (revisionId?: string) => {
           v-if="expandedSources[source.id]"
           class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
         >
-          <div v-if="latestRevision(source.id)" class="space-y-2">
+          <div v-if="latestRevisionBySource[source.id]" class="space-y-2">
             <div class="flex items-start justify-between gap-3">
               <div class="space-y-1">
                 <p class="text-[11px] font-semibold tracking-wide text-gray-500 uppercase">
-                  Scraped {{ formatRevisionLabel(latestRevision(source.id)!) }}
+                  Scraped {{ formatLatestRevisionLabel(latestRevisionBySource[source.id]) }}
                 </p>
                 <p class="text-sm font-semibold text-gray-900">
                   {{
-                    latestRevision(source.id)?.ai_summary ||
-                    latestRevision(source.id)?.extracted_data?.title ||
+                    latestRevisionBySource[source.id]?.ai_summary ||
+                    latestRevisionBySource[source.id]?.extracted_data?.title ||
                     'No summary available'
                   }}
                 </p>
                 <span
                   class="inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
                   :class="
-                    latestRevision(source.id)?.was_change_detected
+                    latestRevisionBySource[source.id]?.was_change_detected
                       ? 'bg-green-100 text-green-700'
                       : 'bg-gray-100 text-gray-600'
                   "
                 >
                   {{
-                    latestRevision(source.id)?.was_change_detected ? 'Change Detected' : 'No Change'
+                    latestRevisionBySource[source.id]?.was_change_detected
+                      ? 'Change Detected'
+                      : 'No Change'
                   }}
                 </span>
               </div>
@@ -237,14 +255,14 @@ const hasTicket = (revisionId?: string) => {
               class="prose prose-sm mt-2 max-w-none text-gray-800"
               v-html="
                 renderSummary(
-                  latestRevision(source.id)?.ai_markdown_summary ||
-                    latestRevision(source.id)?.ai_summary,
+                  latestRevisionBySource[source.id]?.ai_markdown_summary ||
+                    latestRevisionBySource[source.id]?.ai_summary,
                 )
               "
             />
 
             <div
-              v-if="latestRevision(source.id)?.was_change_detected"
+              v-if="latestRevisionBySource[source.id]?.was_change_detected"
               class="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between"
             >
               <p class="text-xs text-gray-600">
@@ -252,14 +270,11 @@ const hasTicket = (revisionId?: string) => {
               </p>
               <button
                 class="btn--default btn--sm sm:btn--lg"
-                @click="
-                  emit('open-ticket', {
-                    source,
-                    revision: latestRevision(source.id)!,
-                  })
-                "
+                @click="openTicket(source, latestRevisionBySource[source.id])"
               >
-                {{ hasTicket(latestRevision(source.id)?.id) ? 'View ticket' : 'Open ticket' }}
+                {{
+                  hasTicket(latestRevisionBySource[source.id]?.id) ? 'View ticket' : 'Open ticket'
+                }}
               </button>
             </div>
           </div>

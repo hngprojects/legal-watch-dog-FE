@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, FilePlus, Paperclip, Send, UserPlus2 } from 'lucide-vue-next'
+import { ArrowLeft, Paperclip, Send, SquareCheckBig, UserPlus2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTicketStore } from '@/stores/ticket-store'
@@ -24,20 +24,6 @@ const authorName = computed(() => {
     user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.email || 'You'
   )
 })
-
-// const statusLabel = computed(() => {
-//   if (!ticket.value) return ''
-//   if (ticket.value.status === 'in_progress') return 'In Progress'
-//   if (ticket.value.status === 'closed') return 'Closed'
-//   return 'Open'
-// })
-
-// const priorityLabel = computed(() => {
-//   if (!ticket.value) return ''
-//   if (ticket.value.priority === 'medium') return 'Medium'
-//   if (ticket.value.priority === 'low') return 'Low'
-//   return 'High'
-// })
 
 const handleBack = () => {
   router.push({ name: 'tickets' })
@@ -103,17 +89,10 @@ const formatDate = (date: string) => new Date(date).toLocaleString()
                 </h1>
               </div>
               <div class="flex items-center gap-2 sm:gap-3">
-                <button
-                  class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-[#401903] transition-colors hover:bg-gray-50"
-                  @click="closeTicket"
-                >
-                  <FilePlus :size="16" />
-                  Close ticket
+                <button class="btn--default btn--md" @click="closeTicket">
+                  <SquareCheckBig :size="16" />
                 </button>
-                <button
-                  class="group flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-[#401903] shadow-sm transition hover:bg-[#401903] hover:text-white"
-                  @click="goToInvites"
-                >
+                <button class="btn--default btn--md" @click="goToInvites">
                   <UserPlus2 :size="18" />
                 </button>
               </div>
