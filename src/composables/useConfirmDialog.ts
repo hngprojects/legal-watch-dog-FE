@@ -1,5 +1,5 @@
-import { reactive, readonly, inject } from "vue"
-import type { App } from "vue"
+import { reactive, readonly, inject } from 'vue'
+import type { App } from 'vue'
 
 export interface ConfirmDialogOptions {
   title?: string
@@ -10,7 +10,7 @@ export interface ConfirmDialogOptions {
   onCancel?: () => void
 }
 
-const CONFIRM_DIALOG_KEY = Symbol("CONFIRM_DIALOG_KEY")
+const CONFIRM_DIALOG_KEY = Symbol('CONFIRM_DIALOG_KEY')
 
 export function createConfirmDialog() {
   const state = reactive({
@@ -47,7 +47,7 @@ export function useConfirmDialog() {
 
   if (!dialog) {
     throw new Error(
-      "useConfirmDialog() was used but createConfirmDialog() plugin was not installed."
+      'useConfirmDialog() was used but createConfirmDialog() plugin was not installed.',
     )
   }
 
