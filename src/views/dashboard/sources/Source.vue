@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Swal from '@/lib/swal'
+import { toast } from "vue-sonner"
 import { sourceApi } from '@/api/source'
 import type { SourceType, ScrapeFrequency, CreateSourcePayload } from '@/types/source'
 import type { Jurisdiction } from '@/api/jurisdiction'
@@ -60,22 +60,21 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
 
 const validateForm = (): boolean => {
   if (!sourceForm.value.name.trim()) {
-    Swal.fire('Error', 'Source name is required', 'error')
+    toast.error("Source name is required")
     return false
   }
   if (!sourceForm.value.type) {
-    Swal.fire('Error', 'Please select a source type', 'error')
+    toast.error("Please select a source type")
     return false
   }
   if (!sourceForm.value.url.trim()) {
-    Swal.fire('Error', 'Source URL is required', 'error')
+    toast.error("Source URL is required")
     return false
   }
   try {
-    // will throw if invalid
     new URL(sourceForm.value.url)
   } catch {
-    Swal.fire('Error', 'Please enter a valid URL', 'error')
+    toast.error("Please enter a valid URL")
     return false
   }
   return true
@@ -95,37 +94,34 @@ const saveSources = async () => {
 
   try {
     const res = await sourceApi.create(payload)
-    // success if status 200
+
     if (res?.data?.data?.source) {
-      await Swal.fire({
-        title: 'Source Added!',
-        text: 'Your source has been successfully added and will be monitored.',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false,
-      })
+      toast.success("Source added successfully")
       router.push(`/dashboard/jurisdictions/${jurisdictionId.value}`)
     } else {
-      throw new Error(res?.data?.message || 'Unexpected response from server')
+      throw new Error(res?.data?.message || "Unexpected response from server")
     }
+
   } catch (error: unknown) {
-    console.error('Create source error:', error)
+    console.error("Create source error:", error)
+
     const err = error as {
       response?: { data?: { message?: string; detail?: string | Array<{ msg?: string }> } }
       message?: string
     }
 
-    let msg = 'Failed to add source. Please check your input.'
+    let msg = "Failed to add source. Please check your input."
+
     if (err.response?.data) {
       const d = err.response.data
-      if (typeof d.detail === 'string') msg = d.detail
+      if (typeof d.detail === "string") msg = d.detail
       else if (Array.isArray(d.detail) && d.detail[0]?.msg) msg = d.detail[0].msg
       else if (d.message) msg = d.message
     } else if (err.message) {
       msg = err.message
     }
 
-    Swal.fire('Error', msg, 'error')
+    toast.error(msg)
   } finally {
     submitting.value = false
   }

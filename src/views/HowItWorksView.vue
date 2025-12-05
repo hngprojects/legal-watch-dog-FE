@@ -46,8 +46,7 @@ const showVideo = ref(false)
 <template>
   <div class="flex min-h-screen flex-col">
     <main
-      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] py-12 sm:py-16 lg:py-20"
-    >
+      class="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#F7F7F7] py-12 sm:py-16 lg:py-20">
       <!-- Background gradient - responsive -->
       <div
         class="pointer-events-none absolute top-0 left-1/2 z-0 h-[500px] w-[1200px] -translate-x-1/2 -translate-y-[50%] rounded-[50%] sm:h-[600px] sm:w-[1400px] sm:-translate-y-[55%] lg:h-[800px] lg:w-[1600px] lg:-translate-y-[60%]"
@@ -59,23 +58,16 @@ const showVideo = ref(false)
             rgba(247, 247, 247, 0.8) 70%,
             #f7f7f7 100%
           );
-        "
-      ></div>
+        "></div>
 
       <!-- Hero Section -->
-      <section
-        class="app-container relative z-10 mb-16 space-y-8 text-center sm:mb-20 sm:space-y-10 lg:mb-24"
-      >
+      <section class="app-container relative z-10 mb-16 space-y-8 text-center sm:mb-20 sm:space-y-10 lg:mb-24">
         <PillTag>
-          <span class="text-sm font-normal text-gray-600 sm:text-base"
-            >AI-Powered Regulatory Intelligence</span
-          >
+          <span class="text-sm font-normal text-gray-600 sm:text-base">AI-Powered Regulatory Intelligence</span>
         </PillTag>
 
         <div class="space-y-4 sm:space-y-5">
-          <h1
-            class="text-primary lg:text-preset-display-md text-3xl font-bold sm:text-4xl md:text-5xl"
-          >
+          <h1 class="text-primary lg:text-preset-display-md text-3xl font-bold sm:text-4xl md:text-5xl">
             How Legal Watch Dog Works
           </h1>
           <p class="lg:text-preset-body-xx-lg text-base text-gray-600 sm:text-lg md:text-xl">
@@ -85,38 +77,29 @@ const showVideo = ref(false)
         </div>
 
         <!-- Video Button -->
-        <Button
-          variant="secondary"
-          class="my-4 cursor-pointer self-center px-6 py-5 text-sm sm:my-6 sm:px-8 sm:text-base"
-          size="lg"
-          @click="showVideo = true"
-        >
-          <Icon :icon="PlayIcon" class="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Watch 2-minute Demo
-        </Button>
+        <div>
+          <Button variant="default" size="default"
+             class="hidden text-sm sm:block sm:text-base w-fit mx-auto"
+            @click="showVideo = true">
+            <Icon :icon="PlayIcon" class="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Watch 2-minute Demo
+          </Button>
+        </div>
 
         <!-- Video Modal -->
         <Teleport to="body">
-          <div
-            v-if="showVideo"
-            class="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4"
-            @click="showVideo = false"
-          >
+          <div v-if="showVideo" class="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4"
+            @click="showVideo = false">
             <div class="relative w-full max-w-3xl sm:max-w-4xl lg:max-w-5xl">
               <button
                 class="absolute -top-10 right-0 z-10 cursor-pointer text-4xl leading-none font-light text-white transition-colors duration-200 select-none hover:text-gray-300 sm:-top-12 sm:text-5xl"
-                @click="showVideo = false"
-              >
+                @click="showVideo = false">
                 ×
               </button>
 
               <div class="relative overflow-hidden rounded-xl shadow-2xl sm:rounded-2xl">
-                <iframe
-                  src="https://drive.google.com/file/d/13Tm2Ysa0wwVKmkTOLcZe9c5eMmxJDb1b/preview"
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  allowfullscreen
-                  class="aspect-video w-full border-0"
-                  title="Legal Watch Dog - 2 Minute Demo"
-                ></iframe>
+                <iframe src="https://drive.google.com/file/d/13Tm2Ysa0wwVKmkTOLcZe9c5eMmxJDb1b/preview"
+                  allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen
+                  class="aspect-video w-full border-0" title="Legal Watch Dog - 2 Minute Demo"></iframe>
               </div>
             </div>
           </div>
@@ -129,29 +112,20 @@ const showVideo = ref(false)
           <h2 class="lg:text-preset-display-sm text-2xl font-semibold sm:text-3xl md:text-4xl">
             5 <span class="text-peach-amber-main">Simple Steps</span> to Stay Informed
           </h2>
-          <p
-            class="lg:text-preset-body-xx-lg mt-2 text-base text-gray-600 sm:mt-3 sm:text-lg md:text-xl"
-          >
+          <p class="lg:text-preset-body-xx-lg mt-2 text-base text-gray-600 sm:mt-3 sm:text-lg md:text-xl">
             From setups to alerts in minutes
           </p>
         </div>
 
         <div class="space-y-16 sm:space-y-20">
-          <article
-            v-for="(step, i) in steps"
-            :key="i"
+          <article v-for="(step, i) in steps" :key="i"
             class="flex w-full flex-col items-center justify-center gap-8 text-center md:gap-10 lg:flex-row lg:items-start lg:text-start"
-            :class="{ 'lg:flex-row-reverse': i % 2 !== 0 }"
-          >
+            :class="{ 'lg:flex-row-reverse': i % 2 !== 0 }">
             <!-- Content Column -->
-            <div
-              class="w-full max-w-md space-y-4 md:max-w-lg lg:max-w-none lg:basis-1/2 lg:space-y-5 lg:self-center"
-              :class="[i % 2 !== 0 ? 'lg:pl-10 xl:pl-14' : 'lg:pr-10 xl:pr-14']"
-            >
+            <div class="w-full max-w-md space-y-4 md:max-w-lg lg:max-w-none lg:basis-1/2 lg:space-y-5 lg:self-center"
+              :class="[i % 2 !== 0 ? 'lg:pl-10 xl:pl-14' : 'lg:pr-10 xl:pr-14']">
               <!-- Step Indicator -->
-              <div
-                class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"
-              >
+              <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <div class="flex items-center justify-center p-3 sm:p-4">
                   <img :src="workIcon" alt="icon" class="h-10 w-10 sm:h-12 sm:w-12" />
                 </div>
@@ -175,11 +149,7 @@ const showVideo = ref(false)
 
             <!-- Image Column -->
             <div class="w-full max-w-md md:max-w-lg lg:max-w-none lg:basis-1/2">
-              <img
-                :src="step.image"
-                :alt="step.title"
-                class="w-full rounded-2xl shadow-lg sm:rounded-3xl"
-              />
+              <img :src="step.image" :alt="step.title" class="w-full rounded-2xl shadow-lg sm:rounded-3xl" />
             </div>
           </article>
         </div>
@@ -198,6 +168,7 @@ const showVideo = ref(false)
 }
 
 @media (max-width: 768px) {
+
   /* Stack steps vertically on mobile/tablet */
   article {
     flex-direction: column !important;

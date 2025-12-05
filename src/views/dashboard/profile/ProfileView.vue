@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import Swal from '@/lib/swal'
-import type { SweetAlertOptions } from 'sweetalert2'
 import { Input } from '@/components/ui/input'
 import { userService, type UpdateProfilePayload } from '@/api/user'
 import { useAuthStore } from '@/stores/auth-store'
@@ -11,6 +9,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import type { Organization } from '@/types/organization'
 import type { UserProfile } from '@/types/user'
 import editIcon from '@/assets/icons/editIcon.svg'
+import { toast } from "vue-sonner"
 import {
   Select,
   SelectContent,
@@ -37,14 +36,6 @@ const profileLoading = ref(true)
 const profileError = ref<string | null>(null)
 const userProfile = ref<UserProfile | null>(null)
 const showEditModal = ref(false)
-
-const showSwal = async (options: SweetAlertOptions) => {
-  const shouldReopenModal = showEditModal.value
-  if (shouldReopenModal) showEditModal.value = false
-  const result = await Swal.fire(options)
-  if (shouldReopenModal) showEditModal.value = true
-  return result
-}
 
 const editForm = ref({
   name: '',
@@ -238,81 +229,48 @@ const handleImageUpload = async (event: Event) => {
 
   if (!file) return
 
-  // Validate file type
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
   if (!validTypes.includes(file.type)) {
-    await showSwal({
-      icon: 'error',
-      title: 'Invalid File Type',
-      text: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP).',
-      confirmButtonColor: '#401903',
-    })
+    toast.error("Please upload a valid image file (JPEG, PNG, GIF, or WebP).")
     return
   }
 
-  // Validate file size (max 5MB)
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
-    await showSwal({
-      icon: 'error',
-      title: 'File Too Large',
-      text: 'Image size must be less than 5MB.',
-      confirmButtonColor: '#401903',
-    })
+    toast.error("Image size must be less than 5MB.")
     return
   }
 
   try {
     uploadingImage.value = true
 
-    // Upload image to server
     const response = await userService.uploadProfilePicture(file)
-
-    // Get the uploaded image URL
     const uploadedUrl = response.data?.data?.profile_picture_url
 
     if (uploadedUrl && userProfile.value) {
-      // Update local profile preview
-      userProfile.value = {
-        ...userProfile.value,
-        avatar_url: uploadedUrl,
-      }
+      userProfile.value = { ...userProfile.value, avatar_url: uploadedUrl }
 
-      // Update auth store
       if (authStore.user) {
-        authStore.user = {
-          ...authStore.user,
-          avatar_url: uploadedUrl,
-        }
+        authStore.user = { ...authStore.user, avatar_url: uploadedUrl }
       }
 
-      await showSwal({
-        icon: 'success',
-        title: 'Profile Picture Updated',
-        text: 'Your profile picture has been successfully uploaded.',
-        confirmButtonColor: '#401903',
-      })
+      toast.success("Profile picture updated successfully.")
     }
+
   } catch (error) {
-    console.error('Image upload error:', error)
     const err = error as { response?: { data?: { message?: string; error?: string } } }
     const errorMessage =
       err?.response?.data?.message ||
       err?.response?.data?.error ||
-      'Failed to upload profile picture. Please try again.'
+      "Failed to upload profile picture. Please try again."
 
-    await showSwal({
-      icon: 'error',
-      title: 'Upload Failed',
-      text: errorMessage,
-      confirmButtonColor: '#401903',
-    })
+    toast.error(errorMessage)
   } finally {
     uploadingImage.value = false
-    // Reset file input
     if (target) target.value = ''
   }
 }
+
 
 const closeEditModal = () => {
   showEditModal.value = false
@@ -321,12 +279,7 @@ const closeEditModal = () => {
 const saveEdits = async () => {
   try {
     if (!editForm.value.name.trim()) {
-      await showSwal({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Name is required.',
-        confirmButtonColor: '#401903',
-      })
+      toast.error("Name is required.")
       return
     }
 
@@ -338,30 +291,17 @@ const saveEdits = async () => {
 
     const response = await userService.updateProfile(payload)
 
-    // console.log(response)
-
     if (response.data?.data) {
-      userProfile.value = {
-        ...userProfile.value,
-        ...response.data.data,
-      }
+      userProfile.value = { ...userProfile.value, ...response.data.data }
 
       if (authStore.user) {
-        authStore.user = {
-          ...authStore.user,
-          name: response.data.data.name,
-        }
+        authStore.user = { ...authStore.user, name: response.data.data.name }
       }
     }
 
-    await showSwal({
-      icon: 'success',
-      title: 'Profile Updated',
-      text: 'Your profile has been successfully updated.',
-      confirmButtonColor: '#401903',
-    })
-
+    toast.success("Profile updated successfully.")
     closeEditModal()
+
   } catch (error) {
     const err = error as {
       response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } }
@@ -370,18 +310,14 @@ const saveEdits = async () => {
     const errorMessage =
       err?.response?.data?.message ||
       err?.response?.data?.error ||
-      'Failed to update profile. Please try again.'
+      "Failed to update profile. Please try again."
 
-    await showSwal({
-      icon: 'error',
-      title: 'Update Failed',
-      text: errorMessage,
-      confirmButtonColor: '#401903',
-    })
+    toast.error(errorMessage)
   } finally {
     isSaving.value = false
   }
 }
+
 </script>
 
 <template>

@@ -11,7 +11,7 @@ import type { OrganizationErrorResponse } from '@/types/organization'
 import type { Organization, RawOrganization } from '@/types/organization'
 import type { Invitation } from '@/types/invitation'
 import type { UserProfile } from '@/types/user'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
 import {
   Dialog,
   DialogClose,
@@ -155,7 +155,8 @@ const handleProjectSave = async (payload: {
     })
     projectModalOpen.value = false
     editingProject.value = null
-    await Swal.fire('Updated', 'Project updated successfully.', 'success')
+
+    toast.success('Project updated successfully')
     await loadProjects()
     return
   }
@@ -165,27 +166,22 @@ const handleProjectSave = async (payload: {
     description: payload.description,
     organization_id: orgForAction,
   })
+
   if (created) {
     projectModalOpen.value = false
-    await Swal.fire('Created', 'Project created successfully.', 'success')
+    toast.success('Project created successfully')
     await loadProjects()
   }
 }
 
 const deleteProject = async (projectId?: string) => {
   if (!projectId || !orgId.value) return
-  const confirm = await Swal.fire({
-    title: 'Delete Project?',
-    text: 'This action cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#d33',
-  })
-  if (!confirm.isConfirmed) return
+
+  const confirmed = confirm('Delete this project? This action cannot be undone.')
+  if (!confirmed) return
+
   await projectStore.deleteProject(projectId, orgId.value)
-  await Swal.fire('Deleted', 'Project successfully deleted.', 'success')
+  toast.success('Project successfully deleted')
   await loadProjects()
 }
 
@@ -197,6 +193,7 @@ const openEditOrganization = () => {
 
 const handleOrgSave = async (payload: { name: string; industry: string }) => {
   if (!orgId.value) return
+
   orgEditSaving.value = true
   orgEditError.value = null
 
@@ -204,10 +201,10 @@ const handleOrgSave = async (payload: { name: string; industry: string }) => {
 
   if (updated) {
     orgEditDialogOpen.value = false
-
-    await Swal.fire('Updated', 'Organization updated successfully.', 'success')
+    toast.success('Organization updated successfully')
   } else if (organizationStore.error) {
     orgEditError.value = organizationStore.error
+    toast.error(organizationStore.error)
   }
 
   orgEditSaving.value = false
@@ -215,22 +212,17 @@ const handleOrgSave = async (payload: { name: string; industry: string }) => {
 
 const confirmDeleteOrganization = async () => {
   if (!orgId.value || !organization.value) return
-  const result = await Swal.fire({
-    title: 'Delete organization?',
-    text: 'This action cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#d33',
-  })
-  if (!result.isConfirmed) return
+
+  const confirmed = confirm('Delete this organization? This action cannot be undone.')
+  if (!confirmed) return
+
   const deleted = await organizationStore.deleteOrganization(orgId.value)
+
   if (deleted) {
-    await Swal.fire('Deleted', 'Organization removed successfully.', 'success')
+    toast.success('Organization removed successfully')
     router.push({ name: 'organizations' })
   } else if (organizationStore.error) {
-    await Swal.fire('Could not delete', organizationStore.error, 'error')
+    toast.error(organizationStore.error)
   }
 }
 
@@ -379,41 +371,40 @@ const memberActionLoading = ref<string | null>(null)
 
 const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
   if (!orgId.value || member.role === targetRole) return
+
   if (targetRole === 'Owner') {
-    await Swal.fire('Not allowed', 'Only the creator can be the Owner.', 'info')
+    toast.info('Only the creator can be the Owner')
     return
   }
+
   if (member.role === 'Owner') {
-    await Swal.fire('Not allowed', 'The Owner role cannot be changed.', 'info')
+    toast.info('The Owner role cannot be changed')
     return
   }
+
   if (!member.id) {
-    await Swal.fire('Missing user', 'Cannot update role: user ID unavailable.', 'error')
+    toast.error('Cannot update role: missing user ID')
     return
   }
+
   memberActionLoading.value = `${member.id}-role`
+
   try {
     await organizationService.updateMemberRole(orgId.value, member.id, targetRole)
+
     members.value = members.value.map((item) =>
       item.id === member.id ? { ...item, role: targetRole } : item,
     )
-    await Swal.fire('Role updated', `${member.name} is now ${targetRole}.`, 'success')
+
+    toast.success(`${member.name} is now ${targetRole}`)
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    let message = !err.response
-      ? 'Network error: Unable to reach server'
-      : err.response.data?.detail?.[0]?.msg ||
-        err.response.data?.message ||
-        'Failed to update member role'
 
-    if (typeof message === 'string' && /through this endpoint./i.test(message)) {
-      message = message
-        .replace(/through this endpoint./gi, '')
-        .replace(/\s{2,}/g, ' ')
-        .trim()
-      if (message && !/[.!?]$/.test(message)) message = `${message}.`
-    }
-    await Swal.fire('Could not update role', message, 'error')
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg || err.response.data?.message || 'Failed to update role'
+
+    toast.error(message)
   } finally {
     memberActionLoading.value = null
   }
@@ -421,39 +412,40 @@ const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
 
 const toggleMemberStatus = async (member: Member) => {
   if (!orgId.value) return
+
   if (member.role === 'Owner') {
-    await Swal.fire('Not allowed', 'The Owner cannot be deactivated.', 'info')
+    toast.info('The Owner cannot be deactivated')
     return
   }
+
   if (!member.id) {
-    await Swal.fire('Missing user', 'Cannot update status: user ID unavailable.', 'error')
+    toast.error('Cannot update status: missing user ID')
     return
   }
+
   const targetStatus: MemberStatus = member.status === 'Active' ? 'Inactive' : 'Active'
+
   memberActionLoading.value = `${member.id}-status`
+
   try {
     await organizationService.updateMemberStatus(orgId.value, member.id, targetStatus === 'Active')
+
     members.value = members.value.map((item) =>
       item.id === member.id ? { ...item, status: targetStatus } : item,
     )
+
     const verb = targetStatus === 'Active' ? 'activated' : 'deactivated'
-    await Swal.fire('Status updated', `${member.name} has been ${verb}.`, 'success')
+    toast.success(`${member.name} has been ${verb}`)
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    let message = !err.response
+
+    const message = !err.response
       ? 'Network error: Unable to reach server'
       : err.response.data?.detail?.[0]?.msg ||
         err.response.data?.message ||
-        'Failed to update member status'
+        'Failed to update status'
 
-    if (typeof message === 'string' && /through this endpoint./i.test(message)) {
-      message = message
-        .replace(/through this endpoint/gi, '')
-        .replace(/\s{2,}/g, ' ')
-        .trim()
-      if (message && !/[.!?]$/.test(message)) message = `${message}.`
-    }
-    await Swal.fire('Could not update status', message, 'error')
+    toast.error(message)
   } finally {
     memberActionLoading.value = null
   }
@@ -489,39 +481,45 @@ const openProjects = () => {
 const sendInvitation = async () => {
   inviteError.value = null
   inviteMessage.value = null
+
   if (!orgId.value) {
-    inviteError.value = 'Select an organization before inviting teammates.'
+    toast.error('Select an organization before inviting teammates')
     return
   }
+
   if (!inviteForm.value.email.trim()) {
-    inviteError.value = 'Email is required'
+    toast.error('Email is required')
     return
   }
 
   inviteSending.value = true
+
   try {
     const { data } = await organizationService.inviteMember(orgId.value, {
       invited_email: inviteForm.value.email.trim(),
       role_name: inviteForm.value.role,
     })
-    inviteMessage.value = data.message || data.data?.message || 'Invitation sent successfully.'
+
+    inviteMessage.value = data.message || data.data?.message || 'Invitation sent'
     inviteOpen.value = false
+
     await loadOrganizationInvitations()
-    await Swal.fire('Invitation sent', inviteMessage.value, 'success')
+
+    toast.success(inviteMessage.value)
+
     inviteForm.value.email = ''
     inviteForm.value.role = 'Member'
   } catch (error) {
     const err = error as OrganizationErrorResponse
-    if (!err.response) {
-      inviteError.value = 'Network error: Unable to reach server'
-    } else {
-      inviteError.value =
-        err.response.data?.detail?.[0]?.msg ||
+
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
         err.response.data?.message ||
         'Failed to send invitation'
-    }
+
     inviteOpen.value = false
-    await Swal.fire('Could not send invite', inviteError.value, 'error')
+    toast.error(message)
   } finally {
     inviteSending.value = false
   }

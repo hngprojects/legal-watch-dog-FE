@@ -2,88 +2,78 @@
 import { ref, onMounted, computed } from 'vue'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useOrganizationStore } from '@/stores/organization-store'
-import Swal from '@/lib/swal'
+import { useConfirmDialog } from "@/composables/useConfirmDialog"
+import { toast } from "vue-sonner"
 
 const jurisdictionStore = useJurisdictionStore()
 const orgStore = useOrganizationStore()
 
 const loading = ref(false)
 const orgId = computed(() => orgStore.currentOrganizationId || undefined)
+const { confirm: openConfirm } = useConfirmDialog()
 
 const archivedJurisdictions = computed(() => {
   return jurisdictionStore.archivedJurisdictions
 })
 
 onMounted(() => {
-  // Use initializeArchived instead of syncArchivedFromLocalStorage
   jurisdictionStore.initializeArchived()
 })
 
 const restoreJurisdiction = async (jurisdictionId: string) => {
-  const confirm = await Swal.fire({
-    title: 'Restore Jurisdiction?',
-    text: 'This will make the jurisdiction active again',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, restore it!',
-    cancelButtonText: 'Cancel',
-  })
+  openConfirm({
+    title: "Restore Jurisdiction?",
+    description: "This will make the jurisdiction active again.",
+    confirmText: "Restore",
+    cancelText: "Cancel",
+    async onConfirm() {
+      try {
+        loading.value = true
 
-  if (!confirm.isConfirmed) return
+        if (!orgId.value) {
+          throw new Error("No organization selected")
+        }
 
-  try {
-    loading.value = true
+        await jurisdictionStore.restoreJurisdiction(jurisdictionId, orgId.value)
 
-    if (!orgId.value) {
-      throw new Error('No organization selected')
+        toast.success("Jurisdiction restored successfully")
+      } catch (error) {
+        console.error("Restore failed:", error)
+        toast.error("Failed to restore jurisdiction")
+      } finally {
+        loading.value = false
+      }
     }
-
-    await jurisdictionStore.restoreJurisdiction(jurisdictionId, orgId.value)
-
-    Swal.fire({
-      title: 'Restored!',
-      text: 'Jurisdiction has been restored.',
-      icon: 'success',
-      timer: 2000,
-    })
-  } catch (error) {
-    console.error('Restore failed:', error)
-    Swal.fire('Error', 'Failed to restore jurisdiction', 'error')
-  } finally {
-    loading.value = false
-  }
+  })
 }
+
 
 const permanentDelete = async (jurisdictionId: string) => {
-  const confirm = await Swal.fire({
-    title: 'Remove from Archive?',
-    text: 'This will remove the jurisdiction from your archived list.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, remove it',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#dc2626',
+  openConfirm({
+    title: "Remove from Archive?",
+    description: "This will remove the jurisdiction from your archived list.",
+    confirmText: "Remove",
+    cancelText: "Cancel",
+    async onConfirm() {
+      try {
+        jurisdictionStore.archivedJurisdictions = jurisdictionStore.archivedJurisdictions.filter(
+          (j) => j.id !== jurisdictionId
+        )
+
+        const ids = JSON.parse(localStorage.getItem("archived_jurisdiction_ids") || "[]")
+        const updatedIds = ids.filter((id: string) => id !== jurisdictionId)
+
+        localStorage.setItem("archived_jurisdiction_ids", JSON.stringify(updatedIds))
+        localStorage.removeItem(`archived_jurisdiction_${jurisdictionId}`)
+
+        toast.success("Jurisdiction removed from archive")
+      } catch {
+        toast.error("Failed to remove jurisdiction")
+      }
+    }
   })
-
-  if (!confirm.isConfirmed) return
-
-  try {
-    // Remove from store
-    jurisdictionStore.archivedJurisdictions = jurisdictionStore.archivedJurisdictions.filter(
-      (j) => j.id !== jurisdictionId,
-    )
-
-    // Remove from localStorage
-    const ids = JSON.parse(localStorage.getItem('archived_jurisdiction_ids') || '[]')
-    const updatedIds = ids.filter((id: string) => id !== jurisdictionId)
-    localStorage.setItem('archived_jurisdiction_ids', JSON.stringify(updatedIds))
-    localStorage.removeItem(`archived_jurisdiction_${jurisdictionId}`)
-
-    Swal.fire('Removed!', 'Jurisdiction has been removed from archived list.', 'success')
-  } catch {
-    Swal.fire('Error', 'Failed to remove jurisdiction', 'error')
-  }
 }
+
 </script>
 
 <template>
