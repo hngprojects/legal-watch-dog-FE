@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import ResourceOwnerIcon from '@/assets/icons/resource-owner.svg'
 
 interface Emits {
   (e: 'close'): void
@@ -58,10 +59,10 @@ const generateToken = () => {
 <template>
   <div class="flex flex-col gap-8">
     <div class="flex flex-col gap-6">
-      <h1 class="border-b border-b-[#E5E7EB] pb-6 text-3xl font-bold text-[#0F172A]">
+      <h1 class="border-b border-b-[#E5E7EB] pb-6 text-3xl font-bold text-[#1F1F1F]">
         New fine-grained personal access token
       </h1>
-      <p class="text-sm text-[#6B7280]">
+      <p class="text-2xl text-[#1F1F1F]">
         Create a fine-grained, organization-scoped token suitable for personal API use and for using
         LegalWatchDog over HTTPS.
       </p>
@@ -99,20 +100,7 @@ const generateToken = () => {
         <Select v-model="resourceOwner">
           <SelectTrigger class="h-11 w-full rounded-md border-[#E5E7EB] text-sm sm:w-[336px]">
             <div class="flex items-center gap-2">
-              <svg
-                class="h-5 w-5 text-[#6B7280]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
+              <img :src="ResourceOwnerIcon" alt="Resource Owner" class="h-5 w-5" />
               <SelectValue :placeholder="resourceOwner" />
             </div>
           </SelectTrigger>

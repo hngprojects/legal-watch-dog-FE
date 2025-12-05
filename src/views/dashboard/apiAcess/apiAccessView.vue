@@ -52,7 +52,7 @@ const closeGenerateForm = () => {
                 Generate new token
               </Button>
             </div>
-            <p class="text-sm text-[#6B7280]">
+            <p class="text-sm text-[#1F1F1F]">
               These are fine-grained, repository-scoped tokens suitable for personal API use and for
               using Legal Watch Dog over HTTPS
             </p>
