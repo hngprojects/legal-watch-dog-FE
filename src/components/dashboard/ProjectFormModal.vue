@@ -35,7 +35,13 @@ const emit = defineEmits<{
   (e: 'close'): void
   (
     e: 'save',
-    payload: { title: string; description: string; organizationId: string; projectId?: string; masterPrompt?: string },
+    payload: {
+      title: string
+      description: string
+      organizationId: string
+      projectId?: string
+      masterPrompt?: string
+    },
   ): void
 }>()
 
