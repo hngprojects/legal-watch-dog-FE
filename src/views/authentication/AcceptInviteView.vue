@@ -48,7 +48,7 @@ onMounted(async () => {
       denyButton: 'btn--default btn--sm md:btn--lg',
       confirmButton: 'btn--default btn--sm md:btn--lg',
       cancelButton: 'btn--secondary btn--sm md:btn--lg',
-    }
+    },
   })
 
   if (result.isConfirmed) {

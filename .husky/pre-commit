@@ -1,61 +1,10 @@
-# #!/usr/bin/env sh
+set -e
 
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-# if command -v nvm >/dev/null 2>&1; then
-#     if nvm ls 20 >/dev/null 2>&1; then
-#         nvm use 20 >/dev/null 2>&1 || echo "nvm: failed to use Node 20; continuing with $(node -v 2>/dev/null)"
-#     else
-#         echo "nvm: Node 20 not installed; running with $(node -v 2>/dev/null || echo 'no node found')"
-#     fi
-# fi
+echo "Checking format (prettier)..."
+npm run check-format
 
-# echo "node path: $(which node)"
-# node -v
+echo "Checking lint..."
+npm run lint -- --max-warnings=0
 
-# echo '🏗️👷 Running checks on your code before committing' 🔍🧐
-
-# echo "styling your work" 🎨✨
-
-
-# # Check Prettier standards
-# npm run check-format ||
-# (
-#     echo '🤢🤮🤢🤮 Its so ugly!! - Your styling looks disgusting. 🤢🤮🤢🤮
-#             Prettier Check Failed. Running npm run format...';
-#     npm run format;
-#     git add .;
-#     echo '✨ Formatting complete and changes added. Committing with the previous commit message...';
-#     git commit --amend --no-edit;
-#     echo '✅✅ Amended commit with the new changes. Please try to push again.';
-
-# )
-
-
-# echo '🏗️👷 checking for eslint errors' 🔍🧐
-
-# # Check ESLint Standards
-# npm run lint ||
-# 	(
-# 		echo '😤🏀👋😤 Get that beans code out of here! 😤🏀👋😤
-#                 ESLint Check Failed. Make the required changes listed above, add changes and try to commit again.'
-# 		false
-# 	)
-
-# echo '🏗️👷 checking for typescript errors' 🔍🧐
-
-# # Check tsconfig standards
-# npm run type-check ||
-# 	(
-# 		echo '🤡😂❌🤡 Failed Type check. 🤡😂❌🤡
-#            Are you seriously trying to write that? Make the changes required above.'
-# 		false
-# 	)
-
-# # npx lint-staged       
-
-# # If everything passes... Now we can commit
-# echo '✅✅✅✅ You win this time... I am committing this now. ✅✅✅✅'
-
-# echo '✅✅ Awesome work! ✅✅'
-# echo '🚀⛅ Run git push to upload your changes to the remote repository ⛅🚀'
+echo "Building project..."
+npm run build

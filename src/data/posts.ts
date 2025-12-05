@@ -114,12 +114,12 @@ export const blogPosts = [
   {
     id: 3,
     title: 'Tech Innovations in Law',
-    category: 'AI & Legal Tech',
+    category: 'AI & Tech',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog3.png',
 
     introduction: [
-      'Legal teams are adopting AI to triage regulatory changes, generate first drafts, and surface risks faster. The tools that deliver the most value pair automation with strong guardrails and auditable outputs.',
+      'Teams are adopting AI to triage regulatory changes, generate first drafts, and surface risks faster. The tools that deliver the most value pair automation with strong guardrails and auditable outputs.',
       'Here is how forward-looking teams are experimenting responsibly while keeping humans in the loop.',
     ],
 
@@ -263,10 +263,10 @@ export const blogPosts = [
       {
         id: 3,
         title: 'Tech Innovations in Law',
-        category: 'AI & Legal Tech',
+        category: 'AI & Tech',
         date: 'Dec 1, 2025',
         summary:
-          'A look at emerging tools and technologies transforming how legal professionals research, monitor, and manage compliance..',
+          'A look at emerging tools and technologies transforming how professionals research, monitor, and manage compliance..',
         image: '/src/assets/Images/underblog3.png',
       },
     ],
@@ -274,7 +274,7 @@ export const blogPosts = [
   {
     id: 3,
     title: 'Tech Innovations in Law',
-    category: 'AI & Legal Tech',
+    category: 'AI & Tech',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog3.png',
 
@@ -515,10 +515,10 @@ export const blogPosts = [
       {
         id: 3,
         title: 'Tech Innovations in Law',
-        category: 'AI & Legal Tech',
+        category: 'AI & Tech',
         date: 'Dec 1, 2025',
         summary:
-          'A look at emerging tools and technologies transforming how legal professionals research, monitor, and manage compliance.',
+          'A look at emerging tools and technologies transforming how professionals research, monitor, and manage compliance.',
         image: '/src/assets/Images/underblog3.png',
       },
     ],

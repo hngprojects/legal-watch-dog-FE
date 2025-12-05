@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import Swal from '@/lib/swal'
 import { Input } from '@/components/ui/input'
 import { userService, type UpdateProfilePayload } from '@/api/user'
 import { useAuthStore } from '@/stores/auth-store'
@@ -10,6 +9,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import type { Organization } from '@/types/organization'
 import type { UserProfile } from '@/types/user'
 import editIcon from '@/assets/icons/editIcon.svg'
+import { toast } from 'vue-sonner'
 import {
   Select,
   SelectContent,
@@ -47,6 +47,22 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 const uploadingImage = ref(false)
 const isSaving = ref(false)
 
+const normalizeRoleLabel = (role?: string) => {
+  const normalized = role?.toString().trim().toLowerCase()
+  switch (normalized) {
+    case 'owner':
+      return 'Owner'
+    case 'admin':
+      return 'Admin'
+    case 'manager':
+      return 'Manager'
+    case 'member':
+      return 'Member'
+    default:
+      return 'Member'
+  }
+}
+
 const fallbackNameFromEmail = computed(() => {
   const email = userProfile.value?.email || ''
   if (!email) return ''
@@ -69,11 +85,11 @@ const fullName = computed(() => {
 })
 
 const primaryRole = computed(() => {
-  return (
+  return normalizeRoleLabel(
     userProfile.value?.role ||
-    organizations.value[0]?.user_role ||
-    userProfile.value?.organizations?.[0]?.role ||
-    'Member'
+      organizations.value[0]?.user_role ||
+      userProfile.value?.organizations?.[0]?.role ||
+      'Member',
   )
 })
 
@@ -138,6 +154,8 @@ const fetchProfile = async () => {
 
     userProfile.value = {
       ...apiUser,
+      avatar_url:
+        apiUser.avatar_url || (apiUser as { profile_picture_url?: string }).profile_picture_url,
       // fallbacks for readable display when name fields are missing
       name: apiUser.name || apiUser.first_name || fallbackNameFromEmail.value || 'User',
     }
@@ -151,6 +169,8 @@ const fetchProfile = async () => {
         last_name: apiUser.last_name,
         email: apiUser.email,
         role: apiUser.role,
+        avatar_url:
+          apiUser.avatar_url || (apiUser as { profile_picture_url?: string }).profile_picture_url,
       }
     }
   } catch (error) {
@@ -198,92 +218,54 @@ const openEditModal = () => {
   showEditModal.value = true
 }
 
-// const triggerFileInput = () => {
-//   fileInputRef.value?.click()
-// }
+const triggerFileInput = () => {
+  if (uploadingImage.value) return
+  fileInputRef.value?.click()
+}
 
 const handleImageUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
 
   if (!file) return
-  isSaving.value = true
 
-  // Validate file type
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
   if (!validTypes.includes(file.type)) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Invalid File Type',
-      text: 'Please upload a valid image file (JPEG, PNG, GIF, or WebP).',
-      confirmButtonColor: '#401903',
-    })
-    isSaving.value = false
+    toast.error('Please upload a valid image file (JPEG, PNG, GIF, or WebP).')
     return
   }
 
-  // Validate file size (max 5MB)
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
-    Swal.fire({
-      icon: 'error',
-      title: 'File Too Large',
-      text: 'Image size must be less than 5MB.',
-      confirmButtonColor: '#401903',
-    })
-    isSaving.value = false
+    toast.error('Image size must be less than 5MB.')
     return
   }
 
   try {
     uploadingImage.value = true
 
-    // Upload image to server
     const response = await userService.uploadProfilePicture(file)
-
-    // Get the uploaded image URL
     const uploadedUrl = response.data?.data?.profile_picture_url
 
     if (uploadedUrl && userProfile.value) {
-      // Update local profile preview
-      userProfile.value = {
-        ...userProfile.value,
-        avatar_url: uploadedUrl,
-      }
+      userProfile.value = { ...userProfile.value, avatar_url: uploadedUrl }
 
-      // Update auth store
       if (authStore.user) {
-        authStore.user = {
-          ...authStore.user,
-          avatar_url: uploadedUrl,
-        }
+        authStore.user = { ...authStore.user, avatar_url: uploadedUrl }
       }
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Profile Picture Updated',
-        text: 'Your profile picture has been successfully uploaded.',
-        confirmButtonColor: '#401903',
-      })
+      toast.success('Profile picture updated successfully.')
     }
   } catch (error) {
-    console.error('Image upload error:', error)
     const err = error as { response?: { data?: { message?: string; error?: string } } }
     const errorMessage =
       err?.response?.data?.message ||
       err?.response?.data?.error ||
       'Failed to upload profile picture. Please try again.'
 
-    Swal.fire({
-      icon: 'error',
-      title: 'Upload Failed',
-      text: errorMessage,
-      confirmButtonColor: '#401903',
-    })
+    toast.error(errorMessage)
   } finally {
     uploadingImage.value = false
-    isSaving.value = false
-    // Reset file input
     if (target) target.value = ''
   }
 }
@@ -295,12 +277,7 @@ const closeEditModal = () => {
 const saveEdits = async () => {
   try {
     if (!editForm.value.name.trim()) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        text: 'Name is required.',
-        confirmButtonColor: '#401903',
-      })
+      toast.error('Name is required.')
       return
     }
 
@@ -312,29 +289,15 @@ const saveEdits = async () => {
 
     const response = await userService.updateProfile(payload)
 
-    // console.log(response)
-
     if (response.data?.data) {
-      userProfile.value = {
-        ...userProfile.value,
-        ...response.data.data,
-      }
+      userProfile.value = { ...userProfile.value, ...response.data.data }
 
       if (authStore.user) {
-        authStore.user = {
-          ...authStore.user,
-          name: response.data.data.name,
-        }
+        authStore.user = { ...authStore.user, name: response.data.data.name }
       }
     }
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Profile Updated',
-      text: 'Your profile has been successfully updated.',
-      confirmButtonColor: '#401903',
-    })
-
+    toast.success('Profile updated successfully.')
     closeEditModal()
   } catch (error) {
     const err = error as {
@@ -346,12 +309,7 @@ const saveEdits = async () => {
       err?.response?.data?.error ||
       'Failed to update profile. Please try again.'
 
-    Swal.fire({
-      icon: 'error',
-      title: 'Update Failed',
-      text: errorMessage,
-      confirmButtonColor: '#401903',
-    })
+    toast.error(errorMessage)
   } finally {
     isSaving.value = false
   }
@@ -405,17 +363,15 @@ const saveEdits = async () => {
                   <img :src="editIcon" alt="Edit Icon" />
                 </div>
               </div>
-              <!-- <input
-                ref="fileInputRef"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="handleImageUpload"
-              /> -->
               <!-- <div class="space-y-3"> -->
               <div class="flex flex-col items-center gap-2">
                 <p class="text-3xl font-semibold text-[#1A0E04] capitalize">{{ fullName }}</p>
-                <p class="text-xl text-[#1F1F1F]">{{ primaryRole }} - {{ primaryOrg }}</p>
+                <p
+                  v-if="primaryRole !== 'Member' || primaryOrg !== 'Member'"
+                  class="text-xl text-[#1F1F1F]"
+                >
+                  {{ primaryRole }} - {{ primaryOrg }}
+                </p>
                 <p class="text-lg text-[#6B7280]">{{ userEmail }}</p>
               </div>
               <!-- </div> -->
@@ -508,7 +464,7 @@ const saveEdits = async () => {
                 <span
                   class="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-[#C35A11]"
                 >
-                  {{ org.user_role || 'Member' }}
+                  {{ normalizeRoleLabel(org.user_role) }}
                 </span>
               </div>
             </article>
@@ -538,8 +494,8 @@ const saveEdits = async () => {
             <div
               class="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[#401903]"
               :class="{ 'cursor-not-allowed opacity-50': uploadingImage }"
+              @click="triggerFileInput"
             >
-              <!-- @click="uploadingImage ? null : triggerFileInput()" -->
               <svg
                 v-if="uploadingImage"
                 class="h-4 w-4 animate-spin text-white"
@@ -585,17 +541,14 @@ const saveEdits = async () => {
           </div>
           <div class="space-y-3">
             <label class="text-sm font-semibold text-[#0F172A]" for="role">Role</label>
-            <Select v-model="editForm.role" required>
+            <Select :model-value="primaryRole" disabled>
               <SelectTrigger
                 class="h-12 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
               >
-                <SelectValue placeholder="Select Role" />
+                <SelectValue :placeholder="primaryRole" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Admin">Admin</SelectItem>
-                <!-- <SelectItem value="Member">Member</SelectItem> -->
-                <!-- <SelectItem value="Viewer">Viewer</SelectItem> -->
-                <!-- <SelectItem value="Editor">Editor</SelectItem> -->
+                <SelectItem :value="primaryRole">{{ primaryRole }}</SelectItem>
               </SelectContent>
             </Select>
           </div>

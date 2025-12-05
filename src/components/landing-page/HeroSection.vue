@@ -29,8 +29,8 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
         align="center"
         class="mt-6 text-3xl leading-tight sm:mt-8 sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight lg:text-6xl lg:leading-tight"
       >
-        Automate Legal Monitoring,<br class="hidden sm:inline" />
-        <span class="sm:hidden"> </span>Never Miss A Critical Update
+        AI-Powered Regulatory Intelligence<br class="hidden sm:inline" />
+        <span class="sm:hidden"> </span>
       </TypographyHeading>
 
       <!-- Description -->
@@ -39,8 +39,9 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
         align="center"
         tone="muted"
       >
-        LegalWatchDog uses AI to track all changes on any website, from Visa portals to employment
-        laws and delivers concise actionable summaries.
+        LegalWatchDog quietly keeps an eye on the sources that matter to you by highlighting
+        important changes and surfacing insights before they impact your operations, decisions, or
+        strategy.
       </TypographyText>
 
       <!-- CTA Button -->
@@ -49,7 +50,7 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
         :to="isAuthenticated ? { name: 'dashboard' } : { path: '/signup' }"
         class="mt-6 cursor-pointer self-center px-6 text-sm sm:mt-7 sm:px-8 sm:text-base lg:mt-8"
         size="lg"
-        variant="secondary"
+        variant="default"
       >
         {{ isAuthenticated ? 'Go to Dashboard' : 'Get Monitoring For Free' }}
       </Button>

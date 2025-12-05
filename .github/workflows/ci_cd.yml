@@ -1,4 +1,4 @@
-name: Frontend CI/CD
+name: Frontend CI/CD Pipeline
 
 on:
   workflow_dispatch:
@@ -123,13 +123,13 @@ jobs:
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
 
-            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE-staging"
+            REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE-staging"
             BRANCH="staging"
             REPO_URL="https://github.com/hngprojects/legal-watch-dog-FE.git"
 
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
-              cd /home/ifeanyinw/apps/frontend/
+              cd /home/watchdog/apps/frontend/
               git clone -b "$BRANCH" "$REPO_URL" "$REMOTE_DIR"
             fi
 
@@ -143,11 +143,11 @@ jobs:
 
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-staging/dist
-            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-staging
-            chmod o+rx /home/ifeanyinw
-            chmod o+rx /home/ifeanyinw/apps
-            chmod o+rx /home/ifeanyinw/apps/frontend
+            chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE-staging/dist
+            chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE-staging
+            chmod o+rx /home/watchdog
+            chmod o+rx /home/watchdog/apps
+            chmod o+rx /home/watchdog/apps/frontend
 
             sudo nginx -s reload
           EOF
@@ -202,12 +202,12 @@ jobs:
           sshpass -p "$SERVER_PASS" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
             set -e
 
-            REMOTE_DIR="/home/ifeanyinw/apps/frontend/legal-watch-dog-FE-production"
+            REMOTE_DIR="/home/watchdog/apps/frontend/legal-watch-dog-FE-prod"
             BRANCH="main"
             
             # Clone if the directory doesn't exist
             if [ ! -d "$REMOTE_DIR" ]; then
-              cd /home/ifeanyinw/apps/frontend/
+              cd /home/watchdog/apps/frontend/
               git clone https://github.com/hngprojects/legal-watch-dog-FE.git "$REMOTE_DIR"
             fi
 
@@ -221,11 +221,11 @@ jobs:
 
             rm -rf dist
             tar -xzf /tmp/build.tar.gz -C .
-            chmod -R o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-production/dist
-            chmod o+rx /home/ifeanyinw/apps/frontend/legal-watch-dog-FE-production
-            chmod o+rx /home/ifeanyinw
-            chmod o+rx /home/ifeanyinw/apps
-            chmod o+rx /home/ifeanyinw/apps/frontend
+            chmod -R o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE-production/dist
+            chmod o+rx /home/watchdog/apps/frontend/legal-watch-dog-FE-production
+            chmod o+rx /home/watchdog
+            chmod o+rx /home/watchdog/apps
+            chmod o+rx /home/watchdog/apps/frontend
             
             sudo nginx -s reload
           EOF

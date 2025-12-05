@@ -44,7 +44,7 @@ const teamMembers = [
   },
   {
     name: 'Lucas Nguyen',
-    role: 'VP, Legal Operations',
+    role: 'VP Operations',
     image: team2,
     description: 'Former regulator translating policy shifts into clear, actionable playbooks.',
   },

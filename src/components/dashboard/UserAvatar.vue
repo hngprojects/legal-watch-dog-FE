@@ -3,6 +3,7 @@ import { computed } from 'vue'
 
 const props = defineProps<{
   name?: string | null
+  imageUrl?: string | null
   size?: number
   backgroundClass?: string
   textClass?: string
@@ -26,7 +27,7 @@ const initials = computed(() => {
 
 <template>
   <div
-    class="inline-flex items-center justify-center rounded-full border font-semibold uppercase"
+    class="inline-flex items-center justify-center overflow-hidden rounded-full border font-semibold uppercase"
     :class="[
       backgroundClass || 'bg-[#f3e7db]',
       textClass || 'text-[#5c2a05]',
@@ -34,6 +35,13 @@ const initials = computed(() => {
     ]"
     :style="sizeStyle"
   >
-    {{ initials }}
+    <img
+      v-if="imageUrl"
+      :src="imageUrl"
+      alt="User avatar"
+      class="h-full w-full object-cover"
+      loading="lazy"
+    />
+    <span v-else>{{ initials }}</span>
   </div>
 </template>

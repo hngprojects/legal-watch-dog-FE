@@ -2,107 +2,93 @@
 import { ref, onMounted, computed } from 'vue'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useOrganizationStore } from '@/stores/organization-store'
-import Swal from '@/lib/swal'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { toast } from 'vue-sonner'
 
 const jurisdictionStore = useJurisdictionStore()
 const orgStore = useOrganizationStore()
 
 const loading = ref(false)
 const orgId = computed(() => orgStore.currentOrganizationId || undefined)
+const { confirm: openConfirm } = useConfirmDialog()
 
 const archivedJurisdictions = computed(() => {
   return jurisdictionStore.archivedJurisdictions
 })
 
 onMounted(() => {
-  console.log('🏢 Archived component mounted')
-
-  // Use initializeArchived instead of syncArchivedFromLocalStorage
   jurisdictionStore.initializeArchived()
-
-  console.log('📊 Archived items:', jurisdictionStore.archivedJurisdictions)
 })
 
 const restoreJurisdiction = async (jurisdictionId: string) => {
-  const confirm = await Swal.fire({
+  openConfirm({
     title: 'Restore Jurisdiction?',
-    text: 'This will make the jurisdiction active again',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, restore it!',
-    cancelButtonText: 'Cancel',
+    description: 'This will make the jurisdiction active again.',
+    confirmText: 'Restore',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      try {
+        loading.value = true
+
+        if (!orgId.value) {
+          throw new Error('No organization selected')
+        }
+
+        await jurisdictionStore.restoreJurisdiction(jurisdictionId, orgId.value)
+
+        toast.success('Jurisdiction restored successfully')
+      } catch (error) {
+        console.error('Restore failed:', error)
+        toast.error('Failed to restore jurisdiction')
+      } finally {
+        loading.value = false
+      }
+    },
   })
-
-  if (!confirm.isConfirmed) return
-
-  try {
-    loading.value = true
-
-    if (!orgId.value) {
-      throw new Error('No organization selected')
-    }
-
-    await jurisdictionStore.restoreJurisdiction(jurisdictionId, orgId.value)
-
-    Swal.fire({
-      title: 'Restored!',
-      text: 'Jurisdiction has been restored.',
-      icon: 'success',
-      timer: 2000,
-    })
-  } catch (error) {
-    console.error('Restore failed:', error)
-    Swal.fire('Error', 'Failed to restore jurisdiction', 'error')
-  } finally {
-    loading.value = false
-  }
 }
 
 const permanentDelete = async (jurisdictionId: string) => {
-  const confirm = await Swal.fire({
+  openConfirm({
     title: 'Remove from Archive?',
-    text: 'This will remove the jurisdiction from your archived list.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, remove it',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#dc2626',
+    description: 'This will remove the jurisdiction from your archived list.',
+    confirmText: 'Remove',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      try {
+        jurisdictionStore.archivedJurisdictions = jurisdictionStore.archivedJurisdictions.filter(
+          (j) => j.id !== jurisdictionId,
+        )
+
+        const ids = JSON.parse(localStorage.getItem('archived_jurisdiction_ids') || '[]')
+        const updatedIds = ids.filter((id: string) => id !== jurisdictionId)
+
+        localStorage.setItem('archived_jurisdiction_ids', JSON.stringify(updatedIds))
+        localStorage.removeItem(`archived_jurisdiction_${jurisdictionId}`)
+
+        toast.success('Jurisdiction removed from archive')
+      } catch {
+        toast.error('Failed to remove jurisdiction')
+      }
+    },
   })
-
-  if (!confirm.isConfirmed) return
-
-  try {
-    // Remove from store
-    jurisdictionStore.archivedJurisdictions = jurisdictionStore.archivedJurisdictions.filter(
-      (j) => j.id !== jurisdictionId,
-    )
-
-    // Remove from localStorage
-    const ids = JSON.parse(localStorage.getItem('archived_jurisdiction_ids') || '[]')
-    const updatedIds = ids.filter((id: string) => id !== jurisdictionId)
-    localStorage.setItem('archived_jurisdiction_ids', JSON.stringify(updatedIds))
-    localStorage.removeItem(`archived_jurisdiction_${jurisdictionId}`)
-
-    Swal.fire('Removed!', 'Jurisdiction has been removed from archived list.', 'success')
-  } catch {
-    Swal.fire('Error', 'Failed to remove jurisdiction', 'error')
-  }
 }
 </script>
 
 <template>
-  <main class="min-h-screen bg-gray-50 p-6">
+  <main class="min-h-screen bg-gray-50 p-4 sm:p-6">
     <div class="mx-auto max-w-6xl">
       <!-- Header -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between">
+      <div class="mb-6 sm:mb-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900">Archived Jurisdictions</h1>
-            <p class="mt-2 text-gray-600">Manage your deleted jurisdictions</p>
+            <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Archived Jurisdictions</h1>
+            <p class="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
+              Manage your deleted jurisdictions
+            </p>
           </div>
           <button
             @click="$router.back()"
-            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:w-auto"
           >
             Back
           </button>
@@ -110,9 +96,9 @@ const permanentDelete = async (jurisdictionId: string) => {
       </div>
 
       <div v-if="!orgId" class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-        <div class="flex items-center">
+        <div class="flex items-start sm:items-center">
           <svg
-            class="mr-3 h-5 w-5 text-yellow-600"
+            class="mt-0.5 mr-3 h-5 w-5 shrink-0 text-yellow-600 sm:mt-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -135,9 +121,9 @@ const permanentDelete = async (jurisdictionId: string) => {
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="archivedJurisdictions.length === 0" class="py-16 text-center">
-        <div class="mx-auto max-w-md">
-          <div class="mx-auto mb-6 h-20 w-20 text-gray-400">
+      <div v-else-if="archivedJurisdictions.length === 0" class="py-12 text-center sm:py-16">
+        <div class="mx-auto max-w-md px-4 sm:px-0">
+          <div class="mx-auto mb-4 h-16 w-16 text-gray-400 sm:mb-6 sm:h-20 sm:w-20">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
@@ -147,13 +133,15 @@ const permanentDelete = async (jurisdictionId: string) => {
               />
             </svg>
           </div>
-          <h3 class="mb-3 text-xl font-semibold text-gray-900">No Archived Jurisdictions</h3>
-          <p class="mb-6 text-gray-500">
+          <h3 class="mb-2 text-lg font-semibold text-gray-900 sm:mb-3 sm:text-xl">
+            No Archived Jurisdictions
+          </h3>
+          <p class="mb-4 text-sm text-gray-500 sm:mb-6 sm:text-base">
             Jurisdictions you delete will appear here for restoration.
           </p>
           <button
             @click="$router.back()"
-            class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
+            class="w-full rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white sm:w-auto"
           >
             Return to Active Jurisdictions
           </button>
@@ -162,9 +150,9 @@ const permanentDelete = async (jurisdictionId: string) => {
 
       <div v-else class="space-y-4">
         <div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <div class="flex items-center">
+          <div class="flex items-start sm:items-center">
             <svg
-              class="mr-3 h-5 w-5 text-blue-600"
+              class="mt-0.5 mr-3 h-5 w-5 shrink-0 text-blue-600 sm:mt-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -186,42 +174,44 @@ const permanentDelete = async (jurisdictionId: string) => {
         <div
           v-for="jurisdiction in archivedJurisdictions"
           :key="jurisdiction.id"
-          class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+          class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-6"
         >
-          <div class="flex items-start justify-between">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div class="flex-1">
-              <div class="mb-2 flex items-center">
+              <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
                 <span
-                  class="mr-3 inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800"
+                  class="inline-flex items-center self-start rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 sm:self-center"
                 >
                   Archived
                 </span>
-                <h3 class="text-lg font-semibold text-gray-900">
+                <h3 class="text-base font-semibold text-gray-900 sm:text-lg">
                   {{ jurisdiction.name }}
                 </h3>
               </div>
 
-              <p class="mb-3 text-gray-600">{{ jurisdiction.description }}</p>
+              <p class="mb-3 text-sm text-gray-600 sm:text-base">{{ jurisdiction.description }}</p>
 
-              <div class="flex items-center space-x-4 text-sm text-gray-500">
+              <div
+                class="flex flex-col gap-1 text-xs text-gray-500 sm:flex-row sm:items-center sm:gap-2 sm:text-sm"
+              >
                 <span>Created: {{ new Date(jurisdiction.created_at).toLocaleDateString() }}</span>
-                <span>•</span>
-                <span v-if="jurisdiction.deleted_at">
+                <span class="hidden sm:inline">•</span>
+                <span v-if="jurisdiction.deleted_at" class="sm:ml-0">
                   Archived: {{ new Date(jurisdiction.deleted_at).toLocaleDateString() }}
                 </span>
               </div>
             </div>
 
-            <div class="ml-6 flex items-center space-x-2">
+            <div class="mt-4 flex flex-col gap-2 sm:mt-0 sm:ml-6 sm:flex-row sm:items-center">
               <button
                 @click="restoreJurisdiction(jurisdiction.id)"
-                class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white"
+                class="w-full rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white sm:w-auto"
               >
                 Restore
               </button>
               <button
                 @click="permanentDelete(jurisdiction.id)"
-                class="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+                class="w-full rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 sm:w-auto"
               >
                 Remove
               </button>

@@ -13,24 +13,50 @@ const emit = defineEmits<{
 const handleNavigate = () => {
   emit('navigate')
 }
+
+const dropdownLinks = [
+  {
+    to: 'profile',
+    name: 'Profile',
+  },
+  {
+    to: 'organizations',
+    name: 'Organizations',
+  },
+  {
+    to: 'billing',
+    name: 'Billing',
+  },
+]
 </script>
 
 <template>
-  <DropdownMenu>
-    <DropdownMenuTrigger>
-      <slot />
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      <DropdownMenuItem asChild>
-        <RouterLink :to="{ name: 'profile' }" @click="handleNavigate"> Profile </RouterLink>
-      </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <RouterLink :to="{ name: 'organizations' }" @click="handleNavigate"> Organizations </RouterLink>
-      </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <RouterLink :to="{ name: 'billing' }" @click="handleNavigate"> Billing </RouterLink>
-      </DropdownMenuItem>
-      <DropdownMenuItem @click="emit('logout')">Logout</DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
+  <div class="hidden lg:block">
+    <DropdownMenu>
+      <DropdownMenuTrigger>
+        <slot />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <template :key="link.name" v-for="link in dropdownLinks">
+          <DropdownMenuItem asChild>
+            <RouterLink :to="{ name: link.to }" @click="handleNavigate">
+              {{ link.name }}
+            </RouterLink>
+          </DropdownMenuItem>
+        </template>
+        <DropdownMenuItem @click="emit('logout')">Logout</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
+  <div class="lg:hidden">
+    <slot />
+    <ul class="space-y-2 p-3 *:px-2 *:py-1.5 *:text-sm">
+      <li :key="link.name" v-for="link in dropdownLinks">
+        <RouterLink :to="{ name: link.to }" @click="handleNavigate">
+          {{ link.name }}
+        </RouterLink>
+      </li>
+      <button @click="emit('logout')">Logout</button>
+    </ul>
+  </div>
 </template>
