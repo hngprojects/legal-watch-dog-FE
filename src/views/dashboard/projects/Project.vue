@@ -396,7 +396,6 @@ watch(
           <p class="text-sm leading-5 font-normal text-[#4B5563]">{{ project.description }}</p>
 
           <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            <<<<<<< HEAD ======= >>>>>>> 9b284b076bdc10bd8ffdc8c5ed3c8aa45b54ca05
             <div class="flex items-center gap-3">
               <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
               <div
