@@ -57,7 +57,7 @@ const filteredJurisdictions = computed(() =>
 )
 
 const addJurisdictionOpen = ref(false)
-const jurisdictionForm = ref({ name: '', description: '', prompt: '' })
+const jurisdictionForm = ref({ name: '', description: '' })
 
 const projectModalOpen = ref(false)
 const projectModalMode = ref<'edit'>('edit')
@@ -74,6 +74,14 @@ const organizationName = computed(
 
 const hiring = ref(false)
 const hireEnabled = ref(false)
+const projectInstruction = ref('')
+const instructionSaving = ref(false)
+const isInstructionValid = computed(() => projectInstruction.value.trim().length > 0)
+const instructionPlaceholder = computed(() =>
+  projectInstruction.value.trim()
+    ? 'Describe the monitoring focus, keywords, and context that apply to this project.'
+    : 'No instruction set. Add guidance for this project.',
+)
 
 const ensureOrganizations = async () => {
   if (organizations.value.length || organizationsRequested.value) return
@@ -132,7 +140,7 @@ const deleteProject = async () => {
 }
 
 const openAddJurisdiction = () => {
-  jurisdictionForm.value = { name: '', description: '', prompt: '' }
+  jurisdictionForm.value = { name: '', description: '' }
   addJurisdictionOpen.value = true
 }
 
@@ -146,7 +154,6 @@ const handleCreateJurisdiction = async () => {
   const created = await jurisdictionStore.addJurisdiction(projectId.value, {
     name: jurisdictionForm.value.name.trim(),
     description: jurisdictionForm.value.description.trim(),
-    prompt: jurisdictionForm.value.prompt.trim() || null,
   })
 
   if (created) {
@@ -170,9 +177,7 @@ const handleDialogOpenChange = (val: boolean) => {
   addJurisdictionOpen.value = val
 }
 
-const handleDialogFormUpdate = (
-  payload: Partial<{ name: string; description: string; prompt: string }>,
-) => {
+const handleDialogFormUpdate = (payload: Partial<{ name: string; description: string }>) => {
   jurisdictionForm.value = { ...jurisdictionForm.value, ...payload }
 }
 
@@ -203,6 +208,35 @@ const submitHireRequest = async () => {
     hiring.value = false
   }
 }
+
+const saveProjectInstruction = async () => {
+  if (!projectId.value) return
+  if (!isInstructionValid.value) {
+    toast.error('Project instruction is required')
+    return
+  }
+  instructionSaving.value = true
+  try {
+    await projectStore.updateProject(organizationId.value, projectId.value, {
+      master_prompt: projectInstruction.value.trim() || null,
+    })
+    toast.success('Project instruction updated')
+    await loadProject()
+  } catch (err) {
+    console.error(err)
+    toast.error(projectStore.error || 'Failed to update project instruction')
+  } finally {
+    instructionSaving.value = false
+  }
+}
+
+watch(
+  project,
+  (val) => {
+    projectInstruction.value = val?.master_prompt || ''
+  },
+  { immediate: true },
+)
 
 onMounted(async () => {
   await ensureOrganizations()
@@ -297,6 +331,37 @@ watch(
             <p class="text-sm text-gray-600">
               {{ project?.description || 'Monitor changes to this project and its jurisdictions.' }}
             </p>
+          </div>
+
+          <div class="mt-6 space-y-3 rounded-xl border border-gray-100 bg-[#FBFBFB] p-4 sm:p-5">
+            <div class="space-y-1">
+              <label for="project-instruction" class="text-sm font-semibold text-gray-900">
+                Project instruction
+              </label>
+              <p class="text-xs text-gray-500">
+                Set the default guidance Watchdog should follow for every jurisdiction in this
+                project.
+              </p>
+            </div>
+            <textarea
+              id="project-instruction"
+              v-model="projectInstruction"
+              rows="4"
+              :placeholder="instructionPlaceholder"
+              class="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/10 focus:outline-none"
+              :disabled="instructionSaving"
+              required
+            />
+            <div class="flex justify-end">
+              <button
+                class="btn--default btn--sm sm:btn--md"
+                type="button"
+                :disabled="instructionSaving || !isInstructionValid"
+                @click="saveProjectInstruction"
+              >
+                {{ instructionSaving ? 'Saving...' : 'Save Instruction' }}
+              </button>
+            </div>
           </div>
 
           <div
@@ -416,13 +481,11 @@ watch(
       :open="addJurisdictionOpen"
       :form="jurisdictionForm"
       title="Create Jurisdiction"
-      description="Define the region or legal domain you want to monitor and add any instructions."
+      description="Define the region or legal domain you want to monitor."
       name-label="Jurisdiction Name"
       name-placeholder="e.g. United Kingdom Immigration"
       description-label="Description"
       description-placeholder="What scope or topics will you track?"
-      prompt-label="Instructions (optional)"
-      prompt-placeholder="Add monitoring instructions or keywords to prioritize"
       submit-text="Create Jurisdiction"
       @update:open="handleDialogOpenChange"
       @update:form="handleDialogFormUpdate"
