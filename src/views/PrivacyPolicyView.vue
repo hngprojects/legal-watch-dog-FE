@@ -340,8 +340,8 @@ onBeforeUnmount(() => {
                 <li>Generate summaries</li>
               </ul>
               <p class="text-gray-600">
-                All outputs are provided to assist your team but should not replace review. We
-                do not use your private data to train public AI models.
+                All outputs are provided to assist your team but should not replace review. We do
+                not use your private data to train public AI models.
               </p>
             </section>
 

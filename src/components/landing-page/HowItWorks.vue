@@ -49,8 +49,8 @@ const cards = [
           tone="muted"
           class="max-w-full text-sm leading-relaxed font-semibold text-gray-600 sm:max-w-xl sm:text-base lg:max-w-2xl lg:text-lg"
         >
-          Discover how LegalWatchDog continuously monitors sources, detects changes, and
-          delivers reliable, AI-summarized updates — all in just a few steps.
+          Discover how LegalWatchDog continuously monitors sources, detects changes, and delivers
+          reliable, AI-summarized updates — all in just a few steps.
         </TypographyText>
       </div>
 

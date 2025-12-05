@@ -184,9 +184,7 @@ const goToProject = (id: string) => {
       <DialogScrollContent class="sm:max-w-[640px]">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
-          <DialogDescription>
-            Set up a new project to track regulatory changes
-          </DialogDescription>
+          <DialogDescription> Set up a new project to track regulatory changes </DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="handleCreateProject" class="space-y-6">

@@ -20,8 +20,8 @@
         <TypographyText
           class="mx-auto mb-8 max-w-3xl text-sm text-gray-300 sm:mb-10 sm:text-base md:text-lg lg:text-xl"
         >
-          Stay ahead of regulatory change by automating the monitoring process and saving hours of manual
-          research every week.
+          Stay ahead of regulatory change by automating the monitoring process and saving hours of
+          manual research every week.
         </TypographyText>
 
         <RouterLink to="/signup" class="btn--contrast btn--lg">Get Started</RouterLink>
@@ -168,8 +168,7 @@
             </TypographyHeading>
 
             <TypographyText class="text-base text-gray-600 sm:text-lg">
-              Create actionable tickets for each update, keeping your team informed and
-              accountable.
+              Create actionable tickets for each update, keeping your team informed and accountable.
             </TypographyText>
           </div>
         </div>
