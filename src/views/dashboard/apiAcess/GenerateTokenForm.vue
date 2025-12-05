@@ -11,15 +11,23 @@ import {
 } from '@/components/ui/select'
 import ResourceOwnerIcon from '@/assets/icons/resource-owner.svg'
 
+interface Props {
+  username?: string
+}
+
 interface Emits {
   (e: 'close'): void
 }
+
+const props = withDefaults(defineProps<Props>(), {
+  username: 'user',
+})
 
 const emit = defineEmits<Emits>()
 
 const tokenName = ref('')
 const description = ref('')
-const resourceOwner = ref('seyiadisa')
+const resourceOwner = ref(props.username)
 const expiration = ref('7')
 
 const getExpirationDate = (days: number) => {
@@ -98,14 +106,14 @@ const generateToken = () => {
           Resource owner
         </label>
         <Select v-model="resourceOwner">
-          <SelectTrigger class="h-11 w-full rounded-md border-[#E5E7EB] text-sm sm:w-[336px]">
+          <SelectTrigger class="h-11 w-full rounded-md border-[#E5E7EB] text-sm sm:w-[336px] cursor-pointer">
             <div class="flex items-center gap-2">
               <img :src="ResourceOwnerIcon" alt="Resource Owner" class="h-5 w-5" />
               <SelectValue :placeholder="resourceOwner" />
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="seyiadisa">seyiadisa</SelectItem>
+            <SelectItem :value="username">{{ username }}</SelectItem>
           </SelectContent>
         </Select>
         <p class="text-xs text-[#6B7280]">
@@ -117,7 +125,7 @@ const generateToken = () => {
       <div class="flex flex-col gap-3 space-y-2">
         <label class="text-sm font-semibold text-[#0F172A]" for="expiration">Expiration</label>
         <Select v-model="expiration">
-          <SelectTrigger class="h-11 w-full rounded-md border-[#E5E7EB] text-sm sm:w-[336px]">
+          <SelectTrigger class="h-11 w-full rounded-md border-[#E5E7EB] text-sm sm:w-[336px] cursor-pointer">
             <div class="flex items-center gap-2">
               <svg
                 class="h-5 w-5 text-[#6B7280]"
@@ -133,7 +141,7 @@ const generateToken = () => {
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <SelectValue :placeholder="selectedExpirationLabel" />
+              <SelectValue :placeholder="selectedExpirationLabel" class="cursor-pointer" />
             </div>
           </SelectTrigger>
           <SelectContent>

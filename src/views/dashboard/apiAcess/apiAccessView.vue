@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import TokenItem from './TokenItem.vue'
 import GenerateTokenForm from './GenerateTokenForm.vue'
+import { useAuthStore } from '@/stores/auth-store'
+
+const authStore = useAuthStore()
 
 interface Token {
   id: string
@@ -27,6 +30,11 @@ const tokens = ref<Token[]>([
 ])
 
 const showGenerateForm = ref(false)
+
+const username = computed(() => {
+  const email = authStore.user?.email || ''
+  return email.split('@')[0] || 'user'
+})
 
 const openGenerateForm = () => {
   showGenerateForm.value = true
@@ -77,7 +85,7 @@ const closeGenerateForm = () => {
         </div>
       </template>
 
-      <GenerateTokenForm v-else @close="closeGenerateForm" />
+      <GenerateTokenForm v-else :username="username" @close="closeGenerateForm" />
     </div>
   </main>
 </template>
