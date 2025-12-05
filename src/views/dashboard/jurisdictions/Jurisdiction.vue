@@ -61,10 +61,10 @@ const activeOrganizationId = computed<string>(() => {
   return orgStore.currentOrganizationId || ''
 })
 
-const organizationName = computed(() => {
-  if (!activeOrganizationId.value) return ''
-  return orgStore.organizations.find((org) => org.id === activeOrganizationId.value)?.name || ''
-})
+// const organizationName = computed(() => {
+//   if (!activeOrganizationId.value) return ''
+//   return orgStore.organizations.find((org) => org.id === activeOrganizationId.value)?.name || ''
+// })
 
 const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
@@ -690,29 +690,6 @@ onMounted(() => {
       <header class="flex flex-wrap items-start justify-between gap-4">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'organization-profile',
-                    params: { organizationId: activeOrganizationId },
-                  }"
-                >
-                  {{ organizationName || 'Organization' }}
-                </RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
                 <RouterLink

@@ -54,31 +54,30 @@ const navLinks: NavLink[] = isDashboard
   ? []
   : [
       {
-        name: 'Industries',
+        name: 'Company',
         dropdown: [
-          {
-            name: 'Healthcare',
-            to: '/coming-soon',
-            description: 'Solutions for healthcare providers',
-          },
-          { name: 'Finance', to: '/coming-soon', description: 'Financial services solutions' },
-          { name: 'Retail', to: '/coming-soon', description: 'Retail and e-commerce' },
-          { name: 'Manufacturing', to: '/coming-soon', description: 'Manufacturing solutions' },
-          { name: 'Education', to: '/coming-soon', description: 'Educational institutions' },
+          { name: 'About Us', to: '/about-us', description: 'Get to know us' },
+          { name: 'FAQ', to: '/faq', description: 'Frequently asked questions' },
+          { name: 'Blog', to: '/blog', description: 'Latest articles and insights' },
+          { name: 'Careers', to: '/careers', description: 'Want to join us?' },
         ],
       },
       { name: 'Pricing', to: '/pricing' },
-      {
-        name: 'Resources',
-        dropdown: [
-          { name: 'Blog', to: '/coming-soon', description: 'Latest articles and insights' },
-          { name: 'Documentation', to: '/coming-soon', description: 'Technical documentation' },
-          { name: 'Case Studies', to: '/coming-soon', description: 'Success stories' },
-          { name: 'Guides', to: '/coming-soon', description: 'How-to guides and tutorials' },
-          { name: 'Webinars', to: '/coming-soon', description: 'Live and recorded sessions' },
-        ],
-      },
-      { name: 'Partners', to: '/coming-soon' },
+      // {
+      //   name: 'Industries',
+      //   dropdown: [
+      //     {
+      //       name: 'Healthcare',
+      //       to: '/coming-soon',
+      //       description: 'Solutions for healthcare providers',
+      //     },
+      //     { name: 'Finance', to: '/coming-soon', description: 'Financial services solutions' },
+      //     { name: 'Retail', to: '/coming-soon', description: 'Retail and e-commerce' },
+      //     { name: 'Manufacturing', to: '/coming-soon', description: 'Manufacturing solutions' },
+      //     { name: 'Education', to: '/coming-soon', description: 'Educational institutions' },
+      //   ],
+      // },
+      { name: 'Contact Us', to: '/contact-us' },
     ]
 
 let bodyOverflow: string | null = null
