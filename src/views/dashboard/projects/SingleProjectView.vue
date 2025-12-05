@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { AlertCircle, CheckCircle, CircleHelp, Plus, Settings } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
@@ -13,6 +13,14 @@ import { useTicketStore } from '@/stores/ticket-store'
 import { specialistApi } from '@/api/specialist'
 import ProjectFormModal from '@/components/dashboard/ProjectFormModal.vue'
 import JurisdictionDialog from '@/components/composables/jurisdiction/dialogs/JurisdictionDialog.vue'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
 import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
@@ -60,6 +68,10 @@ const organizationOptions = computed(() =>
   organizations.value.map((org) => ({ id: org.id, name: org.name })),
 )
 
+const organizationName = computed(
+  () => organizations.value.find((org) => org.id === organizationId.value)?.name || 'Organization',
+)
+
 const hiring = ref(false)
 const hireEnabled = ref(false)
 
@@ -88,10 +100,6 @@ const loadJurisdictions = async () => {
 
 const hasChanges = (j: { id: string }) =>
   ticketStore.tickets.some((t) => t.jurisdiction_id === j.id && t.status !== 'closed')
-
-const goBack = () => {
-  router.push({ name: 'organization-projects', params: { organizationId: organizationId.value } })
-}
 
 const openEditProject = () => {
   projectModalMode.value = 'edit'
@@ -224,15 +232,44 @@ watch(
   <main class="min-h-screen flex-1 bg-[#F5F3F0] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
     <div class="mx-auto flex max-w-6xl flex-col gap-6">
       <header class="flex flex-col gap-3 rounded-2xl bg-[#F5F3F0]">
-        <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-          <div class="flex items-center gap-2 text-sm text-[#7C6556]">
-            <button class="flex items-center gap-1 font-medium text-[#AA7A33]" @click="goBack">
-              ←
-              <span>Projects</span>
-            </button>
-            <span>›</span>
-            <span class="font-semibold text-[#AA7A33]">{{ project?.title || 'Project' }}</span>
-          </div>
+        <div
+          class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink as-child>
+                  <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbLink as-child>
+                  <RouterLink :to="{ name: 'organization-profile', params: { organizationId } }">
+                    {{ organizationName }}
+                  </RouterLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbLink as-child>
+                  <RouterLink :to="{ name: 'organization-projects', params: { organizationId } }">
+                    Projects
+                  </RouterLink>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbPage>{{ project?.title || 'Project' }}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
           <DropdownMenu>
             <DropdownMenuTrigger as-child>

@@ -1,5 +1,3 @@
-import { DefineComponent } from 'vue'
-
 declare module 'vue-sonner' {
   export const toast: {
     success: (message: string) => void
@@ -8,5 +6,6 @@ declare module 'vue-sonner' {
     (message: string): void
   }
 
-  export const Toaster: DefineComponent
+  export const Toaster: (props: Record<string, unknown>) => unknown
+  export type ToasterProps = Record<string, unknown>
 }

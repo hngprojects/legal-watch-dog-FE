@@ -98,10 +98,10 @@ const finishGoogleLogin = async () => {
     if (isNewUser) {
       await router.replace({
         name: 'auth-status',
-        query: { status: 'success', context: 'signup', redirect: 'organizations', issued: 'true' },
+        query: { status: 'success', context: 'signup', redirect: 'dashboard', issued: 'true' },
       })
     } else {
-      await router.replace({ name: 'organizations' })
+      await router.replace({ name: 'dashboard' })
     }
   } catch (error) {
     status.value = 'error'
