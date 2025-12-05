@@ -220,6 +220,11 @@ const router = createRouter({
           name: 'billing',
           component: () => import('@/views/dashboard/settings/BillingView.vue'),
         },
+        {
+          path: 'settings/api-access',
+          name: 'api-access',
+          component: () => import('@/views/dashboard/apiAcess/apiAccessView.vue'),
+        },
         { path: 'learn-more', name: 'learn-more', component: LearnMore },
         {
           path: 'payment/plan',
