@@ -52,7 +52,7 @@ const getInitials = (name: string) => {
 
     <Button
       variant="outline"
-      class="border-[#DC2626] hover:border-[#DC2626] bg-[#F7F7F7] hover:bg-[#F7F7F7] text-[#DC2626] hover:text-[#DC2626]"
+      class="border-[#DC2626] bg-[#F7F7F7] text-[#DC2626] hover:border-[#DC2626] hover:bg-[#F7F7F7] hover:text-[#DC2626]"
     >
       Delete
     </Button>
