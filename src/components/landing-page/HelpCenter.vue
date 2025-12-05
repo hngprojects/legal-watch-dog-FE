@@ -163,8 +163,8 @@ const helpFeatures = [
   },
   {
     icon: needhelp3,
-    title: 'Legal Summaries & Sources',
-    description: 'Understand how we verify, summarize, and source legal updates.',
+    title: 'Summaries & Sources',
+    description: 'Understand how we verify, summarize, and source updates.',
   },
   {
     icon: needhelp4,

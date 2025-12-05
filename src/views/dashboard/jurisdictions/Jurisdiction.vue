@@ -962,7 +962,7 @@ onMounted(() => {
           </div>
 
           <p class="mb-1 text-base font-medium text-gray-900">No Sub-Jurisdictions</p>
-          <p class="text-sm text-gray-500">Create one to begin categorizing legal domains.</p>
+          <p class="text-sm text-gray-500">Create one to begin categorizing domains.</p>
         </div>
 
         <!-- Sub jurisdiction section -->
