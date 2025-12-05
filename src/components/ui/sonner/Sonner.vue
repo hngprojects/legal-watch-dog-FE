@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { ToasterProps } from 'vue-sonner'
 import {
   CircleCheckIcon,
   InfoIcon,
@@ -9,9 +8,10 @@ import {
   XIcon,
 } from 'lucide-vue-next'
 import { Toaster as Sonner } from 'vue-sonner'
+import type { ClassValue } from 'clsx'
 import { cn } from '@/lib/utils'
 
-const props = defineProps<ToasterProps>()
+const props = defineProps<{ class?: ClassValue; [key: string]: unknown }>()
 </script>
 
 <template>

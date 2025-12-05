@@ -1,36 +1,47 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useTicketStore } from '@/stores/ticket-store'
+import { toast } from 'vue-sonner'
 
-// Mock Data (2 items as requested)
-const tickets = [
-  {
-    id: '#1024',
-    title: 'Visa Fee Structure Changes',
-    status: 'Open',
-    priority: 'High',
-    assignee: {
-      name: 'Duncan Tito',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d',
-    },
-    lastUpdated: '2h ago',
-  },
-  {
-    id: '#1025',
-    title: 'Mining Permit Documentation',
-    status: 'In Progress',
-    priority: 'High',
-    assignee: {
-      name: 'Duncan Tito',
-      avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d',
-    },
-    lastUpdated: '2h ago',
-  },
-]
+const router = useRouter()
+const ticketStore = useTicketStore()
 
 const activeTab = ref('All Tickets')
 const tabs = ['All Tickets', 'Open', 'Closed']
 
+const filteredTickets = computed(() => {
+  if (activeTab.value === 'All Tickets') return ticketStore.sortedTickets
+  if (activeTab.value === 'Open')
+    return ticketStore.sortedTickets.filter((ticket) => ticket.status === 'open')
+  if (activeTab.value === 'Closed')
+    return ticketStore.sortedTickets.filter((ticket) => ticket.status === 'closed')
+  return ticketStore.sortedTickets
+})
+
+const statusLabel = (status: string) => {
+  if (status === 'in_progress') return 'In Progress'
+  if (status === 'closed') return 'Closed'
+  return 'Open'
+}
+
+const priorityLabel = (priority: string) => {
+  if (priority === 'medium') return 'Medium'
+  if (priority === 'low') return 'Low'
+  return 'High'
+}
+
+const goToTicket = (id: string) => {
+  router.push({ name: 'ticket-detail', params: { ticketId: id } })
+}
+
 const activeMenuId = ref<string | null>(null)
+
+const closeTicket = (id: string) => {
+  ticketStore.updateStatus(id, 'closed')
+  toast.success('Ticket closed')
+  activeMenuId.value = null
+}
 
 const toggleMenu = (id: string) => {
   if (activeMenuId.value === id) {
@@ -54,11 +65,11 @@ const toggleMenu = (id: string) => {
           v-for="tab in tabs"
           :key="tab"
           @click.stop="activeTab = tab"
-          class="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+          class="btn rounded-lg px-4 py-2 text-sm font-medium transition-colors"
           :class="[
             activeTab === tab
-              ? 'bg-[#3E1C05] text-white'
-              : 'bg-transparent text-[#5C5956] hover:bg-gray-50',
+              ? 'bg-accent-main text-white'
+              : 'text-fg bg-transparent hover:bg-gray-50',
           ]"
         >
           {{ tab }}
@@ -145,11 +156,6 @@ const toggleMenu = (id: string) => {
             <th
               class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-[#5C5956] uppercase"
             >
-              Assignee
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-semibold tracking-wider text-[#5C5956] uppercase"
-            >
               Last Updated
             </th>
             <th
@@ -160,7 +166,12 @@ const toggleMenu = (id: string) => {
           </tr>
         </thead>
         <tbody class="divide-y divide-[#EAECF0] bg-white">
-          <tr v-for="ticket in tickets" :key="ticket.id" class="transition-colors hover:bg-gray-50">
+          <tr
+            v-for="ticket in filteredTickets"
+            :key="ticket.id"
+            class="cursor-pointer transition-colors hover:bg-gray-50"
+            @click="goToTicket(ticket.id)"
+          >
             <!-- ID -->
             <td class="px-6 py-4 text-sm font-medium text-[#101828]">
               {{ ticket.id }}
@@ -176,12 +187,12 @@ const toggleMenu = (id: string) => {
               <span
                 class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium"
                 :class="[
-                  ticket.status === 'Open'
+                  ticket.status === 'open'
                     ? 'border-[#F9DBAF] bg-[#F9DBAF]/30 text-[#B93815]'
                     : 'border-gray-200 bg-gray-100 text-gray-700',
                 ]"
               >
-                {{ ticket.status }}
+                {{ statusLabel(ticket.status) }}
               </span>
             </td>
 
@@ -190,27 +201,13 @@ const toggleMenu = (id: string) => {
               <span
                 class="inline-flex items-center rounded-full border border-[#FFDDC7] bg-[#FFF6ED] px-2.5 py-0.5 text-xs font-medium text-[#C4320A]"
               >
-                {{ ticket.priority }}
+                {{ priorityLabel(ticket.priority) }}
               </span>
-            </td>
-
-            <!-- Assignee -->
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-3">
-                <img
-                  :src="ticket.assignee.avatar"
-                  alt=""
-                  class="h-8 w-8 rounded-full border border-gray-200 object-cover"
-                />
-                <span class="text-sm font-medium text-[#344054]">
-                  {{ ticket.assignee.name }}
-                </span>
-              </div>
             </td>
 
             <!-- Last Updated -->
             <td class="px-6 py-4 text-sm text-[#667085]">
-              {{ ticket.lastUpdated }}
+              {{ new Date(ticket.updated_at).toLocaleString() }}
             </td>
 
             <!-- Action -->
@@ -258,13 +255,15 @@ const toggleMenu = (id: string) => {
               >
                 <button
                   class="w-full px-5 py-3 text-left text-[15px] font-medium text-[#344054] transition-colors hover:bg-gray-50"
+                  @click="goToTicket(ticket.id)"
                 >
-                  Close ticket
+                  Open ticket
                 </button>
                 <button
                   class="w-full px-5 py-3 text-left text-[15px] font-medium text-[#DC2626] transition-colors hover:bg-gray-50"
+                  @click="closeTicket(ticket.id)"
                 >
-                  Remove Account
+                  Close ticket
                 </button>
               </div>
             </td>

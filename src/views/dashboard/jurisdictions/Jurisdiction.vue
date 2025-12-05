@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/dialog'
 import JurisdictionSources from '@/components/composables/jurisdiction/JurisdictionSources.vue'
 import JurisdictionAnalysis from '@/components/composables/jurisdiction/JurisdictionAnalysis.vue'
-import SubJurisdictionDialog from '@/components/composables/jurisdiction/dialogs/SubJurisdictionDialog.vue'
+import JurisdictionDialog from '@/components/composables/jurisdiction/dialogs/JurisdictionDialog.vue'
 import SourceDialog from '@/components/composables/jurisdiction/dialogs/SourceDialog.vue'
 import SuggestedSourcesDialog from '@/components/composables/jurisdiction/dialogs/SuggestedSourcesDialog.vue'
 
@@ -39,6 +39,8 @@ import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useSourceStore } from '@/stores/source-store'
+import { useTicketStore } from '@/stores/ticket-store'
+import type { SourceRevision } from '@/types/source'
 
 interface NestedJurisdiction extends Jurisdiction {
   depth: number
@@ -52,6 +54,7 @@ const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
 const orgStore = useOrganizationStore()
 const sourceStore = useSourceStore()
+const ticketStore = useTicketStore()
 
 const activeOrganizationId = computed<string>(() => {
   if (typeof route.query.organizationId === 'string') return route.query.organizationId
@@ -127,6 +130,8 @@ const revisionB = computed(
 const latestRevision = (sourceId: string) => revisions.value[sourceId]?.[0]
 const formatRevisionLabel = (rev: { scraped_at: string }) =>
   new Date(rev.scraped_at).toLocaleString()
+
+const ticketMode = computed(() => ticketStore.getModeForJurisdiction(jurisdiction.value?.id))
 const handleSelectSource = (id: string) => {
   selectedSourceId.value = id
 }
@@ -189,6 +194,7 @@ const fetchRevisionsForSource = async (sourceId: string, page = 1) => {
 
   try {
     await sourceStore.fetchRevisions(sourceId, { skip, limit: revisionLimit })
+    await maybeAutoCreateTicket(sourceId)
   } catch (err) {
     console.error('Failed to load revisions', err)
   }
@@ -234,6 +240,92 @@ const renderSummary = (summary?: string | null) => {
   } catch (err) {
     console.error('Failed to render markdown summary', err)
     return ''
+  }
+}
+
+const buildChangeDetails = (source: Source, revision: SourceRevision) => {
+  const bullets =
+    revision.ai_markdown_summary
+      ?.split('\n')
+      .map((item) => item.replace(/^[-*•]\s*/, '').trim())
+      .filter(Boolean) || []
+
+  return [
+    {
+      heading: source.name || 'Change detected',
+      description:
+        revision.ai_summary ||
+        (typeof revision.extracted_data?.title === 'string'
+          ? revision.extracted_data.title
+          : 'Detected change on tracked source'),
+      bullets,
+    },
+  ]
+}
+
+const createTicketFromRevision = async (
+  source: Source,
+  revision: SourceRevision,
+  opts?: { auto?: boolean },
+) => {
+  if (ticketStore.hasTicketForRevision(revision.id)) {
+    const existing = ticketStore.ticketForRevision(revision.id)
+    if (existing && !opts?.auto) {
+      toast.info('Ticket already exists for this change')
+      router.push({ name: 'ticket-detail', params: { ticketId: existing.id } })
+    }
+    return existing
+  }
+
+  const created = await ticketStore.createTicket({
+    title: `Change detected: ${source.name}`,
+    summary:
+      revision.ai_summary ||
+      `A new change was detected on ${source.name} at ${formatRevisionLabel(revision)}`,
+    priority: 'high',
+    jurisdiction_id: jurisdiction.value?.id,
+    project_id: jurisdiction.value?.project_id,
+    source_id: source.id,
+    revision_id: revision.id,
+    change_summary: revision.ai_summary || 'Change detected',
+    change_details: buildChangeDetails(source, revision),
+    auto_created: opts?.auto,
+  })
+
+  if (created && !opts?.auto) {
+    toast.success('Ticket created from change')
+    router.push({ name: 'ticket-detail', params: { ticketId: created.id } })
+  }
+
+  if (created?.auto_created) {
+    toast.success('Ticket auto-created for detected change')
+  }
+
+  return created
+}
+
+const maybeAutoCreateTicket = async (sourceId: string) => {
+  if (ticketMode.value !== 'auto') return
+  const changeRevision = revisions.value[sourceId]?.find((rev) => rev.was_change_detected)
+  if (!changeRevision || ticketStore.hasTicketForRevision(changeRevision.id)) return
+  const src = sources.value.find((item) => item.id === sourceId)
+  if (!src) return
+  await createTicketFromRevision(src, changeRevision, { auto: true })
+}
+
+const handleOpenTicket = async (payload: { source: Source; revision: SourceRevision }) => {
+  await createTicketFromRevision(payload.source, payload.revision)
+}
+
+const toggleTicketMode = () => {
+  if (!jurisdiction.value?.id) return
+  const next = ticketMode.value === 'auto' ? 'manual' : 'auto'
+  ticketStore.setModeForJurisdiction(jurisdiction.value.id, next)
+  toast.success(
+    next === 'auto' ? 'Automatic ticket creation enabled' : 'Manual ticket creation enabled',
+  )
+  if (next === 'auto' && selectedSourceId.value) {
+    void maybeAutoCreateTicket(selectedSourceId.value)
   }
 }
 
@@ -393,9 +485,10 @@ const saveEdit = async () => {
     } else if (jurisdictionStore.error) {
       toast.error(jurisdictionStore.error)
     }
-  } catch {
+  } catch (error) {
     const msg = jurisdictionStore.error || 'Failed to update jurisdiction'
     toast.error(msg)
+    void error
   }
 }
 
@@ -651,6 +744,26 @@ onMounted(() => {
           </p>
           <p v-if="lastUpdatedText" class="text-sm text-gray-400">Updated {{ lastUpdatedText }}</p>
         </div>
+
+        <div
+          class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-100 bg-[#FBFBFB] px-4 py-3"
+        >
+          <div>
+            <p class="text-xs font-semibold tracking-[0.12em] text-[#6B4B32] uppercase">
+              Ticket creation
+            </p>
+            <p class="text-sm text-gray-600">
+              {{
+                ticketMode === 'auto'
+                  ? 'Automatically create tickets when a change lands.'
+                  : 'Create tickets manually when changes are detected.'
+              }}
+            </p>
+          </div>
+          <button class="btn--secondary btn--sm whitespace-nowrap" @click="toggleTicketMode">
+            {{ ticketMode === 'auto' ? 'Switch to manual' : 'Enable auto-create' }}
+          </button>
+        </div>
       </section>
 
       <section class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
@@ -701,12 +814,14 @@ onMounted(() => {
             :latest-revision="latestRevision"
             :format-revision-label="formatRevisionLabel"
             :render-summary="renderSummary"
+            :ticket-for-revision="ticketStore.ticketForRevision"
             @add-manual="handleManualAddSource"
             @add-ai="handleAiSuggestedSource"
             @scrape="triggerScrape"
             @toggle-source="toggleSourceExpansion"
             @edit="startEditSource"
             @delete="deleteSource"
+            @open-ticket="handleOpenTicket"
           />
         </div>
 
@@ -721,9 +836,17 @@ onMounted(() => {
             :revision-b="revisionB"
             :format-revision-label="formatRevisionLabel"
             :render-summary="renderSummary"
+            :ticket-for-revision="ticketStore.ticketForRevision"
             @select-source="handleSelectSource"
             @select-revision-a="handleSelectRevisionA"
             @select-revision-b="handleSelectRevisionB"
+            @open-ticket="
+              ({ revision }) => {
+                if (!revision) return
+                const src = sources.find((s) => s.id === selectedSourceId)
+                if (src) handleOpenTicket({ source: src, revision })
+              }
+            "
           />
         </div>
       </section>
@@ -795,7 +918,7 @@ onMounted(() => {
       </section>
     </div>
 
-    <SubJurisdictionDialog
+    <JurisdictionDialog
       :open="subJurisdictionModalOpen"
       :form="subJurisdictionForm"
       @update:open="(value) => !value && closeSubJurisdictionModal()"
