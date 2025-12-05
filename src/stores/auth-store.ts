@@ -102,16 +102,16 @@ const setStoredRememberPreference = (remember: boolean) => {
 
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
-    accessToken: getStoredValue(TOKEN_KEY),
-    refreshToken: getStoredValue(REFRESH_TOKEN_KEY),
+    accessToken: import.meta.env.SSR ? null : getStoredValue(TOKEN_KEY),
+    refreshToken: import.meta.env.SSR ? null : getStoredValue(REFRESH_TOKEN_KEY),
     user: null,
-    email: getStoredValue(EMAIL_KEY),
+    email: import.meta.env.SSR ? null : getStoredValue(EMAIL_KEY),
     organisation: null,
     otpPurpose: null,
     resetToken: null,
     signupDraft: null,
     resetPasswordDraft: null,
-    rememberMePreference: getStoredRememberPreference(),
+    rememberMePreference: import.meta.env.SSR ? false : getStoredRememberPreference(),
   }),
 
   getters: {
