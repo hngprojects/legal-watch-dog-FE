@@ -61,10 +61,10 @@ const activeOrganizationId = computed<string>(() => {
   return orgStore.currentOrganizationId || ''
 })
 
-const organizationName = computed(() => {
-  if (!activeOrganizationId.value) return ''
-  return orgStore.organizations.find((org) => org.id === activeOrganizationId.value)?.name || ''
-})
+// const organizationName = computed(() => {
+//   if (!activeOrganizationId.value) return ''
+//   return orgStore.organizations.find((org) => org.id === activeOrganizationId.value)?.name || ''
+// })
 
 const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
@@ -86,8 +86,8 @@ const showInlineEdit = ref(false)
 const subJurisdictionModalOpen = ref(false)
 const addSourceModalOpen = ref(false)
 
-const editForm = ref({ name: '', description: '', prompt: '' })
-const subJurisdictionForm = ref({ name: '', description: '', prompt: '' })
+const editForm = ref({ name: '', description: '' })
+const subJurisdictionForm = ref({ name: '', description: '' })
 
 const sourceForm = ref<{
   id?: string | null
@@ -141,6 +141,15 @@ const handleSelectRevisionA = (id: string | null) => {
 const handleSelectRevisionB = (id: string | null) => {
   selectedRevisionB.value = id
 }
+
+const jurisdictionInstruction = ref('')
+const instructionSaving = ref(false)
+const isInstructionValid = computed(() => jurisdictionInstruction.value.trim().length > 0)
+const instructionPlaceholder = computed(() =>
+  jurisdictionInstruction.value.trim()
+    ? 'Describe the monitoring focus, keywords, and context that apply to this jurisdiction.'
+    : 'No instruction set. Add guidance for this jurisdiction.',
+)
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
@@ -329,6 +338,33 @@ const toggleTicketMode = () => {
   }
 }
 
+const saveJurisdictionInstruction = async () => {
+  if (!jurisdiction.value?.id) return
+  if (!isInstructionValid.value) {
+    toast.error('Jurisdiction instruction is required')
+    return
+  }
+
+  instructionSaving.value = true
+  try {
+    const updated = await jurisdictionStore.updateJurisdiction(
+      jurisdiction.value.id,
+      { prompt: jurisdictionInstruction.value.trim() || null },
+      activeOrganizationId.value,
+    )
+
+    if (updated) {
+      jurisdiction.value = updated
+      toast.success('Jurisdiction instruction updated')
+    }
+  } catch (err) {
+    console.error(err)
+    toast.error(jurisdictionStore.error || 'Failed to update jurisdiction instruction')
+  } finally {
+    instructionSaving.value = false
+  }
+}
+
 const handleManualAddSource = () => {
   openAddSourceModal()
 }
@@ -459,7 +495,6 @@ const startEdit = () => {
   editForm.value = {
     name: jurisdiction.value?.name ?? '',
     description: jurisdiction.value?.description ?? '',
-    prompt: jurisdiction.value?.prompt ?? '',
   }
   showInlineEdit.value = true
 }
@@ -468,7 +503,6 @@ const saveEdit = async () => {
   const payload = {
     name: editForm.value.name,
     description: editForm.value.description,
-    prompt: editForm.value.prompt,
   }
 
   try {
@@ -524,7 +558,11 @@ const subJurisdictions = computed(() => {
 
 const openSubJurisdictionModal = () => {
   subJurisdictionModalOpen.value = true
-  subJurisdictionForm.value = { name: '', description: '', prompt: '' }
+  subJurisdictionForm.value = { name: '', description: '' }
+}
+
+const updateSubJurisdictionForm = (payload: Partial<{ name: string; description: string }>) => {
+  subJurisdictionForm.value = { ...subJurisdictionForm.value, ...payload }
 }
 
 const closeSubJurisdictionModal = () => {
@@ -540,7 +578,6 @@ const createSubJurisdiction = async () => {
   const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
     name: subJurisdictionForm.value.name.trim(),
     description: subJurisdictionForm.value.description.trim(),
-    prompt: subJurisdictionForm.value.prompt.trim() || null,
     parent_id: jurisdiction.value.id,
   })
 
@@ -561,6 +598,14 @@ const lastUpdatedText = computed(() => {
   const t = jurisdiction.value?.updated_at || jurisdiction.value?.created_at
   return t ? new Date(t).toLocaleString() : ''
 })
+
+watch(
+  jurisdiction,
+  (val) => {
+    jurisdictionInstruction.value = val?.prompt || ''
+  },
+  { immediate: true },
+)
 
 watch(
   sources,
@@ -645,29 +690,6 @@ onMounted(() => {
       <header class="flex flex-wrap items-start justify-between gap-4">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'organization-profile',
-                    params: { organizationId: activeOrganizationId },
-                  }"
-                >
-                  {{ organizationName || 'Organization' }}
-                </RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
                 <RouterLink
@@ -763,6 +785,35 @@ onMounted(() => {
           <button class="btn--secondary btn--sm whitespace-nowrap" @click="toggleTicketMode">
             {{ ticketMode === 'auto' ? 'Switch to manual' : 'Enable auto-create' }}
           </button>
+        </div>
+        <div class="mt-6 space-y-3 rounded-xl border border-gray-100 bg-[#FBFBFB] p-4 sm:p-5">
+          <div class="space-y-1">
+            <label for="jurisdiction-instruction" class="text-sm font-semibold text-gray-900">
+              Jurisdiction instruction
+            </label>
+            <p class="text-xs text-gray-500">
+              Set the guidance Watchdog should follow when monitoring this jurisdiction.
+            </p>
+          </div>
+          <textarea
+            id="jurisdiction-instruction"
+            v-model="jurisdictionInstruction"
+            rows="4"
+            :placeholder="instructionPlaceholder"
+            class="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/10 focus:outline-none"
+            :disabled="instructionSaving"
+            required
+          />
+          <div class="flex justify-end">
+            <button
+              class="btn--default btn--sm sm:btn--md"
+              type="button"
+              :disabled="instructionSaving || !isInstructionValid"
+              @click="saveJurisdictionInstruction"
+            >
+              {{ instructionSaving ? 'Saving...' : 'Save Instruction' }}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -888,7 +939,7 @@ onMounted(() => {
           </div>
 
           <p class="mb-1 text-base font-medium text-gray-900">No Sub-Jurisdictions</p>
-          <p class="text-sm text-gray-500">Create one to begin categorizing legal domains.</p>
+          <p class="text-sm text-gray-500">Create one to begin categorizing domains.</p>
         </div>
 
         <!-- Sub jurisdiction section -->
@@ -922,7 +973,7 @@ onMounted(() => {
       :open="subJurisdictionModalOpen"
       :form="subJurisdictionForm"
       @update:open="(value) => !value && closeSubJurisdictionModal()"
-      @update:form="(payload) => (subJurisdictionForm = { ...subJurisdictionForm, ...payload })"
+      @update:form="updateSubJurisdictionForm"
       @submit="createSubJurisdiction"
       @cancel="closeSubJurisdictionModal"
     />
@@ -943,7 +994,7 @@ onMounted(() => {
       <DialogScrollContent class="sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle>Edit Jurisdiction</DialogTitle>
-          <DialogDescription>Update the name, description, and instructions.</DialogDescription>
+          <DialogDescription>Update the name and description.</DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="saveEdit" class="space-y-4">
@@ -959,15 +1010,6 @@ onMounted(() => {
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
             <textarea
               v-model="editForm.description"
-              rows="3"
-              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Instructions</label>
-            <textarea
-              v-model="editForm.prompt"
               rows="3"
               class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
             />
