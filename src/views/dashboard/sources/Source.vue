@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { toast } from "vue-sonner"
+import { toast } from 'vue-sonner'
 import { sourceApi } from '@/api/source'
 import type { SourceType, ScrapeFrequency, CreateSourcePayload } from '@/types/source'
 import type { Jurisdiction } from '@/api/jurisdiction'
@@ -60,21 +60,21 @@ onMounted(() => loadJurisdiction(jurisdictionId.value))
 
 const validateForm = (): boolean => {
   if (!sourceForm.value.name.trim()) {
-    toast.error("Source name is required")
+    toast.error('Source name is required')
     return false
   }
   if (!sourceForm.value.type) {
-    toast.error("Please select a source type")
+    toast.error('Please select a source type')
     return false
   }
   if (!sourceForm.value.url.trim()) {
-    toast.error("Source URL is required")
+    toast.error('Source URL is required')
     return false
   }
   try {
     new URL(sourceForm.value.url)
   } catch {
-    toast.error("Please enter a valid URL")
+    toast.error('Please enter a valid URL')
     return false
   }
   return true
@@ -96,25 +96,24 @@ const saveSources = async () => {
     const res = await sourceApi.create(payload)
 
     if (res?.data?.data?.source) {
-      toast.success("Source added successfully")
+      toast.success('Source added successfully')
       router.push(`/dashboard/jurisdictions/${jurisdictionId.value}`)
     } else {
-      throw new Error(res?.data?.message || "Unexpected response from server")
+      throw new Error(res?.data?.message || 'Unexpected response from server')
     }
-
   } catch (error: unknown) {
-    console.error("Create source error:", error)
+    console.error('Create source error:', error)
 
     const err = error as {
       response?: { data?: { message?: string; detail?: string | Array<{ msg?: string }> } }
       message?: string
     }
 
-    let msg = "Failed to add source. Please check your input."
+    let msg = 'Failed to add source. Please check your input.'
 
     if (err.response?.data) {
       const d = err.response.data
-      if (typeof d.detail === "string") msg = d.detail
+      if (typeof d.detail === 'string') msg = d.detail
       else if (Array.isArray(d.detail) && d.detail[0]?.msg) msg = d.detail[0].msg
       else if (d.message) msg = d.message
     } else if (err.message) {

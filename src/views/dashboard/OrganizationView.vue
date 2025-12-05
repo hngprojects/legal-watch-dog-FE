@@ -2,8 +2,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
-import { toast } from "vue-sonner"
-import { useConfirmDialog } from "@/composables/useConfirmDialog"
+import { toast } from 'vue-sonner'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -69,11 +69,9 @@ const closeCreateModal = () => {
 const handleCreateOrganization = async () => {
   organizationStore.setError(null)
 
-  if (!formData.value.name.trim())
-    return toast.error("Organization name is required")
+  if (!formData.value.name.trim()) return toast.error('Organization name is required')
 
-  if (!formData.value.industry.trim())
-    return toast.error("Industry is required")
+  if (!formData.value.industry.trim()) return toast.error('Industry is required')
 
   const created = await organizationStore.addOrganization({
     name: formData.value.name.trim(),
@@ -83,7 +81,7 @@ const handleCreateOrganization = async () => {
   if (created) {
     closeCreateModal()
 
-    toast.success("Organization created successfully")
+    toast.success('Organization created successfully')
 
     const userId = await ensureUserId()
     if (userId) {
@@ -91,7 +89,6 @@ const handleCreateOrganization = async () => {
     }
   }
 }
-
 
 const goToOrganization = (organizationId: string) => {
   router.push({ name: 'organization-profile', params: { organizationId } })
@@ -105,7 +102,7 @@ const acceptInvite = async (token: string) => {
   try {
     const result = await invitationStore.acceptInvitation(token)
 
-    toast.success(result || "Invitation accepted")
+    toast.success(result || 'Invitation accepted')
 
     const userId = await ensureUserId()
     if (userId) {
@@ -113,10 +110,10 @@ const acceptInvite = async (token: string) => {
     }
     await refreshInvitations()
   } catch (err) {
-    toast.error(invitationStore.error || "Could not accept invitation")
+    toast.error(invitationStore.error || 'Could not accept invitation')
+    void err
   }
 }
-
 
 const hasMoreOrganizations = computed(() => organizationStore.hasMoreOrganizations)
 
@@ -145,7 +142,7 @@ const handleEditSave = async (payload: { name: string; industry: string }) => {
 
   if (updated) {
     editDialogOpen.value = false
-    toast.success("Organization updated successfully.")
+    toast.success('Organization updated successfully.')
   } else if (organizationStore.error) {
     editError.value = organizationStore.error
   }
@@ -155,19 +152,19 @@ const handleEditSave = async (payload: { name: string; industry: string }) => {
 
 const confirmDeleteOrganization = (org: Organization) => {
   openConfirm({
-    title: "Delete organization?",
-    description: "This action cannot be undone.",
-    confirmText: "Delete",
-    cancelText: "Cancel",
+    title: 'Delete organization?',
+    description: 'This action cannot be undone.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
     async onConfirm() {
       const deleted = await organizationStore.deleteOrganization(org.id)
 
       if (deleted) {
-        toast.success("Organization removed successfully.")
+        toast.success('Organization removed successfully.')
       } else if (organizationStore.error) {
         toast.error(organizationStore.error)
       }
-    }
+    },
   })
 }
 
@@ -217,8 +214,11 @@ onMounted(async () => {
           No pending invitations.
         </div>
         <div v-else class="space-y-3">
-          <article v-for="invite in invitations" :key="invite.token"
-            class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+          <article
+            v-for="invite in invitations"
+            :key="invite.token"
+            class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
+          >
             <div>
               <p class="text-sm font-semibold text-gray-900">
                 {{ invite.organization_name || organizationName() }}
@@ -232,32 +232,74 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <div v-if="!loading && organizations.length === 0 && !error"
-      class="mx-auto flex max-w-4xl flex-col items-center justify-center py-16 text-center lg:py-24">
+    <div
+      v-if="!loading && organizations.length === 0 && !error"
+      class="mx-auto flex max-w-4xl flex-col items-center justify-center py-16 text-center lg:py-24"
+    >
       <img :src="illustrationImg" alt="" srcset="" />
       <h1 class="mb-4 text-3xl font-bold text-gray-900 lg:text-4xl">No Organization Yet</h1>
       <p class="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-gray-600">
-        Create an organization to start grouping projects and jurisdictions.<br class="hidden sm:block" />
+        Create an organization to start grouping projects and jurisdictions.<br
+          class="hidden sm:block"
+        />
         Projects and jurisdictions are scoped within organizations.
       </p>
       <button @click="openCreateModal" class="btn--default btn--lg btn--with-icon">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 4V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M4 10H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M10 4V16"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M4 10H16"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
         Add Organization
       </button>
     </div>
 
     <div v-else class="mx-auto max-w-7xl">
-      <div class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+      <div
+        class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
+      >
         <div>
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Organizations</h1>
         </div>
         <button @click="openCreateModal" class="btn--default btn--lg btn--with-icon">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 4V16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M4 10H16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M10 4V16"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M4 10H16"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           Create Organization
         </button>
@@ -275,19 +317,28 @@ onMounted(async () => {
       <!-- Error Comp -->
       <div v-else-if="!loading && error && organizations.length === 0" class="py-12 text-center">
         <p class="text-red-600">{{ error }}</p>
-        <button @click="authStore.user?.id && organizationStore.fetchOrganizations(authStore.user.id)"
-          class="mt-4 text-[#401903] underline">
+        <button
+          @click="authStore.user?.id && organizationStore.fetchOrganizations(authStore.user.id)"
+          class="mt-4 text-[#401903] underline"
+        >
           Retry
         </button>
       </div>
       <!-- Card -->
       <div v-else class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <article v-for="org in organizations" :key="org.id" @click="goToOrganization(org.id)"
-          class="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10">
+        <article
+          v-for="org in organizations"
+          :key="org.id"
+          @click="goToOrganization(org.id)"
+          class="group flex h-full cursor-pointer flex-col justify-between overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/60 transition-all duration-300 hover:shadow-lg hover:ring-[#401903]/10"
+        >
           <div class="relative p-8">
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <button @click.stop class="btn--default btn--icon-sm btn--icon-only absolute top-6 right-4">
+                <button
+                  @click.stop
+                  class="btn--default btn--icon-sm btn--icon-only absolute top-6 right-4"
+                >
                   <EllipsisVertical :size="18" />
                 </button>
               </DropdownMenuTrigger>
@@ -298,16 +349,27 @@ onMounted(async () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <h3 class="mb-2 text-xl font-bold text-[#1F1F1F] transition-colors group-hover:text-[#401903]">
+            <h3
+              class="mb-2 text-xl font-bold text-[#1F1F1F] transition-colors group-hover:text-[#401903]"
+            >
               {{ org.name }}
             </h3>
             <p class="text-sm text-[#4B5563]">{{ org.industry || 'Industry not specified' }}</p>
           </div>
-          <div class="hidden items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4">
+          <div
+            class="hidden items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4"
+          >
             <button @click="goToOrganization(org.id)" class="btn--default flex items-center gap-1">
               View Organization
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M9 18l6-6-6-6"></path>
               </svg>
             </button>
@@ -316,7 +378,11 @@ onMounted(async () => {
       </div>
 
       <div v-if="hasMoreOrganizations" class="mt-8 flex justify-center">
-        <button @click="loadMoreOrganizations" class="btn--default btn--lg" :disabled="organizationStore.loadingMore">
+        <button
+          @click="loadMoreOrganizations"
+          class="btn--default btn--lg"
+          :disabled="organizationStore.loadingMore"
+        >
           <span v-if="organizationStore.loadingMore">Loading...</span>
           <span v-else>Load more</span>
         </button>
@@ -324,9 +390,11 @@ onMounted(async () => {
     </div>
 
     <teleport to="body">
-      <div v-if="showCreateModal"
+      <div
+        v-if="showCreateModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]"
-        @click.self="closeCreateModal">
+        @click.self="closeCreateModal"
+      >
         <div class="relative w-full max-w-[540px] rounded-2xl bg-white shadow-xl">
           <div class="p-5 sm:p-20">
             <div class="mb-6">
@@ -341,8 +409,13 @@ onMounted(async () => {
                 <label for="orgName" class="block text-sm font-medium text-[#1F1F1F]">
                   Company Name
                 </label>
-                <Input v-model="formData.name" id="orgName" placeholder="Name" required
-                  class="h-11 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]" />
+                <Input
+                  v-model="formData.name"
+                  id="orgName"
+                  placeholder="Name"
+                  required
+                  class="h-11 w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
+                />
               </div>
 
               <div class="space-y-2">
@@ -350,22 +423,33 @@ onMounted(async () => {
                   Industry
                 </label>
                 <Select v-model="formData.industry" required>
-                  <SelectTrigger class="h-11! w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]">
+                  <SelectTrigger
+                    class="h-11! w-full rounded-md border-[#D5D7DA] text-sm focus:border-[#401903]"
+                  >
                     <SelectValue placeholder="Select industry" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Government, Politics & Public Sector">Government, Politics & Public Sector
+                    <SelectItem value="Government, Politics & Public Sector"
+                      >Government, Politics & Public Sector
                     </SelectItem>
-                    <SelectItem value="Law, Regulation & Compliance">Law, Regulation & Compliance</SelectItem>
-                    <SelectItem value="Business, Finance & Professional Services">Business, Finance & Professional
-                      Services
+                    <SelectItem value="Law, Regulation & Compliance"
+                      >Law, Regulation & Compliance</SelectItem
+                    >
+                    <SelectItem value="Business, Finance & Professional Services"
+                      >Business, Finance & Professional Services
                     </SelectItem>
-                    <SelectItem value="Technology, Media & Telecommunications">Technology, Media & Telecommunications
+                    <SelectItem value="Technology, Media & Telecommunications"
+                      >Technology, Media & Telecommunications
                     </SelectItem>
-                    <SelectItem value="Health, Science & Education">Health, Science & Education</SelectItem>
-                    <SelectItem value="Energy, Environment & Infrastructure">Energy, Environment & Infrastructure
+                    <SelectItem value="Health, Science & Education"
+                      >Health, Science & Education</SelectItem
+                    >
+                    <SelectItem value="Energy, Environment & Infrastructure"
+                      >Energy, Environment & Infrastructure
                     </SelectItem>
-                    <SelectItem value="Manufacturing, Trade & Logistics">Manufacturing, Trade & Logistics</SelectItem>
+                    <SelectItem value="Manufacturing, Trade & Logistics"
+                      >Manufacturing, Trade & Logistics</SelectItem
+                    >
                   </SelectContent>
                 </Select>
               </div>
@@ -386,8 +470,16 @@ onMounted(async () => {
       </div>
     </teleport>
 
-    <OrganizationFormDialog v-if="editingOrg" v-model:open="editDialogOpen" :initial-name="editingOrg.name"
-      :initial-industry="editingOrg.industry || ''" title="Edit organization" submit-label="Save changes"
-      :loading="editSaving" :error="editError" @save="handleEditSave" />
+    <OrganizationFormDialog
+      v-if="editingOrg"
+      v-model:open="editDialogOpen"
+      :initial-name="editingOrg.name"
+      :initial-industry="editingOrg.industry || ''"
+      title="Edit organization"
+      submit-label="Save changes"
+      :loading="editSaving"
+      :error="editError"
+      @save="handleEditSave"
+    />
   </main>
 </template>

@@ -3,8 +3,9 @@ import { ref } from 'vue'
 import { Plus, FilePlus } from 'lucide-vue-next'
 import aiIcon from '@/assets/icons/ai_icon.png'
 import type { Source, SourceRevision } from '@/types/source'
+import type { Ticket } from '@/types/ticket'
 
-defineProps<{
+const props = defineProps<{
   sources: Source[]
   sourcesLoading: boolean
   sourcesError: string | null
@@ -14,6 +15,7 @@ defineProps<{
   latestRevision: (sourceId: string) => SourceRevision | undefined
   formatRevisionLabel: (rev: { scraped_at: string }) => string
   renderSummary: (summary?: string | null) => string
+  ticketForRevision?: (revisionId: string | undefined) => Ticket | undefined
 }>()
 
 const emit = defineEmits<{
@@ -23,6 +25,7 @@ const emit = defineEmits<{
   (e: 'toggle-source', sourceId: string): void
   (e: 'edit', source: Source): void
   (e: 'delete', source: Source): void
+  (e: 'open-ticket', payload: { source: Source; revision: SourceRevision }): void
 }>()
 
 const showHeaderMenu = ref(false)
@@ -41,6 +44,11 @@ const handleAddManual = () => {
 const handleAddAi = () => {
   closeMenus()
   emit('add-ai')
+}
+
+const hasTicket = (revisionId?: string) => {
+  if (!revisionId || !props.ticketForRevision) return false
+  return Boolean(props.ticketForRevision(revisionId))
 }
 </script>
 
@@ -236,6 +244,26 @@ const handleAddAi = () => {
                 )
               "
             />
+
+            <div
+              v-if="latestRevision(source.id)?.was_change_detected"
+              class="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <p class="text-xs text-gray-600">
+                A change was detected in this revision. Create or open a ticket to collaborate.
+              </p>
+              <button
+                class="btn--default btn--sm sm:btn--lg"
+                @click="
+                  emit('open-ticket', {
+                    source,
+                    revision: latestRevision(source.id)!,
+                  })
+                "
+              >
+                {{ hasTicket(latestRevision(source.id)?.id) ? 'View ticket' : 'Open ticket' }}
+              </button>
+            </div>
           </div>
 
           <div v-else class="text-sm text-gray-600">No revisions found for this source yet.</div>

@@ -36,6 +36,7 @@ import OrganizationView from '@/views/dashboard/OrganizationView.vue'
 import DashboardEntryView from '@/views/dashboard/DashboardEntryView.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
+import AssignedTicket from '@/views/dashboard/Tickets/AssignedTicket.vue'
 
 // Store
 import { useAuthStore } from '@/stores/auth-store'
@@ -192,7 +193,7 @@ const router = createRouter({
         {
           path: 'organizations/:organizationId/projects/:id',
           name: 'project-detail',
-          component: () => import('@/views/dashboard/projects/Project.vue'),
+          component: () => import('@/views/dashboard/projects/SingleProjectView.vue'),
         },
         {
           path: 'jurisdictions',
@@ -219,6 +220,16 @@ const router = createRouter({
           path: 'settings/billing',
           name: 'billing',
           component: () => import('@/views/dashboard/settings/BillingView.vue'),
+        },
+        {
+          path: 'tickets',
+          name: 'tickets',
+          component: AssignedTicket,
+        },
+        {
+          path: 'tickets/:ticketId',
+          name: 'ticket-detail',
+          component: () => import('@/views/dashboard/Tickets/TicketDetail.vue'),
         },
         { path: 'learn-more', name: 'learn-more', component: LearnMore },
         {
