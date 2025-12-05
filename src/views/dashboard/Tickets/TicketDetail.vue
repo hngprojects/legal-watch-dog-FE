@@ -92,11 +92,11 @@ const formatDate = (date: string) => new Date(date).toLocaleString()
         class="overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 sm:p-8"
       >
         <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div class="space-y-2">
+          <div class="w-full space-y-2">
             <p class="text-[11px] font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
               Ticket
             </p>
-            <div class="flex flex-col items-center justify-between gap-5 sm:flex-row">
+            <div class="flex w-full flex-col items-center justify-between gap-5 sm:flex-row">
               <div class="w-3/4">
                 <h1 class="text-2xl font-bold text-[#1F1F1F] sm:text-3xl">
                   {{ ticket.title }}
