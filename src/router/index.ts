@@ -231,6 +231,11 @@ const router = createRouter({
           name: 'ticket-detail',
           component: () => import('@/views/dashboard/Tickets/TicketDetail.vue'),
         },
+        {
+          path: 'tickets/:ticketId/invited-users',
+          name: 'ticket-invited-users',
+          component: () => import('@/views/dashboard/Tickets/TicketInvitesView.vue'),
+        },
         { path: 'learn-more', name: 'learn-more', component: LearnMore },
         {
           path: 'payment/plan',

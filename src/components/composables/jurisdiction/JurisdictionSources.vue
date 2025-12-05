@@ -140,13 +140,11 @@ const hasTicket = (revisionId?: string) => {
       >
         <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
           <!-- Source Info - full width on mobile, constrained on larger screens -->
-          <div class="max-w-full min-w-0 flex-1 sm:max-w-none">
+          <div class="max-w-full min-w-0 flex-1 sm:max-w-[60%] lg:max-w-[65%]">
             <p class="truncate text-xs font-semibold text-gray-900 sm:text-sm md:text-base">
               {{ source.name }}
             </p>
-            <p
-              class="truncate text-[11px] break-all text-gray-500 sm:text-xs sm:break-normal md:text-sm"
-            >
+            <p class="text-[11px] text-gray-500 sm:max-w-[48ch] sm:truncate sm:text-xs md:text-sm">
               {{ source.url }}
             </p>
             <p class="mt-1 text-[11px] tracking-wide text-gray-400 uppercase">
@@ -155,7 +153,7 @@ const hasTicket = (revisionId?: string) => {
           </div>
 
           <!-- Action Buttons - stacked & centered on mobile, inline on desktop -->
-          <div class="flex flex-wrap justify-start gap-2 sm:justify-end">
+          <div class="flex flex-wrap justify-start gap-2 sm:flex-none sm:justify-end">
             <button
               class="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm"
               :class="

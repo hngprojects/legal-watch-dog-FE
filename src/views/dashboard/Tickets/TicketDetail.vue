@@ -16,8 +16,6 @@ const ticket = computed(() => ticketStore.sortedTickets.find((t) => t.id === tic
 
 const commentLimit = 500
 const comment = ref('')
-const inviteEmail = ref('')
-const inviteFieldRef = ref<HTMLInputElement | null>(null)
 
 const authorName = computed(() => {
   const user = authStore.user
@@ -27,19 +25,19 @@ const authorName = computed(() => {
   )
 })
 
-const statusLabel = computed(() => {
-  if (!ticket.value) return ''
-  if (ticket.value.status === 'in_progress') return 'In Progress'
-  if (ticket.value.status === 'closed') return 'Closed'
-  return 'Open'
-})
+// const statusLabel = computed(() => {
+//   if (!ticket.value) return ''
+//   if (ticket.value.status === 'in_progress') return 'In Progress'
+//   if (ticket.value.status === 'closed') return 'Closed'
+//   return 'Open'
+// })
 
-const priorityLabel = computed(() => {
-  if (!ticket.value) return ''
-  if (ticket.value.priority === 'medium') return 'Medium'
-  if (ticket.value.priority === 'low') return 'Low'
-  return 'High'
-})
+// const priorityLabel = computed(() => {
+//   if (!ticket.value) return ''
+//   if (ticket.value.priority === 'medium') return 'Medium'
+//   if (ticket.value.priority === 'low') return 'Low'
+//   return 'High'
+// })
 
 const handleBack = () => {
   router.push({ name: 'tickets' })
@@ -57,17 +55,6 @@ const submitComment = () => {
   comment.value = ''
 }
 
-const sendInvite = () => {
-  if (!ticket.value) return
-  if (!inviteEmail.value.trim()) {
-    toast.error('Enter an email to invite')
-    return
-  }
-  ticketStore.inviteCollaborator(ticket.value.id, inviteEmail.value.trim())
-  toast.success('Invite sent')
-  inviteEmail.value = ''
-}
-
 const attachDocument = (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
@@ -83,9 +70,8 @@ const closeTicket = () => {
   toast.success('Ticket closed')
 }
 
-const focusInviteField = () => {
-  inviteFieldRef.value?.focus()
-}
+const goToInvites = () =>
+  router.push({ name: 'ticket-invited-users', params: { ticketId: ticketId.value } })
 
 const formatDate = (date: string) => new Date(date).toLocaleString()
 </script>
@@ -101,53 +87,40 @@ const formatDate = (date: string) => new Date(date).toLocaleString()
         Back to tickets
       </button>
 
-      <div v-if="ticket" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 sm:p-8">
+      <div
+        v-if="ticket"
+        class="overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 sm:p-8"
+      >
         <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div class="space-y-2">
             <p class="text-[11px] font-semibold tracking-[0.15em] text-[#C17A3F] uppercase">
               Ticket
             </p>
-            <h1 class="text-2xl font-bold text-[#1F1F1F] sm:text-3xl">
-              {{ ticket.title }}
-            </h1>
-            <div class="flex flex-wrap items-center gap-2 text-sm">
-              <span
-                class="inline-flex items-center rounded-full border border-[#F9DBAF] bg-[#FDF4E7] px-3 py-1 text-xs font-semibold text-[#B93815]"
-              >
-                {{ statusLabel }}
-              </span>
-              <span
-                class="inline-flex items-center rounded-full border border-[#D9D3FF] bg-[#F1EEFF] px-3 py-1 text-xs font-semibold text-[#4338CA]"
-              >
-                Priority: {{ priorityLabel }}
-              </span>
-              <span
-                v-if="ticket.auto_created"
-                class="inline-flex items-center rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-semibold text-green-700"
-              >
-                Auto-created
-              </span>
+            <div class="flex flex-col items-center justify-between gap-5 sm:flex-row">
+              <div class="w-3/4">
+                <h1 class="text-2xl font-bold text-[#1F1F1F] sm:text-3xl">
+                  {{ ticket.title }}
+                </h1>
+              </div>
+              <div class="flex items-center gap-2 sm:gap-3">
+                <button
+                  class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-[#401903] transition-colors hover:bg-gray-50"
+                  @click="closeTicket"
+                >
+                  <FilePlus :size="16" />
+                  Close ticket
+                </button>
+                <button
+                  class="group flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-[#401903] shadow-sm transition hover:bg-[#401903] hover:text-white"
+                  @click="goToInvites"
+                >
+                  <UserPlus2 :size="18" />
+                </button>
+              </div>
             </div>
             <p v-if="ticket.summary" class="text-sm text-gray-600">
               {{ ticket.summary }}
             </p>
-            <p class="text-xs text-gray-400">Updated {{ formatDate(ticket.updated_at) }}</p>
-          </div>
-
-          <div class="flex items-center gap-2 sm:gap-3">
-            <button
-              class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-[#401903] transition-colors hover:bg-gray-50"
-              @click="closeTicket"
-            >
-              <FilePlus :size="16" />
-              Close ticket
-            </button>
-            <button
-              class="group flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-[#401903] shadow-sm transition hover:bg-[#401903] hover:text-white"
-              @click="focusInviteField"
-            >
-              <UserPlus2 :size="18" />
-            </button>
           </div>
         </header>
 
@@ -187,7 +160,7 @@ const formatDate = (date: string) => new Date(date).toLocaleString()
           </div>
         </section>
 
-        <section class="mt-6 grid gap-6 lg:grid-cols-2">
+        <section class="mt-6">
           <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
             <div class="mb-2 flex items-center justify-between">
               <h3 class="text-base font-semibold text-[#1F1F1F]">Post Comment</h3>
@@ -201,14 +174,12 @@ const formatDate = (date: string) => new Date(date).toLocaleString()
               class="w-full rounded-lg border border-gray-200 px-3 py-3 text-sm text-gray-800 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/15 focus:outline-none"
             ></textarea>
             <div class="mt-3 flex items-center justify-between">
-              <label
-                class="flex cursor-pointer items-center gap-2 text-sm font-medium text-[#401903] hover:underline"
-              >
+              <label class="btn--link btn--with-icon">
                 <input type="file" class="hidden" @change="attachDocument" />
                 <Paperclip :size="16" />
                 Attach document
               </label>
-              <button class="btn--default btn--lg" @click="submitComment">
+              <button class="btn--default btn--lg btn--with-icon" @click="submitComment">
                 <Send :size="16" />
                 Submit
               </button>
@@ -226,65 +197,6 @@ const formatDate = (date: string) => new Date(date).toLocaleString()
                 </div>
                 <p class="text-sm text-gray-800">{{ item.message }}</p>
               </div>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div class="mb-3 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-[#1F1F1F]">Invite collaborators</h3>
-                <span class="text-xs text-gray-500">External partners allowed</span>
-              </div>
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <input
-                  v-model="inviteEmail"
-                  ref="inviteFieldRef"
-                  type="email"
-                  placeholder="email@company.com"
-                  class="h-11 flex-1 rounded-lg border border-gray-200 px-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/15 focus:outline-none"
-                  @keyup.enter.prevent="sendInvite"
-                />
-                <button class="btn--secondary btn--lg" @click="sendInvite">
-                  <UserPlus2 :size="16" />
-                  Invite
-                </button>
-              </div>
-              <ul v-if="ticket.invites.length" class="mt-3 space-y-2">
-                <li
-                  v-for="invite in ticket.invites"
-                  :key="invite.id"
-                  class="flex items-center justify-between rounded-lg bg-[#F9F7F4] px-3 py-2 text-sm text-gray-700"
-                >
-                  <span>{{ invite.email }}</span>
-                  <span class="text-xs text-gray-500">{{ formatDate(invite.invited_at) }}</span>
-                </li>
-              </ul>
-            </div>
-
-            <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div class="mb-3 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-[#1F1F1F]">Attachments</h3>
-                <label
-                  class="flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#401903]"
-                >
-                  <input type="file" class="hidden" @change="attachDocument" />
-                  <FilePlus :size="16" />
-                  Upload
-                </label>
-              </div>
-              <p v-if="!ticket.attachments.length" class="text-sm text-gray-500">
-                No documents uploaded yet.
-              </p>
-              <ul v-else class="space-y-2">
-                <li
-                  v-for="doc in ticket.attachments"
-                  :key="doc.id"
-                  class="flex items-center justify-between rounded-lg bg-[#F9F7F4] px-3 py-2 text-sm text-gray-800"
-                >
-                  <span>{{ doc.name }}</span>
-                  <span class="text-xs text-gray-500">{{ doc.size }}</span>
-                </li>
-              </ul>
             </div>
           </div>
         </section>
