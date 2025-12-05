@@ -6,6 +6,8 @@ import { createPinia } from 'pinia'
 import { ViteSSG } from 'vite-ssg'
 import { useAuthStore } from './stores/auth-store'
 import { setRouter } from './router/instance'
+import 'vue-sonner/style.css'
+import { createConfirmDialog } from '@/composables/useConfirmDialog'
 
 export const createApp = ViteSSG(
   App,
@@ -14,6 +16,7 @@ export const createApp = ViteSSG(
     const pinia = createPinia()
     setRouter(router)
     app.use(pinia)
+    app.use(createConfirmDialog())
 
     router.beforeEach(async (to) => {
       const auth = useAuthStore()

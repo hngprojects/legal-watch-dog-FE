@@ -12,9 +12,7 @@ import BrainIcon from '@/assets/icons/brain.svg'
 import CheckedIcon from '@/assets/icons/checked.svg'
 import GlobeIcon from '@/assets/icons/globe.svg'
 import GlobeIcon2 from '@/assets/icons/globe2.svg'
-import Swal from '@/lib/swal'
-// import BackLeft from '@/assets/Images/backleft.png'
-// import BackRight from '@/assets/Images/backright.png'
+import { toast } from 'vue-sonner'
 import earlyAccessBg from '@/assets/Images/earlyAccess-bg.png'
 
 // Top Waitlist Form
@@ -63,25 +61,13 @@ const handleSubmit = async () => {
   try {
     const response = await submitWaitlist({ ...form })
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Success!',
-      text: response.message ?? 'You are on the waitlist!',
-    })
+    toast.success(response.message ?? 'You are on the waitlist!')
 
     form.organization_name = ''
     form.organization_email = ''
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Please try again shortly.'
-    // feedback.value = {
-    //   type: 'error',
-    //   message: errorMessage,
-    // }
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: errorMessage,
-    })
+    toast.error(errorMessage)
   } finally {
     isSubmitting.value = false
   }
@@ -108,21 +94,13 @@ const handleEarlyAccessSubmit = async () => {
   try {
     const response = await submitWaitlist({ ...earlyAccessForm })
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Success!',
-      text: response.message ?? "You're on the waitlist!",
-    })
+    toast.success(response.message ?? "You're on the waitlist!")
 
     earlyAccessForm.organization_name = ''
     earlyAccessForm.organization_email = ''
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unable to submit right now.'
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: errorMessage,
-    })
+    toast.error(errorMessage)
   } finally {
     isSubmitting.value = false
   }
@@ -132,7 +110,7 @@ const features = [
   {
     icon: BellIcon,
     title: 'Automated Monitoring',
-    description: 'Continuous scanning of government and legal websites for regulatory changes',
+    description: 'Continuous scanning of government and websites for regulatory changes',
   },
   {
     icon: BrainIcon,
@@ -196,7 +174,7 @@ const testimonials = [
     quote:
       "The confidence scoring helps us prioritize what matters. We've never missed a critical update since switching.",
     name: 'Michael Torres',
-    title: 'Legal Operations Manager',
+    title: 'Regulatory Operations Manager',
     initials: 'MT',
   },
   {
@@ -236,7 +214,7 @@ const testimonials = [
         </Badge>
 
         <h1 class="mb-6 text-5xl leading-tight font-bold text-[#1F1F1F] sm:text-6xl lg:text-[64px]">
-          Stay Ahead of Legal Changes<br />
+          Stay Ahead of Regulatory Changes<br />
           Without the Weekly Stress
         </h1>
 

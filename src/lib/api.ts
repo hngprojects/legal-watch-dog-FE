@@ -4,7 +4,7 @@ import getRouter from '@/router/instance'
 import { useAuthStore } from '@/stores/auth-store'
 import themedSwal from '@/lib/swal'
 
-// Default to staging; override via VITE_API_BASE_URL for prod or other environments.
+// Default to prod; override via VITE_API_BASE_URL for prod or other environments.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.legalwatch.dog/api/v1'
 
 const api = axios.create({

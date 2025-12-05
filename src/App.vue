@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import GlobalConfirmDialog from './components/ui/GlobalConfirmDialog.vue'
+import { Toaster } from '@/components/ui/sonner/index'
 import { onMounted } from 'vue'
 
 onMounted(() => {
@@ -15,4 +17,6 @@ onMounted(() => {
 
 <template>
   <RouterView />
+  <Toaster position="top-right" rich-colors />
+  <GlobalConfirmDialog />
 </template>

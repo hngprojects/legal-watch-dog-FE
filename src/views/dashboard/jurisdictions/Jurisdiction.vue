@@ -4,10 +4,10 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Plus, Settings } from 'lucide-vue-next'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import Swal from '@/lib/swal'
-
+import { toast } from 'vue-sonner'
 import type { Jurisdiction } from '@/api/jurisdiction'
 import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
 import {
   Breadcrumb,
@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/dialog'
 import JurisdictionSources from '@/components/composables/jurisdiction/JurisdictionSources.vue'
 import JurisdictionAnalysis from '@/components/composables/jurisdiction/JurisdictionAnalysis.vue'
-import SubJurisdictionDialog from '@/components/composables/jurisdiction/dialogs/SubJurisdictionDialog.vue'
+import JurisdictionDialog from '@/components/composables/jurisdiction/dialogs/JurisdictionDialog.vue'
 import SourceDialog from '@/components/composables/jurisdiction/dialogs/SourceDialog.vue'
 import SuggestedSourcesDialog from '@/components/composables/jurisdiction/dialogs/SuggestedSourcesDialog.vue'
 
@@ -39,6 +39,8 @@ import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useSourceStore } from '@/stores/source-store'
+import { useTicketStore } from '@/stores/ticket-store'
+import type { SourceRevision } from '@/types/source'
 
 interface NestedJurisdiction extends Jurisdiction {
   depth: number
@@ -46,11 +48,13 @@ interface NestedJurisdiction extends Jurisdiction {
 
 const route = useRoute()
 const router = useRouter()
+const { confirm: openConfirm } = useConfirmDialog()
 
 const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
 const orgStore = useOrganizationStore()
 const sourceStore = useSourceStore()
+const ticketStore = useTicketStore()
 
 const activeOrganizationId = computed<string>(() => {
   if (typeof route.query.organizationId === 'string') return route.query.organizationId
@@ -82,8 +86,8 @@ const showInlineEdit = ref(false)
 const subJurisdictionModalOpen = ref(false)
 const addSourceModalOpen = ref(false)
 
-const editForm = ref({ name: '', description: '', prompt: '' })
-const subJurisdictionForm = ref({ name: '', description: '', prompt: '' })
+const editForm = ref({ name: '', description: '' })
+const subJurisdictionForm = ref({ name: '', description: '' })
 
 const sourceForm = ref<{
   id?: string | null
@@ -126,6 +130,8 @@ const revisionB = computed(
 const latestRevision = (sourceId: string) => revisions.value[sourceId]?.[0]
 const formatRevisionLabel = (rev: { scraped_at: string }) =>
   new Date(rev.scraped_at).toLocaleString()
+
+const ticketMode = computed(() => ticketStore.getModeForJurisdiction(jurisdiction.value?.id))
 const handleSelectSource = (id: string) => {
   selectedSourceId.value = id
 }
@@ -135,6 +141,15 @@ const handleSelectRevisionA = (id: string | null) => {
 const handleSelectRevisionB = (id: string | null) => {
   selectedRevisionB.value = id
 }
+
+const jurisdictionInstruction = ref('')
+const instructionSaving = ref(false)
+const isInstructionValid = computed(() => jurisdictionInstruction.value.trim().length > 0)
+const instructionPlaceholder = computed(() =>
+  jurisdictionInstruction.value.trim()
+    ? 'Describe the monitoring focus, keywords, and context that apply to this jurisdiction.'
+    : 'No instruction set. Add guidance for this jurisdiction.',
+)
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
@@ -188,6 +203,7 @@ const fetchRevisionsForSource = async (sourceId: string, page = 1) => {
 
   try {
     await sourceStore.fetchRevisions(sourceId, { skip, limit: revisionLimit })
+    await maybeAutoCreateTicket(sourceId)
   } catch (err) {
     console.error('Failed to load revisions', err)
   }
@@ -211,13 +227,14 @@ const triggerScrape = async (source: Source) => {
     const res = await sourceStore.scrapeSource(source.id)
     const message = (res as { message?: string })?.message ?? 'Scrape completed successfully.'
 
-    Swal.fire('Scrape Complete', message, 'success')
+    toast.success(message)
+
     expandedSources.value[source.id] = true
     await fetchRevisionsForSource(source.id)
   } catch (err) {
     const msg = sourceStore.error || parseApiError(err, 'Failed to trigger scrape')
     scrapeErrors.value[source.id] = msg
-    Swal.fire('Scrape Failed', msg, 'error')
+    toast.error(msg)
   } finally {
     scraping.value[source.id] = false
   }
@@ -232,6 +249,119 @@ const renderSummary = (summary?: string | null) => {
   } catch (err) {
     console.error('Failed to render markdown summary', err)
     return ''
+  }
+}
+
+const buildChangeDetails = (source: Source, revision: SourceRevision) => {
+  const bullets =
+    revision.ai_markdown_summary
+      ?.split('\n')
+      .map((item) => item.replace(/^[-*•]\s*/, '').trim())
+      .filter(Boolean) || []
+
+  return [
+    {
+      heading: source.name || 'Change detected',
+      description:
+        revision.ai_summary ||
+        (typeof revision.extracted_data?.title === 'string'
+          ? revision.extracted_data.title
+          : 'Detected change on tracked source'),
+      bullets,
+    },
+  ]
+}
+
+const createTicketFromRevision = async (
+  source: Source,
+  revision: SourceRevision,
+  opts?: { auto?: boolean },
+) => {
+  if (ticketStore.hasTicketForRevision(revision.id)) {
+    const existing = ticketStore.ticketForRevision(revision.id)
+    if (existing && !opts?.auto) {
+      toast.info('Ticket already exists for this change')
+      router.push({ name: 'ticket-detail', params: { ticketId: existing.id } })
+    }
+    return existing
+  }
+
+  const created = await ticketStore.createTicket({
+    title: `Change detected: ${source.name}`,
+    summary:
+      revision.ai_summary ||
+      `A new change was detected on ${source.name} at ${formatRevisionLabel(revision)}`,
+    priority: 'high',
+    jurisdiction_id: jurisdiction.value?.id,
+    project_id: jurisdiction.value?.project_id,
+    source_id: source.id,
+    revision_id: revision.id,
+    change_summary: revision.ai_summary || 'Change detected',
+    change_details: buildChangeDetails(source, revision),
+    auto_created: opts?.auto,
+  })
+
+  if (created && !opts?.auto) {
+    toast.success('Ticket created from change')
+    router.push({ name: 'ticket-detail', params: { ticketId: created.id } })
+  }
+
+  if (created?.auto_created) {
+    toast.success('Ticket auto-created for detected change')
+  }
+
+  return created
+}
+
+const maybeAutoCreateTicket = async (sourceId: string) => {
+  if (ticketMode.value !== 'auto') return
+  const changeRevision = revisions.value[sourceId]?.find((rev) => rev.was_change_detected)
+  if (!changeRevision || ticketStore.hasTicketForRevision(changeRevision.id)) return
+  const src = sources.value.find((item) => item.id === sourceId)
+  if (!src) return
+  await createTicketFromRevision(src, changeRevision, { auto: true })
+}
+
+const handleOpenTicket = async (payload: { source: Source; revision: SourceRevision }) => {
+  await createTicketFromRevision(payload.source, payload.revision)
+}
+
+const toggleTicketMode = () => {
+  if (!jurisdiction.value?.id) return
+  const next = ticketMode.value === 'auto' ? 'manual' : 'auto'
+  ticketStore.setModeForJurisdiction(jurisdiction.value.id, next)
+  toast.success(
+    next === 'auto' ? 'Automatic ticket creation enabled' : 'Manual ticket creation enabled',
+  )
+  if (next === 'auto' && selectedSourceId.value) {
+    void maybeAutoCreateTicket(selectedSourceId.value)
+  }
+}
+
+const saveJurisdictionInstruction = async () => {
+  if (!jurisdiction.value?.id) return
+  if (!isInstructionValid.value) {
+    toast.error('Jurisdiction instruction is required')
+    return
+  }
+
+  instructionSaving.value = true
+  try {
+    const updated = await jurisdictionStore.updateJurisdiction(
+      jurisdiction.value.id,
+      { prompt: jurisdictionInstruction.value.trim() || null },
+      activeOrganizationId.value,
+    )
+
+    if (updated) {
+      jurisdiction.value = updated
+      toast.success('Jurisdiction instruction updated')
+    }
+  } catch (err) {
+    console.error(err)
+    toast.error(jurisdictionStore.error || 'Failed to update jurisdiction instruction')
+  } finally {
+    instructionSaving.value = false
   }
 }
 
@@ -257,9 +387,10 @@ const cancelSuggestions = () => {
 
 const handleSuggestionsSaved = async (count: number) => {
   showSuggestedSources.value = false
+
   if (count > 0 && jurisdiction.value?.id) {
     await sourceStore.fetchSources(jurisdiction.value.id)
-    Swal.fire('Success', `${count} source${count > 1 ? 's' : ''} added successfully!`, 'success')
+    toast.success(`${count} source${count > 1 ? 's' : ''} added successfully`)
   }
 }
 
@@ -303,7 +434,7 @@ const createSourceFromForm = async () => {
 
   if (res) {
     closeAddSourceModal()
-    Swal.fire('Source Added', '', 'success')
+    toast.success('Source added successfully')
   }
 }
 
@@ -336,22 +467,21 @@ const saveEditedSource = async () => {
 
   if (updated) {
     closeAddSourceModal()
-    Swal.fire('Updated!', '', 'success')
+    toast.success('Source updated')
   }
 }
 
 const deleteSource = async (src: Source) => {
-  const confirm = await Swal.fire({
-    title: 'Delete source?',
-    icon: 'warning',
-    showCancelButton: true,
+  openConfirm({
+    title: 'Delete Source?',
+    description: `Are you sure you want to delete "${src.name}"? This action cannot be undone.`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      const ok = await sourceStore.deleteSource(src.id)
+      if (ok) toast.success('Source deleted')
+    },
   })
-
-  if (!confirm.isConfirmed) return
-
-  const ok = await sourceStore.deleteSource(src.id)
-
-  if (ok) Swal.fire('Deleted', '', 'success')
 }
 
 const goBack = () => {
@@ -365,7 +495,6 @@ const startEdit = () => {
   editForm.value = {
     name: jurisdiction.value?.name ?? '',
     description: jurisdiction.value?.description ?? '',
-    prompt: jurisdiction.value?.prompt ?? '',
   }
   showInlineEdit.value = true
 }
@@ -374,7 +503,6 @@ const saveEdit = async () => {
   const payload = {
     name: editForm.value.name,
     description: editForm.value.description,
-    prompt: editForm.value.prompt,
   }
 
   try {
@@ -386,30 +514,30 @@ const saveEdit = async () => {
 
     if (updated) {
       jurisdiction.value = updated
-      Swal.fire('Updated!', '', 'success')
+      toast.success('Jurisdiction updated')
       showInlineEdit.value = false
     } else if (jurisdictionStore.error) {
-      Swal.fire('Update failed', jurisdictionStore.error, 'error')
+      toast.error(jurisdictionStore.error)
     }
   } catch (error) {
     const msg = jurisdictionStore.error || 'Failed to update jurisdiction'
-    Swal.fire('Update failed', msg, 'error')
+    toast.error(msg)
     void error
   }
 }
 
 const deleteJurisdiction = async () => {
-  const confirm = await Swal.fire({
-    title: 'Delete?',
-    showCancelButton: true,
+  openConfirm({
+    title: 'Delete Jurisdiction?',
+    description: `Are you sure you want to delete "${jurisdiction.value?.name}"?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
+      toast.success('Jurisdiction deleted')
+      goBack()
+    },
   })
-
-  if (!confirm.isConfirmed) return
-
-  await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
-
-  Swal.fire('Deleted!', '', 'success')
-  goBack()
 }
 
 const parentJurisdiction = computed(() => {
@@ -430,7 +558,11 @@ const subJurisdictions = computed(() => {
 
 const openSubJurisdictionModal = () => {
   subJurisdictionModalOpen.value = true
-  subJurisdictionForm.value = { name: '', description: '', prompt: '' }
+  subJurisdictionForm.value = { name: '', description: '' }
+}
+
+const updateSubJurisdictionForm = (payload: Partial<{ name: string; description: string }>) => {
+  subJurisdictionForm.value = { ...subJurisdictionForm.value, ...payload }
 }
 
 const closeSubJurisdictionModal = () => {
@@ -440,25 +572,18 @@ const closeSubJurisdictionModal = () => {
 const createSubJurisdiction = async () => {
   if (!jurisdiction.value) return
 
-  if (!subJurisdictionForm.value.name.trim()) return
-  if (!subJurisdictionForm.value.description.trim()) return
+  if (!subJurisdictionForm.value.name.trim()) return toast.error('Name required')
+  if (!subJurisdictionForm.value.description.trim()) return toast.error('Description required')
 
   const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
     name: subJurisdictionForm.value.name.trim(),
     description: subJurisdictionForm.value.description.trim(),
-    prompt: subJurisdictionForm.value.prompt.trim() || null,
     parent_id: jurisdiction.value.id,
   })
 
   if (created) {
     closeSubJurisdictionModal()
-    Swal.fire({
-      icon: 'success',
-      title: 'Sub-jurisdiction created',
-      text: `"${created.name}" has been added.`,
-      timer: 2000,
-      showConfirmButton: false,
-    })
+    toast.success(`"${created.name}" added successfully`)
   }
 }
 
@@ -473,6 +598,14 @@ const lastUpdatedText = computed(() => {
   const t = jurisdiction.value?.updated_at || jurisdiction.value?.created_at
   return t ? new Date(t).toLocaleString() : ''
 })
+
+watch(
+  jurisdiction,
+  (val) => {
+    jurisdictionInstruction.value = val?.prompt || ''
+  },
+  { immediate: true },
+)
 
 watch(
   sources,
@@ -569,7 +702,7 @@ onMounted(() => {
               <BreadcrumbLink as-child>
                 <RouterLink
                   :to="{
-                    name: 'organization-projects',
+                    name: 'organization-profile',
                     params: { organizationId: activeOrganizationId },
                   }"
                 >
@@ -656,6 +789,55 @@ onMounted(() => {
           </p>
           <p v-if="lastUpdatedText" class="text-sm text-gray-400">Updated {{ lastUpdatedText }}</p>
         </div>
+
+        <div
+          class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-100 bg-[#FBFBFB] px-4 py-3"
+        >
+          <div>
+            <p class="text-xs font-semibold tracking-[0.12em] text-[#6B4B32] uppercase">
+              Ticket creation
+            </p>
+            <p class="text-sm text-gray-600">
+              {{
+                ticketMode === 'auto'
+                  ? 'Automatically create tickets when a change lands.'
+                  : 'Create tickets manually when changes are detected.'
+              }}
+            </p>
+          </div>
+          <button class="btn--secondary btn--sm whitespace-nowrap" @click="toggleTicketMode">
+            {{ ticketMode === 'auto' ? 'Switch to manual' : 'Enable auto-create' }}
+          </button>
+        </div>
+        <div class="mt-6 space-y-3 rounded-xl border border-gray-100 bg-[#FBFBFB] p-4 sm:p-5">
+          <div class="space-y-1">
+            <label for="jurisdiction-instruction" class="text-sm font-semibold text-gray-900">
+              Jurisdiction instruction
+            </label>
+            <p class="text-xs text-gray-500">
+              Set the guidance Watchdog should follow when monitoring this jurisdiction.
+            </p>
+          </div>
+          <textarea
+            id="jurisdiction-instruction"
+            v-model="jurisdictionInstruction"
+            rows="4"
+            :placeholder="instructionPlaceholder"
+            class="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/10 focus:outline-none"
+            :disabled="instructionSaving"
+            required
+          />
+          <div class="flex justify-end">
+            <button
+              class="btn--default btn--sm sm:btn--md"
+              type="button"
+              :disabled="instructionSaving || !isInstructionValid"
+              @click="saveJurisdictionInstruction"
+            >
+              {{ instructionSaving ? 'Saving...' : 'Save Instruction' }}
+            </button>
+          </div>
+        </div>
       </section>
 
       <section class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
@@ -706,12 +888,14 @@ onMounted(() => {
             :latest-revision="latestRevision"
             :format-revision-label="formatRevisionLabel"
             :render-summary="renderSummary"
+            :ticket-for-revision="ticketStore.ticketForRevision"
             @add-manual="handleManualAddSource"
             @add-ai="handleAiSuggestedSource"
             @scrape="triggerScrape"
             @toggle-source="toggleSourceExpansion"
             @edit="startEditSource"
             @delete="deleteSource"
+            @open-ticket="handleOpenTicket"
           />
         </div>
 
@@ -726,9 +910,17 @@ onMounted(() => {
             :revision-b="revisionB"
             :format-revision-label="formatRevisionLabel"
             :render-summary="renderSummary"
+            :ticket-for-revision="ticketStore.ticketForRevision"
             @select-source="handleSelectSource"
             @select-revision-a="handleSelectRevisionA"
             @select-revision-b="handleSelectRevisionB"
+            @open-ticket="
+              ({ revision }) => {
+                if (!revision) return
+                const src = sources.find((s) => s.id === selectedSourceId)
+                if (src) handleOpenTicket({ source: src, revision })
+              }
+            "
           />
         </div>
       </section>
@@ -770,7 +962,7 @@ onMounted(() => {
           </div>
 
           <p class="mb-1 text-base font-medium text-gray-900">No Sub-Jurisdictions</p>
-          <p class="text-sm text-gray-500">Create one to begin categorizing legal domains.</p>
+          <p class="text-sm text-gray-500">Create one to begin categorizing domains.</p>
         </div>
 
         <!-- Sub jurisdiction section -->
@@ -800,11 +992,11 @@ onMounted(() => {
       </section>
     </div>
 
-    <SubJurisdictionDialog
+    <JurisdictionDialog
       :open="subJurisdictionModalOpen"
       :form="subJurisdictionForm"
       @update:open="(value) => !value && closeSubJurisdictionModal()"
-      @update:form="(payload) => (subJurisdictionForm = { ...subJurisdictionForm, ...payload })"
+      @update:form="updateSubJurisdictionForm"
       @submit="createSubJurisdiction"
       @cancel="closeSubJurisdictionModal"
     />
@@ -825,7 +1017,7 @@ onMounted(() => {
       <DialogScrollContent class="sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle>Edit Jurisdiction</DialogTitle>
-          <DialogDescription>Update the name, description, and instructions.</DialogDescription>
+          <DialogDescription>Update the name and description.</DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="saveEdit" class="space-y-4">
@@ -841,15 +1033,6 @@ onMounted(() => {
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
             <textarea
               v-model="editForm.description"
-              rows="3"
-              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Instructions</label>
-            <textarea
-              v-model="editForm.prompt"
               rows="3"
               class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
             />

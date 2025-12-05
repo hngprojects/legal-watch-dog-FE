@@ -19,7 +19,7 @@ const faqs = [
   {
     question: 'Who can use Legal WatchDog?',
     answer:
-      "The platform is built for enterprises. Whether you're part of a legal team, compliance team, risk team, policy team, or simply need to monitor updates across different regions, Legal WatchDog can support your work.",
+      "The platform is built for enterprises. Whether you're part of a team, compliance team, risk team, policy team, or simply need to monitor updates across different regions, Legal WatchDog can support your work.",
   },
   {
     question: 'How do I get started?',

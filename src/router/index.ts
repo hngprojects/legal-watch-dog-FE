@@ -11,7 +11,6 @@ import Careers from '@/views/CareersView.vue'
 import Terms from '@/views/TermsView.vue'
 import HelpCenter from '@/views/HelpCenterView.vue'
 import Features from '@/views/FeaturesView.vue'
-// import BlogView from '@/views/BlogView.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import LearnMore from '@/views/LearnMore.vue'
@@ -33,6 +32,7 @@ import ComponentCatalogueView from '@/views/ComponentCatalogueView.vue'
 import OrganizationView from '@/views/dashboard/OrganizationView.vue'
 import ProjectView from '@/views/dashboard/ProjectView.vue'
 import JurisdictionView from '@/views/dashboard/JurisdictionView.vue'
+import AssignedTicket from '@/views/dashboard/Tickets/AssignedTicket.vue'
 
 export const routes = [
   {
@@ -157,7 +157,7 @@ export const routes = [
       {
         path: '',
         name: 'dashboard',
-        redirect: { name: 'organizations' },
+        component: () => import('@/views/dashboard/DashboardEntryView.vue'),
       },
       {
         path: 'organizations',
@@ -183,7 +183,7 @@ export const routes = [
       {
         path: 'organizations/:organizationId/projects/:id',
         name: 'project-detail',
-        component: () => import('@/views/dashboard/projects/Project.vue'),
+        component: () => import('@/views/dashboard/projects/SingleProjectView.vue'),
       },
       {
         path: 'jurisdictions',
@@ -210,6 +210,21 @@ export const routes = [
         path: 'settings/billing',
         name: 'billing',
         component: () => import('@/views/dashboard/settings/BillingView.vue'),
+      },
+      {
+        path: 'tickets',
+        name: 'tickets',
+        component: AssignedTicket,
+      },
+      {
+        path: 'tickets/:ticketId',
+        name: 'ticket-detail',
+        component: () => import('@/views/dashboard/Tickets/TicketDetail.vue'),
+      },
+      {
+        path: 'tickets/:ticketId/invited-users',
+        name: 'ticket-invited-users',
+        component: () => import('@/views/dashboard/Tickets/TicketInvitesView.vue'),
       },
       { path: 'learn-more', name: 'learn-more', component: LearnMore },
       {

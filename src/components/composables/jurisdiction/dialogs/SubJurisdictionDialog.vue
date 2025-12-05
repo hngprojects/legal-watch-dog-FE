@@ -26,7 +26,7 @@ const emit = defineEmits<{
     <DialogScrollContent class="sm:max-w-[520px]">
       <DialogHeader>
         <DialogTitle>Define your Sub-Jurisdiction</DialogTitle>
-        <DialogDescription>Define a specific legal domain or region to monitor</DialogDescription>
+        <DialogDescription>Define a specific domain or region to monitor</DialogDescription>
       </DialogHeader>
 
       <form @submit.prevent="emit('submit')" class="space-y-5">
@@ -48,7 +48,7 @@ const emit = defineEmits<{
             :value="form.description"
             rows="4"
             required
-            placeholder="What legal areas will you monitor?"
+            placeholder="What areas will you monitor?"
             class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
             @input="
               emit('update:form', { description: ($event.target as HTMLTextAreaElement).value })
