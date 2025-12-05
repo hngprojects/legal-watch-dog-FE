@@ -374,7 +374,7 @@ watch(
                 class="h-10 w-10 rounded-full object-cover shadow-sm"
               />
               <div>
-                <p class="text-sm font-semibold text-gray-900">Hire HNG Specialist</p>
+                <p class="text-sm font-semibold text-gray-900">Hire a Specialist</p>
                 <p class="text-xs text-gray-500">Professional support, anytime.</p>
               </div>
             </div>
