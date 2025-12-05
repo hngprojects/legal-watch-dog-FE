@@ -2,8 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useOrganizationStore } from '@/stores/organization-store'
-import { useConfirmDialog } from "@/composables/useConfirmDialog"
-import { toast } from "vue-sonner"
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { toast } from 'vue-sonner'
 
 const jurisdictionStore = useJurisdictionStore()
 const orgStore = useOrganizationStore()
@@ -22,58 +22,56 @@ onMounted(() => {
 
 const restoreJurisdiction = async (jurisdictionId: string) => {
   openConfirm({
-    title: "Restore Jurisdiction?",
-    description: "This will make the jurisdiction active again.",
-    confirmText: "Restore",
-    cancelText: "Cancel",
+    title: 'Restore Jurisdiction?',
+    description: 'This will make the jurisdiction active again.',
+    confirmText: 'Restore',
+    cancelText: 'Cancel',
     async onConfirm() {
       try {
         loading.value = true
 
         if (!orgId.value) {
-          throw new Error("No organization selected")
+          throw new Error('No organization selected')
         }
 
         await jurisdictionStore.restoreJurisdiction(jurisdictionId, orgId.value)
 
-        toast.success("Jurisdiction restored successfully")
+        toast.success('Jurisdiction restored successfully')
       } catch (error) {
-        console.error("Restore failed:", error)
-        toast.error("Failed to restore jurisdiction")
+        console.error('Restore failed:', error)
+        toast.error('Failed to restore jurisdiction')
       } finally {
         loading.value = false
       }
-    }
+    },
   })
 }
-
 
 const permanentDelete = async (jurisdictionId: string) => {
   openConfirm({
-    title: "Remove from Archive?",
-    description: "This will remove the jurisdiction from your archived list.",
-    confirmText: "Remove",
-    cancelText: "Cancel",
+    title: 'Remove from Archive?',
+    description: 'This will remove the jurisdiction from your archived list.',
+    confirmText: 'Remove',
+    cancelText: 'Cancel',
     async onConfirm() {
       try {
         jurisdictionStore.archivedJurisdictions = jurisdictionStore.archivedJurisdictions.filter(
-          (j) => j.id !== jurisdictionId
+          (j) => j.id !== jurisdictionId,
         )
 
-        const ids = JSON.parse(localStorage.getItem("archived_jurisdiction_ids") || "[]")
+        const ids = JSON.parse(localStorage.getItem('archived_jurisdiction_ids') || '[]')
         const updatedIds = ids.filter((id: string) => id !== jurisdictionId)
 
-        localStorage.setItem("archived_jurisdiction_ids", JSON.stringify(updatedIds))
+        localStorage.setItem('archived_jurisdiction_ids', JSON.stringify(updatedIds))
         localStorage.removeItem(`archived_jurisdiction_${jurisdictionId}`)
 
-        toast.success("Jurisdiction removed from archive")
+        toast.success('Jurisdiction removed from archive')
       } catch {
-        toast.error("Failed to remove jurisdiction")
+        toast.error('Failed to remove jurisdiction')
       }
-    }
+    },
   })
 }
-
 </script>
 
 <template>

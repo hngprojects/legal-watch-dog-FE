@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Source } from '@/types/source'
 import type { SourceRevision } from '@/types/source'
+import RevisionTicketAction from './RevisionTicketAction.vue'
 
 defineProps<{
   sources: Source[]
@@ -12,12 +13,14 @@ defineProps<{
   revisionB: SourceRevision | null
   formatRevisionLabel: (rev: { scraped_at: string }) => string
   renderSummary: (summary?: string | null) => string
+  ticketForRevision?: (revisionId: string | undefined) => unknown
 }>()
 
 const emit = defineEmits<{
   (e: 'select-source', id: string): void
   (e: 'select-revision-a', id: string | null): void
   (e: 'select-revision-b', id: string | null): void
+  (e: 'open-ticket', payload: { revision: SourceRevision | null }): void
 }>()
 </script>
 
@@ -95,6 +98,12 @@ const emit = defineEmits<{
         class="prose prose-sm max-w-none text-gray-800"
         v-html="renderSummary(revisionA.ai_markdown_summary || revisionA.ai_summary)"
       />
+      <RevisionTicketAction
+        v-if="revisionA?.was_change_detected"
+        :revision="revisionA"
+        :ticket-for-revision="ticketForRevision"
+        @open-ticket="emit('open-ticket', $event)"
+      />
       <p v-else class="text-sm text-gray-500">Choose a revision to display.</p>
     </div>
 
@@ -118,6 +127,12 @@ const emit = defineEmits<{
         v-if="revisionB"
         class="prose prose-sm max-w-none text-gray-800"
         v-html="renderSummary(revisionB.ai_markdown_summary || revisionB.ai_summary)"
+      />
+      <RevisionTicketAction
+        v-if="revisionB?.was_change_detected"
+        :revision="revisionB"
+        :ticket-for-revision="ticketForRevision"
+        @open-ticket="emit('open-ticket', $event)"
       />
       <p v-else class="text-sm text-gray-500">Choose a revision to display.</p>
     </div>

@@ -4,10 +4,10 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Plus, Settings } from 'lucide-vue-next'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { toast } from "vue-sonner"
+import { toast } from 'vue-sonner'
 import type { Jurisdiction } from '@/api/jurisdiction'
 import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
-import { useConfirmDialog } from "@/composables/useConfirmDialog"
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
 import {
   Breadcrumb,
@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/dialog'
 import JurisdictionSources from '@/components/composables/jurisdiction/JurisdictionSources.vue'
 import JurisdictionAnalysis from '@/components/composables/jurisdiction/JurisdictionAnalysis.vue'
-import SubJurisdictionDialog from '@/components/composables/jurisdiction/dialogs/SubJurisdictionDialog.vue'
+import JurisdictionDialog from '@/components/composables/jurisdiction/dialogs/JurisdictionDialog.vue'
 import SourceDialog from '@/components/composables/jurisdiction/dialogs/SourceDialog.vue'
 import SuggestedSourcesDialog from '@/components/composables/jurisdiction/dialogs/SuggestedSourcesDialog.vue'
 
@@ -39,6 +39,8 @@ import { useJurisdictionStore } from '@/stores/jurisdiction-store'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useSourceStore } from '@/stores/source-store'
+import { useTicketStore } from '@/stores/ticket-store'
+import type { SourceRevision } from '@/types/source'
 
 interface NestedJurisdiction extends Jurisdiction {
   depth: number
@@ -52,6 +54,7 @@ const jurisdictionStore = useJurisdictionStore()
 const projectStore = useProjectStore()
 const orgStore = useOrganizationStore()
 const sourceStore = useSourceStore()
+const ticketStore = useTicketStore()
 
 const activeOrganizationId = computed<string>(() => {
   if (typeof route.query.organizationId === 'string') return route.query.organizationId
@@ -127,6 +130,8 @@ const revisionB = computed(
 const latestRevision = (sourceId: string) => revisions.value[sourceId]?.[0]
 const formatRevisionLabel = (rev: { scraped_at: string }) =>
   new Date(rev.scraped_at).toLocaleString()
+
+const ticketMode = computed(() => ticketStore.getModeForJurisdiction(jurisdiction.value?.id))
 const handleSelectSource = (id: string) => {
   selectedSourceId.value = id
 }
@@ -189,6 +194,7 @@ const fetchRevisionsForSource = async (sourceId: string, page = 1) => {
 
   try {
     await sourceStore.fetchRevisions(sourceId, { skip, limit: revisionLimit })
+    await maybeAutoCreateTicket(sourceId)
   } catch (err) {
     console.error('Failed to load revisions', err)
   }
@@ -216,7 +222,6 @@ const triggerScrape = async (source: Source) => {
 
     expandedSources.value[source.id] = true
     await fetchRevisionsForSource(source.id)
-
   } catch (err) {
     const msg = sourceStore.error || parseApiError(err, 'Failed to trigger scrape')
     scrapeErrors.value[source.id] = msg
@@ -225,7 +230,6 @@ const triggerScrape = async (source: Source) => {
     scraping.value[source.id] = false
   }
 }
-
 
 const renderSummary = (summary?: string | null) => {
   if (!summary) return ''
@@ -236,6 +240,92 @@ const renderSummary = (summary?: string | null) => {
   } catch (err) {
     console.error('Failed to render markdown summary', err)
     return ''
+  }
+}
+
+const buildChangeDetails = (source: Source, revision: SourceRevision) => {
+  const bullets =
+    revision.ai_markdown_summary
+      ?.split('\n')
+      .map((item) => item.replace(/^[-*•]\s*/, '').trim())
+      .filter(Boolean) || []
+
+  return [
+    {
+      heading: source.name || 'Change detected',
+      description:
+        revision.ai_summary ||
+        (typeof revision.extracted_data?.title === 'string'
+          ? revision.extracted_data.title
+          : 'Detected change on tracked source'),
+      bullets,
+    },
+  ]
+}
+
+const createTicketFromRevision = async (
+  source: Source,
+  revision: SourceRevision,
+  opts?: { auto?: boolean },
+) => {
+  if (ticketStore.hasTicketForRevision(revision.id)) {
+    const existing = ticketStore.ticketForRevision(revision.id)
+    if (existing && !opts?.auto) {
+      toast.info('Ticket already exists for this change')
+      router.push({ name: 'ticket-detail', params: { ticketId: existing.id } })
+    }
+    return existing
+  }
+
+  const created = await ticketStore.createTicket({
+    title: `Change detected: ${source.name}`,
+    summary:
+      revision.ai_summary ||
+      `A new change was detected on ${source.name} at ${formatRevisionLabel(revision)}`,
+    priority: 'high',
+    jurisdiction_id: jurisdiction.value?.id,
+    project_id: jurisdiction.value?.project_id,
+    source_id: source.id,
+    revision_id: revision.id,
+    change_summary: revision.ai_summary || 'Change detected',
+    change_details: buildChangeDetails(source, revision),
+    auto_created: opts?.auto,
+  })
+
+  if (created && !opts?.auto) {
+    toast.success('Ticket created from change')
+    router.push({ name: 'ticket-detail', params: { ticketId: created.id } })
+  }
+
+  if (created?.auto_created) {
+    toast.success('Ticket auto-created for detected change')
+  }
+
+  return created
+}
+
+const maybeAutoCreateTicket = async (sourceId: string) => {
+  if (ticketMode.value !== 'auto') return
+  const changeRevision = revisions.value[sourceId]?.find((rev) => rev.was_change_detected)
+  if (!changeRevision || ticketStore.hasTicketForRevision(changeRevision.id)) return
+  const src = sources.value.find((item) => item.id === sourceId)
+  if (!src) return
+  await createTicketFromRevision(src, changeRevision, { auto: true })
+}
+
+const handleOpenTicket = async (payload: { source: Source; revision: SourceRevision }) => {
+  await createTicketFromRevision(payload.source, payload.revision)
+}
+
+const toggleTicketMode = () => {
+  if (!jurisdiction.value?.id) return
+  const next = ticketMode.value === 'auto' ? 'manual' : 'auto'
+  ticketStore.setModeForJurisdiction(jurisdiction.value.id, next)
+  toast.success(
+    next === 'auto' ? 'Automatic ticket creation enabled' : 'Manual ticket creation enabled',
+  )
+  if (next === 'auto' && selectedSourceId.value) {
+    void maybeAutoCreateTicket(selectedSourceId.value)
   }
 }
 
@@ -308,10 +398,9 @@ const createSourceFromForm = async () => {
 
   if (res) {
     closeAddSourceModal()
-    toast.success("Source added successfully")
+    toast.success('Source added successfully')
   }
 }
-
 
 const startEditSource = (src: Source) => {
   editingSourceId.value = src.id
@@ -342,19 +431,19 @@ const saveEditedSource = async () => {
 
   if (updated) {
     closeAddSourceModal()
-    toast.success("Source updated")
+    toast.success('Source updated')
   }
 }
 
 const deleteSource = async (src: Source) => {
   openConfirm({
-    title: "Delete Source?",
+    title: 'Delete Source?',
     description: `Are you sure you want to delete "${src.name}"? This action cannot be undone.`,
-    confirmText: "Delete",
-    cancelText: "Cancel",
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
     async onConfirm() {
       const ok = await sourceStore.deleteSource(src.id)
-      if (ok) toast.success("Source deleted")
+      if (ok) toast.success('Source deleted')
     },
   })
 }
@@ -391,33 +480,31 @@ const saveEdit = async () => {
 
     if (updated) {
       jurisdiction.value = updated
-      toast.success("Jurisdiction updated")
+      toast.success('Jurisdiction updated')
       showInlineEdit.value = false
     } else if (jurisdictionStore.error) {
       toast.error(jurisdictionStore.error)
     }
-
   } catch (error) {
-    const msg = jurisdictionStore.error || "Failed to update jurisdiction"
+    const msg = jurisdictionStore.error || 'Failed to update jurisdiction'
     toast.error(msg)
+    void error
   }
 }
 
 const deleteJurisdiction = async () => {
   openConfirm({
-    title: "Delete Jurisdiction?",
+    title: 'Delete Jurisdiction?',
     description: `Are you sure you want to delete "${jurisdiction.value?.name}"?`,
-    confirmText: "Delete",
-    cancelText: "Cancel",
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
     async onConfirm() {
       await jurisdictionStore.deleteJurisdiction(jurisdictionId.value)
-      toast.success("Jurisdiction deleted")
+      toast.success('Jurisdiction deleted')
       goBack()
     },
   })
 }
-
-
 
 const parentJurisdiction = computed(() => {
   if (!jurisdiction.value) return null
@@ -447,25 +534,21 @@ const closeSubJurisdictionModal = () => {
 const createSubJurisdiction = async () => {
   if (!jurisdiction.value) return
 
-  if (!subJurisdictionForm.value.name.trim()) return toast.error("Name required")
-  if (!subJurisdictionForm.value.description.trim()) return toast.error("Description required")
+  if (!subJurisdictionForm.value.name.trim()) return toast.error('Name required')
+  if (!subJurisdictionForm.value.description.trim()) return toast.error('Description required')
 
-  const created = await jurisdictionStore.addJurisdiction(
-    jurisdiction.value.project_id,
-    {
-      name: subJurisdictionForm.value.name.trim(),
-      description: subJurisdictionForm.value.description.trim(),
-      prompt: subJurisdictionForm.value.prompt.trim() || null,
-      parent_id: jurisdiction.value.id,
-    }
-  )
+  const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
+    name: subJurisdictionForm.value.name.trim(),
+    description: subJurisdictionForm.value.description.trim(),
+    prompt: subJurisdictionForm.value.prompt.trim() || null,
+    parent_id: jurisdiction.value.id,
+  })
 
   if (created) {
     closeSubJurisdictionModal()
     toast.success(`"${created.name}" added successfully`)
   }
 }
-
 
 const goToJurisdiction = (id: string) => {
   router.push({
@@ -545,9 +628,15 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-else-if="!jurisdiction" class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm">
+    <div
+      v-else-if="!jurisdiction"
+      class="mx-auto max-w-4xl rounded-2xl bg-white p-10 text-center shadow-sm"
+    >
       <h1 class="text-2xl font-semibold text-gray-900">Jurisdiction not found</h1>
-      <button @click="goBack" class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline">
+      <button
+        @click="goBack"
+        class="mt-4 inline-flex items-center gap-2 text-[#401903] hover:underline"
+      >
         Back to Projects
       </button>
     </div>
@@ -566,10 +655,12 @@ onMounted(() => {
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink :to="{
-                  name: 'organization-profile',
-                  params: { organizationId: activeOrganizationId },
-                }">
+                <RouterLink
+                  :to="{
+                    name: 'organization-profile',
+                    params: { organizationId: activeOrganizationId },
+                  }"
+                >
                   {{ organizationName || 'Organization' }}
                 </RouterLink>
               </BreadcrumbLink>
@@ -579,10 +670,12 @@ onMounted(() => {
 
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
-                <RouterLink :to="{
-                  name: 'organization-projects',
-                  params: { organizationId: activeOrganizationId },
-                }">
+                <RouterLink
+                  :to="{
+                    name: 'organization-projects',
+                    params: { organizationId: activeOrganizationId },
+                  }"
+                >
                   Projects
                 </RouterLink>
               </BreadcrumbLink>
@@ -592,10 +685,12 @@ onMounted(() => {
 
             <BreadcrumbItem v-if="jurisdiction.project_id && projectName">
               <BreadcrumbLink as-child>
-                <RouterLink :to="{
-                  name: 'project-detail',
-                  params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
-                }">
+                <RouterLink
+                  :to="{
+                    name: 'project-detail',
+                    params: { organizationId: activeOrganizationId, id: jurisdiction.project_id },
+                  }"
+                >
                   {{ projectName }}
                 </RouterLink>
               </BreadcrumbLink>
@@ -622,8 +717,10 @@ onMounted(() => {
 
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <button type="button"
-              class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 sm:h-10 sm:w-10">
+            <button
+              type="button"
+              class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 sm:h-10 sm:w-10"
+            >
               <Settings :size="17" class="sm:size-[18px]" />
             </button>
           </DropdownMenuTrigger>
@@ -647,69 +744,146 @@ onMounted(() => {
           </p>
           <p v-if="lastUpdatedText" class="text-sm text-gray-400">Updated {{ lastUpdatedText }}</p>
         </div>
+
+        <div
+          class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-100 bg-[#FBFBFB] px-4 py-3"
+        >
+          <div>
+            <p class="text-xs font-semibold tracking-[0.12em] text-[#6B4B32] uppercase">
+              Ticket creation
+            </p>
+            <p class="text-sm text-gray-600">
+              {{
+                ticketMode === 'auto'
+                  ? 'Automatically create tickets when a change lands.'
+                  : 'Create tickets manually when changes are detected.'
+              }}
+            </p>
+          </div>
+          <button class="btn--secondary btn--sm whitespace-nowrap" @click="toggleTicketMode">
+            {{ ticketMode === 'auto' ? 'Switch to manual' : 'Enable auto-create' }}
+          </button>
+        </div>
       </section>
 
       <section class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
         <div class="border-b border-gray-100 px-6 py-4">
           <div class="flex gap-8">
-            <button @click="activeTab = 'sources'" :class="[
-              'relative pb-4 text-sm font-semibold transition-colors',
-              activeTab === 'sources'
-                ? 'text-[#1F1F1F]'
-                : 'hover:text-[#1F1F1F cursor-pointer text-gray-500',
-            ]">
+            <button
+              @click="activeTab = 'sources'"
+              :class="[
+                'relative pb-4 text-sm font-semibold transition-colors',
+                activeTab === 'sources'
+                  ? 'text-[#1F1F1F]'
+                  : 'hover:text-[#1F1F1F cursor-pointer text-gray-500',
+              ]"
+            >
               Sources
-              <span v-if="activeTab === 'sources'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
+              <span
+                v-if="activeTab === 'sources'"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
+              ></span>
             </button>
 
-            <button @click="activeTab = 'analysis'" :class="[
-              'relative pb-4 text-sm font-semibold transition-colors',
-              activeTab === 'analysis'
-                ? 'text-[#1F1F1F]'
-                : 'cursor-pointer text-gray-500 hover:text-[#1F1F1F]',
-            ]">
+            <button
+              @click="activeTab = 'analysis'"
+              :class="[
+                'relative pb-4 text-sm font-semibold transition-colors',
+                activeTab === 'analysis'
+                  ? 'text-[#1F1F1F]'
+                  : 'cursor-pointer text-gray-500 hover:text-[#1F1F1F]',
+              ]"
+            >
               Analysis
-              <span v-if="activeTab === 'analysis'" class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"></span>
+              <span
+                v-if="activeTab === 'analysis'"
+                class="absolute inset-x-0 -bottom-px h-0.5 bg-[#401903]"
+              ></span>
             </button>
           </div>
         </div>
 
         <div v-if="activeTab === 'sources'" class="space-y-4 p-6">
-          <JurisdictionSources :sources="sources" :sources-loading="sourcesLoading" :sources-error="sourcesError"
-            :scraping="scraping" :scrape-errors="scrapeErrors" :expanded-sources="expandedSources"
-            :latest-revision="latestRevision" :format-revision-label="formatRevisionLabel"
-            :render-summary="renderSummary" @add-manual="handleManualAddSource" @add-ai="handleAiSuggestedSource"
-            @scrape="triggerScrape" @toggle-source="toggleSourceExpansion" @edit="startEditSource"
-            @delete="deleteSource" />
+          <JurisdictionSources
+            :sources="sources"
+            :sources-loading="sourcesLoading"
+            :sources-error="sourcesError"
+            :scraping="scraping"
+            :scrape-errors="scrapeErrors"
+            :expanded-sources="expandedSources"
+            :latest-revision="latestRevision"
+            :format-revision-label="formatRevisionLabel"
+            :render-summary="renderSummary"
+            :ticket-for-revision="ticketStore.ticketForRevision"
+            @add-manual="handleManualAddSource"
+            @add-ai="handleAiSuggestedSource"
+            @scrape="triggerScrape"
+            @toggle-source="toggleSourceExpansion"
+            @edit="startEditSource"
+            @delete="deleteSource"
+            @open-ticket="handleOpenTicket"
+          />
         </div>
 
         <div v-else class="space-y-4 p-6">
-          <JurisdictionAnalysis :sources="sources" :selected-source-id="selectedSourceId"
-            :revision-options="revisionOptions" :selected-revision-a="selectedRevisionA"
-            :selected-revision-b="selectedRevisionB" :revision-a="revisionA" :revision-b="revisionB"
-            :format-revision-label="formatRevisionLabel" :render-summary="renderSummary"
-            @select-source="handleSelectSource" @select-revision-a="handleSelectRevisionA"
-            @select-revision-b="handleSelectRevisionB" />
+          <JurisdictionAnalysis
+            :sources="sources"
+            :selected-source-id="selectedSourceId"
+            :revision-options="revisionOptions"
+            :selected-revision-a="selectedRevisionA"
+            :selected-revision-b="selectedRevisionB"
+            :revision-a="revisionA"
+            :revision-b="revisionB"
+            :format-revision-label="formatRevisionLabel"
+            :render-summary="renderSummary"
+            :ticket-for-revision="ticketStore.ticketForRevision"
+            @select-source="handleSelectSource"
+            @select-revision-a="handleSelectRevisionA"
+            @select-revision-b="handleSelectRevisionB"
+            @open-ticket="
+              ({ revision }) => {
+                if (!revision) return
+                const src = sources.find((s) => s.id === selectedSourceId)
+                if (src) handleOpenTicket({ source: src, revision })
+              }
+            "
+          />
         </div>
       </section>
 
       <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
-        <div class="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div
+          class="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+        >
           <h3 class="text-lg font-semibold text-[#1F1F1F]">Sub-Jurisdictions</h3>
 
-          <button class="btn--default btn--with-icon btn--sm sm-btn--lg" @click="openSubJurisdictionModal">
+          <button
+            class="btn--default btn--with-icon btn--sm sm-btn--lg"
+            @click="openSubJurisdictionModal"
+          >
             <Plus :size="16" /> Add Sub-jurisdiction
           </button>
         </div>
 
         <!-- Empty subjurisdiction section -->
-        <div v-if="subJurisdictions.length === 0"
-          class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center">
+        <div
+          v-if="subJurisdictions.length === 0"
+          class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 p-10 text-center"
+        >
           <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-7 w-7 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+              />
             </svg>
           </div>
 
@@ -719,10 +893,16 @@ onMounted(() => {
 
         <!-- Sub jurisdiction section -->
         <div v-else class="space-y-3">
-          <article v-for="node in subJurisdictions" :key="node.id" @click="goToJurisdiction(node.id)"
+          <article
+            v-for="node in subJurisdictions"
+            :key="node.id"
+            @click="goToJurisdiction(node.id)"
             class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
-            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }">
-            <h4 class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]">
+            :style="{ paddingLeft: `${node.depth * 16 + 16}px` }"
+          >
+            <h4
+              class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+            >
               {{ node.name }}
             </h4>
 
@@ -738,15 +918,26 @@ onMounted(() => {
       </section>
     </div>
 
-    <SubJurisdictionDialog :open="subJurisdictionModalOpen" :form="subJurisdictionForm"
+    <JurisdictionDialog
+      :open="subJurisdictionModalOpen"
+      :form="subJurisdictionForm"
       @update:open="(value) => !value && closeSubJurisdictionModal()"
       @update:form="(payload) => (subJurisdictionForm = { ...subJurisdictionForm, ...payload })"
-      @submit="createSubJurisdiction" @cancel="closeSubJurisdictionModal" />
+      @submit="createSubJurisdiction"
+      @cancel="closeSubJurisdictionModal"
+    />
 
-    <SuggestedSourcesDialog :open="showSuggestedSources" :jurisdiction-id="jurisdiction?.id || ''"
-      :jurisdiction-name="jurisdiction?.name || ''" :jurisdiction-description="jurisdiction?.description || ''"
-      :project-description="projectName" @update:open="toggleSuggestedDialog" @cancel="cancelSuggestions"
-      @save="handleSuggestionsSaved" @sources-added="sourceStore.fetchSources(jurisdiction?.id || '')" />
+    <SuggestedSourcesDialog
+      :open="showSuggestedSources"
+      :jurisdiction-id="jurisdiction?.id || ''"
+      :jurisdiction-name="jurisdiction?.name || ''"
+      :jurisdiction-description="jurisdiction?.description || ''"
+      :project-description="projectName"
+      @update:open="toggleSuggestedDialog"
+      @cancel="cancelSuggestions"
+      @save="handleSuggestionsSaved"
+      @sources-added="sourceStore.fetchSources(jurisdiction?.id || '')"
+    />
 
     <Dialog :open="showInlineEdit" @update:open="(value) => (showInlineEdit = value)">
       <DialogScrollContent class="sm:max-w-[560px]">
@@ -758,20 +949,28 @@ onMounted(() => {
         <form @submit.prevent="saveEdit" class="space-y-4">
           <div>
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Name</label>
-            <input v-model="editForm.name"
-              class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+            <input
+              v-model="editForm.name"
+              class="h-12 w-full rounded-lg border px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
           </div>
 
           <div>
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Description</label>
-            <textarea v-model="editForm.description" rows="3"
-              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+            <textarea
+              v-model="editForm.description"
+              rows="3"
+              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
           </div>
 
           <div>
             <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Instructions</label>
-            <textarea v-model="editForm.prompt" rows="3"
-              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none" />
+            <textarea
+              v-model="editForm.prompt"
+              rows="3"
+              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
+            />
           </div>
 
           <DialogFooter class="flex justify-end gap-3 pt-2">
@@ -784,9 +983,16 @@ onMounted(() => {
       </DialogScrollContent>
     </Dialog>
 
-    <SourceDialog :open="addSourceModalOpen" :editing-id="editingSourceId" :form="sourceForm" :loading="sourcesLoading"
-      :error="sourcesError" @update:open="(value) => !value && closeAddSourceModal()"
+    <SourceDialog
+      :open="addSourceModalOpen"
+      :editing-id="editingSourceId"
+      :form="sourceForm"
+      :loading="sourcesLoading"
+      :error="sourcesError"
+      @update:open="(value) => !value && closeAddSourceModal()"
       @update:form="(payload) => (sourceForm = { ...sourceForm, ...payload })"
-      @submit="editingSourceId ? saveEditedSource() : createSourceFromForm()" @cancel="closeAddSourceModal" />
+      @submit="editingSourceId ? saveEditedSource() : createSourceFromForm()"
+      @cancel="closeAddSourceModal"
+    />
   </main>
 </template>
