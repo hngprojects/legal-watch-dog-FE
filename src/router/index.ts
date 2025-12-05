@@ -13,7 +13,7 @@ import Careers from '@/views/CareersView.vue'
 import Terms from '@/views/TermsView.vue'
 import HelpCenter from '@/views/HelpCenterView.vue'
 import Features from '@/views/FeaturesView.vue'
-import BlogView from '@/views/BlogView.vue'
+// import BlogView from '@/views/BlogView.vue'
 import WaitlistView from '@/views/WaitlistView.vue'
 import SkeletonView from '@/views/SkeletonView.vue'
 import LearnMore from '@/views/LearnMore.vue'
@@ -70,13 +70,7 @@ const router = createRouter({
         { path: 'careers', name: 'careers', component: Careers },
         { path: 'help-center', name: 'help-center', component: HelpCenter },
         { path: 'terms', name: 'terms', component: Terms },
-        { path: 'blog', name: 'blog', component: BlogView },
-        {
-          path: 'blog/:id',
-          name: 'blog-detail',
-          component: () => import('@/views/BlogDetailView.vue'),
-          props: true,
-        },
+
         { path: 'features', name: 'features', component: Features },
         { path: 'waitlist', name: 'waitlist', component: WaitlistView },
 
@@ -105,7 +99,6 @@ const router = createRouter({
         { path: 'onboarding', name: 'onboarding', component: OnboardingView },
       ],
     },
-
     {
       path: '/',
       component: AuthLayout,
