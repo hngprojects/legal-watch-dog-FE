@@ -71,7 +71,7 @@ const generateToken = () => {
       <h1 class="border-b border-b-[#E5E7EB] pb-6 text-3xl font-bold text-[#1F1F1F]">
         New fine-grained personal access token
       </h1>
-      <p class="text-2xl text-[#1F1F1F]">
+      <p class="text-xl text-[#1F1F1F] font-bold">
         Create a fine-grained, organization-scoped token suitable for personal API use and for using
         LegalWatchDog over HTTPS.
       </p>
