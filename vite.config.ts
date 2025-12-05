@@ -12,7 +12,9 @@ export default defineConfig({
     port: 3000,
   },
   ssgOptions: {
-    entry: 'src/blog.ts',
+    includedRoutes: (paths) => {
+      return paths.filter((path) => path.startsWith('/blog'))
+    },
   },
   plugins: [vue(), vueJsx(), vueDevTools(), tailwindcss()],
   resolve: {
