@@ -10,7 +10,7 @@ const sections: Section[] = [
   { id: 'introduction', label: 'Introduction' },
   { id: 'information-we-collect', label: 'Information We Collect' },
   { id: 'use-of-information', label: 'How We Use Information' },
-  { id: 'legal-basis', label: 'Legal Basis for Processing' },
+  { id: 'legal-basis', label: 'Regulatory Basis for Processing' },
   { id: 'data-sharing', label: 'How We Share Information' },
   { id: 'data-retention', label: 'Data Storage & Retention' },
   { id: 'security', label: 'Security Measures' },
@@ -193,7 +193,7 @@ onBeforeUnmount(() => {
                   <p class="text-gray-600">If your team uploads documents, we store:</p>
                   <ul class="mt-2 list-disc space-y-1 pl-6">
                     <li>Internal compliance files</li>
-                    <li>Legal documents</li>
+                    <li>Regulatory documents</li>
                     <li>Regulatory filings</li>
                     <li>News articles</li>
                   </ul>
@@ -259,13 +259,13 @@ onBeforeUnmount(() => {
 
             <section id="legal-basis" class="space-y-4">
               <div>
-                <h2 class="text-2xl font-bold text-[#3C2610]">Legal Basis for Processing</h2>
+                <h2 class="text-2xl font-bold text-[#3C2610]">Basis for Processing</h2>
                 <p class="mt-2 text-gray-600">Depending on your region, we rely on:</p>
               </div>
               <ul class="list-disc space-y-2 pl-6 text-gray-700">
                 <li>Performance of a contract</li>
                 <li>Legitimate business interest</li>
-                <li>Compliance with legal obligations</li>
+                <li>Compliance with obligations</li>
                 <li>Consent for optional analytics</li>
               </ul>
             </section>
@@ -279,7 +279,7 @@ onBeforeUnmount(() => {
                 <li>Authorized users within your organization</li>
                 <li>External partners added to tickets or reviews</li>
                 <li>Service providers (hosting, data processing, AI processing)</li>
-                <li>Legal authorities if required by law</li>
+                <li>Authorities if required by law</li>
               </ul>
               <p class="text-gray-600">We do not sell personal data.</p>
             </section>
@@ -340,7 +340,7 @@ onBeforeUnmount(() => {
                 <li>Generate summaries</li>
               </ul>
               <p class="text-gray-600">
-                All outputs are provided to assist your team but should not replace legal review. We
+                All outputs are provided to assist your team but should not replace review. We
                 do not use your private data to train public AI models.
               </p>
             </section>

@@ -14,13 +14,13 @@
           level="h1"
           class="mb-4 text-3xl leading-tight font-extrabold text-white sm:mb-5 sm:text-4xl md:text-5xl lg:text-6xl"
         >
-          Never Miss a Legal Update Again
+          Never Miss a Regulatory Update Again
         </TypographyHeading>
 
         <TypographyText
           class="mx-auto mb-8 max-w-3xl text-sm text-gray-300 sm:mb-10 sm:text-base md:text-lg lg:text-xl"
         >
-          Stay ahead of legal change by automating the monitoring process and saving hours of manual
+          Stay ahead of regulatory change by automating the monitoring process and saving hours of manual
           research every week.
         </TypographyText>
 
@@ -119,7 +119,7 @@
               level="h3"
               class="mb-3 text-xl font-bold text-gray-900 sm:text-2xl md:text-3xl"
             >
-              AI-Powered Legal Insights
+              AI-Powered Insights
             </TypographyHeading>
 
             <TypographyText class="text-base text-gray-600 sm:text-lg">
@@ -168,7 +168,7 @@
             </TypographyHeading>
 
             <TypographyText class="text-base text-gray-600 sm:text-lg">
-              Create actionable tickets for each legal update, keeping your team informed and
+              Create actionable tickets for each update, keeping your team informed and
               accountable.
             </TypographyText>
           </div>
@@ -183,7 +183,7 @@
           level="h2"
           class="mb-4 text-2xl leading-tight font-bold text-[#401903] sm:mb-5 sm:text-3xl md:text-4xl"
         >
-          Turn <span class="text-[#F2AB6D]"> Legal Changes </span>Into Clear Actions
+          Turn <span class="text-[#F2AB6D]"> Regulatory Changes </span>Into Clear Actions
         </TypographyHeading>
 
         <TypographyText class="mb-8 text-base text-gray-600 sm:mb-10 sm:text-lg md:text-xl">

@@ -73,7 +73,6 @@ const handleSubmit = async () => {
   }
 }
 
-
 const handleEarlyAccessSubmit = async () => {
   if (isSubmitting.value) return
 
@@ -107,12 +106,11 @@ const handleEarlyAccessSubmit = async () => {
   }
 }
 
-
 const features = [
   {
     icon: BellIcon,
     title: 'Automated Monitoring',
-    description: 'Continuous scanning of government and legal websites for regulatory changes',
+    description: 'Continuous scanning of government and websites for regulatory changes',
   },
   {
     icon: BrainIcon,
@@ -176,7 +174,7 @@ const testimonials = [
     quote:
       "The confidence scoring helps us prioritize what matters. We've never missed a critical update since switching.",
     name: 'Michael Torres',
-    title: 'Legal Operations Manager',
+    title: 'Regulatory Operations Manager',
     initials: 'MT',
   },
   {
@@ -216,7 +214,7 @@ const testimonials = [
         </Badge>
 
         <h1 class="mb-6 text-5xl leading-tight font-bold text-[#1F1F1F] sm:text-6xl lg:text-[64px]">
-          Stay Ahead of Legal Changes<br />
+          Stay Ahead of Regulatory Changes<br />
           Without the Weekly Stress
         </h1>
 
