@@ -153,7 +153,7 @@ const toggleMenu = (id: string) => {
               Last Updated
             </th>
             <th
-              class="w-[80px] px-6 py-3 text-center text-xs font-semibold tracking-wider text-[#5C5956] uppercase"
+              class="w-20 px-6 py-3 text-center text-xs font-semibold tracking-wider text-[#5C5956] uppercase"
             >
               Action
             </th>
@@ -253,7 +253,7 @@ const toggleMenu = (id: string) => {
               <!-- Dropdown Menu – ONLY z-index changed -->
               <div
                 v-if="activeMenuId === ticket.id"
-                class="animate-in fade-in zoom-in absolute top-8 right-8 z-[9999] w-48 rounded-xl border border-gray-100 bg-white py-2 text-left shadow-[0px_4px_24px_rgba(0,0,0,0.1)] duration-200"
+                class="animate-in fade-in zoom-in absolute top-8 right-8 z-9999 w-48 rounded-xl border border-gray-100 bg-white py-2 text-left shadow-[0px_4px_24px_rgba(0,0,0,0.1)] duration-200"
                 @click.stop
               >
                 <button

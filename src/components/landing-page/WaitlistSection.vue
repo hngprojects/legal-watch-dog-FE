@@ -12,9 +12,7 @@ import BrainIcon from '@/assets/icons/brain.svg'
 import CheckedIcon from '@/assets/icons/checked.svg'
 import GlobeIcon from '@/assets/icons/globe.svg'
 import GlobeIcon2 from '@/assets/icons/globe2.svg'
-import Swal from '@/lib/swal'
-// import BackLeft from '@/assets/Images/backleft.png'
-// import BackRight from '@/assets/Images/backright.png'
+import { toast } from 'vue-sonner'
 import earlyAccessBg from '@/assets/Images/earlyAccess-bg.png'
 
 // Top Waitlist Form
@@ -63,29 +61,18 @@ const handleSubmit = async () => {
   try {
     const response = await submitWaitlist({ ...form })
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Success!',
-      text: response.message ?? 'You are on the waitlist!',
-    })
+    toast.success(response.message ?? 'You are on the waitlist!')
 
     form.organization_name = ''
     form.organization_email = ''
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Please try again shortly.'
-    // feedback.value = {
-    //   type: 'error',
-    //   message: errorMessage,
-    // }
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: errorMessage,
-    })
+    toast.error(errorMessage)
   } finally {
     isSubmitting.value = false
   }
 }
+
 
 const handleEarlyAccessSubmit = async () => {
   if (isSubmitting.value) return
@@ -108,25 +95,18 @@ const handleEarlyAccessSubmit = async () => {
   try {
     const response = await submitWaitlist({ ...earlyAccessForm })
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Success!',
-      text: response.message ?? "You're on the waitlist!",
-    })
+    toast.success(response.message ?? "You're on the waitlist!")
 
     earlyAccessForm.organization_name = ''
     earlyAccessForm.organization_email = ''
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unable to submit right now.'
-    Swal.fire({
-      icon: 'error',
-      title: 'Oops...',
-      text: errorMessage,
-    })
+    toast.error(errorMessage)
   } finally {
     isSubmitting.value = false
   }
 }
+
 
 const features = [
   {
