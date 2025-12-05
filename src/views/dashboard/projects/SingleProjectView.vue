@@ -68,9 +68,9 @@ const organizationOptions = computed(() =>
   organizations.value.map((org) => ({ id: org.id, name: org.name })),
 )
 
-const organizationName = computed(
-  () => organizations.value.find((org) => org.id === organizationId.value)?.name || 'Organization',
-)
+// const organizationName = computed(
+//   () => organizations.value.find((org) => org.id === organizationId.value)?.name || 'Organization',
+// )
 
 const hiring = ref(false)
 const hireEnabled = ref(false)
@@ -271,24 +271,6 @@ watch(
         >
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink as-child>
-                  <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbLink as-child>
-                  <RouterLink :to="{ name: 'organization-profile', params: { organizationId } }">
-                    {{ organizationName }}
-                  </RouterLink>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
               <BreadcrumbItem>
                 <BreadcrumbLink as-child>
                   <RouterLink :to="{ name: 'organization-projects', params: { organizationId } }">

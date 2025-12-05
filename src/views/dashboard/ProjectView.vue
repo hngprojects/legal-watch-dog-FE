@@ -9,10 +9,10 @@ import Swal from '@/lib/swal'
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
+  // BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
+  // BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import ProjectFormModal from '@/components/dashboard/ProjectFormModal.vue'
 
@@ -40,7 +40,7 @@ const organizationId = computed(() => {
   const id = route.params.organizationId
   return typeof id === 'string' ? id : ''
 })
-const hasOrganization = computed(() => Boolean(organizationId.value))
+// const hasOrganization = computed(() => Boolean(organizationId.value))
 const organizationName = computed(() => {
   const currentId = organizationId.value
   if (!currentId) return ''
@@ -229,27 +229,6 @@ watch(
       <div class="flex flex-wrap items-center justify-between gap-3">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
-            <BreadcrumbItem v-if="hasOrganization">
-              <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organization-profile', params: { organizationId } }">
-                  {{ organizationName || 'Organization' }}
-                </RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem v-else>
-              <BreadcrumbPage>Organization</BreadcrumbPage>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
             <BreadcrumbItem>
               <BreadcrumbPage>Projects</BreadcrumbPage>
             </BreadcrumbItem>
