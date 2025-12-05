@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
+import { blogPosts } from './src/data/posts' // Import your blog posts
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,7 +14,11 @@ export default defineConfig({
   },
   ssgOptions: {
     includedRoutes: (paths) => {
-      return paths.filter((path) => path.startsWith('/blog'))
+      const staticBlogRoutes = paths.filter(
+        (path) => path.startsWith('/blog') && !path.includes(':'),
+      )
+      const dynamicBlogRoutes = [...blogPosts.map((post) => `/blog/${post.id}`)]
+      return [...staticBlogRoutes, ...dynamicBlogRoutes]
     },
   },
   plugins: [vue(), vueJsx(), vueDevTools(), tailwindcss()],
