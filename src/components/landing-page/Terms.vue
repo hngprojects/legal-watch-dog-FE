@@ -62,7 +62,7 @@ const termsContent = [
     preamble:
       'By accessing, browsing, or using the Platform, or using any of our features, you confirm that:',
     items: [
-      'You are at least 18 years old or have legal permission',
+      'You are at least 18 years old or have permission',
       'You have read and understood these Terms.',
       'You have the authority to accept these terms on behalf of yourself or your organization.',
     ],
@@ -97,7 +97,7 @@ const termsContent = [
     preamble: null,
     items: [
       'AI outputs may contain errors or omissions.',
-      'You are responsible for independently verifying any critical legal information.',
+      'You are responsible for independently verifying any critical information.',
       'Outputs are for informational purposes only.',
     ],
     note: null,

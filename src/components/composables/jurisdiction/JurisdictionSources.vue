@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { Plus, FilePlus } from 'lucide-vue-next'
-import aiIcon from '@/assets/icons/ai_icon.png'
+import { computed } from 'vue'
+import { Plus, Search } from 'lucide-vue-next'
 import type { Source, SourceRevision } from '@/types/source'
 import type { Ticket } from '@/types/ticket'
 
@@ -28,9 +27,6 @@ const emit = defineEmits<{
   (e: 'open-ticket', payload: { source: Source; revision: SourceRevision }): void
 }>()
 
-const showHeaderMenu = ref(false)
-const showEmptyStateMenu = ref(false)
-
 const latestRevisionBySource = computed<Record<string, SourceRevision | undefined>>(() => {
   const map: Record<string, SourceRevision | undefined> = {}
   props.sources.forEach((source) => {
@@ -47,19 +43,18 @@ const openTicket = (source: Source, revision?: SourceRevision) => {
   emit('open-ticket', { source, revision })
 }
 
-const closeMenus = () => {
-  showHeaderMenu.value = false
-  showEmptyStateMenu.value = false
-}
-
 const handleAddManual = () => {
-  closeMenus()
   emit('add-manual')
 }
 
 const handleAddAi = () => {
-  closeMenus()
   emit('add-ai')
+}
+
+const handleScrape = (source: Source) => {
+  // Guard to prevent accidental double-triggering
+  if (props.scraping[source.id]) return
+  emit('scrape', source)
 }
 
 const hasTicket = (revisionId?: string) => {
@@ -69,37 +64,34 @@ const hasTicket = (revisionId?: string) => {
 </script>
 
 <template>
+  <div class="flex items-center gap-2">
+    <div class="relative w-full sm:w-64">
+      <Search
+        :size="16"
+        class="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 sm:size-[18px]"
+      />
+      <input
+        type="text"
+        placeholder="Auto source search"
+        class="text-md focus:border-accent-main focus:ring-accent-main/20 w-full rounded-lg border border-gray-200 bg-white py-2 pr-3 pl-10 text-gray-700 shadow-sm outline-none focus:ring-2"
+        @keydown.enter.prevent="handleAddAi"
+      />
+    </div>
+    <button @click="handleAddAi" class="btn--secondary btn--sm btn--with-icon">
+      <FileSearchCorner size="16" />
+      Search
+    </button>
+  </div>
   <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
     <div>
       <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
       <p class="text-xs text-gray-500">Trigger scraping per source and view results.</p>
     </div>
-
-    <div class="relative">
-      <button
-        @click.stop="showHeaderMenu = !showHeaderMenu"
-        class="btn--default btn--with-icon btn--sm md:btn--lg"
-      >
-        <Plus :size="16" class="sm:size-[18px]" />
-        <span class="hidden sm:inline">Add Source</span>
-        <span class="sm:hidden">Add</span>
-      </button>
-
-      <div
-        v-if="showHeaderMenu"
-        class="absolute top-full z-50 mt-2 w-60 space-y-2 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0"
-      >
-        <button @click="handleAddManual" class="btn--secondary btn--sm lg:btn--lg btn--with-icon">
-          <FilePlus :size="18" />
-          Add Source Manually
-        </button>
-
-        <button @click="handleAddAi" class="btn--secondary btn--sm md:btn--lg btn--with-icon">
-          <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-          AI Suggested sources
-        </button>
-      </div>
-    </div>
+    <button @click="handleAddManual" class="btn--default btn--with-icon btn--sm md:btn--lg">
+      <Plus :size="16" class="sm:size-[18px]" />
+      <span class="hidden sm:inline">Add Source</span>
+      <span class="sm:hidden">Add</span>
+    </button>
   </div>
 
   <div v-if="sourcesLoading" class="space-y-2">
@@ -117,35 +109,6 @@ const hasTicket = (revisionId?: string) => {
     >
       <p class="text-sm text-gray-500">No sources added yet.</p>
       <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
-
-      <div class="relative mt-4 inline-block">
-        <button
-          @click.stop="showEmptyStateMenu = !showEmptyStateMenu"
-          class="btn--default btn--sm md:btn--lg btn--with-icon"
-        >
-          <Plus :size="16" />
-          <span class="hidden sm:inline">Add Source</span>
-          <span class="sm:hidden">Add</span>
-        </button>
-
-        <div
-          v-if="showEmptyStateMenu"
-          class="absolute top-full left-1/2 z-50 mt-2 w-60 -translate-x-1/2 rounded-xl bg-white p-1 text-left shadow-lg ring-1 ring-black/5"
-        >
-          <button @click="handleAddManual" class="btn btn--sm btn--with-icon">
-            <FilePlus :size="18" />
-            Add Source Manually
-          </button>
-
-          <button
-            @click="handleAddAi"
-            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
-          >
-            <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-            AI Suggested sources
-          </button>
-        </div>
-      </div>
     </div>
 
     <div v-else class="space-y-3">
@@ -171,6 +134,7 @@ const hasTicket = (revisionId?: string) => {
           <!-- Action Buttons - stacked & centered on mobile, inline on desktop -->
           <div class="flex flex-wrap justify-start gap-2 sm:flex-none sm:justify-end">
             <button
+              type="button"
               class="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm"
               :class="
                 scraping[source.id]
@@ -178,7 +142,7 @@ const hasTicket = (revisionId?: string) => {
                   : 'bg-[#401903] text-white hover:bg-[#301403]'
               "
               :disabled="scraping[source.id]"
-              @click="emit('scrape', source)"
+              @click="handleScrape(source)"
             >
               {{ scraping[source.id] ? 'Scraping...' : 'Scrape Now' }}
             </button>

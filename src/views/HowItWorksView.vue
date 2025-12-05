@@ -15,7 +15,7 @@ import alertsImg from '@/assets/Images/how-it-works/alerts.webp'
 const steps = [
   {
     title: 'Set Your Project',
-    description: 'Define what you want to monitor or any legal topic across multiple jurisdiction.',
+    description: 'Define what you want to monitor or any topic across multiple jurisdiction.',
     image: projectImg,
   },
   {
@@ -79,7 +79,7 @@ const showVideo = ref(false)
             How Legal Watch Dog Works
           </h1>
           <p class="lg:text-preset-body-xx-lg text-base text-gray-600 sm:text-lg md:text-xl">
-            Stay ahead of legal changes with AI-powered monitoring.<br class="hidden sm:block" />
+            Stay ahead of changes with AI-powered monitoring.<br class="hidden sm:block" />
             Never miss an important update across any jurisdiction.
           </p>
         </div>
