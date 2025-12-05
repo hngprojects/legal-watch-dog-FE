@@ -18,7 +18,6 @@ const archivedJurisdictions = computed(() => {
 
 onMounted(() => {
   jurisdictionStore.initializeArchived()
-
 })
 
 const restoreJurisdiction = async (jurisdictionId: string) => {
@@ -85,7 +84,9 @@ const permanentDelete = async (jurisdictionId: string) => {
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Archived Jurisdictions</h1>
-            <p class="mt-1 sm:mt-2 text-sm text-gray-600 sm:text-base">Manage your deleted jurisdictions</p>
+            <p class="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
+              Manage your deleted jurisdictions
+            </p>
           </div>
           <button
             @click="$router.back()"
@@ -99,7 +100,7 @@ const permanentDelete = async (jurisdictionId: string) => {
       <div v-if="!orgId" class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
         <div class="flex items-start sm:items-center">
           <svg
-            class="mr-3 mt-0.5 h-5 w-5 shrink-0 text-yellow-600 sm:mt-0"
+            class="mt-0.5 mr-3 h-5 w-5 shrink-0 text-yellow-600 sm:mt-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -122,7 +123,7 @@ const permanentDelete = async (jurisdictionId: string) => {
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="archivedJurisdictions.length === 0" class="py-12 sm:py-16 text-center">
+      <div v-else-if="archivedJurisdictions.length === 0" class="py-12 text-center sm:py-16">
         <div class="mx-auto max-w-md px-4 sm:px-0">
           <div class="mx-auto mb-4 h-16 w-16 text-gray-400 sm:mb-6 sm:h-20 sm:w-20">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +135,9 @@ const permanentDelete = async (jurisdictionId: string) => {
               />
             </svg>
           </div>
-          <h3 class="mb-2 text-lg font-semibold text-gray-900 sm:mb-3 sm:text-xl">No Archived Jurisdictions</h3>
+          <h3 class="mb-2 text-lg font-semibold text-gray-900 sm:mb-3 sm:text-xl">
+            No Archived Jurisdictions
+          </h3>
           <p class="mb-4 text-sm text-gray-500 sm:mb-6 sm:text-base">
             Jurisdictions you delete will appear here for restoration.
           </p>
@@ -151,7 +154,7 @@ const permanentDelete = async (jurisdictionId: string) => {
         <div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
           <div class="flex items-start sm:items-center">
             <svg
-              class="mr-3 mt-0.5 h-5 w-5 shrink-0 text-blue-600 sm:mt-0"
+              class="mt-0.5 mr-3 h-5 w-5 shrink-0 text-blue-600 sm:mt-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -179,7 +182,7 @@ const permanentDelete = async (jurisdictionId: string) => {
             <div class="flex-1">
               <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
                 <span
-                  class="self-start inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 sm:self-center"
+                  class="inline-flex items-center self-start rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 sm:self-center"
                 >
                   Archived
                 </span>
@@ -190,7 +193,9 @@ const permanentDelete = async (jurisdictionId: string) => {
 
               <p class="mb-3 text-sm text-gray-600 sm:text-base">{{ jurisdiction.description }}</p>
 
-              <div class="flex flex-col gap-1 text-xs text-gray-500 sm:flex-row sm:items-center sm:gap-2 sm:text-sm">
+              <div
+                class="flex flex-col gap-1 text-xs text-gray-500 sm:flex-row sm:items-center sm:gap-2 sm:text-sm"
+              >
                 <span>Created: {{ new Date(jurisdiction.created_at).toLocaleDateString() }}</span>
                 <span class="hidden sm:inline">•</span>
                 <span v-if="jurisdiction.deleted_at" class="sm:ml-0">

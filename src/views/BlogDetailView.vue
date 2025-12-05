@@ -10,9 +10,7 @@ const route = useRoute()
 // reactively watch route changes
 const blogId = computed(() => Number(route.params.id))
 
-const blogPost = computed(() =>
-  blogPosts.find((post) => post.id === blogId.value)
-)
+const blogPost = computed(() => blogPosts.find((post) => post.id === blogId.value))
 </script>
 <template>
   <div v-if="blogPost" class="min-h-screen bg-gray-50 py-16">
@@ -36,11 +34,7 @@ const blogPost = computed(() =>
         <TypographyHeading level="h2" class="mb-4 text-center text-2xl font-bold">
           Introduction
         </TypographyHeading>
-        <p
-          v-for="(para, i) in blogPost.introduction"
-          :key="i"
-          class="mb-6 leading-7 text-gray-700"
-        >
+        <p v-for="(para, i) in blogPost.introduction" :key="i" class="mb-6 leading-7 text-gray-700">
           {{ para }}
         </p>
       </section>
@@ -158,7 +152,5 @@ const blogPost = computed(() =>
     </div>
   </div>
 
-  <div v-else class="py-40 text-center text-xl text-gray-600">
-    Blog post not found.
-  </div>
+  <div v-else class="py-40 text-center text-xl text-gray-600">Blog post not found.</div>
 </template>

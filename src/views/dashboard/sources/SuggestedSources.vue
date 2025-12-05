@@ -144,7 +144,9 @@ watch(
 
 <template>
   <div class="rounded-sm border border-gray-100 bg-white p-1 shadow-sm">
-    <div class="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div
+      class="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between"
+    >
       <div class="flex items-center gap-3">
         <div class="flex h-8 w-8 items-center justify-center rounded bg-[#401903]">
           <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain brightness-0 invert" />
@@ -188,9 +190,9 @@ watch(
         class="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50/50 hover:border-gray-200"
       >
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-          <div class="flex-1 space-y-1 min-w-0">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-              <h4 class="text-sm sm:text-2xl font-medium text-gray-900">{{ item.title }}</h4>
+          <div class="min-w-0 flex-1 space-y-1">
+            <div class="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+              <h4 class="text-sm font-medium text-gray-900 sm:text-2xl">{{ item.title }}</h4>
               <span
                 v-if="item.is_official"
                 class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
@@ -201,12 +203,12 @@ watch(
             <a
               :href="item.url"
               target="_blank"
-              class="wrap-break-word text-sm text-[#401903] underline hover:no-underline"
+              class="text-sm wrap-break-word text-[#401903] underline hover:no-underline"
             >
               {{ item.url }}
             </a>
-            <p class="mt-1 text-xs text-gray-600 italic wrap-break-word">{{ item.snippet }}</p>
-            <p class="mt-2 text-xs text-gray-500 wrap-break-word">
+            <p class="mt-1 text-xs wrap-break-word text-gray-600 italic">{{ item.snippet }}</p>
+            <p class="mt-2 text-xs wrap-break-word text-gray-500">
               <span class="font-medium">Reason:</span> {{ item.confidence_reason }}
             </p>
           </div>
@@ -219,11 +221,7 @@ watch(
             <button
               @click="toggleAddSuggestion(item.id)"
               class="w-20 rounded-lg px-3 py-1.5 text-sm font-medium transition-all"
-              :class="
-                item.added
-                  ? 'bg-[#12B76A] text-white'
-                  : 'btn--secondary btn--sm'
-              "
+              :class="item.added ? 'bg-[#12B76A] text-white' : 'btn--secondary btn--sm'"
             >
               {{ item.added ? 'Added' : 'Add' }}
             </button>

@@ -69,11 +69,9 @@ api.interceptors.response.use(
 
       if (hasRefreshToken && !originalRequest?._retry && !isRefreshRequest) {
         if (!refreshPromise) {
-          refreshPromise = auth
-            .refreshTokens()
-            .finally(() => {
-              refreshPromise = null
-            })
+          refreshPromise = auth.refreshTokens().finally(() => {
+            refreshPromise = null
+          })
         }
 
         try {
