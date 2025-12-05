@@ -9,7 +9,7 @@ import { useOrganizationStore } from '@/stores/organization-store'
 import type { Organization } from '@/types/organization'
 import type { UserProfile } from '@/types/user'
 import editIcon from '@/assets/icons/editIcon.svg'
-import { toast } from "vue-sonner"
+import { toast } from 'vue-sonner'
 import {
   Select,
   SelectContent,
@@ -231,13 +231,13 @@ const handleImageUpload = async (event: Event) => {
 
   const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
   if (!validTypes.includes(file.type)) {
-    toast.error("Please upload a valid image file (JPEG, PNG, GIF, or WebP).")
+    toast.error('Please upload a valid image file (JPEG, PNG, GIF, or WebP).')
     return
   }
 
   const maxSize = 5 * 1024 * 1024
   if (file.size > maxSize) {
-    toast.error("Image size must be less than 5MB.")
+    toast.error('Image size must be less than 5MB.')
     return
   }
 
@@ -254,15 +254,14 @@ const handleImageUpload = async (event: Event) => {
         authStore.user = { ...authStore.user, avatar_url: uploadedUrl }
       }
 
-      toast.success("Profile picture updated successfully.")
+      toast.success('Profile picture updated successfully.')
     }
-
   } catch (error) {
     const err = error as { response?: { data?: { message?: string; error?: string } } }
     const errorMessage =
       err?.response?.data?.message ||
       err?.response?.data?.error ||
-      "Failed to upload profile picture. Please try again."
+      'Failed to upload profile picture. Please try again.'
 
     toast.error(errorMessage)
   } finally {
@@ -271,7 +270,6 @@ const handleImageUpload = async (event: Event) => {
   }
 }
 
-
 const closeEditModal = () => {
   showEditModal.value = false
 }
@@ -279,7 +277,7 @@ const closeEditModal = () => {
 const saveEdits = async () => {
   try {
     if (!editForm.value.name.trim()) {
-      toast.error("Name is required.")
+      toast.error('Name is required.')
       return
     }
 
@@ -299,9 +297,8 @@ const saveEdits = async () => {
       }
     }
 
-    toast.success("Profile updated successfully.")
+    toast.success('Profile updated successfully.')
     closeEditModal()
-
   } catch (error) {
     const err = error as {
       response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } }
@@ -310,14 +307,13 @@ const saveEdits = async () => {
     const errorMessage =
       err?.response?.data?.message ||
       err?.response?.data?.error ||
-      "Failed to update profile. Please try again."
+      'Failed to update profile. Please try again.'
 
     toast.error(errorMessage)
   } finally {
     isSaving.value = false
   }
 }
-
 </script>
 
 <template>

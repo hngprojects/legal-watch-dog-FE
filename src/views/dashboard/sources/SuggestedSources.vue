@@ -108,7 +108,6 @@ const saveSelected = async () => {
     emit('save', count)
 
     toast.success(`${count} source${count > 1 ? 's' : ''} added and will be monitored.`)
-
   } catch (err) {
     const message =
       typeof err === 'object' && err && 'response' in err
@@ -120,7 +119,6 @@ const saveSelected = async () => {
     toast.error(message || 'Failed to add sources')
   }
 }
-
 
 onMounted(() => loadSuggestions())
 

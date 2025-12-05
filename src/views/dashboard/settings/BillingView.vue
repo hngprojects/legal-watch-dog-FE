@@ -6,7 +6,7 @@ import type { BillingHistoryEntry, BillingPlan } from '@/types/billing'
 import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { toast } from "vue-sonner"
+import { toast } from 'vue-sonner'
 
 const hasHistory = ref(false)
 const isFreeTrial = ref(true)
@@ -57,7 +57,8 @@ const calculateDaysLeft = (endDate: Date): string => {
 <template>
   <h1 class="app-container mb-8 text-3xl font-semibold">Billing & Subscription</h1>
   <section
-    class="app-container mb-10 flex flex-col gap-6 *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row">
+    class="app-container mb-10 flex flex-col gap-6 *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
+  >
     <article>
       <div class="mb-5 flex items-center justify-between">
         <h2 class="text-xl text-gray-600">Current Plan</h2>
@@ -75,7 +76,10 @@ const calculateDaysLeft = (endDate: Date): string => {
       <template v-else-if="currentPlan">
         <div class="mb-4 flex flex-col gap-2 md:flex-row md:items-center">
           <h3 class="text-3xl font-semibold">{{ currentPlan.label }}</h3>
-          <p class="text-red-main mb-2 w-fit rounded-md bg-red-100 px-2 py-1 text-sm" v-if="cancelled">
+          <p
+            class="text-red-main mb-2 w-fit rounded-md bg-red-100 px-2 py-1 text-sm"
+            v-if="cancelled"
+          >
             Cancelled
           </p>
         </div>
@@ -83,13 +87,19 @@ const calculateDaysLeft = (endDate: Date): string => {
       </template>
 
       <div class="flex flex-col gap-x-6 gap-y-4 *:flex-1 md:flex-row">
-        <RouterLink :to="{ name: 'payment-plan' }"
-          class="btn--md btn--default flex items-center justify-center text-center">
+        <RouterLink
+          :to="{ name: 'payment-plan' }"
+          class="btn--md btn--default flex items-center justify-center text-center"
+        >
           Upgrade Plan
         </RouterLink>
         <template v-if="currentPlan && endDate">
           <CancelSubscriptionModal :endDate="endDate" :currentPlan="currentPlan">
-            <button class="btn--md btn--secondary" :class="[isFreeTrial && 'btn--disabled']" :disabled="isFreeTrial">
+            <button
+              class="btn--md btn--secondary"
+              :class="[isFreeTrial && 'btn--disabled']"
+              :disabled="isFreeTrial"
+            >
               Cancel Subscription
             </button>
           </CancelSubscriptionModal>
@@ -108,8 +118,10 @@ const calculateDaysLeft = (endDate: Date): string => {
       </p>
 
       <AddPaymentModal>
-        <RouterLink :to="{ name: 'payment-plan', params: { plan: 'professional' } }"
-          class="btn--md btn--secondary block w-fit text-center">
+        <RouterLink
+          :to="{ name: 'payment-plan', params: { plan: 'professional' } }"
+          class="btn--md btn--secondary block w-fit text-center"
+        >
           Add Payment Method
         </RouterLink>
       </AddPaymentModal>
@@ -119,8 +131,10 @@ const calculateDaysLeft = (endDate: Date): string => {
   <section class="app-container">
     <h2 class="mb-6 text-2xl font-semibold">Payment History</h2>
 
-    <div class="flex min-h-[356px] rounded-lg bg-white"
-      :class="[hasHistory ? '' : 'items-center justify-center px-6 text-center']">
+    <div
+      class="flex min-h-[356px] rounded-lg bg-white"
+      :class="[hasHistory ? '' : 'items-center justify-center px-6 text-center']"
+    >
       <div v-if="hasHistory" class="w-full overflow-x-auto px-4 py-8 md:px-8">
         <table class="w-full table-auto">
           <thead>
