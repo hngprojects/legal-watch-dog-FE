@@ -1,676 +1,964 @@
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { useProjectStore } from '@/stores/project-store'
-import { useJurisdictionStore } from '@/stores/jurisdiction-store'
+import { storeToRefs } from 'pinia'
 import { useOrganizationStore } from '@/stores/organization-store'
+import { useProjectStore } from '@/stores/project-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { computed, ref, onMounted, watch } from 'vue'
-import type { Project, ProjectErrorResponse } from '@/types/project'
-import type { Jurisdiction } from '@/api/jurisdiction'
-import { ArrowLeftIcon, Plus, Settings, ChevronDown } from 'lucide-vue-next'
+import { organizationService } from '@/api/organization'
+import { invitationService } from '@/api/invitation'
+import type { OrganizationErrorResponse } from '@/types/organization'
+import type { Organization, RawOrganization } from '@/types/organization'
+import type { Invitation } from '@/types/invitation'
+import type { UserProfile } from '@/types/user'
 import { toast } from 'vue-sonner'
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import {
   Dialog,
+  DialogClose,
+  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogScrollContent,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { EllipsisVertical } from 'lucide-vue-next'
+import ProjectFormModal from '@/components/dashboard/ProjectFormModal.vue'
+import { DropdownMenu } from '@/components/ui/dropdown-menu'
+import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
+import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
+import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
+import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
+import { Settings } from 'lucide-vue-next'
 
-import profile from '@/assets/icons/profile.webp'
-import { useConfirmDialog } from '@/composables/useConfirmDialog'
+type MemberRole = 'Owner' | 'Admin' | 'Manager' | 'Member'
+type MemberStatus = 'Active' | 'Pending' | 'Inactive'
 
-const confirmDialog = useConfirmDialog()
+type Member = {
+  id: string
+  name: string
+  email: string
+  role: MemberRole
+  status: MemberStatus
+}
+
 const route = useRoute()
 const router = useRouter()
-const projectStore = useProjectStore()
-const jurisdictionStore = useJurisdictionStore()
 const organizationStore = useOrganizationStore()
+const projectStore = useProjectStore()
 const authStore = useAuthStore()
-const organizationsRequested = ref(false)
-const projectId = route.params.id as string
-const organizationId = computed(
-  () => (route.params.organizationId as string) || project.value?.org_id || '',
-)
-const organizationName = computed(() => {
-  if (!organizationId.value) return ''
-  return organizationStore.organizations.find((org) => org.id === organizationId.value)?.name || ''
+const { organizations, loading: orgLoading } = storeToRefs(organizationStore)
+const { projects, loading: projectsLoading, error: projectError } = storeToRefs(projectStore)
+
+const orgId = computed(() => {
+  const id = route.params.organizationId
+  return typeof id === 'string' ? id : ''
 })
-const project = ref<Project | null>(null)
-const loading = ref(true)
-const activeTab = ref<'jurisdictions' | 'activity'>('jurisdictions')
-const showAddJurisdictionModal = ref(false)
-const jurisdictionForm = ref({ name: '', description: '' })
-const selected = ref('AI')
 
-// Default form structure for Hire Specialist
-const defaultHireForm = {
-  industry: 'Immigration & Global Mobility',
-}
+const mapRawOrganization = (org: RawOrganization): Organization => ({
+  id: org.organization_id || org.organizationId || org.id || (org as { _id?: string })._id || '',
+  name: org.name,
+  industry: org.industry,
+  is_active: org.is_active,
+  user_role: org.user_role || (org as { role?: string }).role,
+  project_count:
+    org.project_count ??
+    (org as { projects_count?: number }).projects_count ??
+    (Array.isArray((org as { projects?: unknown }).projects)
+      ? (org as { projects?: Array<unknown> }).projects?.length
+      : undefined),
+  created_at: org.created_at,
+  updated_at: org.updated_at,
+})
 
-const showHireSpecialistModal = ref(false)
-const hireForm = ref({ ...defaultHireForm })
-
-const openHireSpecialistModal = () => {
-  hireForm.value = { ...defaultHireForm }
-  showHireSpecialistModal.value = true
-}
-
-const closeHireSpecialistModal = () => {
-  showHireSpecialistModal.value = false
-}
-
-const submitHireForm = async () => {
-  closeHireSpecialistModal()
-  toast.success('Your specialist request is being reviewed.')
-}
-
-const projectJurisdictions = computed<Jurisdiction[]>(() =>
-  jurisdictionStore.jurisdictions.filter((item) => item.project_id === projectId),
-)
-
-const topLevelJurisdictions = computed<Jurisdiction[]>(() =>
-  projectJurisdictions.value.filter((item) => !item.parent_id),
-)
-
-// archive count
-const archiveCount = computed(() => jurisdictionStore.archivedJurisdictions.length)
-
-const goBack = () => {
-  if (organizationId.value) {
-    router.push({
-      name: 'organization-projects',
-      params: { organizationId: organizationId.value },
-    })
+const upsertOrganization = (raw: RawOrganization | null | undefined) => {
+  if (!raw) return
+  const mapped = mapRawOrganization(raw)
+  if (!mapped.id) return
+  const idx = organizationStore.organizations.findIndex((item) => item.id === mapped.id)
+  if (idx >= 0) {
+    organizationStore.organizations.splice(idx, 1, mapped)
   } else {
-    router.push({ name: 'organizations' })
+    organizationStore.organizations.push(mapped)
   }
 }
 
-const openAddJurisdictionModal = () => {
-  showAddJurisdictionModal.value = true
-  jurisdictionForm.value = { name: '', description: '' }
-  jurisdictionStore.setError(null)
+const inviteOpen = ref(false)
+const inviteForm = ref({ email: '', role: 'Member' as MemberRole })
+const inviteSending = ref(false)
+const inviteMessage = ref<string | null>(null)
+const inviteError = ref<string | null>(null)
+const orgInvitations = ref<Invitation[]>([])
+const orgInvitationsLoading = ref(false)
+const orgInvitationsError = ref<string | null>(null)
+
+const members = ref<Member[]>([])
+const membersLoading = ref(false)
+const membersError = ref<string | null>(null)
+
+const organization = computed(
+  () => organizations.value.find((item) => item.id === orgId.value) || null,
+)
+
+const projectModalOpen = ref(false)
+const projectModalMode = ref<'edit' | 'create'>('create')
+const editingProject = ref<{ id?: string; title?: string; description?: string } | null>(null)
+const organizationOptions = computed(() =>
+  orgId.value && organization.value ? [{ id: orgId.value, name: organization.value.name }] : [],
+)
+const orgEditDialogOpen = ref(false)
+const orgEditSaving = ref(false)
+const orgEditError = ref<string | null>(null)
+
+const goToProject = (projectId: string) => {
+  if (!orgId.value) return
+  router.push({ name: 'project-detail', params: { organizationId: orgId.value, id: projectId } })
 }
 
-const closeAddJurisdictionModal = () => {
-  showAddJurisdictionModal.value = false
-  jurisdictionForm.value = { name: '', description: '' }
-  jurisdictionStore.setError(null)
+const openEditProject = (project: { id?: string; title?: string; description?: string }) => {
+  if (!project) return
+  editingProject.value = { ...project }
+  projectModalMode.value = 'edit'
+  projectModalOpen.value = true
+  projectStore.setError(null)
 }
 
-const handleCreateJurisdiction = async () => {
-  jurisdictionStore.setError(null)
-
-  if (!jurisdictionForm.value.name.trim()) {
-    return toast.error('Jurisdiction name is required')
-  }
-  if (!jurisdictionForm.value.description.trim()) {
-    return toast.error('Description is required')
-  }
-
-  try {
-    const newJurisdiction = await jurisdictionStore.addJurisdiction(
-      projectId,
-      {
-        name: jurisdictionForm.value.name.trim(),
-        description: jurisdictionForm.value.description.trim(),
-      },
-      organizationId.value,
-    )
-
-    if (newJurisdiction) {
-      closeAddJurisdictionModal()
-      toast.success('Jurisdiction created successfully')
-    }
-  } catch {
-    toast.error(jurisdictionStore.error || 'Could not create jurisdiction')
-  }
+const openCreateProject = () => {
+  editingProject.value = null
+  projectModalMode.value = 'create'
+  projectModalOpen.value = true
+  projectStore.setError(null)
 }
 
-const goToJurisdiction = (jurisdictionId: string) => {
-  router.push({
-    path: `/dashboard/jurisdictions/${jurisdictionId}`,
-    query: organizationId.value ? { organizationId: organizationId.value } : undefined,
+const closeProjectModal = () => {
+  projectModalOpen.value = false
+  editingProject.value = null
+  projectStore.setError(null)
+}
+
+const handleProjectSave = async (payload: {
+  title: string
+  description: string
+  organizationId: string
+  projectId?: string
+}) => {
+  const orgForAction = orgId.value
+  if (!orgForAction) return
+
+  const targetProjectId = payload.projectId || editingProject.value?.id
+
+  if (projectModalMode.value === 'edit' && targetProjectId) {
+    await projectStore.updateProject(orgForAction, targetProjectId, {
+      title: payload.title,
+      description: payload.description,
+    })
+    projectModalOpen.value = false
+    editingProject.value = null
+
+    toast.success('Project updated successfully')
+    await loadProjects()
+    return
+  }
+
+  const created = await projectStore.addProject({
+    title: payload.title,
+    description: payload.description,
+    organization_id: orgForAction,
   })
+
+  if (created) {
+    projectModalOpen.value = false
+    toast.success('Project created successfully')
+    await loadProjects()
+  }
+}
+
+const deleteProject = async (projectId?: string) => {
+  if (!projectId || !orgId.value) return
+
+  const confirmed = confirm('Delete this project? This action cannot be undone.')
+  if (!confirmed) return
+
+  await projectStore.deleteProject(projectId, orgId.value)
+  toast.success('Project successfully deleted')
+  await loadProjects()
+}
+
+const openEditOrganization = () => {
+  if (!organization.value) return
+  orgEditError.value = null
+  orgEditDialogOpen.value = true
+}
+
+const handleOrgSave = async (payload: { name: string; industry: string }) => {
+  if (!orgId.value) return
+
+  orgEditSaving.value = true
+  orgEditError.value = null
+
+  const updated = await organizationStore.updateOrganization(orgId.value, payload)
+
+  if (updated) {
+    orgEditDialogOpen.value = false
+    toast.success('Organization updated successfully')
+  } else if (organizationStore.error) {
+    orgEditError.value = organizationStore.error
+    toast.error(organizationStore.error)
+  }
+
+  orgEditSaving.value = false
+}
+
+const confirmDeleteOrganization = async () => {
+  if (!orgId.value || !organization.value) return
+
+  const confirmed = confirm('Delete this organization? This action cannot be undone.')
+  if (!confirmed) return
+
+  const deleted = await organizationStore.deleteOrganization(orgId.value)
+
+  if (deleted) {
+    toast.success('Organization removed successfully')
+    router.push({ name: 'organizations' })
+  } else if (organizationStore.error) {
+    toast.error(organizationStore.error)
+  }
+}
+
+const initials = (name: string) =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0]?.toUpperCase())
+    .slice(0, 2)
+    .join('')
+
+const statusClass = (status: MemberStatus) =>
+  status === 'Active'
+    ? 'text-emerald-700 bg-emerald-50 border-emerald-100'
+    : status === 'Pending'
+      ? 'text-amber-700 bg-amber-50 border-amber-100'
+      : 'text-red-700 bg-red-50 border-red-100'
+
+const roleClass = (role: MemberRole) => {
+  switch (role) {
+    case 'Owner':
+      return 'text-[#0f5132] bg-[#e7f5ed] border-[#c6e8d6]'
+    case 'Admin':
+      return 'text-[#9b3413] bg-[#fbeadd] border-[#f1d2b8]'
+    case 'Manager':
+      return 'text-[#6e2b3f] bg-[#f9e7ec] border-[#f2c9d8]'
+    default:
+      return 'text-[#92400e] bg-[#fef6ec] border-[#f5e0c3]'
+  }
+}
+
+const ensureUserId = async () => {
+  if (authStore.user?.id) return authStore.user.id
+  const loaded = await authStore.loadCurrentUser?.()
+  return loaded?.id
 }
 
 const ensureOrganizations = async () => {
-  if (organizationStore.organizations.length || organizationsRequested.value) return
-  let userId = authStore.user?.id
-  if (!userId) {
-    const loaded = await authStore.loadCurrentUser?.()
-    userId = loaded?.id
-  }
+  if (organizations.value.length || orgLoading.value) return
+  const userId = await ensureUserId()
   if (userId) {
-    organizationsRequested.value = true
     await organizationStore.fetchOrganizations(userId)
   }
 }
 
-onMounted(async () => {
-  void ensureOrganizations()
-
-  const existingProject = projectStore.projects.find((p) => p.id === projectId)
-
-  if (existingProject) {
-    project.value = existingProject
-  } else {
-    if (organizationId.value) {
-      await projectStore.fetchProjects(organizationId.value)
-    } else {
-      projectStore.setError('Organization context missing. Please navigate from Organizations.')
-    }
-    const foundProject = projectStore.projects.find((p) => p.id === projectId)
-    project.value = foundProject || null
-  }
-
-  await jurisdictionStore.fetchJurisdictions(projectId, organizationId.value)
-
-  jurisdictionStore.initializeArchived()
-
-  loading.value = false
-})
-
-const showSettingsMenu = ref(false)
-const showInlineEdit = ref(false)
-
-const editForm = ref({
-  title: '',
-  description: '',
-  master_prompt: '',
-})
-
-const toggleSettingsMenu = () => {
-  showSettingsMenu.value = !showSettingsMenu.value
-}
-
-const closeSettingsMenu = () => {
-  showSettingsMenu.value = false
-}
-
-const deleteProject = () => {
-  closeSettingsMenu()
-
-  confirmDialog.confirm({
-    title: 'Delete Project?',
-    description: 'This action cannot be undone.',
-    onConfirm: async () => {
-      if (!organizationId.value) {
-        projectStore.setError('Organization context missing. Please navigate from Organizations.')
-        return
-      }
-
-      await projectStore.deleteProject(projectId, organizationId.value)
-
-      toast.success('Project deleted successfully')
-
-      if (organizationId.value) {
-        router.push({
-          name: 'organization-projects',
-          params: { organizationId: organizationId.value },
-        })
-      } else {
-        router.push({ name: 'organizations' })
-      }
-    },
-  })
-}
-
-const startEdit = () => {
-  editForm.value = {
-    title: project.value?.title || '',
-    description: project.value?.description || '',
-    master_prompt: project.value?.master_prompt || '',
-  }
-
-  showInlineEdit.value = true
-  closeSettingsMenu()
-}
-
-const saveEdit = async () => {
+const fetchOrganizationDetails = async () => {
+  if (organization.value || !orgId.value) return
   try {
-    const orgIdForUpdate = organizationId.value || project.value?.org_id || ''
-    const updated = await projectStore.updateProject(orgIdForUpdate, projectId, {
-      title: editForm.value.title,
-      description: editForm.value.description,
-      master_prompt: editForm.value.master_prompt,
+    const { data } = await organizationService.getOrganizationById(orgId.value)
+    const raw = (data?.data as RawOrganization | undefined) ?? null
+    upsertOrganization(raw)
+  } catch (error) {
+    console.error('Failed to fetch organization details', error)
+  }
+}
+
+const loadProjects = async () => {
+  if (!orgId.value) return
+  await projectStore.fetchProjects(orgId.value)
+}
+
+const normalizeOrgInvitations = (payload: unknown): Invitation[] => {
+  if (Array.isArray(payload)) {
+    return payload
+      .map((item) => ({
+        id: (item as Invitation)?.id,
+        token: (item as Invitation)?.token,
+        organization_id: (item as Invitation)?.organization_id || orgId.value,
+        organization_name: (item as Invitation)?.organization_name,
+        role: (item as Invitation)?.role || (item as Invitation)?.role_name,
+        role_name: (item as Invitation)?.role_name,
+        status: (item as Invitation)?.status,
+      }))
+      .filter((item) => item.token && item.organization_id)
+  }
+
+  if (payload && typeof payload === 'object') {
+    const obj = payload as { invitations?: unknown; data?: unknown }
+    const list = obj.invitations || obj.data
+    if (Array.isArray(list)) return normalizeOrgInvitations(list)
+  }
+
+  return []
+}
+
+const loadOrganizationInvitations = async () => {
+  if (!orgId.value) return
+  orgInvitationsLoading.value = true
+  orgInvitationsError.value = null
+  try {
+    const { data } = await invitationService.listMyInvitations()
+    const payload = data?.data ?? data
+    const allInvites = normalizeOrgInvitations(payload)
+    orgInvitations.value = allInvites.filter((invite) => invite.organization_id === orgId.value)
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+    if (!err.response) {
+      orgInvitationsError.value = 'Network error: Unable to reach server'
+    } else {
+      orgInvitationsError.value =
+        err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to load invitations'
+    }
+  } finally {
+    orgInvitationsLoading.value = false
+  }
+}
+
+const mapUserToMember = (user: UserProfile): Member => {
+  const fullName = user.name || `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim()
+  const memberId = user.id || user.user_id || ''
+  const orgRecord = user.organizations?.find((org) => org.organization_id === orgId.value)
+  const orgRole = orgRecord?.role || user.role || ''
+  const normalizedRole = orgRole?.toLowerCase()
+  const role: MemberRole =
+    normalizedRole === 'owner'
+      ? 'Owner'
+      : normalizedRole === 'admin'
+        ? 'Admin'
+        : normalizedRole === 'manager'
+          ? 'Manager'
+          : 'Member'
+  const orgActive = user.organizations?.find((org) => org.organization_id === orgId.value)
+  const effectiveActive =
+    orgActive?.is_active ??
+    (typeof orgActive?.is_active === 'undefined' ? user.is_active : orgActive?.is_active)
+  const status: MemberStatus =
+    role === 'Owner'
+      ? 'Active'
+      : effectiveActive === false
+        ? 'Inactive'
+        : effectiveActive === true
+          ? 'Active'
+          : 'Pending'
+  return {
+    id: memberId,
+    name: fullName || 'Member',
+    email: user.email,
+    role,
+    status,
+  }
+}
+
+const memberActionLoading = ref<string | null>(null)
+
+const updateMemberRole = async (member: Member, targetRole: MemberRole) => {
+  if (!orgId.value || member.role === targetRole) return
+
+  if (targetRole === 'Owner') {
+    toast.info('Only the creator can be the Owner')
+    return
+  }
+
+  if (member.role === 'Owner') {
+    toast.info('The Owner role cannot be changed')
+    return
+  }
+
+  if (!member.id) {
+    toast.error('Cannot update role: missing user ID')
+    return
+  }
+
+  memberActionLoading.value = `${member.id}-role`
+
+  try {
+    await organizationService.updateMemberRole(orgId.value, member.id, targetRole)
+
+    members.value = members.value.map((item) =>
+      item.id === member.id ? { ...item, role: targetRole } : item,
+    )
+
+    toast.success(`${member.name} is now ${targetRole}`)
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg || err.response.data?.message || 'Failed to update role'
+
+    toast.error(message)
+  } finally {
+    memberActionLoading.value = null
+  }
+}
+
+const toggleMemberStatus = async (member: Member) => {
+  if (!orgId.value) return
+
+  if (member.role === 'Owner') {
+    toast.info('The Owner cannot be deactivated')
+    return
+  }
+
+  if (!member.id) {
+    toast.error('Cannot update status: missing user ID')
+    return
+  }
+
+  const targetStatus: MemberStatus = member.status === 'Active' ? 'Inactive' : 'Active'
+
+  memberActionLoading.value = `${member.id}-status`
+
+  try {
+    await organizationService.updateMemberStatus(orgId.value, member.id, targetStatus === 'Active')
+
+    members.value = members.value.map((item) =>
+      item.id === member.id ? { ...item, status: targetStatus } : item,
+    )
+
+    const verb = targetStatus === 'Active' ? 'activated' : 'deactivated'
+    toast.success(`${member.name} has been ${verb}`)
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to update status'
+
+    toast.error(message)
+  } finally {
+    memberActionLoading.value = null
+  }
+}
+
+const fetchMembers = async () => {
+  if (!orgId.value) return
+  membersLoading.value = true
+  membersError.value = null
+  try {
+    const { data } = await organizationService.listOrganizationUsers(orgId.value)
+    const users = data.data?.users ?? []
+    members.value = users.map(mapUserToMember)
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+    if (!err.response) {
+      membersError.value = 'Network error: Unable to reach server'
+    } else {
+      membersError.value =
+        err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to load members'
+    }
+  } finally {
+    membersLoading.value = false
+  }
+}
+
+const openProjects = () => {
+  router.push({ name: 'organization-projects', params: { organizationId: orgId.value } })
+}
+
+const sendInvitation = async () => {
+  inviteError.value = null
+  inviteMessage.value = null
+
+  if (!orgId.value) {
+    toast.error('Select an organization before inviting teammates')
+    return
+  }
+
+  if (!inviteForm.value.email.trim()) {
+    toast.error('Email is required')
+    return
+  }
+
+  inviteSending.value = true
+
+  try {
+    const { data } = await organizationService.inviteMember(orgId.value, {
+      invited_email: inviteForm.value.email.trim(),
+      role_name: inviteForm.value.role,
     })
 
-    if (project.value && updated) {
-      project.value.title = editForm.value.title
-      project.value.description = editForm.value.description
-      project.value.master_prompt = editForm.value.master_prompt
-    }
+    inviteMessage.value = data.message || data.data?.message || 'Invitation sent'
+    inviteOpen.value = false
 
-    toast.success('Project updated successfully')
+    await loadOrganizationInvitations()
 
-    showInlineEdit.value = false
-  } catch (err) {
-    toast.error(
-      projectStore.error ||
-        (err as ProjectErrorResponse).response?.data?.detail?.[0]?.msg ||
-        'Failed to update project',
-    )
+    toast.success(inviteMessage.value)
+
+    inviteForm.value.email = ''
+    inviteForm.value.role = 'Member'
+  } catch (error) {
+    const err = error as OrganizationErrorResponse
+
+    const message = !err.response
+      ? 'Network error: Unable to reach server'
+      : err.response.data?.detail?.[0]?.msg ||
+        err.response.data?.message ||
+        'Failed to send invitation'
+
+    inviteOpen.value = false
+    toast.error(message)
+  } finally {
+    inviteSending.value = false
   }
 }
 
+onMounted(async () => {
+  await ensureOrganizations()
+  await fetchOrganizationDetails()
+  await loadProjects()
+  await fetchMembers()
+  await loadOrganizationInvitations()
+})
+
 watch(
-  () => projectStore.projects,
-  (newProjects) => {
-    const found = newProjects.find((p) => p.id === projectId)
-    if (found) project.value = found
+  () => route.params.organizationId,
+  async (newVal) => {
+    const id = typeof newVal === 'string' ? newVal : ''
+    if (!id) return
+    inviteMessage.value = null
+    inviteError.value = null
+    inviteForm.value.email = ''
+    inviteForm.value.role = 'Member'
+    await fetchOrganizationDetails()
+    await loadProjects()
+    await fetchMembers()
+    await loadOrganizationInvitations()
   },
-  { deep: true },
 )
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-gray-50 p-2 lg:p-10">
-    <div v-if="loading" class="mx-auto max-w-7xl">
-      <div class="animate-pulse">
-        <div class="mb-8 h-6 w-64 rounded bg-gray-200"></div>
-        <div class="mb-4 h-10 w-96 rounded bg-gray-200"></div>
-        <div class="h-5 w-full max-w-2xl rounded bg-gray-200"></div>
-      </div>
-    </div>
-
-    <div v-else-if="!project" class="mx-auto max-w-7xl py-16 text-center">
-      <h1 class="mb-4 text-2xl font-bold text-gray-900">Project not found</h1>
-      <button @click="goBack" class="cursor-pointer text-[#401903] hover:underline">
-        <ArrowLeftIcon :size="18" /> Back to Projects
-      </button>
-    </div>
-
-    <div v-else class="app-container mx-auto">
-      <div class="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organization-profile', params: { organizationId } }">
-                  {{ organizationName || 'Organization' }}
-                </RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organization-projects', params: { organizationId } }">
-                  Projects
-                </RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
-            <BreadcrumbItem>
-              <BreadcrumbPage>{{ project.title }}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <div class="relative">
-          <button @click.stop="toggleSettingsMenu" class="btn--default btn--icon-sm btn--icon-only">
-            <Settings :size="18" />
-          </button>
-
-          <div
-            v-if="showSettingsMenu"
-            @click.stop
-            class="absolute z-50 mt-2 w-44 space-y-1 rounded-md bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0"
-          >
-            <button @click="startEdit" class="btn--secondary btn--full btn--sm">
-              Edit Project
-            </button>
-            <button @click="deleteProject" class="btn--danger btn--full btn--sm">
-              Delete Project
-            </button>
-          </div>
+  <main class="app-container min-h-screen flex-1 bg-gray-50 px-4 py-6 md:px-6 lg:px-0 lg:py-14">
+    <div class="mx-auto flex flex-col gap-6 md:gap-8">
+      <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+        <div>
+          <p class="text-xs font-medium tracking-wide text-[#9CA3AF] uppercase md:text-sm">
+            Organization Profile
+          </p>
         </div>
+        <RouterLink
+          to="/dashboard/organizations"
+          class="text-xs text-[#401903] underline md:text-sm"
+        >
+          Back to organizations
+        </RouterLink>
       </div>
 
-      <div class="mb-8 flex flex-col gap-5 rounded-[10px] bg-white p-5">
-        <template v-if="showInlineEdit">
-          <form @submit.prevent="saveEdit" class="w-full space-y-4">
-            <div>
-              <label class="text-sm font-medium text-[#1F1F1F]">Project Name</label>
-              <input
-                v-model="editForm.title"
-                class="h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-              />
+      <section
+        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-8 lg:p-10"
+      >
+        <div class="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          <div class="flex items-center gap-4 md:gap-6">
+            <div
+              class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-gray-200 to-gray-100 text-lg font-bold text-gray-500 md:h-24 md:w-24 md:text-2xl"
+            >
+              {{ initials(organization?.name || 'Org') || 'Org' }}
             </div>
-
-            <div>
-              <label class="text-sm font-medium text-[#1F1F1F]">Description</label>
-              <textarea
-                v-model="editForm.description"
-                rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-              ></textarea>
-            </div>
-
-            <div>
-              <label class="text-sm font-medium text-[#1F1F1F]">Master Prompt</label>
-              <textarea
-                v-model="editForm.master_prompt"
-                rows="3"
-                class="w-full rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-              ></textarea>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                @click="showInlineEdit = false"
-                class="btn--secondary btn--sm md:btn--lg"
+            <div class="min-w-0 flex-1">
+              <p
+                class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs"
               >
-                Cancel
+                Organization
+              </p>
+              <h2 class="truncate text-lg font-bold text-gray-900 md:text-2xl">
+                {{ organization?.name || 'Org Name' }}
+              </h2>
+              <p class="truncate text-xs text-gray-600 md:text-sm">
+                {{ organization?.industry || 'Law, Regulations & Compliance' }}
+              </p>
+            </div>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <button class="btn--default btn--sm btn--with-icon md:btn--lg md:self-center">
+                <Settings :size="16" class="md:hidden" />
+                <Settings :size="18" class="hidden md:block" />
+                Manage
               </button>
-              <button type="submit" class="btn--default btn--sm md:btn--lg">Save Changes</button>
-            </div>
-          </form>
-        </template>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @click="openEditOrganization">Edit organization</DropdownMenuItem>
+              <DropdownMenuItem class="text-red-600" @click="confirmDeleteOrganization">
+                Delete organization
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </section>
 
-        <template v-else>
-          <h1 class="text-2xl leading-[30px] font-bold text-gray-900">{{ project.title }}</h1>
-          <p class="text-sm leading-5 font-normal text-[#4B5563]">{{ project.description }}</p>
-
-          <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            <div class="flex items-center gap-3">
-              <p class="text-[16px] font-medium text-[#1F1F1F]">Default mode of research:</p>
-              <div
-                class="relative flex h-12 w-32 items-center rounded-[12px] border border-[#D1D5DB] bg-white px-4 shadow-sm"
-              >
-                <select
-                  v-model="selected"
-                  class="w-full cursor-pointer appearance-none bg-transparent text-[16px] font-medium text-[#374151] focus:outline-none"
-                >
-                  <option value="AI">AI</option>
-                  <option value="Manual">Manual</option>
-                  <option value="Hybrid">Hybrid</option>
-                </select>
-                <svg
-                  class="pointer-events-none absolute right-4 h-5 w-5 text-gray-500"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            <div
-              @click="openHireSpecialistModal"
-              class="flex cursor-pointer items-center rounded-lg p-2 transition-colors hover:bg-gray-100 sm:ml-6"
-            >
-              <div
-                class="mr-2 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gray-200"
-              >
-                <img :src="profile" alt="Specialist Avatar" class="h-full w-full object-cover" />
-              </div>
-
-              <div class="flex flex-col text-sm leading-tight">
-                <span class="font-semibold text-gray-900">Hire HNG Specialist</span>
-                <span class="text-gray-500">Professional support, anytime.</span>
-              </div>
-            </div>
+      <section
+        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
+      >
+        <div class="mb-4 flex flex-wrap items-start justify-between gap-3 md:items-center">
+          <div>
+            <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
+              Projects ({{ projects.length }})
+            </p>
           </div>
-        </template>
-      </div>
-
-      <div class="mb-8 flex items-end justify-between md:mt-[88px]">
-        <div class="flex w-auto gap-8 border-b border-gray-200">
-          <button
-            @click="activeTab = 'jurisdictions'"
-            :class="[
-              'relative pb-4 text-sm font-medium transition-colors',
-              activeTab === 'jurisdictions' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700',
-            ]"
-          >
-            Jurisdictions
-            <div
-              v-if="activeTab === 'jurisdictions'"
-              class="absolute right-0 bottom-0 left-0 h-0.5 bg-[#401903]"
-            ></div>
-          </button>
+          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <button @click="openCreateProject" class="btn--default btn--sm md:btn--lg">
+              Add Project
+            </button>
+            <button @click="openProjects" class="btn--link">View all</button>
+          </div>
         </div>
 
-        <div class="mb-3 flex items-center gap-3">
-          <button
-            @click="router.push({ name: 'jurisdictions-archive', query: { organizationId } })"
-            class="flex items-center gap-2 rounded-lg border border-[#401903] px-5 py-2.5 text-sm font-medium text-[#401903] shadow-sm transition-all hover:bg-orange-50"
-          >
-            <span>Archive</span>
-            <span
-              v-if="archiveCount > 0"
-              class="rounded-full bg-[#401903] px-2 py-0.5 text-xs font-semibold text-white"
-            >
-              {{ archiveCount }}
-            </span>
-          </button>
-
-          <button
-            @click="openAddJurisdictionModal"
-            class="btn--default btn--with-icon btn--sm md:btn--lg"
-          >
-            <Plus :size="18" class="sm:size-5" />
-            <span class="hidden sm:inline">Add Jurisdiction</span>
-            <span class="sm:hidden">Add</span>
-          </button>
+        <div v-if="projectsLoading" class="space-y-3">
+          <div class="h-16 animate-pulse rounded-xl bg-gray-100 md:h-20"></div>
         </div>
-      </div>
-
-      <div class=" ">
-        <div v-if="activeTab === 'jurisdictions'">
-          <div v-if="jurisdictionStore.loading" class="space-y-4">
-            <div v-for="n in 3" :key="n" class="animate-pulse">
-              <div class="h-24 rounded-lg bg-gray-200"></div>
-            </div>
+        <div
+          v-else-if="!projects.length"
+          class="space-y-3 rounded-xl border border-dashed border-gray-200 p-6 text-center"
+        >
+          <p class="text-xs text-gray-600 md:text-sm">
+            No projects yet. Create one to start tracking changes.
+          </p>
+          <div class="flex justify-center">
+            <button class="btn--default btn--sm md:btn--lg" @click="openCreateProject">
+              Add Project
+            </button>
           </div>
-
-          <div
-            v-else-if="projectJurisdictions.length === 0"
-            class="flex flex-col items-center justify-center bg-white py-20"
+        </div>
+        <div v-else class="space-y-2 md:space-y-3">
+          <article
+            v-for="project in projects"
+            :key="project.id"
+            class="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3 transition hover:bg-white md:gap-4 md:rounded-xl md:p-5"
+            @click="goToProject(project.id)"
           >
-            <div class="text-center">
-              <div
-                class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-100"
-              >
-                <svg
-                  class="h-6 w-6 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">
+                {{ project.title }}
+              </p>
+              <p class="line-clamp-1 text-[10px] text-gray-500 md:line-clamp-2 md:text-xs">
+                {{ project.description }}
+              </p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
+                <button
+                  @click.stop
+                  class="shrink-0 rounded-full p-1.5 text-gray-500 transition hover:bg-white hover:text-gray-700 md:p-2"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12h6m-3-3v6m-4 4h8a2 2 0 002-2V6a2 2 0 00-2-2H8a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  <EllipsisVertical :size="16" class="md:hidden" />
+                  <EllipsisVertical :size="18" class="hidden md:block" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem @click.stop="openEditProject(project)">Edit</DropdownMenuItem>
+                <DropdownMenuItem class="text-red-600" @click.stop="deleteProject(project.id)">
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </article>
+        </div>
+      </section>
+
+      <section
+        class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200/60 md:rounded-2xl md:p-6"
+      >
+        <div
+          class="mb-4 flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center"
+        >
+          <div class="min-w-0">
+            <p class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs">
+              Members
+            </p>
+            <p class="truncate text-xs text-gray-500 md:text-sm">
+              Invite teammates to collaborate.
+            </p>
+          </div>
+          <Dialog v-model:open="inviteOpen">
+            <DialogTrigger as-child>
+              <button class="btn--default btn--sm md:btn--lgy whitespace-nowrap">
+                Invite Member
+              </button>
+            </DialogTrigger>
+            <DialogContent class="w-[95%] rounded-xl sm:max-w-[480px]">
+              <DialogHeader>
+                <DialogTitle>Invite teammate</DialogTitle>
+                <DialogDescription>
+                  Send an invitation email to join this organization.
+                </DialogDescription>
+              </DialogHeader>
+              <form class="space-y-4" @submit.prevent="sendInvitation">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-900" for="invite-email">Email</label>
+                  <input
+                    id="invite-email"
+                    v-model="inviteForm.email"
+                    type="email"
+                    placeholder="teammate@company.com"
+                    required
+                    class="h-10 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none md:h-11"
                   />
-                </svg>
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-900" for="invite-role">Role</label>
+                  <select
+                    id="invite-role"
+                    v-model="inviteForm.role"
+                    class="h-10 w-full rounded-lg border border-[#D5D7DA] px-3 text-sm text-gray-900 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none md:h-11"
+                  >
+                    <option value="Admin">Admin</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Member">Member</option>
+                  </select>
+                </div>
+
+                <div v-if="inviteMessage" class="rounded-lg bg-green-50 p-3 text-sm text-green-700">
+                  {{ inviteMessage }}
+                </div>
+                <div v-else-if="inviteError" class="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                  {{ inviteError }}
+                </div>
+
+                <DialogFooter class="mt-2 flex items-center justify-end gap-3">
+                  <DialogClose as-child>
+                    <button type="button" class="btn--secondary btn--sm md:btn--lg btn--full">
+                      Cancel
+                    </button>
+                  </DialogClose>
+                  <button
+                    type="submit"
+                    :disabled="inviteSending"
+                    class="btn--default btn--sm md:btn--lg btn--full"
+                  >
+                    <span v-if="inviteSending">Sending...</span>
+                    <span v-else>Send Invite</span>
+                  </button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div class="divide-y divide-gray-100">
+          <div v-if="membersLoading" class="space-y-3">
+            <div v-for="n in 4" :key="n" class="flex items-center justify-between py-3">
+              <div class="flex items-center gap-3">
+                <div class="h-8 w-8 rounded-full bg-gray-100 md:h-10 md:w-10"></div>
+                <div>
+                  <div class="mb-1 h-3 w-24 rounded bg-gray-100 md:h-4 md:w-32"></div>
+                  <div class="h-2 w-32 rounded bg-gray-100 md:h-3 md:w-40"></div>
+                </div>
               </div>
-              <h3 class="mt-2 text-sm font-medium text-gray-900">No Jurisdictions added</h3>
-              <p class="mt-1 text-sm text-gray-500">
-                Search source or Click add sources to get started.
-              </p>
             </div>
           </div>
 
-          <div v-else class="space-y-3">
+          <div v-else-if="membersError" class="py-4 text-xs text-red-600 md:text-sm">
+            {{ membersError }}
+          </div>
+
+          <div v-else-if="!members.length" class="py-4 text-xs text-gray-600 md:text-sm">
+            No members yet. Invite someone to get started.
+          </div>
+
+          <template v-else>
             <article
-              v-for="jurisdiction in topLevelJurisdictions"
-              :key="jurisdiction.id"
-              @click="goToJurisdiction(jurisdiction.id)"
-              class="group cursor-pointer rounded-lg bg-white p-6 shadow ring-1 ring-gray-200/60 transition-all hover:shadow-md hover:ring-[#401903]/10"
+              v-for="member in members"
+              :key="member.id"
+              class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0"
             >
-              <h3
-                class="mb-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-[#401903]"
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f4dfcd] text-xs font-semibold text-[#5c2a05] md:h-10 md:w-10 md:text-sm"
+                >
+                  {{ initials(member.name) }}
+                </div>
+                <div class="min-w-0 flex-1 pr-2">
+                  <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">
+                    {{ member.name }}
+                  </p>
+                  <p class="truncate text-[10px] text-[#9b755a] md:text-xs">{{ member.email }}</p>
+                </div>
+              </div>
+
+              <div
+                class="flex w-full items-center justify-between gap-3 pl-12 sm:w-auto sm:justify-start sm:pl-0"
               >
-                {{ jurisdiction.name }}
-              </h3>
-              <p class="text-sm leading-relaxed text-gray-600">
-                {{ jurisdiction.description }}
-              </p>
-              <p class="mt-2 text-xs text-gray-400">
-                {{ new Date(jurisdiction.created_at).toLocaleString() }}
-              </p>
+                <div class="flex gap-2">
+                  <Badge
+                    :class="[
+                      'border px-2 py-0.5 text-[10px] font-semibold md:px-3 md:py-1 md:text-xs',
+                      roleClass(member.role),
+                    ]"
+                  >
+                    {{ member.role }}
+                  </Badge>
+                  <Badge
+                    :class="[
+                      'border px-2 py-0.5 text-[10px] font-semibold md:px-3 md:py-1 md:text-xs',
+                      statusClass(member.status),
+                    ]"
+                  >
+                    {{ member.status }}
+                  </Badge>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <button @click.stop class="btn--icon-only btn--default btn--icon-sm">
+                      <EllipsisVertical :size="16" class="md:hidden" />
+                      <EllipsisVertical :size="18" class="hidden md:block" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` ||
+                        member.role === 'Admin' ||
+                        member.role === 'Owner'
+                      "
+                      @click.stop="updateMemberRole(member, 'Admin')"
+                    >
+                      Admin
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` ||
+                        member.role === 'Manager' ||
+                        member.role === 'Owner'
+                      "
+                      @click.stop="updateMemberRole(member, 'Manager')"
+                    >
+                      Manager
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="
+                        memberActionLoading === `${member.id}-role` ||
+                        member.role === 'Member' ||
+                        member.role === 'Owner'
+                      "
+                      @click.stop="updateMemberRole(member, 'Member')"
+                    >
+                      Member
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      :disabled="
+                        memberActionLoading === `${member.id}-status` || member.role === 'Owner'
+                      "
+                      @click.stop="toggleMemberStatus(member)"
+                    >
+                      {{ member.status === 'Active' ? 'Deactivate' : 'Activate' }}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </article>
+          </template>
+        </div>
+
+        <div
+          class="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50/60 p-3 md:mt-8 md:p-4"
+        >
+          <div class="mb-3 flex items-center justify-between">
+            <div>
+              <p
+                class="text-[10px] font-semibold tracking-wide text-[#9CA3AF] uppercase md:text-xs"
+              >
+                Pending invitations
+              </p>
+              <p class="text-xs text-gray-600 md:text-sm">Invites sent for this organization.</p>
+            </div>
+          </div>
+          <div v-if="orgInvitationsLoading" class="space-y-2">
+            <div
+              v-for="n in 3"
+              :key="n"
+              class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm"
+            >
+              <div class="h-3 w-24 animate-pulse rounded bg-gray-200"></div>
+              <div class="h-3 w-12 animate-pulse rounded bg-gray-200"></div>
+            </div>
+          </div>
+          <div v-else-if="orgInvitationsError" class="text-xs text-red-600 md:text-sm">
+            {{ orgInvitationsError }}
+          </div>
+          <div v-else-if="!orgInvitations.length" class="text-xs text-gray-600 md:text-sm">
+            No pending invitations.
+          </div>
+          <div v-else class="space-y-2">
+            <div
+              v-for="invite in orgInvitations"
+              :key="invite.token"
+              class="flex flex-col gap-2 rounded-lg bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div class="min-w-0">
+                <p class="truncate text-xs font-semibold text-gray-900 md:text-sm">
+                  {{ invite.organization_name || organization?.name || 'Organization' }}
+                </p>
+                <p class="truncate text-[10px] text-gray-500 md:text-xs">
+                  Token: {{ invite.token }}
+                </p>
+              </div>
+              <span
+                class="self-start rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 sm:self-auto md:px-3 md:py-1 md:text-xs"
+              >
+                {{ invite.role_name || invite.role || 'Member' }}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
 
-    <Dialog
-      :open="showAddJurisdictionModal"
-      @update:open="(value) => !value && closeAddJurisdictionModal()"
+    <div
+      v-if="!organization && !orgLoading"
+      class="mx-auto mt-10 max-w-3xl rounded-xl bg-white p-8 text-center shadow-sm"
     >
-      <DialogScrollContent class="sm:max-w-[540px]">
-        <DialogHeader>
-          <DialogTitle>Define your Jurisdiction</DialogTitle>
-          <DialogDescription>Define a specific legal domain or region to monitor</DialogDescription>
-        </DialogHeader>
+      <p class="text-lg font-semibold text-gray-900">Organization not found</p>
+      <p class="mt-2 text-sm text-gray-600">Return to organizations to choose a valid profile.</p>
+      <RouterLink to="/dashboard/organizations" class="mt-4 inline-block text-[#401903] underline">
+        Go back
+      </RouterLink>
+    </div>
 
-        <form @submit.prevent="handleCreateJurisdiction" class="space-y-5">
-          <div>
-            <label for="jurisdictionName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-              Jurisdiction Name
-            </label>
-            <input
-              v-model="jurisdictionForm.name"
-              id="jurisdictionName"
-              placeholder="e.g United Kingdom"
-              required
-              class="h-12 w-full rounded-lg border border-[#D5D7DA] px-4 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label for="jurisdictionDesc" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-              Description
-            </label>
-            <textarea
-              v-model="jurisdictionForm.description"
-              id="jurisdictionDesc"
-              rows="3"
-              placeholder="What legal areas will you monitor?"
-              required
-              class="h-[130px] w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            />
-          </div>
-
-          <div v-if="jurisdictionStore.error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-            {{ jurisdictionStore.error }}
-          </div>
-
-          <DialogFooter class="flex justify-end gap-2 pt-2">
-            <button type="button" @click="closeAddJurisdictionModal" class="btn--secondary btn--lg">
-              Cancel
-            </button>
-            <button type="submit" class="btn--default btn--lg">Create Jurisdiction</button>
-          </DialogFooter>
-        </form>
-      </DialogScrollContent>
-    </Dialog>
-
-    <Dialog
-      :open="showHireSpecialistModal"
-      @update:open="(value) => !value && closeHireSpecialistModal()"
-    >
-      <DialogScrollContent class="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Hire a Specialist</DialogTitle>
-        </DialogHeader>
-
-        <form @submit.prevent="submitHireForm" class="space-y-6">
-          <div>
-            <label for="companyName" class="mb-2 block text-sm font-semibold text-gray-900">
-              Company Name
-            </label>
-            <input
-              placeholder="United UI"
-              id="companyName"
-              type="text"
-              required
-              class="w-full rounded-xl border border-[#E2E8F0] bg-[#F1F5F9] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
-            />
-          </div>
-
-          <div>
-            <label for="companyEmail" class="mb-2 block text-sm font-semibold text-gray-900">
-              Company Email Address
-            </label>
-            <input
-              placeholder="olivia@untitledui.com"
-              type="email"
-              required
-              class="w-full rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
-            />
-          </div>
-
-          <div>
-            <label for="industry" class="mb-2 block text-sm font-semibold text-gray-900">
-              Industry
-            </label>
-            <div class="relative">
-              <select
-                id="industry"
-                class="w-full cursor-pointer appearance-none rounded-xl border border-blue-500 bg-white px-4 py-3 text-sm text-gray-900 transition-colors focus:border-blue-700 focus:ring-0"
-              >
-                <option value="Immigration & Global Mobility">Immigration & Global Mobility</option>
-                <option value="Finance">Finance</option>
-                <option value="Healthcare">Healthcare</option>
-              </select>
-              <ChevronDown
-                :size="16"
-                class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 transform text-gray-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label for="description" class="mb-2 block text-sm font-semibold text-gray-900">
-              Brief Description
-            </label>
-            <textarea
-              placeholder="Monitor changes to EU travel rules, visa requirements, entry conditions, and policy updates across all Schengen and EU member states"
-              id="description"
-              rows="3"
-              required
-              class="h-24 w-full resize-none rounded-xl border border-[#E2E8F0] px-4 py-3 text-sm text-gray-900 placeholder-[#6B7280] transition-colors focus:border-blue-500 focus:ring-0"
-            />
-          </div>
-
-          <DialogFooter class="flex justify-end gap-2 pt-4">
-            <button type="button" @click="closeHireSpecialistModal" class="btn--secondary btn--lg">
-              Cancel
-            </button>
-            <button type="submit" class="btn--default btn--lg">Hire Specialist</button>
-          </DialogFooter>
-        </form>
-      </DialogScrollContent>
-    </Dialog>
+    <OrganizationFormDialog
+      v-if="organization"
+      v-model:open="orgEditDialogOpen"
+      :initial-name="organization.name"
+      :initial-industry="organization.industry || ''"
+      title="Edit organization"
+      submit-label="Save changes"
+      :loading="orgEditSaving"
+      :error="orgEditError"
+      @save="handleOrgSave"
+    />
   </main>
+
+  <ProjectFormModal
+    :open="projectModalOpen"
+    :mode="projectModalMode"
+    :organizations="organizationOptions"
+    :default-organization-id="orgId"
+    :project="editingProject || undefined"
+    :error="projectError"
+    @close="closeProjectModal"
+    @save="handleProjectSave"
+  />
 </template>
