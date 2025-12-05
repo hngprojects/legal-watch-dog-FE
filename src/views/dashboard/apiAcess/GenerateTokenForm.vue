@@ -1,0 +1,178 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
+interface Emits {
+  (e: 'close'): void
+}
+
+const emit = defineEmits<Emits>()
+
+const tokenName = ref('')
+const description = ref('')
+const resourceOwner = ref('seyiadisa')
+const expiration = ref('7')
+
+const getExpirationDate = (days: number) => {
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+const expirationOptions = computed(() => [
+  { value: '7', label: `7 days (${getExpirationDate(7)})` },
+  { value: '30', label: `30 days (${getExpirationDate(30)})` },
+  { value: '60', label: `60 days (${getExpirationDate(60)})` },
+  { value: '90', label: `90 days (${getExpirationDate(90)})` },
+  { value: 'never', label: 'No expiration' },
+])
+
+const selectedExpirationLabel = computed(() => {
+  const option = expirationOptions.value.find((opt) => opt.value === expiration.value)
+  return option?.label || ''
+})
+
+const closeForm = () => {
+  emit('close')
+}
+
+const generateToken = () => {
+  console.log('Generating token...', {
+    tokenName: tokenName.value,
+    description: description.value,
+    resourceOwner: resourceOwner.value,
+    expiration: expiration.value,
+  })
+  closeForm()
+}
+</script>
+
+<template>
+  <div class="flex flex-col gap-8">
+    <div class="flex flex-col gap-2">
+      <h1 class="text-3xl font-bold text-[#0F172A]">New fine-grained personal access token</h1>
+      <p class="text-sm text-[#6B7280]">
+        Create a fine-grained, repository-scoped token suitable for personal API use and for using
+        Git over HTTPS.
+      </p>
+    </div>
+
+    <form class="flex flex-col gap-14" @submit.prevent="generateToken">
+      <div class="flex flex-col gap-1 space-y-2">
+        <label class="text-sm font-semibold text-[#0F172A]" for="token-name"> Token Name </label>
+        <Input
+          id="token-name"
+          v-model="tokenName"
+          placeholder="Enter token name"
+          class="h-11 rounded-md border-[#E5E7EB]! bg-white text-sm"
+        />
+        <p class="text-xs text-[#6B7280]">
+          A unique name for this token, may be visible to resource owners or users with possession
+          of the token.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-1 space-y-2">
+        <label class="text-sm font-semibold text-[#0F172A]" for="description"> Description </label>
+        <textarea
+          id="description"
+          v-model="description"
+          placeholder="Enter description"
+          class="flex min-h-[100px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm shadow-sm placeholder:text-[#9CA3AF] focus-visible:ring-1 focus-visible:ring-[#401903] focus-visible:outline-none"
+        />
+      </div>
+
+      <div class="flex flex-col gap-3 space-y-2">
+        <label class="text-sm font-semibold text-[#0F172A]" for="resource-owner">
+          Resource owner
+        </label>
+        <Select v-model="resourceOwner">
+          <SelectTrigger class="h-11 w-full rounded-md border-[#E5E7EB] text-sm sm:w-[336px]">
+            <div class="flex items-center gap-2">
+              <svg
+                class="h-5 w-5 text-[#6B7280]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              <SelectValue :placeholder="resourceOwner" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="seyiadisa">seyiadisa</SelectItem>
+          </SelectContent>
+        </Select>
+        <p class="text-xs text-[#6B7280]">
+          The token will be able to make changes to resources owned by the selected resource owner.
+          Tokens can always read all public repositories.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3 space-y-2">
+        <label class="text-sm font-semibold text-[#0F172A]" for="expiration">Expiration</label>
+        <Select v-model="expiration">
+          <SelectTrigger class="h-11 w-full rounded-md border-[#E5E7EB] text-sm sm:w-[336px]">
+            <div class="flex items-center gap-2">
+              <svg
+                class="h-5 w-5 text-[#6B7280]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <SelectValue :placeholder="selectedExpirationLabel" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="option in expirationOptions"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ option.label }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <p class="text-xs text-[#6B7280]">This token will expire on the selected date</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-3 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          class="border-[#E5E7EB] px-6 py-2 text-[#0F172A] hover:bg-[#F5F6F8]"
+          @click="closeForm"
+        >
+          Cancel
+        </Button>
+        <Button type="submit" class="bg-[#401903] px-6 py-2 text-white hover:bg-[#2f1202]">
+          Generate token
+        </Button>
+      </div>
+    </form>
+  </div>
+</template>
