@@ -138,6 +138,7 @@ import { RouterLink } from 'vue-router'
 const products = [
   { label: 'Features', path: '/features' },
   { label: 'Pricing', path: '/pricing' },
+  { label: 'How it Works', path: '/how-it-works' },
 ]
 
 const companies = [

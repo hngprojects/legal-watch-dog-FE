@@ -72,8 +72,9 @@ const handleLogin = async () => {
 
     if (success) {
       const redirectQuery = router.currentRoute.value.query.redirect
-      const redirectTarget =
-        (typeof redirectQuery === 'string' && redirectQuery) || { name: 'organizations' }
+      const redirectTarget = (typeof redirectQuery === 'string' && redirectQuery) || {
+        name: 'dashboard',
+      }
 
       await router.push(redirectTarget)
 
