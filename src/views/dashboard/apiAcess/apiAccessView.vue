@@ -1,6 +1,29 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import TokenItem from './TokenItem.vue'
+
+interface Token {
+  id: string
+  name: string
+  lastUsed?: string
+  expiresOn?: string
+  isExpired?: boolean
+}
+
+const tokens = ref<Token[]>([
+  {
+    id: '1',
+    name: 'Test',
+    expiresOn: 'Sat, Jan 3 2026',
+  },
+  {
+    id: '2',
+    name: 'Test',
+    lastUsed: '2 years ago',
+    isExpired: true,
+  },
+])
 </script>
 
 <template>
@@ -29,8 +52,14 @@ import TokenItem from './TokenItem.vue'
       </div>
 
       <div class="flex flex-col rounded-md border border-gray-200 bg-white">
-        <TokenItem name="Test" expires-on="Sat, Jan 3 2026" />
-        <TokenItem name="Test" last-used="2 years ago" :is-expired="true" />
+        <TokenItem
+          v-for="token in tokens"
+          :key="token.id"
+          :name="token.name"
+          :last-used="token.lastUsed"
+          :expires-on="token.expiresOn"
+          :is-expired="token.isExpired"
+        />
       </div>
     </div>
   </main>
