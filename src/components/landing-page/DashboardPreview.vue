@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // import previewImage from '/images/dashboard-preview.png'
-import Dashboard from '@/assets/Images/Dashboard.png'
+// import Dashboard from '@/assets/Images/Dashboard.png'
 </script>
 
 <template>

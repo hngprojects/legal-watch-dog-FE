@@ -393,7 +393,7 @@ const saveEdit = async () => {
     } else if (jurisdictionStore.error) {
       toast.error(jurisdictionStore.error)
     }
-  } catch (error) {
+  } catch {
     const msg = jurisdictionStore.error || 'Failed to update jurisdiction'
     toast.error(msg)
   }

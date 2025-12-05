@@ -109,7 +109,7 @@ const acceptInvite = async (token: string) => {
       await organizationStore.fetchOrganizations(userId)
     }
     await refreshInvitations()
-  } catch (err) {
+  } catch {
     toast.error(invitationStore.error || 'Could not accept invitation')
   }
 }
