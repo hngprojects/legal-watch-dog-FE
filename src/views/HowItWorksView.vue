@@ -85,14 +85,16 @@ const showVideo = ref(false)
         </div>
 
         <!-- Video Button -->
-        <Button
-          variant="secondary"
-          class="my-4 cursor-pointer self-center px-6 py-5 text-sm sm:my-6 sm:px-8 sm:text-base"
-          size="lg"
-          @click="showVideo = true"
-        >
-          <Icon :icon="PlayIcon" class="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Watch 2-minute Demo
-        </Button>
+        <div>
+          <Button
+            variant="default"
+            size="default"
+            class="mx-auto hidden w-fit text-sm sm:block sm:text-base"
+            @click="showVideo = true"
+          >
+            <Icon :icon="PlayIcon" class="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Watch 2-minute Demo
+          </Button>
+        </div>
 
         <!-- Video Modal -->
         <Teleport to="body">

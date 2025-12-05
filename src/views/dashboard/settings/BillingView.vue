@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import CancelSubscriptionModal from '@/components/pricing/CancelSubscriptionModal.vue'
 import Icon from '@/components/reusable/Icon.vue'
-import Swal from '@/lib/swal'
 import { useBillingStore } from '@/stores/billing-store'
 import type { BillingHistoryEntry, BillingPlan } from '@/types/billing'
 import { FileNotFoundIcon } from '@hugeicons/core-free-icons'
 import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { toast } from 'vue-sonner'
 
 const hasHistory = ref(false)
 const isFreeTrial = ref(true)
@@ -24,11 +24,7 @@ onMounted(async () => {
   ])
 
   if (billingStore.error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'An error occurred',
-      text: billingStore.error,
-    })
+    toast.error(billingStore.error)
   }
 
   if (subscriptionStatus?.trial_starts_at && subscriptionStatus?.trial_ends_at) {
@@ -49,17 +45,12 @@ onMounted(async () => {
 })
 
 const calculateDaysLeft = (endDate: Date): string => {
-  const today = new Date()
-  const diffTime = endDate.getTime() - today.getTime()
+  const diffTime = endDate.getTime() - new Date().getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-  if (diffDays > 0) {
-    return `${diffDays} day${diffDays === 1 ? '' : 's'} left`
-  } else if (diffDays === 0) {
-    return 'Ends today'
-  } else {
-    return 'Ended'
-  }
+  if (diffDays > 0) return `${diffDays} day${diffDays === 1 ? '' : 's'} left`
+  if (diffDays === 0) return 'Ends today'
+  return 'Ended'
 }
 </script>
 

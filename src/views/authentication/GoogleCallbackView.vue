@@ -14,6 +14,12 @@ const status = ref<ViewStatus>('working')
 const errorMessage = ref('')
 const errorDetail = ref('')
 
+const readCookie = (key: string) => {
+  if (typeof document === 'undefined') return null
+  const match = document.cookie.match(new RegExp(`(?:^|; )${key}=([^;]*)`))
+  return match && match[1] ? decodeURIComponent(match[1]) : null
+}
+
 const parseOauthParams = () => {
   const hashParams = new URLSearchParams(
     window.location.hash && window.location.hash.startsWith('#')
@@ -69,6 +75,11 @@ const tryFetchGoogleProfile = async () => {
 const finishGoogleLogin = async () => {
   const params = parseOauthParams()
   const rememberPreference = authStore.rememberMePreference
+  const cookieAccess = readCookie('lwd_access_token')
+  const cookieRefresh =
+    readCookie('lwd_refresh_token') ?? readCookie('lwd_request_token') ?? undefined
+  const accessToken = params.accessToken ?? cookieAccess ?? undefined
+  const refreshToken = params.refreshToken ?? cookieRefresh ?? undefined
 
   if (params.error) {
     status.value = 'error'
@@ -77,7 +88,7 @@ const finishGoogleLogin = async () => {
     return
   }
 
-  if (!params.accessToken) {
+  if (!accessToken) {
     status.value = 'error'
     errorMessage.value = 'Google sign-in did not return an access token.'
     errorDetail.value = params.errorDescription ?? ''
@@ -85,11 +96,16 @@ const finishGoogleLogin = async () => {
   }
 
   try {
-    authStore.handleLoginSuccess(params.accessToken, rememberPreference)
+    authStore.handleLoginSuccess(accessToken, rememberPreference, undefined, refreshToken)
 
     const profileUser = await tryFetchGoogleProfile()
     if (profileUser) {
-      authStore.handleLoginSuccess(params.accessToken, rememberPreference, profileUser as never)
+      authStore.handleLoginSuccess(
+        accessToken,
+        rememberPreference,
+        profileUser as never,
+        refreshToken,
+      )
     } else {
       await authStore.loadCurrentUser()
     }
@@ -98,10 +114,10 @@ const finishGoogleLogin = async () => {
     if (isNewUser) {
       await router.replace({
         name: 'auth-status',
-        query: { status: 'success', context: 'signup', redirect: 'organizations', issued: 'true' },
+        query: { status: 'success', context: 'signup', redirect: 'dashboard', issued: 'true' },
       })
     } else {
-      await router.replace({ name: 'organizations' })
+      await router.replace({ name: 'dashboard' })
     }
   } catch (error) {
     status.value = 'error'

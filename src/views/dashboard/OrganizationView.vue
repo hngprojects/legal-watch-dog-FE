@@ -2,7 +2,8 @@
 import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -29,6 +30,7 @@ const invitationStore = useInvitationStore()
 const { invitations, loading: inviteLoading, error: inviteError } = storeToRefs(invitationStore)
 const router = useRouter()
 const authStore = useAuthStore()
+const { confirm: openConfirm } = useConfirmDialog()
 
 const pageLoading = ref(true)
 const showCreateModal = ref(false)
@@ -67,9 +69,9 @@ const closeCreateModal = () => {
 const handleCreateOrganization = async () => {
   organizationStore.setError(null)
 
-  if (!formData.value.name.trim())
-    return organizationStore.setError('Organization name is required')
-  if (!formData.value.industry.trim()) return organizationStore.setError('Industry is required')
+  if (!formData.value.name.trim()) return toast.error('Organization name is required')
+
+  if (!formData.value.industry.trim()) return toast.error('Industry is required')
 
   const created = await organizationStore.addOrganization({
     name: formData.value.name.trim(),
@@ -78,11 +80,8 @@ const handleCreateOrganization = async () => {
 
   if (created) {
     closeCreateModal()
-    await Swal.fire(
-      'Organization created',
-      'You can now add projects under this organization.',
-      'success',
-    )
+
+    toast.success('Organization created successfully')
 
     const userId = await ensureUserId()
     if (userId) {
@@ -102,19 +101,17 @@ const refreshInvitations = async () => {
 const acceptInvite = async (token: string) => {
   try {
     const result = await invitationStore.acceptInvitation(token)
-    await Swal.fire('Invitation Accepted', result, 'success')
+
+    toast.success(result || 'Invitation accepted')
+
     const userId = await ensureUserId()
     if (userId) {
       await organizationStore.fetchOrganizations(userId)
     }
     await refreshInvitations()
   } catch (err) {
+    toast.error(invitationStore.error || 'Could not accept invitation')
     void err
-    await Swal.fire(
-      'Could not accept invitation',
-      invitationStore.error || 'Something went wrong',
-      'error',
-    )
   }
 }
 
@@ -137,35 +134,38 @@ const openEditOrganization = (org: Organization) => {
 
 const handleEditSave = async (payload: { name: string; industry: string }) => {
   if (!editingOrg.value) return
+
   editSaving.value = true
   editError.value = null
+
   const updated = await organizationStore.updateOrganization(editingOrg.value.id, payload)
+
   if (updated) {
     editDialogOpen.value = false
-    await Swal.fire('Updated', 'Organization updated successfully.', 'success')
+    toast.success('Organization updated successfully.')
   } else if (organizationStore.error) {
     editError.value = organizationStore.error
   }
+
   editSaving.value = false
 }
 
-const confirmDeleteOrganization = async (org: Organization) => {
-  const result = await Swal.fire({
+const confirmDeleteOrganization = (org: Organization) => {
+  openConfirm({
     title: 'Delete organization?',
-    text: 'This action cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#d33',
+    description: 'This action cannot be undone.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      const deleted = await organizationStore.deleteOrganization(org.id)
+
+      if (deleted) {
+        toast.success('Organization removed successfully.')
+      } else if (organizationStore.error) {
+        toast.error(organizationStore.error)
+      }
+    },
   })
-  if (!result.isConfirmed) return
-  const deleted = await organizationStore.deleteOrganization(org.id)
-  if (deleted) {
-    await Swal.fire('Deleted', 'Organization removed successfully.', 'success')
-  } else if (organizationStore.error) {
-    await Swal.fire('Could not delete', organizationStore.error, 'error')
-  }
 }
 
 onMounted(async () => {
@@ -430,23 +430,23 @@ onMounted(async () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Government, Politics & Public Sector"
-                      >Government, Politics & Public Sector</SelectItem
-                    >
+                      >Government, Politics & Public Sector
+                    </SelectItem>
                     <SelectItem value="Law, Regulation & Compliance"
                       >Law, Regulation & Compliance</SelectItem
                     >
                     <SelectItem value="Business, Finance & Professional Services"
-                      >Business, Finance & Professional Services</SelectItem
-                    >
+                      >Business, Finance & Professional Services
+                    </SelectItem>
                     <SelectItem value="Technology, Media & Telecommunications"
-                      >Technology, Media & Telecommunications</SelectItem
-                    >
+                      >Technology, Media & Telecommunications
+                    </SelectItem>
                     <SelectItem value="Health, Science & Education"
                       >Health, Science & Education</SelectItem
                     >
                     <SelectItem value="Energy, Environment & Infrastructure"
-                      >Energy, Environment & Infrastructure</SelectItem
-                    >
+                      >Energy, Environment & Infrastructure
+                    </SelectItem>
                     <SelectItem value="Manufacturing, Trade & Logistics"
                       >Manufacturing, Trade & Logistics</SelectItem
                     >

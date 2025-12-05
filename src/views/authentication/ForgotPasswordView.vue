@@ -35,7 +35,8 @@ const handleSubmit = async () => {
     const statusCode = (response as { status_code?: number })?.status_code
     if (typeof statusCode === 'number' && statusCode >= 400) {
       serverError.value =
-        (response as { message?: string })?.message ?? 'Unable to send reset email. Please try again.'
+        (response as { message?: string })?.message ??
+        'Unable to send reset email. Please try again.'
       return
     }
 
