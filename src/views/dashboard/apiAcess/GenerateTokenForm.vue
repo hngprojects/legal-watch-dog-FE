@@ -57,11 +57,13 @@ const generateToken = () => {
 
 <template>
   <div class="flex flex-col gap-8">
-    <div class="flex flex-col gap-2">
-      <h1 class="text-3xl font-bold text-[#0F172A]">New fine-grained personal access token</h1>
+    <div class="flex flex-col gap-6">
+      <h1 class="border-b border-b-[#E5E7EB] pb-6 text-3xl font-bold text-[#0F172A]">
+        New fine-grained personal access token
+      </h1>
       <p class="text-sm text-[#6B7280]">
-        Create a fine-grained, repository-scoped token suitable for personal API use and for using
-        Git over HTTPS.
+        Create a fine-grained, organization-scoped token suitable for personal API use and for using
+        LegalWatchDog over HTTPS.
       </p>
     </div>
 
@@ -72,7 +74,7 @@ const generateToken = () => {
           id="token-name"
           v-model="tokenName"
           placeholder="Enter token name"
-          class="h-11 rounded-md border-[#E5E7EB]! bg-white text-sm"
+          class="h-11 rounded-md border-[#E5E7EB]! bg-white text-sm shadow-none"
         />
         <p class="text-xs text-[#6B7280]">
           A unique name for this token, may be visible to resource owners or users with possession
@@ -86,7 +88,7 @@ const generateToken = () => {
           id="description"
           v-model="description"
           placeholder="Enter description"
-          class="flex min-h-[100px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm shadow-sm placeholder:text-[#9CA3AF] focus-visible:ring-1 focus-visible:ring-[#401903] focus-visible:outline-none"
+          class="flex min-h-[100px] w-full rounded-md border border-[#E5E7EB] bg-white px-3 py-2 text-sm placeholder:text-[#9CA3AF] focus-visible:ring-1 focus-visible:ring-[#401903] focus-visible:outline-none"
         />
       </div>
 

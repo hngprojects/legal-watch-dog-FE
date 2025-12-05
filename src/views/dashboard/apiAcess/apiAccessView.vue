@@ -54,7 +54,7 @@ const closeGenerateForm = () => {
             </div>
             <p class="text-sm text-[#6B7280]">
               These are fine-grained, repository-scoped tokens suitable for personal API use and for
-              using Git over HTTPS
+              using Legal Watch Dog over HTTPS
             </p>
           </div>
           <Button
