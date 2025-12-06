@@ -21,7 +21,7 @@ export default defineConfig({
           ?.map((child) => `/${child.path}`)
           .filter((path) => !path.includes(':')) ?? []
 
-      const dynamicBlogPaths = blogPosts.map((post) => `/blog/${post.id}`)
+      const dynamicBlogPaths = blogPosts.map((post) => `/blog/${post.slug}`)
 
       return [...new Set([...landingPagePaths, ...dynamicBlogPaths])]
     },

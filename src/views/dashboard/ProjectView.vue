@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,6 +27,7 @@ const route = useRoute()
 const showProjectModal = ref(false)
 const projectModalMode = ref<'create' | 'edit'>('create')
 const organizationsRequested = ref(false)
+const projectSaving = ref(false)
 
 const inviteForm = ref({
   email: '',
@@ -84,16 +85,19 @@ const closeProjectModal = () => {
 
 const handleProjectSave = async (payload: {
   title: string
-  description: string
+  description: string | null
   organizationId: string
   projectId?: string
 }) => {
   projectStore.setError(null)
+  if (projectSaving.value) return
+  projectSaving.value = true
 
   const orgIdToUse = payload.organizationId || organizationId.value
 
   if (!orgIdToUse) {
     projectStore.setError('Select an organization before creating a project.')
+    projectSaving.value = false
     return
   }
 
@@ -103,12 +107,13 @@ const handleProjectSave = async (payload: {
         title: payload.title,
         description: payload.description,
       })
-      await Swal.fire('Updated', 'Project updated successfully.', 'success')
+      toast.success('Project updated successfully.')
       closeProjectModal()
     } catch (error) {
       void error
-      await Swal.fire('Update failed', projectStore.error || 'Could not update project', 'error')
+      toast.error(projectStore.error || 'Could not update project')
     }
+    projectSaving.value = false
     return
   }
 
@@ -120,7 +125,7 @@ const handleProjectSave = async (payload: {
     })
 
     if (newProject) {
-      await Swal.fire('Created', 'Project created successfully.', 'success')
+      toast.success('Project created successfully.')
       closeProjectModal()
       router.push({
         name: 'organization-projects',
@@ -129,7 +134,9 @@ const handleProjectSave = async (payload: {
     }
   } catch (error) {
     void error
-    await Swal.fire('Create failed', projectStore.error || 'Could not create project', 'error')
+    toast.error(projectStore.error || 'Could not create project')
+  } finally {
+    projectSaving.value = false
   }
 }
 
@@ -467,6 +474,7 @@ watch(
   <ProjectFormModal
     :open="showProjectModal"
     :mode="projectModalMode"
+    :loading="projectSaving"
     :organizations="organizationOptions"
     :default-organization-id="organizationId || organizations[0]?.id"
     :error="projectStore.error"

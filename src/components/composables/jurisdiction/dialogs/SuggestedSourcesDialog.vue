@@ -14,6 +14,8 @@ defineProps<{
   jurisdictionName: string
   jurisdictionDescription: string
   projectDescription: string
+  jurisdictionPrompt?: string | null
+  searchQuery?: string
 }>()
 
 const emit = defineEmits<{
@@ -38,6 +40,8 @@ const emit = defineEmits<{
         :jurisdiction-name="jurisdictionName"
         :jurisdiction-description="jurisdictionDescription"
         :project-description="projectDescription"
+        :jurisdiction-prompt="jurisdictionPrompt"
+        :search-query="searchQuery"
         @cancel="emit('cancel')"
         @save="emit('save', $event)"
         @sources-added="emit('sources-added')"
