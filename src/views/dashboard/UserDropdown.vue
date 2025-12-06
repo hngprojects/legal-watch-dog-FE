@@ -32,6 +32,9 @@ const handleNavigate = () => {
       <DropdownMenuItem asChild>
         <RouterLink :to="{ name: 'billing' }" @click="handleNavigate"> Billing </RouterLink>
       </DropdownMenuItem>
+      <DropdownMenuItem asChild>
+        <RouterLink :to="{ name: 'api-access' }" @click="handleNavigate"> API Access </RouterLink>
+      </DropdownMenuItem>
       <DropdownMenuItem @click="emit('logout')">Logout</DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
