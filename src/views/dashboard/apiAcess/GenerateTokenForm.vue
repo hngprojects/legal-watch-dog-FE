@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,6 +13,9 @@ import ResourceOwnerIcon from '@/assets/icons/resource-owner.svg'
 import CalendarIcon from '@/assets/icons/calendar.svg'
 import BellIcon from '@/assets/icons/bell3.svg'
 import CopyIcon from '@/assets/icons/copy.svg'
+import { useOrganizationStore } from '@/stores/organization-store'
+import { useAuthStore } from '@/stores/auth-store'
+import { storeToRefs } from 'pinia'
 
 interface Props {
   username?: string
@@ -28,12 +31,17 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
+const authStore = useAuthStore()
+const organizationStore = useOrganizationStore()
+const { organizations } = storeToRefs(organizationStore)
+
 const isTokenGenerated = ref(false)
 const apiKey = ref('')
 
 const tokenName = ref('')
 const description = ref('')
 const resourceOwner = ref(props.username)
+const organization = ref('')
 const expiration = ref('7')
 
 const getExpirationDate = (days: number) => {
@@ -55,6 +63,16 @@ const selectedExpirationLabel = computed(() => {
   return option?.label || ''
 })
 
+onMounted(async () => {
+  const userId = authStore.user?.id
+  if (userId && organizations.value.length === 0) {
+    await organizationStore.fetchOrganizations(userId)
+  }
+  if (organizations.value.length > 0 && organizations.value[0]) {
+    organization.value = organizations.value[0].id
+  }
+})
+
 const closeForm = () => {
   emit('close')
 }
@@ -64,6 +82,7 @@ const generateToken = () => {
     tokenName: tokenName.value,
     description: description.value,
     resourceOwner: resourceOwner.value,
+    organization: organization.value,
     expiration: expiration.value,
   })
   isTokenGenerated.value = true
@@ -110,51 +129,111 @@ const generateToken = () => {
         />
       </div>
 
-      <div class="flex flex-col gap-3 space-y-2">
-        <label class="text-sm font-semibold text-[#0F172A]" for="resource-owner">
-          Resource owner
-        </label>
-        <Select v-model="resourceOwner">
-          <SelectTrigger
-            class="h-11 w-full cursor-pointer rounded-md border-[#E5E7EB] text-sm sm:w-[336px]"
-          >
-            <div class="flex items-center gap-2">
-              <img :src="ResourceOwnerIcon" alt="Resource Owner" class="h-5 w-5" />
-              <SelectValue :placeholder="resourceOwner" />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem :value="username">{{ username }}</SelectItem>
-          </SelectContent>
-        </Select>
-        <p class="text-xs text-[#6B7280]">
-          The token will be able to make changes to resources owned by the selected resource owner.
-          Tokens can always read all public repositories.
-        </p>
+      <div
+        class="flex w-full flex-col items-center justify-between gap-9 space-y-2 overflow-hidden sm:flex-row"
+      >
+        <div class="flex flex-col gap-3 space-y-2 sm:w-1/2">
+          <label class="text-sm font-semibold text-[#0F172A]">
+            Resource owner
+          </label>
+          <Select v-model="resourceOwner">
+            <SelectTrigger
+              id="resource-owner"
+              class="h-11 w-full cursor-pointer rounded-md border-[#E5E7EB] text-sm sm:w-[336px]"
+            >
+              <div class="flex items-center gap-2">
+                <img :src="ResourceOwnerIcon" alt="Resource Owner" class="h-5 w-5" />
+                <SelectValue :placeholder="resourceOwner" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem :value="username">{{ username }}</SelectItem>
+            </SelectContent>
+          </Select>
+          <p class="text-xs text-[#6B7280]">
+            The token will be able to make changes to organization owned by the selected
+            organization owner. Tokens can always read all organization activities.
+          </p>
+        </div>
+        <div class="flex flex-col gap-3 space-y-2 sm:w-1/2">
+          <label class="text-sm font-semibold text-[#0F172A]">
+            Organization
+          </label>
+          <Select v-model="organization">
+            <SelectTrigger
+              id="organization"
+              class="h-11 w-full cursor-pointer rounded-md border-[#E5E7EB] text-sm sm:w-[336px]"
+            >
+              <div class="flex items-center gap-2">
+                <img :src="ResourceOwnerIcon" alt="Organization" class="h-5 w-5" />
+                <SelectValue placeholder="Select organization" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-if="organizations.length === 0" value="no-org" disabled>
+                No organizations available
+              </SelectItem>
+              <SelectItem v-for="org in organizations" :key="org.id" :value="org.id">
+                {{ org.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <p class="text-xs text-[#6B7280]">
+            The token will be able to make changes to resources owned by the selected organization.
+            Tokens can always read all organization activities.
+          </p>
+        </div>
       </div>
 
-      <div class="flex flex-col gap-3 space-y-2">
-        <label class="text-sm font-semibold text-[#0F172A]" for="expiration">Expiration</label>
-        <Select v-model="expiration">
-          <SelectTrigger
-            class="h-11 w-full cursor-pointer rounded-md border-[#E5E7EB] text-sm sm:w-[336px]"
-          >
-            <div class="flex items-center gap-2">
-              <img :src="CalendarIcon" alt="Calendar" class="h-5 w-5" />
-              <SelectValue :placeholder="selectedExpirationLabel" class="cursor-pointer" />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="option in expirationOptions"
-              :key="option.value"
-              :value="option.value"
+      <div class="flex w-full flex-col items-center gap-9 space-y-2 overflow-hidden sm:flex-row">
+        <div class="flex w-full flex-col gap-3 space-y-2 sm:w-1/2">
+          <label class="text-sm font-semibold text-[#0F172A]">Expiration</label>
+          <Select v-model="expiration">
+            <SelectTrigger
+              id="expiration"
+              class="h-11 w-full cursor-pointer rounded-md border-[#E5E7EB] text-sm sm:w-[336px]"
             >
-              {{ option.label }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-        <p class="text-xs text-[#6B7280]">This token will expire on the selected date</p>
+              <div class="flex items-center gap-2">
+                <img :src="CalendarIcon" alt="Calendar" class="h-5 w-5" />
+                <SelectValue :placeholder="selectedExpirationLabel" class="cursor-pointer" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="option in expirationOptions"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <p class="text-xs text-[#6B7280]">This token will expire on the selected date</p>
+        </div>
+        <div class="flex w-full flex-col gap-3 space-y-2 sm:w-1/2">
+          <label class="text-sm font-semibold text-[#0F172A]">Scope</label>
+          <Select v-model="expiration">
+            <SelectTrigger
+              id="scope"
+              class="h-11 w-full cursor-pointer rounded-md border-[#E5E7EB] text-sm sm:w-[336px]"
+            >
+              <div class="flex items-center gap-2">
+                <img :src="CalendarIcon" alt="Calendar" class="h-5 w-5" />
+                <SelectValue :placeholder="selectedExpirationLabel" class="cursor-pointer" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="option in expirationOptions"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <p class="text-xs text-[#6B7280]">This token will expire on the selected date</p>
+        </div>
       </div>
 
       <!-- Action Buttons -->
