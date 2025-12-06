@@ -3,6 +3,7 @@ export interface Invitation {
   token: string
   organization_id: string
   organization_name?: string
+  invited_email?: string
   role_name?: string
   role?: string
   status?: string

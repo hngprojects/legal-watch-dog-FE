@@ -1,7 +1,6 @@
 import api from '@/lib/api'
 import axios from 'axios'
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.staging.legalwatch.dog/api/v1'
+import { API_BASE_URL } from '@/lib/config'
 
 export const billingService = {
   getOrganizationSubscriptionStatus: (organizationId: string) =>
@@ -15,7 +14,7 @@ export const billingService = {
       currency: 'USD',
     }),
 
-  getPlans: () => axios.get(BASE_URL + '/billing/plans'),
+  getPlans: () => axios.get(API_BASE_URL + '/billing/plans'),
 
   checkout: (organizationId: string, plan_id: string) =>
     api.post(`/organizations/${organizationId}/billing/checkout`, {

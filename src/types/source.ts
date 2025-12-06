@@ -11,6 +11,7 @@ export interface PaginationMeta {
 
 export interface SourceRevision {
   id: string
+  data_revision_id?: string | null
   source_id: string
   minio_object_key: string
   content_hash?: string | null
