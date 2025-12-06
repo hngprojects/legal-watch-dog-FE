@@ -10,6 +10,19 @@ const route = useRoute()
 const blogId = computed(() => route.params.slug)
 
 const blogPost = computed(() => blogPosts.find((post) => post.slug === blogId.value))
+
+const enrichedRelatedPosts = computed(() => {
+  if (!blogPost.value?.relatedPosts) {
+    return []
+  }
+  return blogPost.value.relatedPosts.map((relatedPost) => {
+    const fullPost = blogPosts.find((bp) => bp.id === relatedPost.id)
+    return {
+      ...relatedPost,
+      slug: fullPost?.slug,
+    }
+  })
+})
 </script>
 <template>
   <div v-if="blogPost" class="min-h-screen bg-gray-50 py-16">
@@ -133,10 +146,10 @@ const blogPost = computed(() => blogPosts.find((post) => post.slug === blogId.va
 
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div
-            v-for="post in blogPost.relatedPosts"
+            v-for="post in enrichedRelatedPosts"
             :key="post.id"
             class="cursor-pointer rounded-xl border bg-white shadow-md transition hover:shadow-lg"
-            @click="$router.push(`/blog/${blogPosts.find((bp) => bp.id === post.id)?.slug}`)"
+            @click="post.slug && $router.push(`/blog/${post.slug}`)"
           >
             <img :src="post.image" class="h-48 w-full rounded-t-xl object-cover" />
 
