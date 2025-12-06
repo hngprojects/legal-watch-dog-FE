@@ -228,7 +228,9 @@ const generateToken = () => {
               </SelectItem>
             </SelectContent>
           </Select>
-          <p class="text-xs text-[#6B7280]">This token will expire on the selected date</p>
+          <p class="text-xs text-[#6B7280]">
+            Set permissions for this token to control read or download access
+          </p>
         </div>
       </div>
 
