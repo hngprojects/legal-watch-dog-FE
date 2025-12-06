@@ -44,6 +44,17 @@ const resourceOwner = ref(props.username)
 const organization = ref('')
 const expiration = ref('7')
 
+const selectedOrganization = computed({
+  get: () => organization.value,
+  set: (value: string) => {
+    organization.value = value
+    // Automatically switch the current organization when user selects a different one
+    if (value && value !== 'no-org') {
+      organizationStore.setCurrentOrganization(value)
+    }
+  },
+})
+
 const getExpirationDate = (days: number) => {
   const date = new Date()
   date.setDate(date.getDate() + days)
@@ -68,7 +79,10 @@ onMounted(async () => {
   if (userId && organizations.value.length === 0) {
     await organizationStore.fetchOrganizations(userId)
   }
-  if (organizations.value.length > 0 && organizations.value[0]) {
+  // Use current organization as default, fallback to first organization if none selected
+  if (organizationStore.currentOrganizationId) {
+    organization.value = organizationStore.currentOrganizationId
+  } else if (organizations.value.length > 0 && organizations.value[0]) {
     organization.value = organizations.value[0].id
   }
 })
@@ -155,7 +169,7 @@ const generateToken = () => {
         </div>
         <div class="flex flex-col gap-3 space-y-2 sm:w-1/2">
           <label class="text-sm font-semibold text-[#0F172A]"> Organization </label>
-          <Select v-model="organization">
+          <Select v-model="selectedOrganization">
             <SelectTrigger
               id="organization"
               class="h-11 w-full cursor-pointer rounded-md border-[#E5E7EB] text-sm sm:w-[336px]"
@@ -176,7 +190,7 @@ const generateToken = () => {
           </Select>
           <p class="text-xs text-[#6B7280]">
             The token will be able to make changes to resources owned by the selected organization.
-            Tokens can always read all organization activities.
+            Selecting a different organization will switch your current workspace.
           </p>
         </div>
       </div>
