@@ -22,9 +22,7 @@ import type {
   VerifyOtpResponse,
   GoogleProfileResponse,
 } from '@/types/auth'
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'https://api.staging.legalwatch.dog/api/v1'
+import { API_BASE_URL } from '@/lib/config'
 
 const http = axios.create({
   baseURL: API_BASE_URL,
