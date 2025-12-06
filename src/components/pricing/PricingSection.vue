@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import PricingCard from './PricingCard.vue'
 import { useBillingStore } from '@/stores/billing-store'
 import type { BillingPlan } from '@/types/billing'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
 
 const activeBillingCycle = ref<'month' | 'year'>('month')
 const billingStore = useBillingStore()
@@ -15,12 +15,9 @@ onMounted(async () => {
   if (res) {
     plans.value = res
   }
+
   if (billingStore.error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'An error occurred',
-      text: billingStore.error,
-    })
+    toast.error(billingStore.error)
   }
 })
 </script>

@@ -450,15 +450,34 @@ onUnmounted(() => {
 
         <!-- AUTHENTICATED USER SECTION -->
         <template v-if="isAuthenticated">
-          <!-- User Profile Section -->
           <div class="border-b p-4 sm:p-6">
-            <div class="flex items-center gap-3">
-              <UserAvatar :name="displayName" :image-url="avatarUrl" :size="48" />
-              <div class="flex-1 overflow-hidden">
-                <p class="truncate text-base font-semibold text-gray-900">{{ displayName }}</p>
-                <p class="truncate text-sm text-gray-500">{{ authStore.user?.email }}</p>
-              </div>
-            </div>
+            <UserDropdown @logout="handleLogout">
+              <button class="flex w-full items-center gap-3 rounded-lg px-4 py-3 hover:bg-gray-100">
+                <UserAvatar :name="displayName" :image-url="avatarUrl" :size="48" />
+                <div class="flex-1 overflow-hidden text-left">
+                  <p class="truncate text-base font-semibold text-gray-900">
+                    {{ displayName }}
+                  </p>
+                  <p class="truncate text-sm text-gray-500">
+                    {{ authStore.user?.email }}
+                  </p>
+                </div>
+
+                <svg
+                  class="h-5 w-5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+            </UserDropdown>
           </div>
 
           <!-- Organization Switcher -->
@@ -467,7 +486,6 @@ onUnmounted(() => {
           </div>
 
           <!-- Notifications Button -->
-          <!-- Notifications Section -->
           <div class="border-b p-4 sm:p-6">
             <button
               @click="toggleMobileNotifications"

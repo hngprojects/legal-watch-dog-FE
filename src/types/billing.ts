@@ -1,5 +1,6 @@
 export interface BillingErrorResponse {
   error: string
+  status_code: number
   message: string
 }
 

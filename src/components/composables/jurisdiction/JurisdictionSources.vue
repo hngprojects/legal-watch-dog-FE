@@ -21,6 +21,7 @@ const props = defineProps<{
   formatRevisionLabel: (rev: { scraped_at: string }) => string
   renderSummary: (summary?: string | null) => string
   ticketForRevision?: (revisionId: string | undefined) => Ticket | undefined
+  creatingTicketIds?: Record<string, boolean>
 }>()
 
 const emit = defineEmits<{
@@ -418,10 +419,18 @@ const refreshRevisions = (sourceId: string) => emit('refresh-revisions', sourceI
                 </p>
                 <button
                   class="btn--default btn--sm sm:btn--lg"
+                  :disabled="props.creatingTicketIds?.[latestRevisionBySource[source.id]?.id || '']"
+                  :aria-disabled="
+                    props.creatingTicketIds?.[latestRevisionBySource[source.id]?.id || ''] || false
+                  "
                   @click="openTicket(source, latestRevisionBySource[source.id])"
                 >
                   {{
-                    hasTicket(latestRevisionBySource[source.id]?.id) ? 'View ticket' : 'Open ticket'
+                    hasTicket(latestRevisionBySource[source.id]?.id)
+                      ? 'View ticket'
+                      : props.creatingTicketIds?.[latestRevisionBySource[source.id]?.id || '']
+                        ? 'Opening...'
+                        : 'Open ticket'
                   }}
                 </button>
               </div>

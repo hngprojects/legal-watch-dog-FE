@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { ticketApi } from '@/api/ticket'
 import type {
   CreateTicketPayload,
   Ticket,
@@ -99,6 +100,17 @@ export const useTicketStore = defineStore('ticket', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  const parseError = (err: unknown, fallback: string) => {
+    const apiErr = err as {
+      response?: { data?: { message?: string; detail?: string | Array<{ msg?: string }> } }
+      message?: string
+    }
+    const detail = apiErr.response?.data?.detail
+    if (typeof detail === 'string') return detail
+    if (Array.isArray(detail) && detail[0]?.msg) return detail[0].msg
+    return apiErr.response?.data?.message || apiErr.message || fallback
+  }
+
   const sortedTickets = computed(() =>
     [...tickets.value].sort(
       (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
@@ -110,37 +122,76 @@ export const useTicketStore = defineStore('ticket', () => {
     persistTickets(tickets.value)
   }
 
-  const createTicket = async (payload: CreateTicketPayload) => {
+  const resolveTicket = (payload: unknown): Ticket | null => {
+    if (!payload || typeof payload !== 'object') return null
+    const dataObj = payload as { ticket?: unknown }
+    if (dataObj.ticket && typeof dataObj.ticket === 'object') {
+      return dataObj.ticket as Ticket
+    }
+    if ((payload as Ticket).id) {
+      return payload as Ticket
+    }
+    return null
+  }
+
+  const createTicket = async (organizationId: string, payload: CreateTicketPayload) => {
     loading.value = true
     error.value = null
 
+    if (!organizationId) {
+      error.value = 'Select an organization before creating a ticket'
+      loading.value = false
+      return null
+    }
+
+    if (!payload.project_id) {
+      error.value = 'Project information missing for ticket creation'
+      loading.value = false
+      return null
+    }
+
     try {
+      const response = await ticketApi.createManualTicket(
+        organizationId,
+        payload.project_id,
+        payload,
+      )
+      const rawTicket = resolveTicket(response?.data?.data) ?? resolveTicket(response?.data)
       const now = new Date().toISOString()
       const ticket: Ticket = {
-        id: `T-${Date.now()}`,
-        title: payload.title,
-        summary: payload.summary,
-        status: 'open',
-        priority: payload.priority || 'high',
-        jurisdiction_id: payload.jurisdiction_id,
-        project_id: payload.project_id,
-        source_id: payload.source_id,
-        revision_id: payload.revision_id,
-        change_summary: payload.change_summary,
-        change_details: payload.change_details || [],
-        auto_created: payload.auto_created,
-        created_at: now,
-        updated_at: now,
-        comments: [],
-        invites: [],
-        attachments: [],
+        id: rawTicket?.id || `T-${Date.now()}`,
+        title: rawTicket?.title || payload.title,
+        description: rawTicket?.description ?? payload.description ?? payload.summary ?? null,
+        summary: rawTicket?.summary ?? payload.summary,
+        status: rawTicket?.status || 'open',
+        priority: rawTicket?.priority || payload.priority || 'high',
+        jurisdiction_id: rawTicket?.jurisdiction_id ?? payload.jurisdiction_id,
+        project_id: rawTicket?.project_id ?? payload.project_id,
+        source_id: rawTicket?.source_id ?? payload.source_id,
+        revision_id: rawTicket?.revision_id ?? payload.revision_id,
+        data_revision_id:
+          rawTicket?.data_revision_id ?? payload.data_revision_id ?? payload.revision_id,
+        change_diff_id: rawTicket?.change_diff_id ?? payload.change_diff_id ?? null,
+        change_summary: rawTicket?.change_summary ?? payload.change_summary,
+        content: rawTicket?.content ?? payload.content ?? null,
+        change_details:
+          (rawTicket?.change_details && rawTicket.change_details.length > 0
+            ? rawTicket.change_details
+            : payload.change_details) || [],
+        auto_created: rawTicket?.auto_created ?? payload.auto_created,
+        assigned_to_user_id: rawTicket?.assigned_to_user_id ?? payload.assigned_to_user_id ?? null,
+        created_at: rawTicket?.created_at || now,
+        updated_at: rawTicket?.updated_at || now,
+        comments: rawTicket?.comments || [],
+        invites: rawTicket?.invites || [],
+        attachments: rawTicket?.attachments || [],
       }
 
       upsertTicket(ticket)
       return ticket
     } catch (err) {
       console.error('Failed to create ticket', err)
-      error.value = 'Failed to create ticket'
+      error.value = parseError(err, 'Failed to create ticket')
       return null
     } finally {
       loading.value = false
@@ -214,7 +265,9 @@ export const useTicketStore = defineStore('ticket', () => {
 
   const hasTicketForRevision = (revisionId?: string) => {
     if (!revisionId) return false
-    return tickets.value.some((t) => t.revision_id === revisionId)
+    return tickets.value.some(
+      (t) => t.revision_id === revisionId || t.data_revision_id === revisionId,
+    )
   }
 
   const getModeForJurisdiction = (jurisdictionId?: string) => {
@@ -224,7 +277,9 @@ export const useTicketStore = defineStore('ticket', () => {
 
   const ticketForRevision = (revisionId?: string) => {
     if (!revisionId) return undefined
-    return tickets.value.find((t) => t.revision_id === revisionId)
+    return tickets.value.find(
+      (t) => t.revision_id === revisionId || t.data_revision_id === revisionId,
+    )
   }
 
   const setModeForJurisdiction = (jurisdictionId: string, mode: TicketMode) => {
