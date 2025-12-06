@@ -1,6 +1,18 @@
 <template>
-  <div class="blogs-page bg-slate-100">
-    <div class="app-container mx-auto px-6 lg:px-8">
+  <div class="blogs-page relative overflow-hidden bg-[#f7f7f7]">
+    <div
+      class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+      style="
+        background: radial-gradient(
+          ellipse,
+          #f8d9c5 0%,
+          rgba(248, 217, 197, 0.5) 40%,
+          rgba(247, 247, 247, 0.8) 70%,
+          transparent 100%
+        );
+      "
+    ></div>
+    <div class="app-container relative z-10 mx-auto px-6 lg:px-8">
       <section class="pt-20 pb-16 text-center">
         <div
           class="shadow-4xl mb-4 inline-flex items-center space-x-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-[#3F1A0F]"
@@ -129,57 +141,46 @@
               placeholder="Search Blogs..."
               v-model="searchTerm"
             />
-            <button
-              type="submit"
-              class="ml-2 flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 text-gray-600 hover:bg-gray-100"
-            >
-              <svg
-                class="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0012 14.586V17m0 2v2"
-                ></path>
-              </svg>
-            </button>
           </form>
         </div>
 
         <div v-if="displayedPosts.length" class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10">
-          <article
+          <RouterLink
             v-for="post in displayedPosts"
             :key="post.id"
-            class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md"
+            :to="`/blog/${post.slug}`"
+            custom
+            v-slot="{ href, navigate }"
           >
-            <img :src="post.mainImage" :alt="post.title" class="h-48 w-full object-cover" />
-            <div class="p-6">
-              <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]">
-                  {{ post.category }}
-                </span>
-                <span class="text-gray-500">| {{ post.date }}</span>
+            <article
+              :href="href"
+              @click="navigate"
+              class="group cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition duration-300 ease-in-out hover:border-gray-200 hover:shadow-xl"
+            >
+              <img
+                :src="post.mainImage"
+                :alt="post.title"
+                class="h-48 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+              />
+              <div class="p-6">
+                <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
+                  <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]">
+                    {{ post.category }}
+                  </span>
+                  <span class="text-gray-500">| {{ post.date }}</span>
+                </div>
+                <TypographyHeading
+                  level="h3"
+                  class="mb-3 text-xl font-bold text-gray-900 transition duration-150 group-hover:text-[#3F1A0F]"
+                >
+                  {{ post.title }}
+                </TypographyHeading>
+                <TypographyText class="mb-4 text-gray-600">
+                  {{ getPreview(post) }}
+                </TypographyText>
               </div>
-              <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
-                {{ post.title }}
-              </TypographyHeading>
-              <TypographyText class="mb-4 text-gray-600">
-                {{ getPreview(post) }}
-              </TypographyText>
-              <RouterLink
-                :to="`/blog/${post.slug}`"
-                class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
-              >
-                <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
-              </RouterLink>
-            </div>
-          </article>
+            </article>
+          </RouterLink>
         </div>
 
         <div
@@ -191,44 +192,15 @@
 
         <div class="mt-12 flex justify-center" v-if="canToggle">
           <Button
-            variant="outline"
-            class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-center text-gray-900 transition duration-150 hover:bg-gray-50"
+            class="mt-6 cursor-pointer self-center px-[50px] text-sm sm:mt-7 sm:px-[120px] sm:text-base lg:mt-8"
+            size="lg"
+            variant="default"
             @click="toggleMoreCards"
           >
             {{ showMoreCards ? 'View Less' : 'View More' }}
           </Button>
         </div>
       </section>
-
-      <!-- <section class="-mx-6 bg-gray-50/50 py-20 text-center lg:-mx-8">
-        <div class="mx-auto max-w-xl px-6">
-          <TypographyHeading
-            level="h3"
-            class="mb-4 text-center text-2xl leading-tight font-bold text-gray-900 md:text-3xl"
-          >
-            Stay ahead of legal changes by
-            <span class="font-extrabold text-[#3F1A0F]">subscribing</span> to our newsletter.
-          </TypographyHeading>
-
-          <TypographyText class="mb-8 text-center text-base text-gray-600">
-            Join our newsletmter to get early alerts on regulation updates, price fluctuations, and
-            compliance insights that matter to your business.
-          </TypographyText>
-
-          <div class="mx-auto max-w-sm">
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              class="focus-visible:ring-brand-primary mb-4 border-gray-300 bg-white py-6 text-center focus-visible:ring-offset-0"
-            />
-            <Button
-              class="w-full rounded-lg bg-[#3F1A0F] py-6 text-white transition duration-200 hover:bg-[#3f1a0fab]"
-            >
-              Subscribe
-            </Button>
-          </div>
-        </div>
-      </section> -->
     </div>
   </div>
 </template>
@@ -297,9 +269,10 @@ watch(filteredPosts, (posts) => {
   }
 })
 
-watch(slides, () => {
-  if (currentSlide.value >= slides.value.length) {
-    currentSlide.value = 0
+watch(slides, (newSlides) => {
+  const maxIndex = newSlides.length - 1
+  if (currentSlide.value > maxIndex) {
+    currentSlide.value = maxIndex >= 0 ? maxIndex : 0
   }
 })
 
@@ -361,6 +334,7 @@ onUnmounted(() => {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;

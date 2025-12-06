@@ -10,7 +10,7 @@ import DialogTitle from '../ui/dialog/DialogTitle.vue'
 import DialogTrigger from '../ui/dialog/DialogTrigger.vue'
 import XIcon from '@/assets/icons/checkmark-circle-2.svg'
 import type { BillingPlan } from '@/types/billing'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
 
 const {} = defineProps<{
   endDate: Date
@@ -32,13 +32,11 @@ const handleCancelSubscription = async () => {
   await billingStore.cancelSubscription()
 
   if (billingStore.error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'An error occurred',
-      text: billingStore.error,
-    })
+    toast.error(billingStore.error)
+    return
   }
 
+  toast.success('Subscription cancelled successfully.')
   window.location.reload()
 }
 </script>

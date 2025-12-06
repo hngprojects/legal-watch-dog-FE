@@ -1,3 +1,39 @@
+<script setup lang="ts">
+import { TypographyText } from '../ui/typography'
+import Frame from '@/assets/images/Frame.png'
+// import Facebook from '@/assets/images/Facebook.png'
+// import Twitter from '@/assets/images/Twitter.png'
+// import Instagram from '@/assets/images/Instagram.png'
+// import LinkedIn from '@/assets/images/LinkedIn.png'
+// import YouTube from '@/assets/images/YouTube.png'
+import { RouterLink } from 'vue-router'
+
+const products = [
+  { label: 'Features', path: '/features' },
+  { label: 'Pricing', path: '/pricing' },
+  { label: 'How it Works', path: '/how-it-works' },
+]
+
+const companies = [
+  { label: 'About', path: '/about-us' },
+  // { label: 'Contact us', path: '/contact-us' },
+  // { label: 'Careers', path: '/careers' },
+  { label: 'FAQ', path: '/faq' },
+  { label: 'Blog', path: '/blog' },
+]
+
+const supports = [
+  { label: 'Getting started', path: '/how-it-works' },
+  // { label: 'Help center', path: '/help-center' },
+  { label: 'Contact Us', path: '/contact-us' },
+]
+
+const privacys = [
+  { label: 'Privacy Policy', path: '/privacy-policy' },
+  { label: 'Terms of Service', path: '/terms' },
+]
+</script>
+
 <template>
   <footer class="border-t border-gray-100 bg-[#F9FAFB] text-gray-800">
     <div class="app-container mx-auto px-6 pt-16 pb-6 lg:px-0">
@@ -124,37 +160,3 @@
     </div>
   </footer>
 </template>
-
-<script setup lang="ts">
-import { TypographyText } from '../ui/typography'
-import Frame from '@/assets/images/Frame.png'
-// import Facebook from '@/assets/images/Facebook.png'
-// import Twitter from '@/assets/images/Twitter.png'
-// import Instagram from '@/assets/images/Instagram.png'
-// import LinkedIn from '@/assets/images/LinkedIn.png'
-// import YouTube from '@/assets/images/YouTube.png'
-import { RouterLink } from 'vue-router'
-
-const products = [
-  { label: 'Features', path: '/features' },
-  { label: 'Pricing', path: '/pricing' },
-]
-
-const companies = [
-  { label: 'About', path: '/about-us' },
-  { label: 'Careers', path: '/careers' },
-  { label: 'FAQ', path: '/faq' },
-  { label: 'Blog', path: '/blog' },
-]
-
-const supports = [
-  { label: 'How it Works', path: '/how-it-works' },
-  { label: 'Contact us', path: '/contact-us' },
-  // { label: 'Help center', path: '/help-center' },
-]
-
-const privacys = [
-  { label: 'Privacy Policy', path: '/privacy-policy' },
-  { label: 'Terms of Service', path: '/terms' },
-]
-</script>

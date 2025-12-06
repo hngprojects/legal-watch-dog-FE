@@ -59,21 +59,22 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col bg-[#F7F4EF] text-gray-800">
-    <main class="relative flex-1">
-      <div
-        class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[520px]"
-        style="
-          background: radial-gradient(
-            60% 55% at 50% 35%,
-            rgba(242, 171, 109, 0.24),
-            rgba(247, 244, 239, 0.8) 55%,
-            rgba(247, 244, 239, 0.9) 80%,
-            #f7f4ef 100%
-          );
-        "
-      ></div>
+  <div class="relative flex min-h-screen flex-col overflow-hidden bg-[#F7F4EF] text-gray-800">
+    <!-- Enhanced Radial Gradient Background -->
+    <div
+      class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+      style="
+        background: radial-gradient(
+          ellipse,
+          #f8d9c5 0%,
+          rgba(248, 217, 197, 0.5) 40%,
+          rgba(247, 247, 247, 0.8) 70%,
+          #f7f7f7 100%
+        );
+      "
+    ></div>
 
+    <main class="relative z-10 flex-1">
       <section
         class="app-container mx-auto flex w-full flex-col gap-10 px-4 py-14 sm:px-6 lg:flex-row lg:gap-14 lg:py-20"
       >

@@ -1,57 +1,3 @@
-<template>
-  <div class="terms-page flex min-h-screen flex-col bg-white">
-    <main class="grow bg-[#F8FAFC]">
-      <div class="mx-auto max-w-4xl px-6 py-20 lg:px-8">
-        <div class="mb-12 text-center">
-          <TypographyHeading
-            level="h1"
-            class="mb-2 text-4xl font-extrabold text-gray-900 md:text-5xl"
-          >
-            Terms and Conditions
-          </TypographyHeading>
-          <TypographyText class="text-sm text-gray-500">
-            Last updated 25th November, 2025
-          </TypographyText>
-        </div>
-
-        <div class="border border-gray-100 p-8 md:p-12">
-          <TypographyText class="mb-8 text-base leading-relaxed text-gray-700">
-            Welcome to Legal Watch Dog Terms and Conditions. Please review these terms and
-            conditions carefully. These terms govern your use of our website, web application and
-            related services. By accessing or using our services, you agree to comply with these
-            terms. Please note that if you do not agree, please discontinue use immediately. By
-            continuing to use Legal WatchDog, you are consenting to this policy.
-          </TypographyText>
-
-          <section v-for="(section, index) in termsContent" :key="index" class="mb-8">
-            <TypographyHeading level="h2" class="mb-4 text-lg font-bold text-[#5D2D18]">
-              {{ section.id }}. {{ section.title }}
-            </TypographyHeading>
-
-            <TypographyText v-if="section.preamble" class="mb-3 block text-base text-gray-700">
-              {{ section.preamble }}
-            </TypographyText>
-
-            <ul class="list-none space-y-2 pl-4 text-base text-gray-700">
-              <li
-                v-for="(item, i) in section.items"
-                :key="i"
-                class="relative before:absolute before:-left-4 before:font-bold before:text-[#5D2D18] before:content-['•']"
-              >
-                {{ item }}
-              </li>
-            </ul>
-
-            <TypographyText v-if="section.note" class="mt-4 block text-base text-gray-700 italic">
-              {{ section.note }}
-            </TypographyText>
-          </section>
-        </div>
-      </div>
-    </main>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { TypographyHeading, TypographyText } from '../ui/typography'
 
@@ -114,3 +60,71 @@ const termsContent = [
   },
 ]
 </script>
+
+<template>
+  <div class="terms-page relative flex min-h-screen flex-col overflow-hidden">
+    <!-- Radial Gradient Background -->
+    <div
+      class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+      style="
+        background: radial-gradient(
+          ellipse,
+          #f8d9c5 0%,
+          rgba(248, 217, 197, 0.5) 40%,
+          rgba(247, 247, 247, 0.8) 70%,
+          #f7f7f7 100%
+        );
+      "
+    ></div>
+
+    <main class="relative grow">
+      <div class="mx-auto max-w-4xl px-6 py-20 lg:px-8">
+        <div class="text-center">
+          <TypographyHeading
+            level="h1"
+            class="mb-2 text-4xl font-extrabold text-gray-900 md:text-5xl"
+          >
+            Terms and Conditions
+          </TypographyHeading>
+          <TypographyText class="text-sm text-gray-500">
+            Last updated 25th November, 2025
+          </TypographyText>
+        </div>
+
+        <div class="md:p-12">
+          <TypographyText class="mb-8 text-base leading-relaxed text-gray-700">
+            Welcome to Legal Watch Dog Terms and Conditions. Please review these terms and
+            conditions carefully. These terms govern your use of our website, web application and
+            related services. By accessing or using our services, you agree to comply with these
+            terms. Please note that if you do not agree, please discontinue use immediately. By
+            continuing to use Legal WatchDog, you are consenting to this policy.
+          </TypographyText>
+
+          <section v-for="(section, index) in termsContent" :key="index" class="mb-8">
+            <TypographyHeading level="h2" class="mb-4 text-lg font-bold text-[#5D2D18]">
+              {{ section.id }}. {{ section.title }}
+            </TypographyHeading>
+
+            <TypographyText v-if="section.preamble" class="mb-3 block text-base text-gray-700">
+              {{ section.preamble }}
+            </TypographyText>
+
+            <ul class="list-none space-y-2 pl-4 text-base text-gray-700">
+              <li
+                v-for="(item, i) in section.items"
+                :key="i"
+                class="relative before:absolute before:-left-4 before:font-bold before:text-[#5D2D18] before:content-['•']"
+              >
+                {{ item }}
+              </li>
+            </ul>
+
+            <TypographyText v-if="section.note" class="mt-4 block text-base text-gray-700 italic">
+              {{ section.note }}
+            </TypographyText>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</template>
