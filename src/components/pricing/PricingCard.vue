@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Icon from '@/components/reusable/Icon.vue'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
 import { useBillingStore } from '@/stores/billing-store'
 import type { BillingPlan } from '@/types/billing'
 import {
@@ -31,17 +31,14 @@ const handlePay = async () => {
   const result = await billingStore.handlePlanChange(plan.id)
 
   if (billingStore.error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'An error occurred',
-      text: billingStore.error,
-    })
-  } else if (result) {
-    if (typeof result === 'string' && result.startsWith('http')) {
-      window.location.href = result
-    } else {
-      await billingStore.getSubscriptionStatus()
-    }
+    toast.error(billingStore.error)
+    return
+  }
+
+  if (typeof result === 'string' && result.startsWith('http')) {
+    window.location.href = result
+  } else {
+    await billingStore.getSubscriptionStatus()
   }
 }
 </script>

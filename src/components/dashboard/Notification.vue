@@ -3,10 +3,12 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { notificationService } from '@/api/notification'
 import type { Notification, ApiNotification } from '@/types/notification'
-import Swal from '@/lib/swal'
 import type { AxiosError } from 'axios'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
+const { confirm: openConfirm } = useConfirmDialog()
 
 const props = defineProps<{ unreadCount?: number }>()
 const emit = defineEmits<{ (e: 'update:unreadCount', value: number): void }>()
@@ -94,7 +96,7 @@ const handleNotificationClick = async (id: string, index: number) => {
       emit('update:unreadCount', localUnreadCount.value)
     }
   } catch {
-    Swal.fire('Error', 'Could not open notification', 'error')
+    toast.error('Could not open notification')
   }
 }
 
@@ -102,29 +104,27 @@ const deleteNotification = async (id: string, index: number) => {
   const item = notifications.value[index]
   if (!item) return
 
-  const result = await Swal.fire({
+  openConfirm({
     title: 'Delete notification?',
-    text: 'This cannot be undone.',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Delete',
-    cancelButtonText: 'Cancel',
-    confirmButtonColor: '#dc2626',
+    description: 'This action cannot be undone.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      try {
+        await notificationService.deleteNotification(id)
+        notifications.value.splice(index, 1)
+
+        if (!item.read) {
+          localUnreadCount.value = Math.max(0, localUnreadCount.value - 1)
+          emit('update:unreadCount', localUnreadCount.value)
+        }
+
+        toast.success('Notification deleted')
+      } catch {
+        toast.error('Failed to delete notification')
+      }
+    },
   })
-
-  if (!result.isConfirmed) return
-
-  try {
-    await notificationService.deleteNotification(id)
-    notifications.value.splice(index, 1)
-    if (!item.read) {
-      localUnreadCount.value = Math.max(0, localUnreadCount.value - 1)
-      emit('update:unreadCount', localUnreadCount.value)
-    }
-    Swal.fire({ icon: 'success', title: 'Deleted', timer: 1500, showConfirmButton: false })
-  } catch {
-    Swal.fire('Error', 'Failed to delete', 'error')
-  }
 }
 
 const markAllAsRead = async () => {
@@ -137,14 +137,9 @@ const markAllAsRead = async () => {
     localUnreadCount.value = 0
     emit('update:unreadCount', 0)
 
-    Swal.fire({
-      icon: 'success',
-      title: `Marked ${count} notification(s) as read`,
-      timer: 1800,
-      showConfirmButton: false,
-    })
+    toast.success(`Marked ${count} notifications as read`)
   } catch {
-    Swal.fire('Error', 'Failed to mark all as read', 'error')
+    toast.error('Failed to mark all as read')
   }
 }
 
