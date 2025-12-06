@@ -84,7 +84,7 @@ const closeProjectModal = () => {
 
 const handleProjectSave = async (payload: {
   title: string
-  description: string
+  description: string | null
   organizationId: string
   projectId?: string
 }) => {

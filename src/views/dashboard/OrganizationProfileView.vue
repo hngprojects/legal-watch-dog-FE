@@ -103,7 +103,9 @@ const organization = computed(
 
 const projectModalOpen = ref(false)
 const projectModalMode = ref<'edit' | 'create'>('create')
-const editingProject = ref<{ id?: string; title?: string; description?: string } | null>(null)
+const editingProject = ref<{ id?: string; title?: string; description?: string | null } | null>(
+  null,
+)
 const organizationOptions = computed(() =>
   orgId.value && organization.value ? [{ id: orgId.value, name: organization.value.name }] : [],
 )
@@ -116,7 +118,7 @@ const goToProject = (projectId: string) => {
   router.push({ name: 'project-detail', params: { organizationId: orgId.value, id: projectId } })
 }
 
-const openEditProject = (project: { id?: string; title?: string; description?: string }) => {
+const openEditProject = (project: { id?: string; title?: string; description?: string | null }) => {
   if (!project) return
   editingProject.value = { ...project }
   projectModalMode.value = 'edit'
@@ -139,7 +141,7 @@ const closeProjectModal = () => {
 
 const handleProjectSave = async (payload: {
   title: string
-  description: string
+  description: string | null
   organizationId: string
   projectId?: string
 }) => {
