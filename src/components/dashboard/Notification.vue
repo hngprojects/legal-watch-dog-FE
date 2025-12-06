@@ -152,7 +152,7 @@ onMounted(fetchNotifications)
 </script>
 
 <template>
-  <div class="w-80 rounded-lg border bg-white p-4 shadow-lg">
+  <div class="w-full rounded-lg border bg-white p-4 shadow-lg sm:w-80">
     <div class="mb-3 flex items-center justify-between">
       <h3 class="font-semibold text-gray-700">Notifications</h3>
       <button
