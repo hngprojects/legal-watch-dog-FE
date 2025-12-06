@@ -426,7 +426,7 @@ watch(
             >
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
-                  <h3 class="text-base font-semibold text-gray-900">{{ j.name }}</h3>
+                  <h3 class="text-base font-semibold break-all text-gray-900">{{ j.name }}</h3>
                   <p class="text-sm text-gray-600">{{ j.description }}</p>
                 </div>
                 <span
