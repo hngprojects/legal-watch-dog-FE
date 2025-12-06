@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import EmailIcon from '@/assets/icons/message.png'
 import OfficeIcon from '@/assets/icons/officechair.png'
-import PhoneIcon from '@/assets/icons/call.png'
+// import PhoneIcon from '@/assets/icons/call.png'
 import AlertIcon from '@/assets/icons/alert.png'
 import type { ContactUsApiPayload } from '@/types/contact-us'
 import { submitContactForm } from '@/api/contact-us'
@@ -176,7 +176,7 @@ const handleSubmit = async () => {
               </div>
               <div class="flex flex-col justify-center">
                 <p class="mt-3 text-sm font-medium text-[#1F1F1F] sm:text-base lg:mt-0">
-                  contact@legalwatch.dog
+                  info@emerj.net
                 </p>
               </div>
             </div>
@@ -191,17 +191,16 @@ const handleSubmit = async () => {
               </div>
               <div class="flex flex-col justify-center">
                 <p class="mt-3 text-sm font-medium text-[#1F1F1F] sm:text-base lg:mt-0">
-                  2972 Westheimer Rd. Santa Ana,<br />Illinois 85486
+                  Emerj LLC 30 N Gould St Ste R, Sheridan,<br />
+                  Wyoming, 82801, United States
                 </p>
               </div>
             </div>
 
             <!-- Phone -->
-            <div class="flex items-start gap-3 sm:items-center sm:gap-4">
-              <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
-                style="background: #f1a75f"
-              >
+            <!-- <div class="flex items-start gap-3 sm:items-center sm:gap-4">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                style="background: #f1a75f">
                 <img :src="PhoneIcon" alt="Phone" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
@@ -209,7 +208,7 @@ const handleSubmit = async () => {
                   +44 123 654 7890
                 </p>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
 
