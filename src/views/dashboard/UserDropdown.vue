@@ -27,6 +27,10 @@ const dropdownLinks = [
     to: 'billing',
     name: 'Billing',
   },
+  {
+    to: 'api-access',
+    name: 'API Access',
+  },
 ]
 </script>
 
