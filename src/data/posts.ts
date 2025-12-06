@@ -2,6 +2,7 @@ export const blogPosts = [
   {
     id: 1,
     title: 'Policy Developments to Know',
+    slug: 'policy-developments-to-know',
     category: 'Policy Updates',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog1.png',
@@ -80,6 +81,7 @@ export const blogPosts = [
   {
     id: 2,
     title: 'New Regulations Explained',
+    slug: 'new-regulations-explained',
     category: 'Regulatory Changes',
     date: 'Dec 1, 2025',
     mainImage: '/src/assets/Images/underblog2.png',
@@ -114,12 +116,13 @@ export const blogPosts = [
   {
     id: 3,
     title: 'Tech Innovations in Law',
-    category: 'AI & Legal Tech',
+    slug: 'tech-innovations-in-law',
+    category: 'AI & Tech',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog3.png',
 
     introduction: [
-      'Legal teams are adopting AI to triage regulatory changes, generate first drafts, and surface risks faster. The tools that deliver the most value pair automation with strong guardrails and auditable outputs.',
+      'Teams are adopting AI to triage regulatory changes, generate first drafts, and surface risks faster. The tools that deliver the most value pair automation with strong guardrails and auditable outputs.',
       'Here is how forward-looking teams are experimenting responsibly while keeping humans in the loop.',
     ],
 
@@ -146,6 +149,7 @@ export const blogPosts = [
   {
     id: 4,
     title: 'Market and Industry Insights',
+    slug: 'market-and-industry-insights',
     category: 'Industry Trends',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog4.png',
@@ -177,6 +181,7 @@ export const blogPosts = [
   {
     id: 5,
     title: 'Current Policy Alerts',
+    slug: 'current-policy-alerts',
     category: 'Policy Alerts',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog5.png',
@@ -207,6 +212,7 @@ export const blogPosts = [
   {
     id: 6,
     title: 'Practical Compliance Guides',
+    slug: 'practical-compliance-guides',
     category: 'Compliance Tips',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog6.png',
@@ -263,18 +269,19 @@ export const blogPosts = [
       {
         id: 3,
         title: 'Tech Innovations in Law',
-        category: 'AI & Legal Tech',
+        category: 'AI & Tech',
         date: 'Dec 1, 2025',
         summary:
-          'A look at emerging tools and technologies transforming how legal professionals research, monitor, and manage compliance..',
+          'A look at emerging tools and technologies transforming how professionals research, monitor, and manage compliance..',
         image: '/src/assets/Images/underblog3.png',
       },
     ],
   },
   {
-    id: 3,
-    title: 'Tech Innovations in Law',
-    category: 'AI & Legal Tech',
+    id: 7,
+    title: 'Emerging Tech in Legal Compliance',
+    slug: 'emerging-tech-in-legal-compliance',
+    category: 'AI & Tech',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog3.png',
 
@@ -356,8 +363,9 @@ export const blogPosts = [
     ],
   },
   {
-    id: 4,
-    title: 'Market and Industry Insights',
+    id: 8,
+    title: 'Key Industry and Market Insights',
+    slug: 'key-industry-and-market-insights',
     category: 'Industry Trends',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog4.png',
@@ -440,8 +448,9 @@ export const blogPosts = [
     ],
   },
   {
-    id: 5,
-    title: 'Current Policy Alerts',
+    id: 9,
+    title: 'Weekly Policy Alert Roundup',
+    slug: 'weekly-policy-alert-roundup',
     category: 'Policy Alerts',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog5.png',
@@ -515,17 +524,18 @@ export const blogPosts = [
       {
         id: 3,
         title: 'Tech Innovations in Law',
-        category: 'AI & Legal Tech',
+        category: 'AI & Tech',
         date: 'Dec 1, 2025',
         summary:
-          'A look at emerging tools and technologies transforming how legal professionals research, monitor, and manage compliance.',
+          'A look at emerging tools and technologies transforming how professionals research, monitor, and manage compliance.',
         image: '/src/assets/Images/underblog3.png',
       },
     ],
   },
   {
-    id: 6,
-    title: 'Practical Compliance Guides',
+    id: 10,
+    title: 'Essential Compliance Guides for Business',
+    slug: 'essential-compliance-guides-for-business',
     category: 'Compliance Tips',
     date: 'Nov 28, 2025',
     mainImage: '/src/assets/Images/underblog6.png',

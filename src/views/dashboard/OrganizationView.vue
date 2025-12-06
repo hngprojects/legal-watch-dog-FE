@@ -441,6 +441,9 @@ onMounted(async () => {
                     <SelectItem value="Technology, Media & Telecommunications"
                       >Technology, Media & Telecommunications
                     </SelectItem>
+                    <SelectItem value="Hospitality & Entertainment"
+                      >Hospitality & Entertainment
+                    </SelectItem>
                     <SelectItem value="Health, Science & Education"
                       >Health, Science & Education</SelectItem
                     >

@@ -172,7 +172,7 @@
                 {{ getPreview(post) }}
               </TypographyText>
               <RouterLink
-                :to="`/blog/${post.id}`"
+                :to="`/blog/${post.slug}`"
                 class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
               >
                 <span>Learn More</span>

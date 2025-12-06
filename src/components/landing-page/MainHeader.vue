@@ -7,12 +7,14 @@ import { useAuthStore } from '@/stores/auth-store'
 
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 import UserAvatar from '@/components/dashboard/UserAvatar.vue'
-import Swal from '@/lib/swal'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { toast } from 'vue-sonner'
 import OrganizationSwitcher from '@/components/dashboard/OrganizationSwitcher.vue'
 import Notification from '@/components/dashboard/Notification.vue'
 import { notificationService } from '@/api/notification'
 
 const router = useRouter()
+const { confirm: openConfirm } = useConfirmDialog()
 const route = useRoute()
 
 type NavLink = {
@@ -67,31 +69,30 @@ const navLinks: NavLink[] = isDashboard
   ? []
   : [
       {
-        name: 'Industries',
+        name: 'Company',
         dropdown: [
-          {
-            name: 'Healthcare',
-            to: '/coming-soon',
-            description: 'Solutions for healthcare providers',
-          },
-          { name: 'Finance', to: '/coming-soon', description: 'Financial services solutions' },
-          { name: 'Retail', to: '/coming-soon', description: 'Retail and e-commerce' },
-          { name: 'Manufacturing', to: '/coming-soon', description: 'Manufacturing solutions' },
-          { name: 'Education', to: '/coming-soon', description: 'Educational institutions' },
+          { name: 'About Us', to: '/about-us', description: 'Get to know us' },
+          { name: 'FAQ', to: '/faq', description: 'Frequently asked questions' },
+          { name: 'Blog', to: '/blog', description: 'Latest articles and insights' },
+          { name: 'Careers', to: '/careers', description: 'Want to join us?' },
         ],
       },
       { name: 'Pricing', to: '/pricing' },
-      {
-        name: 'Resources',
-        dropdown: [
-          { name: 'Blog', to: '/coming-soon', description: 'Latest articles and insights' },
-          { name: 'Documentation', to: '/coming-soon', description: 'Technical documentation' },
-          { name: 'Case Studies', to: '/coming-soon', description: 'Success stories' },
-          { name: 'Guides', to: '/coming-soon', description: 'How-to guides and tutorials' },
-          { name: 'Webinars', to: '/coming-soon', description: 'Live and recorded sessions' },
-        ],
-      },
-      { name: 'Partners', to: '/coming-soon' },
+      // {
+      //   name: 'Industries',
+      //   dropdown: [
+      //     {
+      //       name: 'Healthcare',
+      //       to: '/coming-soon',
+      //       description: 'Solutions for healthcare providers',
+      //     },
+      //     { name: 'Finance', to: '/coming-soon', description: 'Financial services solutions' },
+      //     { name: 'Retail', to: '/coming-soon', description: 'Retail and e-commerce' },
+      //     { name: 'Manufacturing', to: '/coming-soon', description: 'Manufacturing solutions' },
+      //     { name: 'Education', to: '/coming-soon', description: 'Educational institutions' },
+      //   ],
+      // },
+      { name: 'Contact Us', to: '/contact-us' },
     ]
 
 let bodyOverflow: string | null = null
@@ -132,22 +133,21 @@ const closeDropdown = () => {
   activeDropdown.value = null
 }
 
-const handleLogout = async () => {
-  const result = await Swal.fire({
-    icon: 'warning',
+const handleLogout = () => {
+  openConfirm({
     title: 'Log out?',
-    text: 'You will need to sign in again to access your dashboard.',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, log me out',
-    cancelButtonText: 'Stay logged in',
-    confirmButtonColor: '#DC2626',
+    description: 'You will need to sign in again to access your dashboard.',
+    confirmText: 'Log out',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      isMenuOpen.value = false
+
+      await authStore.logout()
+      toast.success('You have been logged out')
+
+      router.replace({ name: 'login' })
+    },
   })
-
-  if (!result.isConfirmed) return
-
-  isMenuOpen.value = false
-  await authStore.logout()
-  router.replace({ name: 'login' })
 }
 
 const isNotificationsOpen = ref(false)

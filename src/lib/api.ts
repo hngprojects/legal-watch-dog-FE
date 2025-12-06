@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type { AxiosRequestConfig } from 'axios'
-import router from '@/router'
+import getRouter from '@/router/instance'
 import { useAuthStore } from '@/stores/auth-store'
 import themedSwal from '@/lib/swal'
 
@@ -51,8 +51,11 @@ const showSessionExpiredAlert = () => {
     })
     .finally(() => {
       isSessionExpiredAlertActive = false
-      const redirectPath = window.location.pathname + window.location.search + window.location.hash
-      void router.push({ name: 'login', query: { redirect: redirectPath } })
+      if (typeof window !== 'undefined') {
+        const redirectPath =
+          window.location.pathname + window.location.search + window.location.hash
+        void getRouter().push({ name: 'login', query: { redirect: redirectPath } })
+      }
     })
 }
 

@@ -20,18 +20,17 @@ const showCreateModal = ref(false)
 const formData = ref({
   title: '',
   description: '',
-  master_prompt: '',
 })
 
 const openCreateModal = () => {
   showCreateModal.value = true
-  formData.value = { title: '', description: '', master_prompt: '' }
+  formData.value = { title: '', description: '' }
   projectStore.setError(null)
 }
 
 const closeCreateModal = () => {
   showCreateModal.value = false
-  formData.value = { title: '', description: '', master_prompt: '' }
+  formData.value = { title: '', description: '' }
   projectStore.setError(null)
 }
 
@@ -43,9 +42,6 @@ const handleCreateProject = async () => {
   projectStore.setError(null)
 
   if (!formData.value.title.trim()) return projectStore.setError('Project name is required')
-  if (!formData.value.description.trim()) return projectStore.setError('Description is required')
-  if (!formData.value.master_prompt.trim())
-    return projectStore.setError('Master prompt is required')
 
   projectStore.setError(
     'Projects are scoped to organizations. Please create one from an organization.',
@@ -184,9 +180,7 @@ const goToProject = (id: string) => {
       <DialogScrollContent class="sm:max-w-[640px]">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
-          <DialogDescription>
-            Set up a new project to track legal and regulatory changes
-          </DialogDescription>
+          <DialogDescription> Set up a new project to track regulatory changes </DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="handleCreateProject" class="space-y-6">
@@ -215,8 +209,7 @@ const goToProject = (id: string) => {
                 v-model="formData.description"
                 id="desc"
                 rows="4"
-                placeholder="What legal areas will you monitor?"
-                required
+                placeholder="What regulatory areas will you monitor?"
                 class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
               />
               <label
@@ -226,85 +219,6 @@ const goToProject = (id: string) => {
                 Description
               </label>
             </div>
-
-            <form @submit.prevent="handleCreateProject" class="space-y-6">
-              <div>
-                <h4 class="mb-3 text-sm font-medium text-[#121110]">Project information</h4>
-
-                <div class="relative">
-                  <input
-                    v-model="formData.title"
-                    id="projName"
-                    placeholder="e.g Global Visa Monitoring"
-                    required
-                    class="peer h-[52px] w-full rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                  />
-                  <label
-                    for="projName"
-                    class="pointer-events-none absolute top-2.5 left-3 origin-left -translate-y-6 scale-75 transform bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:top-2.5 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-[#401903]"
-                  >
-                    Project Name
-                  </label>
-                </div>
-                <p class="mt-1.5 pl-1 text-xs text-[#717680]">
-                  Give your project a descriptive name
-                </p>
-
-                <div class="relative mt-6">
-                  <textarea
-                    v-model="formData.description"
-                    id="desc"
-                    rows="4"
-                    placeholder="What legal areas will you monitor?"
-                    required
-                    class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                  />
-                  <label
-                    for="desc"
-                    class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:scale-75 peer-focus:text-[#401903]"
-                  >
-                    Description
-                  </label>
-                </div>
-
-                <div class="relative mt-6">
-                  <textarea
-                    v-model="formData.master_prompt"
-                    id="prompt"
-                    rows="4"
-                    placeholder="e.g. Summarize any changes to visa policy in the UK, EU, USA, Canada..."
-                    required
-                    class="peer w-full resize-none rounded-lg border border-[#D5D7DA] px-4 pt-5 pb-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-                  />
-                  <label
-                    for="prompt"
-                    class="pointer-events-none absolute -top-2.5 left-3 bg-white px-1 text-xs font-medium text-[#1F1F1F] transition-all duration-200 peer-placeholder-shown:top-6 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-placeholder-shown:text-[#717680] peer-focus:-top-2.5 peer-focus:scale-75 peer-focus:text-[#401903]"
-                  >
-                    Instructions
-                  </label>
-                </div>
-              </div>
-
-              <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-                {{ error }}
-              </div>
-
-              <div class="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  @click="closeCreateModal"
-                  class="rounded-lg border border-[#F1A75F] px-5 py-2.5 text-sm font-medium text-[#F1A75F] hover:bg-orange-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="rounded-lg bg-[#401903] px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-[#2a1102]"
-                >
-                  Save Project
-                </button>
-              </div>
-            </form>
           </div>
 
           <div v-if="error" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">

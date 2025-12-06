@@ -21,12 +21,12 @@ const props = defineProps<{
   mode: Mode
   organizations: OrganizationOption[]
   defaultOrganizationId?: string
+  loading?: boolean
   project?: {
     id?: string
     title?: string
-    description?: string
+    description?: string | null
     org_id?: string
-    masterPrompt?: string
   }
   error?: string | null
 }>()
@@ -37,10 +37,9 @@ const emit = defineEmits<{
     e: 'save',
     payload: {
       title: string
-      description: string
+      description: string | null
       organizationId: string
       projectId?: string
-      masterPrompt?: string
     },
   ): void
 }>()
@@ -49,7 +48,6 @@ const formState = ref({
   title: '',
   description: '',
   organizationId: '',
-  masterPrompt: '',
 })
 
 const localError = ref<string | null>(null)
@@ -60,7 +58,6 @@ const resetState = () => {
     description: props.project?.description || '',
     organizationId:
       props.project?.org_id || props.defaultOrganizationId || props.organizations[0]?.id || '',
-    masterPrompt: props.project?.masterPrompt || '',
   }
   localError.value = null
 }
@@ -80,21 +77,20 @@ const handleClose = () => {
 }
 
 const handleSubmit = () => {
+  if (props.loading) return
   localError.value = null
   if (!formState.value.title.trim()) {
     localError.value = 'Project name is required'
     return
   }
-  if (!formState.value.description.trim()) {
-    localError.value = 'Description is required'
-    return
-  }
+
+  const description = formState.value.description.trim()
+
   emit('save', {
     title: formState.value.title.trim(),
-    description: formState.value.description.trim(),
+    description: description || null,
     organizationId: formState.value.organizationId,
     projectId: props.project?.id,
-    masterPrompt: formState.value.masterPrompt.trim() || undefined,
   })
 }
 </script>
@@ -134,26 +130,9 @@ const handleSubmit = () => {
             v-model="formState.description"
             id="desc"
             rows="3"
-            placeholder="What legal areas will you monitor?"
-            required
+            placeholder="What areas will you monitor?"
             class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
           />
-        </div>
-
-        <div>
-          <label for="masterPrompt" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-            Master Prompt
-          </label>
-          <textarea
-            v-model="formState.masterPrompt"
-            id="masterPrompt"
-            rows="3"
-            placeholder="Global instructions that apply to all jurisdictions in this project (optional)"
-            class="w-full resize-none rounded-lg border border-[#D5D7DA] px-4 py-3 text-sm text-gray-900 placeholder-[#717680] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-          />
-          <p class="mt-1.5 text-xs text-[#717680]">
-            Optional instructions that will be inherited by every jurisdiction
-          </p>
         </div>
 
         <div v-if="localError" class="rounded-lg bg-red-50 p-4 text-sm text-red-700">
@@ -165,8 +144,21 @@ const handleSubmit = () => {
 
         <DialogFooter class="flex justify-end gap-3 pt-2">
           <button type="button" @click="handleClose" class="btn--secondary btn--lg">Cancel</button>
-          <button type="submit" class="btn--default btn--lg">
-            {{ mode === 'edit' ? 'Save Changes' : 'Save Project' }}
+          <button
+            type="submit"
+            class="btn--default btn--lg"
+            :disabled="loading"
+            :aria-busy="loading"
+          >
+            {{
+              loading
+                ? mode === 'edit'
+                  ? 'Saving...'
+                  : 'Creating...'
+                : mode === 'edit'
+                  ? 'Save Changes'
+                  : 'Save Project'
+            }}
           </button>
         </DialogFooter>
       </form>
