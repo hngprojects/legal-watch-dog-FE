@@ -28,7 +28,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
-const isTokenGenerated = ref(true)
+const isTokenGenerated = ref(false)
+const apiKey = ref('')
 
 const tokenName = ref('')
 const description = ref('')
@@ -66,6 +67,8 @@ const generateToken = () => {
     expiration: expiration.value,
   })
   isTokenGenerated.value = true
+  apiKey.value =
+    'github_pat_11AJRQ6BI0p7cCVBzAMdJ8_hfUX1M1Cb2WvHYAw3Q8IrMLhaKPLnchMsV5T9B4kqsV6HYJKINIS9eB'
   closeForm()
 }
 </script>
@@ -185,7 +188,7 @@ const generateToken = () => {
             again
           </p>
           <p class="rounded-sm bg-[#CDCDCD] px-4 py-2 text-xs break-all text-[#080808]">
-            github_pat_11AJRQ6BI0p7cCVBzAMdJ8_hfUX1M1Cb2WvHYAw3Q8IrMLhaKPLnchMsV5T9B4kqsV6HYJKINIS9eB
+            {{ apiKey }}
           </p>
         </div>
         <button type="button" class="shrink-0 self-center">
