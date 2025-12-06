@@ -7,9 +7,9 @@ import TypographyHeading from '@/components/ui/typography/TypographyHeading.vue'
 
 const route = useRoute()
 
-const blogId = computed(() => Number(route.params.id))
+const blogId = computed(() => route.params.slug)
 
-const blogPost = computed(() => blogPosts.find((post) => post.id === blogId.value))
+const blogPost = computed(() => blogPosts.find((post) => post.slug === blogId.value))
 </script>
 <template>
   <div v-if="blogPost" class="min-h-screen bg-gray-50 py-16">
@@ -136,7 +136,7 @@ const blogPost = computed(() => blogPosts.find((post) => post.id === blogId.valu
             v-for="post in blogPost.relatedPosts"
             :key="post.id"
             class="cursor-pointer rounded-xl border bg-white shadow-md transition hover:shadow-lg"
-            @click="$router.push(`/blog/${post.id}`)"
+            @click="$router.push(`/blog/${blogPosts.find((bp) => bp.id === post.id)?.slug}`)"
           >
             <img :src="post.image" class="h-48 w-full rounded-t-xl object-cover" />
 
