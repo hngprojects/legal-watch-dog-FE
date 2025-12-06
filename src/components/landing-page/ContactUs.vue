@@ -157,7 +157,9 @@ const handleSubmit = async () => {
             Contact Us
           </h1>
 
-          <p class="mb-8 max-w-md text-sm leading-relaxed text-[#6B7280] sm:mb-10 sm:text-base lg:mb-12">
+          <p
+            class="mb-8 max-w-md text-sm leading-relaxed text-[#6B7280] sm:mb-10 sm:text-base lg:mb-12"
+          >
             Have any enquiry? you have come to the right place. Get in touch with us through the
             form and we will get back to you as soon as possible
           </p>
@@ -166,8 +168,10 @@ const handleSubmit = async () => {
           <div class="flex flex-col gap-5 sm:gap-6">
             <!-- Email -->
             <div class="flex items-start gap-3 sm:items-center sm:gap-4">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
-                style="background: #f1a75f">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                style="background: #f1a75f"
+              >
                 <img :src="EmailIcon" alt="Email" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
@@ -179,8 +183,10 @@ const handleSubmit = async () => {
 
             <!-- Office Address -->
             <div class="flex items-start gap-3 sm:items-center sm:gap-4">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
-                style="background: #f1a75f">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                style="background: #f1a75f"
+              >
                 <img :src="OfficeIcon" alt="Office" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
@@ -192,8 +198,10 @@ const handleSubmit = async () => {
 
             <!-- Phone -->
             <div class="flex items-start gap-3 sm:items-center sm:gap-4">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
-                style="background: #f1a75f">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                style="background: #f1a75f"
+              >
                 <img :src="PhoneIcon" alt="Phone" class="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div class="flex flex-col justify-center">
@@ -213,8 +221,13 @@ const handleSubmit = async () => {
               <label for="fullName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
                 Full Name
               </label>
-              <Input id="fullName" v-model="form.fullName" type="text" placeholder="John Doe"
-                class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]" />
+              <Input
+                id="fullName"
+                v-model="form.fullName"
+                type="text"
+                placeholder="John Doe"
+                class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
+              />
               <p v-if="errors.fullName" class="mt-1 text-sm text-red-600">
                 {{ errors.fullName }}
               </p>
@@ -226,8 +239,13 @@ const handleSubmit = async () => {
                 Phone Number
               </label>
               <div class="relative">
-                <Input id="phoneNumber" v-model="form.phoneNumber" type="tel" placeholder="+15550000000"
-                  class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]" />
+                <Input
+                  id="phoneNumber"
+                  v-model="form.phoneNumber"
+                  type="tel"
+                  placeholder="+15550000000"
+                  class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
+                />
               </div>
               <p v-if="errors.phoneNumber" class="mt-1 text-sm text-red-600">
                 {{ errors.phoneNumber }}
@@ -239,8 +257,13 @@ const handleSubmit = async () => {
               <label for="email" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
                 Company's Email Address
               </label>
-              <Input id="email" v-model="form.email" type="email" placeholder="olivia@untitledui.com"
-                class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]" />
+              <Input
+                id="email"
+                v-model="form.email"
+                type="email"
+                placeholder="olivia@untitledui.com"
+                class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
+              />
               <p v-if="errors.email" class="mt-1 text-sm text-red-600">
                 {{ errors.email }}
               </p>
@@ -251,10 +274,18 @@ const handleSubmit = async () => {
               <label for="message" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
                 Message
               </label>
-              <textarea id="message" v-model="form.message" @input="updateCharacterCount" :maxlength="maxCharacters"
-                rows="5" placeholder="Add message"
-                class="sm:rows-6 w-full resize-none rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#1F1F1F] placeholder-[#9CA3AF] transition-all outline-none focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"></textarea>
-              <div class="mt-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0">
+              <textarea
+                id="message"
+                v-model="form.message"
+                @input="updateCharacterCount"
+                :maxlength="maxCharacters"
+                rows="5"
+                placeholder="Add message"
+                class="sm:rows-6 w-full resize-none rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#1F1F1F] placeholder-[#9CA3AF] transition-all outline-none focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+              ></textarea>
+              <div
+                class="mt-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0"
+              >
                 <div class="order-2 sm:order-1">
                   <p v-if="errors.message" class="text-sm text-red-600">
                     {{ errors.message }}
@@ -275,9 +306,16 @@ const handleSubmit = async () => {
                 <div class="flex-1">
                   <h4 class="mb-2 text-sm font-semibold text-[#1F1F1F]">Agreement</h4>
                   <div class="flex items-start gap-2">
-                    <input id="agreement" v-model="form.agreement" type="checkbox"
-                      class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#D1D5DB] text-[#401903] focus:ring-2 focus:ring-[#401903]/20" />
-                    <label for="agreement" class="cursor-pointer text-xs leading-relaxed text-[#6B7280] sm:text-sm">
+                    <input
+                      id="agreement"
+                      v-model="form.agreement"
+                      type="checkbox"
+                      class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#D1D5DB] text-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                    />
+                    <label
+                      for="agreement"
+                      class="cursor-pointer text-xs leading-relaxed text-[#6B7280] sm:text-sm"
+                    >
                       By completing and submitting this form, I agree to have this website store my
                       submitted information so they can respond to my inquiry or send occasional
                       updates. For information on how to unsubscribe, as well as our privacy
@@ -296,8 +334,12 @@ const handleSubmit = async () => {
             </div>
 
             <!-- Submit Button -->
-            <Button type="submit" @click="handleSubmit" :disabled="isSubmitting"
-              class="btn--default btn--lg btn--full text-center">
+            <Button
+              type="submit"
+              @click="handleSubmit"
+              :disabled="isSubmitting"
+              class="btn--default btn--lg btn--full text-center"
+            >
               <span v-if="!isSubmitting">Submit</span>
               <span v-else>Submitting...</span>
             </Button>
@@ -356,7 +398,6 @@ img {
 
 /* Improve touch targets for mobile */
 @media (max-width: 768px) {
-
   label,
   input,
   button,
