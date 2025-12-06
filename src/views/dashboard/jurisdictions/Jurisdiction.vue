@@ -366,13 +366,26 @@ const buildChangeDetails = (source: Source, revision: SourceRevision) => {
   ]
 }
 
+const creatingTicket = ref<Record<string, boolean>>({})
+
+const resolveTicketOrgId = () => {
+  if (activeOrganizationId.value) return activeOrganizationId.value
+  const projId = jurisdiction.value?.project_id
+  if (projId) {
+    const project = projectStore.projects.find((p) => p.id === projId)
+    if (project?.org_id) return project.org_id
+  }
+  return orgStore.currentOrganizationId || ''
+}
+
 const createTicketFromRevision = async (
   source: Source,
   revision: SourceRevision,
-  opts?: { auto?: boolean },
+  opts?: { auto?: boolean; skipExistingCheck?: boolean },
 ) => {
-  if (ticketStore.hasTicketForRevision(revision.id)) {
-    const existing = ticketStore.ticketForRevision(revision.id)
+  const revisionKey = revision.data_revision_id || revision.id
+  if (!opts?.skipExistingCheck && ticketStore.hasTicketForRevision(revisionKey)) {
+    const existing = ticketStore.ticketForRevision(revisionKey)
     if (existing && !opts?.auto) {
       toast.info('Ticket already exists for this change')
       router.push({ name: 'ticket-detail', params: { ticketId: existing.id } })
@@ -380,22 +393,53 @@ const createTicketFromRevision = async (
     return existing
   }
 
-  const created = await ticketStore.createTicket({
+  const orgId = resolveTicketOrgId()
+  const projectId = jurisdiction.value?.project_id
+
+  if (!orgId || !projectId) {
+    if (!opts?.auto) {
+      toast.error('Missing organization or project context to create a ticket')
+    }
+    return null
+  }
+
+  const contentPayload =
+    revision.extracted_data || revision.ai_markdown_summary || revision.ai_summary
+      ? {
+          ai_summary: revision.ai_summary,
+          ai_markdown_summary: revision.ai_markdown_summary,
+          extracted_data: revision.extracted_data,
+        }
+      : null
+
+  const created = await ticketStore.createTicket(orgId, {
     title: `Change detected: ${source.name}`,
+    description:
+      revision.ai_summary ||
+      (typeof revision.extracted_data?.title === 'string' ? revision.extracted_data.title : null),
     summary:
       revision.ai_summary ||
       `A new change was detected on ${source.name} at ${formatRevisionLabel(revision)}`,
     priority: 'high',
     jurisdiction_id: jurisdiction.value?.id,
-    project_id: jurisdiction.value?.project_id,
+    project_id: projectId,
     source_id: source.id,
     revision_id: revision.id,
+    data_revision_id: revision.id,
     change_summary: revision.ai_summary || 'Change detected',
     change_details: buildChangeDetails(source, revision),
+    content: contentPayload,
     auto_created: opts?.auto,
   })
 
-  if (created && !opts?.auto) {
+  if (!created) {
+    if (!opts?.auto) {
+      toast.error(ticketStore.error || 'Could not create ticket right now. Please try again.')
+    }
+    return null
+  }
+
+  if (!opts?.auto && !opts?.skipExistingCheck) {
     toast.success('Ticket created from change')
     router.push({ name: 'ticket-detail', params: { ticketId: created.id } })
   }
@@ -417,7 +461,26 @@ const maybeAutoCreateTicket = async (sourceId: string) => {
 }
 
 const handleOpenTicket = async (payload: { source: Source; revision: SourceRevision }) => {
-  await createTicketFromRevision(payload.source, payload.revision)
+  const revisionKey = payload.revision.data_revision_id || payload.revision.id
+  if (creatingTicket.value[revisionKey]) return
+  const existing = ticketStore.ticketForRevision(revisionKey)
+  if (existing) {
+    router.push({ name: 'ticket-detail', params: { ticketId: existing.id } })
+    return
+  }
+
+  creatingTicket.value = { ...creatingTicket.value, [revisionKey]: true }
+  const created = await createTicketFromRevision(payload.source, payload.revision, {
+    skipExistingCheck: true,
+  })
+  creatingTicket.value = { ...creatingTicket.value, [revisionKey]: false }
+
+  if (created) {
+    toast.success('Ticket created from change')
+    router.push({ name: 'ticket-detail', params: { ticketId: created.id } })
+  } else {
+    toast.error(ticketStore.error || 'Could not create ticket right now. Please try again.')
+  }
 }
 
 const toggleTicketMode = () => {
@@ -945,7 +1008,7 @@ onUnmounted(() => {
             <button
               @click="activeTab = 'sources'"
               :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
+                'relative pb-1 text-sm font-semibold transition-colors',
                 activeTab === 'sources'
                   ? 'text-[#1F1F1F]'
                   : 'hover:text-[#1F1F1F cursor-pointer text-gray-500',
@@ -961,7 +1024,7 @@ onUnmounted(() => {
             <button
               @click="activeTab = 'analysis'"
               :class="[
-                'relative pb-4 text-sm font-semibold transition-colors',
+                'relative pb-1 text-sm font-semibold transition-colors',
                 activeTab === 'analysis'
                   ? 'text-[#1F1F1F]'
                   : 'cursor-pointer text-gray-500 hover:text-[#1F1F1F]',
@@ -994,6 +1057,7 @@ onUnmounted(() => {
             :format-revision-label="formatRevisionLabel"
             :render-summary="renderSummary"
             :ticket-for-revision="ticketStore.ticketForRevision"
+            :creating-ticket-ids="creatingTicket"
             @add-manual="handleManualAddSource"
             @add-ai="handleAiSuggestedSource"
             @scrape="triggerScrape"

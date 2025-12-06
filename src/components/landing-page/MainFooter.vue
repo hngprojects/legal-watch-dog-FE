@@ -138,21 +138,19 @@ import { RouterLink } from 'vue-router'
 const products = [
   { label: 'Features', path: '/features' },
   { label: 'Pricing', path: '/pricing' },
-  { label: 'How it Works', path: '/how-it-works' },
 ]
 
 const companies = [
   { label: 'About', path: '/about-us' },
-  { label: 'Contact us', path: '/contact-us' },
   { label: 'Careers', path: '/careers' },
   { label: 'FAQ', path: '/faq' },
   { label: 'Blog', path: '/blog' },
 ]
 
 const supports = [
-  { label: 'Getting started', path: '/how-it-works' },
+  { label: 'How it Works', path: '/how-it-works' },
+  { label: 'Contact us', path: '/contact-us' },
   // { label: 'Help center', path: '/help-center' },
-  { label: 'Contact support', path: '/contact-us' },
 ]
 
 const privacys = [
