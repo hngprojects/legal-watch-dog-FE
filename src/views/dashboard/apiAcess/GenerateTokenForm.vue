@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/select'
 import ResourceOwnerIcon from '@/assets/icons/resource-owner.svg'
 import CalendarIcon from '@/assets/icons/calendar.svg'
+import BellIcon from '@/assets/icons/bell3.svg'
+import CopyIcon from '@/assets/icons/copy.svg'
 
 interface Props {
   username?: string
@@ -25,6 +27,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<Emits>()
+
+const isTokenGenerated = ref(true)
 
 const tokenName = ref('')
 const description = ref('')
@@ -61,6 +65,7 @@ const generateToken = () => {
     resourceOwner: resourceOwner.value,
     expiration: expiration.value,
   })
+  isTokenGenerated.value = true
   closeForm()
 }
 </script>
@@ -71,7 +76,7 @@ const generateToken = () => {
       <h1 class="border-b border-b-[#E5E7EB] pb-6 text-3xl font-bold text-[#1F1F1F]">
         New fine-grained personal access token
       </h1>
-      <p class="text-xl text-[#1F1F1F] font-bold">
+      <p class="text-xl font-bold text-[#1F1F1F]">
         Create a fine-grained, organization-scoped token suitable for personal API use and for using
         LegalWatchDog over HTTPS.
       </p>
@@ -164,5 +169,29 @@ const generateToken = () => {
         </Button>
       </div>
     </form>
+    <section
+      v-if="isTokenGenerated"
+      class="fixed top-0 left-0 z-99 flex h-screen w-full items-center justify-center bg-white/75 p-4 shadow-md"
+    >
+      <div
+        class="flex w-full items-start justify-between gap-1 rounded-md bg-[#EDEDED] p-4 sm:w-[500px] lg:w-[700px]"
+      >
+        <div class="mr-3 shrink-0 rounded-full bg-white p-2">
+          <img :src="BellIcon" alt="Alert" class="h-6 w-6" />
+        </div>
+        <div class="flex flex-1 flex-col gap-3">
+          <p class="text-xs">
+            Make sure to copy your personal access token now as you will not be able to see this
+            again
+          </p>
+          <p class="rounded-sm bg-[#CDCDCD] px-4 py-2 text-xs break-all text-[#080808]">
+            github_pat_11AJRQ6BI0p7cCVBzAMdJ8_hfUX1M1Cb2WvHYAw3Q8IrMLhaKPLnchMsV5T9B4kqsV6HYJKINIS9eB
+          </p>
+        </div>
+        <button type="button" class="shrink-0 self-center">
+          <img :src="CopyIcon" alt="Copy" class="h-6 w-6" />
+        </button>
+      </div>
+    </section>
   </div>
 </template>
