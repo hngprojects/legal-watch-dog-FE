@@ -104,6 +104,15 @@ const generateToken = () => {
     'github_pat_11AJRQ6BI0p7cCVBzAMdJ8_hfUX1M1Cb2WvHYAw3Q8IrMLhaKPLnchMsV5T9B4kqsV6HYJKINIS9eB'
   closeForm()
 }
+
+const copyToClipboard = async () => {
+  try {
+    await navigator.clipboard.writeText(apiKey.value)
+    console.log('Token copied to clipboard')
+  } catch (err) {
+    console.error('Failed to copy token:', err)
+  }
+}
 </script>
 
 <template>
@@ -282,7 +291,7 @@ const generateToken = () => {
             {{ apiKey }}
           </p>
         </div>
-        <button type="button" class="shrink-0 self-center">
+        <button type="button" class="shrink-0 self-center" @click="copyToClipboard">
           <img :src="CopyIcon" alt="Copy" class="h-6 w-6" />
         </button>
       </div>
