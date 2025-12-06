@@ -8,6 +8,7 @@ import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { toast } from 'vue-sonner'
 
+const isLoading = ref(true)
 const hasHistory = ref(false)
 const isFreeTrial = ref(true)
 const cancelled = ref(false)
@@ -18,6 +19,7 @@ const invoice = ref<BillingHistoryEntry[] | undefined>(undefined)
 const billingStore = useBillingStore()
 
 onMounted(async () => {
+  isLoading.value = true
   const [subscriptionStatus, history] = await Promise.all([
     billingStore.getSubscriptionStatus(),
     billingStore.getPaymentHistory(),
@@ -25,6 +27,7 @@ onMounted(async () => {
 
   if (billingStore.error) {
     toast.error(billingStore.error)
+    return
   }
 
   if (subscriptionStatus?.trial_starts_at && subscriptionStatus?.trial_ends_at) {
@@ -42,6 +45,7 @@ onMounted(async () => {
     hasHistory.value = true
     invoice.value = history
   }
+  isLoading.value = false
 })
 
 const calculateDaysLeft = (endDate: Date): string => {
@@ -56,7 +60,33 @@ const calculateDaysLeft = (endDate: Date): string => {
 
 <template>
   <h1 class="app-container mb-8 text-3xl font-semibold">Billing & Subscription</h1>
+  <!-- Loading Skeleton -->
   <section
+    v-if="isLoading"
+    class="app-container mb-10 flex animate-pulse flex-col gap-6 *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
+  >
+    <article>
+      <div class="mb-5 flex items-center justify-between">
+        <div class="h-6 w-32 rounded bg-gray-200"></div>
+        <div class="h-8 w-24 rounded-full bg-gray-200"></div>
+      </div>
+      <div class="mb-4 h-8 w-48 rounded bg-gray-200"></div>
+      <div class="mb-10 h-5 w-full rounded bg-gray-200"></div>
+      <div class="flex flex-col gap-x-6 gap-y-4 *:flex-1 md:flex-row">
+        <div class="h-11 rounded-md bg-gray-200"></div>
+        <div class="h-11 rounded-md bg-gray-200"></div>
+      </div>
+    </article>
+    <article>
+      <div class="mb-6 h-7 w-40 rounded bg-gray-200"></div>
+      <div class="mb-2 h-5 w-full rounded bg-gray-200"></div>
+      <div class="h-5 w-3/4 rounded bg-gray-200"></div>
+    </article>
+  </section>
+
+  <!-- Content -->
+  <section
+    v-else
     class="app-container mb-10 flex flex-col gap-6 *:flex-1 *:rounded-md *:bg-white *:px-6 *:py-5 *:ring-1 *:ring-gray-300 md:flex-row"
   >
     <article>
@@ -122,7 +152,29 @@ const calculateDaysLeft = (endDate: Date): string => {
   <section class="app-container">
     <h2 class="mb-6 text-2xl font-semibold">Payment History</h2>
 
+    <!-- Loading Skeleton -->
+    <div v-if="isLoading" class="min-h-[356px] animate-pulse rounded-lg bg-white px-4 py-8 md:px-8">
+      <div class="w-full table-auto">
+        <div class="flex *:min-w-40 *:font-semibold">
+          <div class="h-6 flex-1 rounded-l-md bg-gray-200 px-4 py-3"></div>
+          <div class="h-6 flex-1 bg-gray-200 px-4 py-3"></div>
+          <div class="h-6 flex-1 bg-gray-200 px-4 py-3"></div>
+          <div class="h-6 flex-1 rounded-r-md bg-gray-200 px-4 py-3"></div>
+        </div>
+        <div class="mt-6 space-y-4">
+          <div v-for="i in 3" :key="i" class="flex items-center gap-x-4 *:flex-1">
+            <div class="h-5 rounded bg-gray-200 px-4 py-3"></div>
+            <div class="h-5 rounded bg-gray-200 px-4 py-3"></div>
+            <div class="h-5 rounded bg-gray-200 px-4 py-3"></div>
+            <div class="h-5 rounded bg-gray-200 px-4 py-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
     <div
+      v-else
       class="flex min-h-[356px] rounded-lg bg-white"
       :class="[hasHistory ? '' : 'items-center justify-center px-6 text-center']"
     >
