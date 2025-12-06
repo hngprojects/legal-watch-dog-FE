@@ -146,7 +146,7 @@ export const useProjectStore = defineStore('projects', {
         const baseProject: Project = existing || {
           id: projectId,
           title: payload.title ?? '',
-          description: payload.description ?? '',
+          description: payload.description ?? null,
           master_prompt: payload.master_prompt ?? null,
           org_id: resolvedOrgId,
           created_at: '',
@@ -157,8 +157,12 @@ export const useProjectStore = defineStore('projects', {
         const updatedProject: Project = resolveProject(data) || {
           ...baseProject,
           title: payload.title ?? baseProject.title,
-          description: payload.description ?? baseProject.description,
-          master_prompt: payload.master_prompt ?? baseProject.master_prompt ?? null,
+          description:
+            payload.description !== undefined ? payload.description : baseProject.description,
+          master_prompt:
+            payload.master_prompt !== undefined
+              ? payload.master_prompt
+              : (baseProject.master_prompt ?? null),
           org_id: resolvedOrgId,
         }
 

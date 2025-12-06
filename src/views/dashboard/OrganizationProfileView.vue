@@ -103,7 +103,10 @@ const organization = computed(
 
 const projectModalOpen = ref(false)
 const projectModalMode = ref<'edit' | 'create'>('create')
-const editingProject = ref<{ id?: string; title?: string; description?: string } | null>(null)
+const editingProject = ref<{ id?: string; title?: string; description?: string | null } | null>(
+  null,
+)
+const projectSaving = ref(false)
 const organizationOptions = computed(() =>
   orgId.value && organization.value ? [{ id: orgId.value, name: organization.value.name }] : [],
 )
@@ -116,7 +119,7 @@ const goToProject = (projectId: string) => {
   router.push({ name: 'project-detail', params: { organizationId: orgId.value, id: projectId } })
 }
 
-const openEditProject = (project: { id?: string; title?: string; description?: string }) => {
+const openEditProject = (project: { id?: string; title?: string; description?: string | null }) => {
   if (!project) return
   editingProject.value = { ...project }
   projectModalMode.value = 'edit'
@@ -139,38 +142,54 @@ const closeProjectModal = () => {
 
 const handleProjectSave = async (payload: {
   title: string
-  description: string
+  description: string | null
   organizationId: string
   projectId?: string
 }) => {
   const orgForAction = orgId.value
   if (!orgForAction) return
+  if (projectSaving.value) return
+  projectSaving.value = true
 
   const targetProjectId = payload.projectId || editingProject.value?.id
 
   if (projectModalMode.value === 'edit' && targetProjectId) {
-    await projectStore.updateProject(orgForAction, targetProjectId, {
-      title: payload.title,
-      description: payload.description,
-    })
-    projectModalOpen.value = false
-    editingProject.value = null
+    try {
+      await projectStore.updateProject(orgForAction, targetProjectId, {
+        title: payload.title,
+        description: payload.description,
+      })
+      projectModalOpen.value = false
+      editingProject.value = null
 
-    toast.success('Project updated successfully')
-    await loadProjects()
+      toast.success('Project updated successfully')
+      await loadProjects()
+    } catch (error) {
+      void error
+      toast.error(projectStore.error || 'Could not update project')
+    } finally {
+      projectSaving.value = false
+    }
     return
   }
 
-  const created = await projectStore.addProject({
-    title: payload.title,
-    description: payload.description,
-    organization_id: orgForAction,
-  })
+  try {
+    const created = await projectStore.addProject({
+      title: payload.title,
+      description: payload.description,
+      organization_id: orgForAction,
+    })
 
-  if (created) {
-    projectModalOpen.value = false
-    toast.success('Project created successfully')
-    await loadProjects()
+    if (created) {
+      projectModalOpen.value = false
+      toast.success('Project created successfully')
+      await loadProjects()
+    }
+  } catch (error) {
+    void error
+    toast.error(projectStore.error || 'Could not create project')
+  } finally {
+    projectSaving.value = false
   }
 }
 
@@ -619,7 +638,7 @@ watch(
               Projects ({{ projects.length }})
             </p>
           </div>
-          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+          <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
             <button @click="openCreateProject" class="btn--default btn--sm md:btn--lg">
               Add Project
             </button>
@@ -637,11 +656,6 @@ watch(
           <p class="text-xs text-gray-600 md:text-sm">
             No projects yet. Create one to start tracking changes.
           </p>
-          <div class="flex justify-center">
-            <button class="btn--default btn--sm md:btn--lg" @click="openCreateProject">
-              Add Project
-            </button>
-          </div>
         </div>
         <div v-else class="space-y-2 md:space-y-3">
           <article
@@ -954,6 +968,7 @@ watch(
   <ProjectFormModal
     :open="projectModalOpen"
     :mode="projectModalMode"
+    :loading="projectSaving"
     :organizations="organizationOptions"
     :default-organization-id="orgId"
     :project="editingProject || undefined"

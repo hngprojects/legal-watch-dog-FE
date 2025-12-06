@@ -20,6 +20,7 @@ const props = withDefaults(
     descriptionLabel?: string
     descriptionPlaceholder?: string
     submitText?: string
+    loading?: boolean
   }>(),
   {
     title: 'Define your Sub-Jurisdiction',
@@ -29,6 +30,7 @@ const props = withDefaults(
     descriptionLabel: 'Description',
     descriptionPlaceholder: 'What legal areas will you monitor?',
     submitText: 'Create Sub-Jurisdiction',
+    loading: false,
   },
 )
 
@@ -81,7 +83,14 @@ const emit = defineEmits<{
             Cancel
           </button>
 
-          <button type="submit" class="btn--default btn--lg">{{ props.submitText }}</button>
+          <button
+            type="submit"
+            class="btn--default btn--lg"
+            :disabled="props.loading"
+            :aria-busy="props.loading"
+          >
+            {{ props.loading ? 'Saving...' : props.submitText }}
+          </button>
         </DialogFooter>
       </form>
     </DialogScrollContent>

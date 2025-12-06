@@ -11,6 +11,8 @@ const props = defineProps<{
   jurisdictionName: string
   jurisdictionDescription: string
   projectDescription: string
+  jurisdictionPrompt?: string | null
+  searchQuery?: string
 }>()
 
 const emit = defineEmits<{
@@ -32,8 +34,14 @@ const maxRetries = 2
 let idCounter = 1
 
 const loadSuggestions = async (attempt = 1): Promise<void> => {
-  if (!props.jurisdictionName || !props.jurisdictionDescription || !props.projectDescription) {
-    error.value = 'Missing context to generate suggestions.'
+  if (
+    !props.jurisdictionName ||
+    !props.jurisdictionDescription ||
+    !props.projectDescription ||
+    !props.jurisdictionPrompt ||
+    !props.searchQuery
+  ) {
+    error.value = 'Add jurisdiction instructions and a search query to start automatic search.'
     loading.value = false
     return
   }
@@ -42,6 +50,8 @@ const loadSuggestions = async (attempt = 1): Promise<void> => {
     jurisdiction_name: props.jurisdictionName,
     jurisdiction_description: props.jurisdictionDescription,
     project_description: props.projectDescription,
+    jurisdiction_prompt: props.jurisdictionPrompt,
+    search_query: props.searchQuery,
   }
 
   try {
@@ -128,6 +138,8 @@ watch(
     props.jurisdictionDescription,
     props.projectDescription,
     props.jurisdictionId,
+    props.jurisdictionPrompt,
+    props.searchQuery,
   ],
   () => {
     if (props.jurisdictionName && props.jurisdictionId) {
