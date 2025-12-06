@@ -7,7 +7,7 @@ import AccordionTrigger from '@/components/ui/accordion/AccordionTrigger.vue'
 import { Copy01Icon } from '@hugeicons/core-free-icons'
 import { ref } from 'vue'
 
-const EMAIL = 'Contact@LegalWatchDog.com'
+const EMAIL = 'info@emerj.net'
 const copyRef = ref('Copy')
 
 const faqs = [
@@ -148,7 +148,7 @@ function copyEmail() {
               Don't hesitate to send us an email with your enquiry or statement at:
             </p>
             <div
-              class="mx-auto flex w-full max-w-md flex-col items-center gap-3 rounded-md bg-white p-3 shadow-sm sm:max-w-lg sm:flex-row sm:justify-between sm:gap-4 sm:p-4"
+              class="mx-auto flex w-full max-w-md flex-col items-center gap-1 rounded-md bg-white p-2 shadow-sm sm:max-w-lg sm:gap-4 sm:p-4"
             >
               <p
                 class="text-center text-sm font-medium break-all sm:text-left sm:text-base md:text-lg"

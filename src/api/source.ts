@@ -8,6 +8,9 @@ import type {
   SuggestedSource,
   SourceType,
   ScrapeFrequency,
+  ScrapeJob,
+  ScrapeJobsResponse,
+  ScrapeJobTriggerResponse,
 } from '@/types/source'
 
 type ApiEnvelope<T> = {
@@ -60,7 +63,17 @@ export const sourceApi = {
       payload,
     ),
 
-  scrape: (source_id: string) => api.post<ApiEnvelope<unknown>>(`/sources/${source_id}/scrapes`),
+  triggerScrape: (source_id: string) =>
+    api.post<ApiEnvelope<ScrapeJobTriggerResponse | ScrapeJob>>(`/sources/${source_id}/scrapes`),
+
+  listScrapeJobs: (source_id: string, params?: { page?: number; per_page?: number }) =>
+    api.get<ApiEnvelope<ScrapeJobsResponse>>(`/sources/${source_id}/scrapes`, { params }),
+
+  getActiveScrapeJob: (source_id: string) =>
+    api.get<ApiEnvelope<ScrapeJob | null>>(`/sources/${source_id}/scrapes/active`),
+
+  getScrapeJobStatus: (source_id: string, job_id: string) =>
+    api.get<ApiEnvelope<ScrapeJob>>(`/sources/${source_id}/scrapes/${job_id}`),
 
   getRevisions: (source_id: string, params?: { skip?: number; limit?: number }) =>
     api.get<ApiEnvelope<RevisionsResponse>>(`/sources/${source_id}/revisions`, {

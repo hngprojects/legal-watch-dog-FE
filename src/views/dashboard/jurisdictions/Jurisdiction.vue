@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Plus, Settings } from 'lucide-vue-next'
 import { marked } from 'marked'
@@ -7,6 +7,7 @@ import DOMPurify from 'dompurify'
 import { toast } from 'vue-sonner'
 import type { Jurisdiction } from '@/api/jurisdiction'
 import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
+import type { ScrapeJob } from '@/types/source'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
 import {
@@ -61,10 +62,10 @@ const activeOrganizationId = computed<string>(() => {
   return orgStore.currentOrganizationId || ''
 })
 
-const organizationName = computed(() => {
-  if (!activeOrganizationId.value) return ''
-  return orgStore.organizations.find((org) => org.id === activeOrganizationId.value)?.name || ''
-})
+// const organizationName = computed(() => {
+//   if (!activeOrganizationId.value) return ''
+//   return orgStore.organizations.find((org) => org.id === activeOrganizationId.value)?.name || ''
+// })
 
 const jurisdictionId = computed(() => route.params.id as string)
 const jurisdiction = ref<Jurisdiction | null>(null)
@@ -82,12 +83,15 @@ const activeTab = ref<'analysis' | 'sources'>('sources')
 
 const showSuggestedSources = ref(false)
 const showInlineEdit = ref(false)
+const editSaving = ref(false)
 
 const subJurisdictionModalOpen = ref(false)
 const addSourceModalOpen = ref(false)
+const subJurisdictionSaving = ref(false)
+const sourceSearchQuery = ref('')
 
-const editForm = ref({ name: '', description: '', prompt: '' })
-const subJurisdictionForm = ref({ name: '', description: '', prompt: '' })
+const editForm = ref({ name: '', description: '' })
+const subJurisdictionForm = ref({ name: '', description: '' })
 
 const sourceForm = ref<{
   id?: string | null
@@ -108,15 +112,24 @@ const sourceForm = ref<{
 const sources = computed(() => sourceStore.sources)
 const sourcesLoading = computed(() => sourceStore.loading)
 const sourcesError = computed(() => sourceStore.error)
+const scrapeJobs = computed(() => sourceStore.scrapeJobs)
+const scrapeJobsLoading = computed(() => sourceStore.scrapeJobsLoading)
+const scrapeJobsError = computed(() => sourceStore.scrapeJobsError)
+const activeScrapeJobs = computed(() => sourceStore.activeScrapeJobs)
+const revisionsLoading = computed(() => sourceStore.revisionsLoading)
+const revisionsError = computed(() => sourceStore.revisionsError)
 const editingSourceId = ref<string | null>(null)
-const scrapeErrors = ref<Record<string, string>>({})
 const scraping = ref<Record<string, boolean>>({})
 const expandedSources = ref<Record<string, boolean>>({})
 const selectedSourceId = ref<string>('')
 const selectedRevisionA = ref<string | null>(null)
 const selectedRevisionB = ref<string | null>(null)
+const jobPollers = ref<Record<string, ReturnType<typeof setTimeout> | null>>({})
+const jobPollCounts = ref<Record<string, number>>({})
 
 const revisionLimit = 5
+const JOB_POLL_INTERVAL = 4000
+const JOB_POLL_LIMIT = 45
 const revisions = computed(() => sourceStore.revisions)
 const revisionOptions = computed(() =>
   selectedSourceId.value ? revisions.value[selectedSourceId.value] || [] : [],
@@ -141,6 +154,15 @@ const handleSelectRevisionA = (id: string | null) => {
 const handleSelectRevisionB = (id: string | null) => {
   selectedRevisionB.value = id
 }
+
+const jurisdictionInstruction = ref('')
+const instructionSaving = ref(false)
+const isInstructionValid = computed(() => jurisdictionInstruction.value.trim().length > 0)
+const instructionPlaceholder = computed(() =>
+  jurisdictionInstruction.value.trim()
+    ? 'Describe the monitoring focus, keywords, and context that apply to this jurisdiction.'
+    : 'No instruction set. Add guidance for this jurisdiction.',
+)
 
 const loadJurisdiction = async (id: string) => {
   loading.value = true
@@ -170,6 +192,11 @@ const loadJurisdiction = async (id: string) => {
 
   if (jurisdiction.value) {
     await sourceStore.fetchSources(jurisdiction.value.id)
+    await Promise.allSettled(
+      (sources.value || []).map(async (src) => {
+        await fetchScrapeDataForSource(src.id)
+      }),
+    )
   }
 
   loading.value = false
@@ -189,6 +216,66 @@ const parseApiError = (err: unknown, fallback: string) => {
   return fallback
 }
 
+const isJobActive = (job?: ScrapeJob | null) =>
+  job?.status === 'PENDING' || job?.status === 'IN_PROGRESS'
+
+const clearJobPoller = (sourceId: string) => {
+  const timer = jobPollers.value[sourceId]
+  if (timer) clearTimeout(timer)
+  jobPollers.value[sourceId] = null
+  jobPollCounts.value[sourceId] = 0
+}
+
+const scheduleJobPoll = (sourceId: string, jobId: string) => {
+  clearJobPoller(sourceId)
+  jobPollCounts.value[sourceId] = 0
+
+  const poll = async () => {
+    const nextCount = (jobPollCounts.value[sourceId] || 0) + 1
+    jobPollCounts.value[sourceId] = nextCount
+
+    if (nextCount >= JOB_POLL_LIMIT) {
+      clearJobPoller(sourceId)
+      toast.error('Scrape status check timed out. Please refresh.')
+      return
+    }
+
+    try {
+      const job = await sourceStore.fetchScrapeJobStatus(sourceId, jobId)
+      if (job && !isJobActive(job)) {
+        clearJobPoller(sourceId)
+        await sourceStore.fetchScrapeJobs(sourceId)
+        await fetchRevisionsForSource(sourceId)
+
+        if (job.status === 'COMPLETED') {
+          toast.success('Scrape finished')
+        } else if (job.status === 'FAILED') {
+          toast.error(job.error_message || 'Scrape failed')
+        }
+        return
+      }
+    } catch (err) {
+      if (nextCount >= JOB_POLL_LIMIT - 1) {
+        clearJobPoller(sourceId)
+        toast.error(parseApiError(err, 'Scrape status polling failed'))
+        return
+      }
+    }
+
+    jobPollers.value[sourceId] = setTimeout(poll, JOB_POLL_INTERVAL)
+  }
+
+  jobPollers.value[sourceId] = setTimeout(poll, JOB_POLL_INTERVAL)
+}
+
+const hydrateActiveJob = (sourceId: string, job?: ScrapeJob | null) => {
+  if (job && isJobActive(job)) {
+    scheduleJobPoll(sourceId, job.id)
+  } else {
+    clearJobPoller(sourceId)
+  }
+}
+
 const fetchRevisionsForSource = async (sourceId: string, page = 1) => {
   const skip = (page - 1) * revisionLimit
 
@@ -200,11 +287,23 @@ const fetchRevisionsForSource = async (sourceId: string, page = 1) => {
   }
 }
 
+const fetchScrapeDataForSource = async (sourceId: string) => {
+  try {
+    const [active] = await Promise.all([
+      sourceStore.fetchActiveScrapeJob(sourceId),
+      sourceStore.fetchScrapeJobs(sourceId, { page: 1, per_page: 10 }),
+    ])
+    hydrateActiveJob(sourceId, active)
+  } catch (err) {
+    console.error('Failed to load scrape jobs', err)
+  }
+}
+
 const toggleSourceExpansion = async (sourceId: string) => {
   expandedSources.value[sourceId] = !expandedSources.value[sourceId]
 
   if (expandedSources.value[sourceId]) {
-    await fetchRevisionsForSource(sourceId)
+    await Promise.all([fetchRevisionsForSource(sourceId), fetchScrapeDataForSource(sourceId)])
   }
 }
 
@@ -212,20 +311,24 @@ const triggerScrape = async (source: Source) => {
   if (scraping.value[source.id]) return
 
   scraping.value[source.id] = true
-  scrapeErrors.value[source.id] = ''
 
   try {
-    const res = await sourceStore.scrapeSource(source.id)
-    const message = (res as { message?: string })?.message ?? 'Scrape completed successfully.'
+    const job = await sourceStore.scrapeSource(source.id)
+    const message = job?.status
+      ? job.status === 'IN_PROGRESS'
+        ? 'Scrape started.'
+        : 'Scrape job queued.'
+      : 'Scrape triggered.'
 
     toast.success(message)
 
     expandedSources.value[source.id] = true
-    await fetchRevisionsForSource(source.id)
+    hydrateActiveJob(source.id, job)
+    await Promise.all([fetchScrapeDataForSource(source.id), fetchRevisionsForSource(source.id)])
   } catch (err) {
     const msg = sourceStore.error || parseApiError(err, 'Failed to trigger scrape')
-    scrapeErrors.value[source.id] = msg
     toast.error(msg)
+    void fetchScrapeDataForSource(source.id)
   } finally {
     scraping.value[source.id] = false
   }
@@ -329,11 +432,49 @@ const toggleTicketMode = () => {
   }
 }
 
+const saveJurisdictionInstruction = async () => {
+  if (!jurisdiction.value?.id) return
+  if (!isInstructionValid.value) {
+    toast.error('Jurisdiction instruction is required')
+    return
+  }
+
+  instructionSaving.value = true
+  try {
+    const updated = await jurisdictionStore.updateJurisdiction(
+      jurisdiction.value.id,
+      { prompt: jurisdictionInstruction.value.trim() || null },
+      activeOrganizationId.value,
+    )
+
+    if (updated) {
+      jurisdiction.value = updated
+      toast.success('Jurisdiction instruction updated')
+    }
+  } catch (err) {
+    console.error(err)
+    toast.error(jurisdictionStore.error || 'Failed to update jurisdiction instruction')
+  } finally {
+    instructionSaving.value = false
+  }
+}
+
 const handleManualAddSource = () => {
   openAddSourceModal()
 }
 
-const handleAiSuggestedSource = () => {
+const handleAiSuggestedSource = (query: string) => {
+  const trimmedQuery = query?.trim() || ''
+  if (!trimmedQuery) {
+    toast.error('Enter what you want the AI to search for.')
+    return
+  }
+  if (!jurisdictionInstruction.value.trim()) {
+    toast.error('Add jurisdiction instructions before running automatic source search.')
+    return
+  }
+
+  sourceSearchQuery.value = trimmedQuery
   activeTab.value = 'sources'
   showSuggestedSources.value = true
 }
@@ -459,16 +600,16 @@ const startEdit = () => {
   editForm.value = {
     name: jurisdiction.value?.name ?? '',
     description: jurisdiction.value?.description ?? '',
-    prompt: jurisdiction.value?.prompt ?? '',
   }
   showInlineEdit.value = true
 }
 
 const saveEdit = async () => {
+  if (editSaving.value) return
+  editSaving.value = true
   const payload = {
     name: editForm.value.name,
     description: editForm.value.description,
-    prompt: editForm.value.prompt,
   }
 
   try {
@@ -489,6 +630,8 @@ const saveEdit = async () => {
     const msg = jurisdictionStore.error || 'Failed to update jurisdiction'
     toast.error(msg)
     void error
+  } finally {
+    editSaving.value = false
   }
 }
 
@@ -524,7 +667,11 @@ const subJurisdictions = computed(() => {
 
 const openSubJurisdictionModal = () => {
   subJurisdictionModalOpen.value = true
-  subJurisdictionForm.value = { name: '', description: '', prompt: '' }
+  subJurisdictionForm.value = { name: '', description: '' }
+}
+
+const updateSubJurisdictionForm = (payload: Partial<{ name: string; description: string }>) => {
+  subJurisdictionForm.value = { ...subJurisdictionForm.value, ...payload }
 }
 
 const closeSubJurisdictionModal = () => {
@@ -532,21 +679,27 @@ const closeSubJurisdictionModal = () => {
 }
 
 const createSubJurisdiction = async () => {
-  if (!jurisdiction.value) return
+  if (!jurisdiction.value || subJurisdictionSaving.value) return
 
   if (!subJurisdictionForm.value.name.trim()) return toast.error('Name required')
   if (!subJurisdictionForm.value.description.trim()) return toast.error('Description required')
 
-  const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
-    name: subJurisdictionForm.value.name.trim(),
-    description: subJurisdictionForm.value.description.trim(),
-    prompt: subJurisdictionForm.value.prompt.trim() || null,
-    parent_id: jurisdiction.value.id,
-  })
+  subJurisdictionSaving.value = true
+  try {
+    const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
+      name: subJurisdictionForm.value.name.trim(),
+      description: subJurisdictionForm.value.description.trim(),
+      parent_id: jurisdiction.value.id,
+    })
 
-  if (created) {
-    closeSubJurisdictionModal()
-    toast.success(`"${created.name}" added successfully`)
+    if (created) {
+      closeSubJurisdictionModal()
+      toast.success(`"${created.name}" added successfully`)
+    } else if (jurisdictionStore.error) {
+      toast.error(jurisdictionStore.error)
+    }
+  } finally {
+    subJurisdictionSaving.value = false
   }
 }
 
@@ -561,6 +714,14 @@ const lastUpdatedText = computed(() => {
   const t = jurisdiction.value?.updated_at || jurisdiction.value?.created_at
   return t ? new Date(t).toLocaleString() : ''
 })
+
+watch(
+  jurisdiction,
+  (val) => {
+    jurisdictionInstruction.value = val?.prompt || ''
+  },
+  { immediate: true },
+)
 
 watch(
   sources,
@@ -616,11 +777,17 @@ watch(
 onMounted(() => {
   loadJurisdiction(jurisdictionId.value)
 })
+
+onUnmounted(() => {
+  Object.values(jobPollers.value).forEach((timer) => {
+    if (timer) clearTimeout(timer)
+  })
+})
 </script>
 
 <template>
   <main class="min-h-screen flex-1 bg-[#F8F7F5] px-4 py-6 sm:px-6 lg:px-10 lg:py-12">
-    <div v-if="loading" class="mx-auto max-w-6xl">
+    <div v-if="loading" class="mx-auto">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
         <div class="h-8 w-80 animate-pulse rounded bg-gray-200"></div>
@@ -641,33 +808,10 @@ onMounted(() => {
       </button>
     </div>
 
-    <div v-else class="mx-auto max-w-6xl space-y-6 lg:space-y-8">
+    <div v-else class="mx-auto space-y-6 lg:space-y-8">
       <header class="flex flex-wrap items-start justify-between gap-4">
         <Breadcrumb>
           <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink :to="{ name: 'organizations' }">Organizations</RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink
-                  :to="{
-                    name: 'organization-profile',
-                    params: { organizationId: activeOrganizationId },
-                  }"
-                >
-                  {{ organizationName || 'Organization' }}
-                </RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-
-            <BreadcrumbSeparator />
-
             <BreadcrumbItem>
               <BreadcrumbLink as-child>
                 <RouterLink
@@ -764,6 +908,35 @@ onMounted(() => {
             {{ ticketMode === 'auto' ? 'Switch to manual' : 'Enable auto-create' }}
           </button>
         </div>
+        <div class="mt-6 space-y-3 rounded-xl border border-gray-100 bg-[#FBFBFB] p-4 sm:p-5">
+          <div class="space-y-1">
+            <label for="jurisdiction-instruction" class="text-sm font-semibold text-gray-900">
+              Jurisdiction instruction
+            </label>
+            <p class="text-xs text-gray-500">
+              Set the guidance Watchdog should follow when monitoring this jurisdiction.
+            </p>
+          </div>
+          <textarea
+            id="jurisdiction-instruction"
+            v-model="jurisdictionInstruction"
+            rows="4"
+            :placeholder="instructionPlaceholder"
+            class="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/10 focus:outline-none"
+            :disabled="instructionSaving"
+            required
+          />
+          <div class="flex justify-end">
+            <button
+              class="btn--default btn--sm sm:btn--md"
+              type="button"
+              :disabled="instructionSaving || !isInstructionValid"
+              @click="saveJurisdictionInstruction"
+            >
+              {{ instructionSaving ? 'Saving...' : 'Save Instruction' }}
+            </button>
+          </div>
+        </div>
       </section>
 
       <section class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
@@ -809,8 +982,14 @@ onMounted(() => {
             :sources-loading="sourcesLoading"
             :sources-error="sourcesError"
             :scraping="scraping"
-            :scrape-errors="scrapeErrors"
             :expanded-sources="expandedSources"
+            :active-jobs="activeScrapeJobs"
+            :scrape-jobs="scrapeJobs"
+            :scrape-jobs-loading="scrapeJobsLoading"
+            :scrape-jobs-error="scrapeJobsError"
+            :revisions-by-source="revisions"
+            :revisions-loading="revisionsLoading"
+            :revisions-error="revisionsError"
             :latest-revision="latestRevision"
             :format-revision-label="formatRevisionLabel"
             :render-summary="renderSummary"
@@ -822,6 +1001,8 @@ onMounted(() => {
             @edit="startEditSource"
             @delete="deleteSource"
             @open-ticket="handleOpenTicket"
+            @refresh-scrape-data="fetchScrapeDataForSource"
+            @refresh-revisions="fetchRevisionsForSource"
           />
         </div>
 
@@ -921,8 +1102,9 @@ onMounted(() => {
     <JurisdictionDialog
       :open="subJurisdictionModalOpen"
       :form="subJurisdictionForm"
+      :loading="subJurisdictionSaving"
       @update:open="(value) => !value && closeSubJurisdictionModal()"
-      @update:form="(payload) => (subJurisdictionForm = { ...subJurisdictionForm, ...payload })"
+      @update:form="updateSubJurisdictionForm"
       @submit="createSubJurisdiction"
       @cancel="closeSubJurisdictionModal"
     />
@@ -933,6 +1115,8 @@ onMounted(() => {
       :jurisdiction-name="jurisdiction?.name || ''"
       :jurisdiction-description="jurisdiction?.description || ''"
       :project-description="projectName"
+      :jurisdiction-prompt="jurisdictionInstruction"
+      :search-query="sourceSearchQuery"
       @update:open="toggleSuggestedDialog"
       @cancel="cancelSuggestions"
       @save="handleSuggestionsSaved"
@@ -943,7 +1127,7 @@ onMounted(() => {
       <DialogScrollContent class="sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle>Edit Jurisdiction</DialogTitle>
-          <DialogDescription>Update the name, description, and instructions.</DialogDescription>
+          <DialogDescription>Update the name and description.</DialogDescription>
         </DialogHeader>
 
         <form @submit.prevent="saveEdit" class="space-y-4">
@@ -964,20 +1148,18 @@ onMounted(() => {
             />
           </div>
 
-          <div>
-            <label class="mb-2 block text-sm font-medium text-[#1F1F1F]">Instructions</label>
-            <textarea
-              v-model="editForm.prompt"
-              rows="3"
-              class="w-full rounded-lg border px-4 py-3 text-sm focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            />
-          </div>
-
           <DialogFooter class="flex justify-end gap-3 pt-2">
             <button type="button" class="btn--secondary btn--lg" @click="showInlineEdit = false">
               Cancel
             </button>
-            <button type="submit" class="btn--default btn--lg">Save Changes</button>
+            <button
+              type="submit"
+              class="btn--default btn--lg"
+              :disabled="editSaving"
+              :aria-busy="editSaving"
+            >
+              {{ editSaving ? 'Saving...' : 'Save Changes' }}
+            </button>
           </DialogFooter>
         </form>
       </DialogScrollContent>

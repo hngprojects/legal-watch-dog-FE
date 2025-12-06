@@ -12,16 +12,15 @@ import { withDefaults } from 'vue'
 const props = withDefaults(
   defineProps<{
     open: boolean
-    form: { name: string; description: string; prompt: string }
+    form: { name: string; description: string }
     title?: string
     description?: string
     nameLabel?: string
     namePlaceholder?: string
     descriptionLabel?: string
     descriptionPlaceholder?: string
-    promptLabel?: string
-    promptPlaceholder?: string
     submitText?: string
+    loading?: boolean
   }>(),
   {
     title: 'Define your Sub-Jurisdiction',
@@ -30,15 +29,14 @@ const props = withDefaults(
     namePlaceholder: 'e.g Global Visa Monitoring',
     descriptionLabel: 'Description',
     descriptionPlaceholder: 'What legal areas will you monitor?',
-    promptLabel: 'Instructions (optional)',
-    promptPlaceholder: 'Add any guidance or keywords to focus on',
     submitText: 'Create Sub-Jurisdiction',
+    loading: false,
   },
 )
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
-  (e: 'update:form', payload: Partial<{ name: string; description: string; prompt: string }>): void
+  (e: 'update:form', payload: Partial<{ name: string; description: string }>): void
   (e: 'submit'): void
   (e: 'cancel'): void
 }>()
@@ -80,25 +78,19 @@ const emit = defineEmits<{
           ></textarea>
         </div>
 
-        <div>
-          <label class="mb-2 block text-sm font-medium text-gray-900">{{
-            props.promptLabel
-          }}</label>
-          <textarea
-            :value="form.prompt"
-            rows="3"
-            :placeholder="props.promptPlaceholder"
-            class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
-            @input="emit('update:form', { prompt: ($event.target as HTMLTextAreaElement).value })"
-          ></textarea>
-        </div>
-
         <DialogFooter class="flex justify-end gap-3 pt-4">
           <button type="button" class="btn--secondary btn--lg" @click="emit('cancel')">
             Cancel
           </button>
 
-          <button type="submit" class="btn--default btn--lg">{{ props.submitText }}</button>
+          <button
+            type="submit"
+            class="btn--default btn--lg"
+            :disabled="props.loading"
+            :aria-busy="props.loading"
+          >
+            {{ props.loading ? 'Saving...' : props.submitText }}
+          </button>
         </DialogFooter>
       </form>
     </DialogScrollContent>
