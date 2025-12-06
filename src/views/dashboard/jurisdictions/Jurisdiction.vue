@@ -787,7 +787,7 @@ onUnmounted(() => {
 
 <template>
   <main class="min-h-screen flex-1 bg-[#F8F7F5] px-4 py-6 sm:px-6 lg:px-10 lg:py-12">
-    <div v-if="loading" class="mx-auto max-w-6xl">
+    <div v-if="loading" class="mx-auto">
       <div class="space-y-4">
         <div class="h-4 w-48 animate-pulse rounded bg-gray-200"></div>
         <div class="h-8 w-80 animate-pulse rounded bg-gray-200"></div>
@@ -808,7 +808,7 @@ onUnmounted(() => {
       </button>
     </div>
 
-    <div v-else class="mx-auto max-w-6xl space-y-6 lg:space-y-8">
+    <div v-else class="mx-auto space-y-6 lg:space-y-8">
       <header class="flex flex-wrap items-start justify-between gap-4">
         <Breadcrumb>
           <BreadcrumbList>

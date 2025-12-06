@@ -26,6 +26,7 @@ type NavLink = {
 const isMenuOpen = ref(false)
 const isMobileDropdownOpen = ref(false)
 const activeDropdown = ref<string | null>(null)
+const activeMobileDropdown = ref<string | null>(null)
 
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
@@ -78,20 +79,6 @@ const navLinks: NavLink[] = isDashboard
         ],
       },
       { name: 'Pricing', to: '/pricing' },
-      // {
-      //   name: 'Industries',
-      //   dropdown: [
-      //     {
-      //       name: 'Healthcare',
-      //       to: '/coming-soon',
-      //       description: 'Solutions for healthcare providers',
-      //     },
-      //     { name: 'Finance', to: '/coming-soon', description: 'Financial services solutions' },
-      //     { name: 'Retail', to: '/coming-soon', description: 'Retail and e-commerce' },
-      //     { name: 'Manufacturing', to: '/coming-soon', description: 'Manufacturing solutions' },
-      //     { name: 'Education', to: '/coming-soon', description: 'Educational institutions' },
-      //   ],
-      // },
       { name: 'Contact Us', to: '/contact-us' },
     ]
 
@@ -112,6 +99,7 @@ watch(isMenuOpen, (newVal) => {
   toggleBodyScroll(newVal)
   if (!newVal) {
     isMobileDropdownOpen.value = false
+    activeMobileDropdown.value = null
   }
 })
 
@@ -119,6 +107,7 @@ const closeMenu = () => {
   isMenuOpen.value = false
   isMobileDropdownOpen.value = false
   activeDropdown.value = null
+  activeMobileDropdown.value = null
 }
 
 const toggleDropdown = (linkName: string) => {
@@ -126,6 +115,14 @@ const toggleDropdown = (linkName: string) => {
     activeDropdown.value = null
   } else {
     activeDropdown.value = linkName
+  }
+}
+
+const toggleMobileDropdown = (linkName: string) => {
+  if (activeMobileDropdown.value === linkName) {
+    activeMobileDropdown.value = null
+  } else {
+    activeMobileDropdown.value = linkName
   }
 }
 
@@ -151,17 +148,20 @@ const handleLogout = () => {
 }
 
 const isNotificationsOpen = ref(false)
+const isMobileNotificationsOpen = ref(false)
 const notificationsButtonRef = ref<HTMLElement | null>(null)
 const notificationsPopupRef = ref<HTMLElement | null>(null)
 const unreadCount = ref(0)
-
-// When dropdown opens, optionally mark as read visually
 
 const toggleNotifications = () => {
   isNotificationsOpen.value = !isNotificationsOpen.value
   if (isNotificationsOpen.value) {
     isMenuOpen.value = false
   }
+}
+
+const toggleMobileNotifications = () => {
+  isMobileNotificationsOpen.value = !isMobileNotificationsOpen.value
 }
 
 const onDocumentClick = (e: MouseEvent) => {
@@ -180,6 +180,8 @@ const onKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
     isNotificationsOpen.value = false
     activeDropdown.value = null
+    isMobileNotificationsOpen.value = false
+    activeMobileDropdown.value = null
   }
 }
 
@@ -412,7 +414,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- MOBILE MENU (unchanged) -->
+    <!-- MOBILE MENU -->
     <Transition
       enter-active-class="transition-transform duration-300 ease-in-out"
       enter-from-class="-translate-x-full"
@@ -446,18 +448,197 @@ onUnmounted(() => {
           </button>
         </div>
 
+        <!-- AUTHENTICATED USER SECTION -->
+        <template v-if="isAuthenticated">
+          <!-- User Profile Section -->
+          <div class="border-b p-4 sm:p-6">
+            <div class="flex items-center gap-3">
+              <UserAvatar :name="displayName" :image-url="avatarUrl" :size="48" />
+              <div class="flex-1 overflow-hidden">
+                <p class="truncate text-base font-semibold text-gray-900">{{ displayName }}</p>
+                <p class="truncate text-sm text-gray-500">{{ authStore.user?.email }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Organization Switcher -->
+          <div class="border-b p-4 sm:p-6">
+            <OrganizationSwitcher />
+          </div>
+
+          <!-- Notifications Button -->
+          <!-- Notifications Section -->
+          <div class="border-b p-4 sm:p-6">
+            <button
+              @click="toggleMobileNotifications"
+              class="flex w-full items-center justify-between rounded-lg px-4 py-3 transition hover:bg-gray-100"
+            >
+              <div class="flex items-center gap-3">
+                <svg
+                  class="h-5 w-5 text-gray-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.8"
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
+                </svg>
+                <span class="text-sm font-medium text-gray-900">Notifications</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  v-if="unreadCount > 0"
+                  class="flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white"
+                >
+                  {{ unreadCount }}
+                </span>
+                <svg
+                  class="h-4 w-4 text-gray-400 transition-transform"
+                  :class="{ 'rotate-180': isMobileNotificationsOpen }"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </button>
+
+            <Transition
+              enter-active-class="transition ease-out duration-200"
+              enter-from-class="opacity-0 -translate-y-2"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition ease-in duration-150"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 -translate-y-2"
+            >
+              <div v-if="isMobileNotificationsOpen" class="mt-3 overflow-hidden">
+                <Notification v-model:unreadCount="unreadCount" />
+              </div>
+            </Transition>
+          </div>
+        </template>
+
+        <!-- NAV LINKS -->
         <template v-if="!isDashboard">
-          <nav class="flex flex-col gap-1 bg-white p-4 sm:gap-2 sm:p-6">
-            <!-- ... nav links ... -->
+          <nav class="flex flex-col gap-1 p-4 sm:gap-2 sm:p-6">
+            <div v-for="link in navLinks" :key="link.name">
+              <!-- Dropdown Link -->
+              <template v-if="link.dropdown">
+                <button
+                  @click="toggleMobileDropdown(link.name)"
+                  class="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-base font-medium text-gray-700 transition hover:bg-gray-50"
+                >
+                  <span>{{ link.name }}</span>
+                  <svg
+                    class="h-5 w-5 transition-transform"
+                    :class="{ 'rotate-180': activeMobileDropdown === link.name }"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                <Transition
+                  enter-active-class="transition ease-out duration-200"
+                  enter-from-class="opacity-0 -translate-y-2"
+                  enter-to-class="opacity-100 translate-y-0"
+                  leave-active-class="transition ease-in duration-150"
+                  leave-from-class="opacity-100 translate-y-0"
+                  leave-to-class="opacity-0 -translate-y-2"
+                >
+                  <div
+                    v-if="activeMobileDropdown === link.name"
+                    class="mt-1 ml-4 space-y-1 border-l-2 border-gray-200 pl-4"
+                  >
+                    <RouterLink
+                      v-for="item in link.dropdown"
+                      :key="item.name"
+                      :to="item.to"
+                      @click="closeMenu"
+                      class="block rounded-md px-3 py-2 transition hover:bg-gray-50"
+                    >
+                      <div class="text-sm font-medium text-gray-900">{{ item.name }}</div>
+                      <div v-if="item.description" class="mt-0.5 text-xs text-gray-500">
+                        {{ item.description }}
+                      </div>
+                    </RouterLink>
+                  </div>
+                </Transition>
+              </template>
+
+              <!-- Regular Link -->
+              <RouterLink
+                v-else
+                :to="link.to!"
+                @click="closeMenu"
+                class="block rounded-lg px-4 py-3 text-base font-medium text-gray-700 transition hover:bg-gray-50"
+              >
+                {{ link.name }}
+              </RouterLink>
+            </div>
           </nav>
         </template>
 
-        <div class="space-y-5 border-t p-4 sm:space-y-4 sm:p-6">
-          <!-- ... auth buttons ... -->
+        <!-- AUTH BUTTONS / LOGOUT -->
+        <div class="border-t p-4 sm:p-6">
+          <template v-if="!isAuthenticated">
+            <div class="space-y-3">
+              <Button
+                :as="RouterLink"
+                :to="{ path: '/login' }"
+                @click="closeMenu"
+                variant="outline"
+                size="default"
+                class="w-full text-base"
+              >
+                Sign In
+              </Button>
+
+              <Button
+                :as="RouterLink"
+                :to="{ path: '/signup' }"
+                @click="closeMenu"
+                variant="default"
+                size="default"
+                class="w-full text-base"
+              >
+                Sign Up
+              </Button>
+            </div>
+          </template>
+
+          <template v-else>
+            <Button
+              @click="handleLogout"
+              class="mt-6 cursor-pointer self-center px-6 text-sm sm:mt-7 sm:px-8 sm:text-base lg:mt-8"
+              size="lg"
+              variant="default"
+            >
+              Log Out
+            </Button>
+          </template>
         </div>
       </div>
     </Transition>
 
+    <!-- MOBILE OVERLAY -->
     <Transition
       enter-active-class="transition-opacity duration-300"
       enter-from-class="opacity-0"

@@ -1,6 +1,18 @@
 <template>
-  <div class="blogs-page bg-slate-100">
-    <div class="app-container mx-auto px-6 lg:px-8">
+  <div class="blogs-page relative overflow-hidden bg-[#f7f7f7]">
+    <div
+      class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+      style="
+        background: radial-gradient(
+          ellipse,
+          #f8d9c5 0%,
+          rgba(248, 217, 197, 0.5) 40%,
+          rgba(247, 247, 247, 0.8) 70%,
+          transparent 100%
+        );
+      "
+    ></div>
+    <div class="app-container relative z-10 mx-auto px-6 lg:px-8">
       <section class="pt-20 pb-16 text-center">
         <div
           class="shadow-4xl mb-4 inline-flex items-center space-x-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-[#3F1A0F]"
@@ -129,25 +141,6 @@
               placeholder="Search Blogs..."
               v-model="searchTerm"
             />
-            <button
-              type="submit"
-              class="ml-2 flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 text-gray-600 hover:bg-gray-100"
-            >
-              <svg
-                class="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414A1 1 0 0012 14.586V17m0 2v2"
-                ></path>
-              </svg>
-            </button>
           </form>
         </div>
 
@@ -173,10 +166,10 @@
               </TypographyText>
               <RouterLink
                 :to="`/blog/${post.slug}`"
-                class="flex items-center space-x-1 text-sm font-semibold text-[#F79009] transition duration-150 hover:text-orange-600"
+                class="text-primary flex items-center space-x-1 text-sm font-semibold transition duration-150 hover:text-orange-600"
               >
                 <span>Learn More</span>
-                <span class="text-[#F79009]">→</span>
+                <span class="text-primary">→</span>
               </RouterLink>
             </div>
           </article>
@@ -191,8 +184,9 @@
 
         <div class="mt-12 flex justify-center" v-if="canToggle">
           <Button
-            variant="outline"
-            class="w-full rounded-lg border border-gray-300 px-8 py-2.5 text-center text-gray-900 transition duration-150 hover:bg-gray-50"
+            class="mt-6 cursor-pointer self-center px-6 text-sm sm:mt-7 sm:px-8 sm:text-base lg:mt-8"
+            size="lg"
+            variant="default"
             @click="toggleMoreCards"
           >
             {{ showMoreCards ? 'View Less' : 'View More' }}
@@ -361,6 +355,7 @@ onUnmounted(() => {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
