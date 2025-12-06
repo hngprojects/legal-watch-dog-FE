@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Plus, Search } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
+import { Plus, Search, FileSearch } from 'lucide-vue-next'
 import type { Source, SourceRevision } from '@/types/source'
 import type { Ticket } from '@/types/ticket'
 
@@ -19,13 +19,16 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'add-manual'): void
-  (e: 'add-ai'): void
+  (e: 'add-ai', query: string): void
   (e: 'scrape', source: Source): void
   (e: 'toggle-source', sourceId: string): void
   (e: 'edit', source: Source): void
   (e: 'delete', source: Source): void
   (e: 'open-ticket', payload: { source: Source; revision: SourceRevision }): void
 }>()
+
+const searchQuery = ref('')
+const hasQuery = computed(() => Boolean(searchQuery.value.trim()))
 
 const latestRevisionBySource = computed<Record<string, SourceRevision | undefined>>(() => {
   const map: Record<string, SourceRevision | undefined> = {}
@@ -48,7 +51,8 @@ const handleAddManual = () => {
 }
 
 const handleAddAi = () => {
-  emit('add-ai')
+  if (!hasQuery.value) return
+  emit('add-ai', searchQuery.value.trim())
 }
 
 const handleScrape = (source: Source) => {
@@ -72,14 +76,20 @@ const hasTicket = (revisionId?: string) => {
       />
       <input
         type="text"
-        placeholder="Auto source search"
+        v-model="searchQuery"
+        placeholder="Automatic source search"
         class="text-md focus:border-accent-main focus:ring-accent-main/20 w-full rounded-lg border border-gray-200 bg-white py-2 pr-3 pl-10 text-gray-700 shadow-sm outline-none focus:ring-2"
         @keydown.enter.prevent="handleAddAi"
       />
     </div>
-    <button @click="handleAddAi" class="btn--secondary btn--sm btn--with-icon">
-      <FileSearchCorner size="16" />
-      Search
+    <button
+      @click="handleAddAi"
+      class="btn--secondary btn--sm btn--with-icon"
+      :disabled="!hasQuery"
+      :aria-disabled="!hasQuery"
+    >
+      <FileSearch :size="16" />
+      Auto Search
     </button>
   </div>
   <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">

@@ -81,6 +81,8 @@ export interface SuggestSourcesRequest {
   jurisdiction_name: string
   jurisdiction_description: string
   project_description: string
+  jurisdiction_prompt?: string | null
+  search_query?: string
 }
 
 export interface SuggestSourcesResponse {

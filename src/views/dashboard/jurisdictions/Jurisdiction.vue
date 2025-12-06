@@ -87,6 +87,7 @@ const editSaving = ref(false)
 const subJurisdictionModalOpen = ref(false)
 const addSourceModalOpen = ref(false)
 const subJurisdictionSaving = ref(false)
+const sourceSearchQuery = ref('')
 
 const editForm = ref({ name: '', description: '' })
 const subJurisdictionForm = ref({ name: '', description: '' })
@@ -371,7 +372,18 @@ const handleManualAddSource = () => {
   openAddSourceModal()
 }
 
-const handleAiSuggestedSource = () => {
+const handleAiSuggestedSource = (query: string) => {
+  const trimmedQuery = query?.trim() || ''
+  if (!trimmedQuery) {
+    toast.error('Enter what you want the AI to search for.')
+    return
+  }
+  if (!jurisdictionInstruction.value.trim()) {
+    toast.error('Add jurisdiction instructions before running automatic source search.')
+    return
+  }
+
+  sourceSearchQuery.value = trimmedQuery
   activeTab.value = 'sources'
   showSuggestedSources.value = true
 }
@@ -998,6 +1010,8 @@ onMounted(() => {
       :jurisdiction-name="jurisdiction?.name || ''"
       :jurisdiction-description="jurisdiction?.description || ''"
       :project-description="projectName"
+      :jurisdiction-prompt="jurisdictionInstruction"
+      :search-query="sourceSearchQuery"
       @update:open="toggleSuggestedDialog"
       @cancel="cancelSuggestions"
       @save="handleSuggestionsSaved"
