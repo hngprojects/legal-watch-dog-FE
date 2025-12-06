@@ -167,6 +167,12 @@ export const routes = [
         alias: '/organizations',
       },
       {
+        path: 'invitations',
+        name: 'invitations',
+        component: () => import('@/views/dashboard/InvitationsView.vue'),
+        alias: '/invitations',
+      },
+      {
         path: 'profile',
         name: 'profile',
         component: () => import('@/views/dashboard/profile/ProfileView.vue'),

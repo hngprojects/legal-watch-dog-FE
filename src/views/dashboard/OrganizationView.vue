@@ -19,15 +19,12 @@ import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue
 import { EllipsisVertical } from 'lucide-vue-next'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
-import { useInvitationStore } from '@/stores/invitation-store'
 import OrganizationFormDialog from '@/components/dashboard/OrganizationFormDialog.vue'
 import illustrationImg from '@/assets/Images/dashboardillustration.png'
 import type { Organization } from '@/types/organization'
 
 const organizationStore = useOrganizationStore()
 const { organizations, loading, error } = storeToRefs(organizationStore)
-const invitationStore = useInvitationStore()
-const { invitations, loading: inviteLoading, error: inviteError } = storeToRefs(invitationStore)
 const router = useRouter()
 const authStore = useAuthStore()
 const { confirm: openConfirm } = useConfirmDialog()
@@ -51,8 +48,6 @@ const ensureUserId = async () => {
   const loadedUser = await authStore.loadCurrentUser()
   return loadedUser?.id || (loadedUser as { user_id?: string } | null)?.user_id || null
 }
-
-const organizationName = () => 'Organization Invitation'
 
 const openCreateModal = () => {
   showCreateModal.value = true
@@ -94,26 +89,7 @@ const goToOrganization = (organizationId: string) => {
   router.push({ name: 'organization-profile', params: { organizationId } })
 }
 
-const refreshInvitations = async () => {
-  await invitationStore.fetchMyInvitations()
-}
-
-const acceptInvite = async (token: string) => {
-  try {
-    const result = await invitationStore.acceptInvitation(token)
-
-    toast.success(result || 'Invitation accepted')
-
-    const userId = await ensureUserId()
-    if (userId) {
-      await organizationStore.fetchOrganizations(userId)
-    }
-    await refreshInvitations()
-  } catch (err) {
-    toast.error(invitationStore.error || 'Could not accept invitation')
-    void err
-  }
-}
+const goToInvitations = () => router.push({ name: 'invitations' })
 
 const hasMoreOrganizations = computed(() => organizationStore.hasMoreOrganizations)
 
@@ -175,7 +151,7 @@ onMounted(async () => {
     pageLoading.value = false
     return
   }
-  await Promise.all([organizationStore.fetchOrganizations(userId), refreshInvitations()])
+  await organizationStore.fetchOrganizations(userId)
   pageLoading.value = false
 })
 </script>
@@ -194,46 +170,8 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-else-if="inviteLoading || inviteError || invitations.length" class="mb-8">
-      <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200/60">
-        <div class="mb-4 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-semibold tracking-wide text-[#9CA3AF] uppercase">Invitations</p>
-            <p class="text-sm text-gray-600">Organizations you have been invited to join.</p>
-          </div>
-          <button @click="refreshInvitations" class="btn--link">Refresh</button>
-        </div>
-
-        <div v-if="inviteLoading" class="space-y-3">
-          <div v-for="n in 3" :key="n" class="h-12 animate-pulse rounded-lg bg-gray-100"></div>
-        </div>
-        <div v-else-if="inviteError" class="text-sm text-red-600">
-          {{ inviteError }}
-        </div>
-        <div v-else-if="!invitations.length" class="text-sm text-gray-600">
-          No pending invitations.
-        </div>
-        <div v-else class="space-y-3">
-          <article
-            v-for="invite in invitations"
-            :key="invite.token"
-            class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 px-4 py-3"
-          >
-            <div>
-              <p class="text-sm font-semibold text-gray-900">
-                {{ invite.organization_name || organizationName() }}
-              </p>
-              <p class="text-xs text-gray-500">
-                Role: {{ invite.role_name || invite.role || 'Member' }}
-              </p>
-            </div>
-            <button @click="acceptInvite(invite.token)" class="btn--default btn--lg">Accept</button>
-          </article>
-        </div>
-      </div>
-    </div>
     <div
-      v-if="!loading && organizations.length === 0 && !error"
+      v-else-if="!loading && organizations.length === 0 && !error"
       class="mx-auto flex max-w-4xl flex-col items-center justify-center py-16 text-center lg:py-24"
     >
       <img :src="illustrationImg" alt="" srcset="" />
@@ -275,34 +213,40 @@ onMounted(async () => {
       <div
         class="mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center"
       >
-        <div>
+        <div class="space-y-1">
           <h1 class="text-3xl font-bold text-gray-900 lg:text-4xl">My Organizations</h1>
+          <p class="text-sm text-gray-600">
+            Manage your organizations and join new teams from your invitations page.
+          </p>
         </div>
-        <button @click="openCreateModal" class="btn--default btn--lg btn--with-icon">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M10 4V16"
-              stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M4 10H16"
-              stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          Create Organization
-        </button>
+        <div class="flex flex-wrap items-center gap-3">
+          <button @click="goToInvitations" class="btn--secondary btn--lg">View Invitations</button>
+          <button @click="openCreateModal" class="btn--default btn--lg btn--with-icon">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 4V16"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M4 10H16"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            Create Organization
+          </button>
+        </div>
       </div>
 
       <div v-if="loading" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
