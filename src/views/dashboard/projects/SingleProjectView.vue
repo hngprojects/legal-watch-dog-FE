@@ -278,9 +278,9 @@ watch(
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-[#F5F3F0] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-    <div class="mx-auto flex max-w-6xl flex-col gap-6">
-      <header class="flex flex-col gap-3 rounded-2xl bg-[#F5F3F0]">
+  <main class="min-h-screen flex-1 px-4 py-6 lg:py-10">
+    <div class="app-container mx-auto flex flex-col gap-6">
+      <header class="flex flex-col gap-3 rounded-2xl">
         <div
           class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:justify-between"
         >
