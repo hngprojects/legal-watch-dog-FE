@@ -13,12 +13,17 @@ export default defineConfig({
     port: 3000,
   },
   ssgOptions: {
-    includedRoutes: (paths) => {
-      const staticBlogRoutes = paths.filter(
-        (path) => path.startsWith('/blog') && !path.includes(':'),
-      )
-      const dynamicBlogRoutes = [...blogPosts.map((post) => `/blog/${post.id}`)]
-      return [...staticBlogRoutes, ...dynamicBlogRoutes]
+    includedRoutes: (_, routes) => {
+      const landingLayoutRoute = routes.find((r) => r.path === '/' && r.name === 'landing')
+
+      const landingPagePaths =
+        landingLayoutRoute?.children
+          ?.map((child) => `/${child.path}`)
+          .filter((path) => !path.includes(':')) ?? []
+
+      const dynamicBlogPaths = blogPosts.map((post) => `/blog/${post.slug}`)
+
+      return [...new Set([...landingPagePaths, ...dynamicBlogPaths])]
     },
   },
   plugins: [vue(), vueJsx(), vueDevTools(), tailwindcss()],

@@ -26,85 +26,102 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main
-    class="app-container flex flex-1 flex-col items-center px-4 py-12 text-center sm:px-6 sm:py-16 md:px-8 md:py-20 lg:px-12"
-  >
-    <!-- Hero Section -->
-    <section class="mb-8 max-w-3xl sm:mb-10 lg:mb-12">
-      <h1
-        class="text-primary lg:text-preset-display-md mb-3 text-2xl font-bold sm:mb-4 sm:text-3xl md:text-4xl"
-      >
-        Choose the plan that fits your team.
-      </h1>
-      <p class="text-sm text-gray-600 sm:text-base md:text-lg">
-        Upgrade to unlock continuous monitoring, AI summaries, and team-wide compliance insights.
-      </p>
-    </section>
+  <div class="relative min-h-screen overflow-hidden">
+    <!-- Radial Gradient Background -->
+    <div
+      class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+      style="
+        background: radial-gradient(
+          ellipse,
+          #f8d9c5 0%,
+          rgba(248, 217, 197, 0.5) 40%,
+          rgba(247, 247, 247, 0.8) 70%,
+          #f7f7f7 100%
+        );
+      "
+    ></div>
 
-    <template v-if="billingStore.loading">
-      <div
-        class="mx-auto mb-16 flex w-fit animate-pulse items-center justify-center gap-2 rounded-md bg-white p-1 ring-1 ring-[#D9DBE9] *:rounded-md *:p-3"
-      >
-        <div class="h-10 w-24 rounded-md bg-gray-200"></div>
-        <div class="h-10 w-24 rounded-md bg-gray-200"></div>
-      </div>
-
-      <div
-        class="flex w-full flex-col justify-start gap-x-6 gap-y-12 text-start md:flex-row md:flex-wrap md:justify-center xl:flex-nowrap xl:items-center"
-      >
-        <div
-          v-for="i in 3"
-          :key="i"
-          class="flex h-[500px] w-full animate-pulse flex-col rounded-lg border border-gray-200 p-6 shadow-sm md:w-[calc(50%-12px)] xl:w-[384px]"
+    <!-- Content -->
+    <main
+      class="app-container relative z-10 flex flex-1 flex-col items-center px-4 py-12 text-center sm:px-6 sm:py-16 md:px-8 md:py-20 lg:px-12"
+    >
+      <!-- Hero Section -->
+      <section class="mb-8 max-w-3xl sm:mb-10 lg:mb-12">
+        <h1
+          class="text-primary lg:text-preset-display-md mb-3 text-2xl font-bold sm:mb-4 sm:text-3xl md:text-4xl"
         >
-          <div class="mb-4 h-full w-full rounded-md bg-gray-200"></div>
-        </div>
-      </div>
-    </template>
-    <template v-else>
-      <section class="w-full max-w-md">
-        <div
-          class="mx-auto mb-10 flex w-fit items-center justify-center gap-1 rounded-md bg-white p-1 ring-1 ring-[#D9DBE9] sm:mb-12 sm:gap-2 sm:*:rounded-md sm:*:p-3 md:mb-16"
-        >
-          <button
-            class="relative rounded px-3 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm"
-            :class="{ 'bg-chocolate-brown-main text-white': activeBillingCycle === 'month' }"
-            @click="() => (activeBillingCycle = 'month')"
-          >
-            Monthly
-          </button>
-          <button
-            class="relative overflow-visible rounded px-3 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm"
-            :class="{ 'bg-chocolate-brown-main text-white': activeBillingCycle === 'year' }"
-            @click="() => (activeBillingCycle = 'year')"
-          >
-            <div class="bg-accent-main absolute -top-5 -right-3 z-10 rounded-full p-2">
-              <p class="text-xs text-[10px] font-medium whitespace-nowrap text-white">Save 20%</p>
-            </div>
-            Yearly
-          </button>
-        </div>
+          Choose the plan that fits your team.
+        </h1>
+        <p class="text-sm text-gray-600 sm:text-base md:text-lg">
+          Upgrade to unlock continuous monitoring, AI summaries, and team-wide compliance insights.
+        </p>
       </section>
 
-      <section class="w-full">
+      <template v-if="billingStore.loading">
         <div
-          class="grid grid-cols-1 gap-8 text-start sm:gap-10 md:grid-cols-2 *:first:md:justify-self-end *:last:md:col-span-2 *:last:md:mx-auto xl:flex xl:flex-nowrap xl:items-center xl:justify-center xl:gap-6"
+          class="mx-auto mb-16 flex w-fit animate-pulse items-center justify-center gap-2 rounded-md bg-white p-1 ring-1 ring-[#D9DBE9] *:rounded-md *:p-3"
         >
-          <template
+          <div class="h-10 w-24 rounded-md bg-gray-200"></div>
+          <div class="h-10 w-24 rounded-md bg-gray-200"></div>
+        </div>
+
+        <div
+          class="flex w-full flex-col justify-start gap-x-6 gap-y-12 text-start md:flex-row md:flex-wrap md:justify-center xl:flex-nowrap xl:items-center"
+        >
+          <div
+            v-for="i in 3"
             :key="i"
-            v-for="(plan, i) in plans?.filter((plan) => plan.interval === activeBillingCycle)"
+            class="flex h-[500px] w-full animate-pulse flex-col rounded-lg border border-gray-200 p-6 shadow-sm md:w-[calc(50%-12px)] xl:w-[384px]"
           >
-            <PricingCard
-              :i="i"
-              :activeBillingCycle="activeBillingCycle"
-              :plan="plan"
-              class="w-full"
-            />
-          </template>
+            <div class="mb-4 h-full w-full rounded-md bg-gray-200"></div>
+          </div>
         </div>
-      </section>
-    </template>
-  </main>
+      </template>
+      <template v-else>
+        <section class="w-full max-w-md">
+          <div
+            class="mx-auto mb-10 flex w-fit items-center justify-center gap-1 rounded-md bg-white p-1 ring-1 ring-[#D9DBE9] sm:mb-12 sm:gap-2 sm:*:rounded-md sm:*:p-3 md:mb-16"
+          >
+            <button
+              class="relative rounded px-3 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm"
+              :class="{ 'bg-chocolate-brown-main text-white': activeBillingCycle === 'month' }"
+              @click="() => (activeBillingCycle = 'month')"
+            >
+              Monthly
+            </button>
+            <button
+              class="relative overflow-visible rounded px-3 py-2 text-xs sm:px-4 sm:py-3 sm:text-sm"
+              :class="{ 'bg-chocolate-brown-main text-white': activeBillingCycle === 'year' }"
+              @click="() => (activeBillingCycle = 'year')"
+            >
+              <div class="bg-accent-main absolute -top-5 -right-3 z-10 rounded-full p-2">
+                <p class="text-xs text-[10px] font-medium whitespace-nowrap text-white">Save 20%</p>
+              </div>
+              Yearly
+            </button>
+          </div>
+        </section>
+
+        <section class="w-full">
+          <div
+            class="grid grid-cols-1 gap-8 text-start sm:gap-10 md:grid-cols-2 *:first:md:justify-self-end *:last:md:col-span-2 *:last:md:mx-auto xl:flex xl:flex-nowrap xl:items-center xl:justify-center xl:gap-6"
+          >
+            <template
+              :key="i"
+              v-for="(plan, i) in plans?.filter((plan) => plan.interval === activeBillingCycle)"
+            >
+              <PricingCard
+                :i="i"
+                :activeBillingCycle="activeBillingCycle"
+                :plan="plan"
+                class="w-full"
+              />
+            </template>
+          </div>
+        </section>
+      </template>
+    </main>
+  </div>
 </template>
 
 <style scoped>

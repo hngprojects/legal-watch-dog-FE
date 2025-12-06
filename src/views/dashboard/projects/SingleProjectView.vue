@@ -61,6 +61,8 @@ const jurisdictionForm = ref({ name: '', description: '' })
 
 const projectModalOpen = ref(false)
 const projectModalMode = ref<'edit'>('edit')
+const projectSaving = ref(false)
+const jurisdictionSaving = ref(false)
 
 const organizationsRequested = ref(false)
 
@@ -116,18 +118,26 @@ const openEditProject = () => {
 
 const handleProjectSave = async (payload: {
   title: string
-  description: string
+  description: string | null
   organizationId: string
   projectId?: string
 }) => {
-  if (!projectId.value) return
-  await projectStore.updateProject(payload.organizationId, projectId.value, {
-    title: payload.title,
-    description: payload.description,
-  })
-  projectModalOpen.value = false
-  toast.success('Project updated')
-  await loadProject()
+  if (!projectId.value || projectSaving.value) return
+  projectSaving.value = true
+  try {
+    await projectStore.updateProject(payload.organizationId, projectId.value, {
+      title: payload.title,
+      description: payload.description,
+    })
+    projectModalOpen.value = false
+    toast.success('Project updated')
+    await loadProject()
+  } catch (error) {
+    void error
+    toast.error(projectStore.error || 'Could not update project')
+  } finally {
+    projectSaving.value = false
+  }
 }
 
 const deleteProject = async () => {
@@ -145,23 +155,28 @@ const openAddJurisdiction = () => {
 }
 
 const handleCreateJurisdiction = async () => {
-  if (!projectId.value) return
+  if (!projectId.value || jurisdictionSaving.value) return
   if (!jurisdictionForm.value.name.trim()) {
     toast.error('Name is required')
     return
   }
 
-  const created = await jurisdictionStore.addJurisdiction(projectId.value, {
-    name: jurisdictionForm.value.name.trim(),
-    description: jurisdictionForm.value.description.trim(),
-  })
+  jurisdictionSaving.value = true
+  try {
+    const created = await jurisdictionStore.addJurisdiction(projectId.value, {
+      name: jurisdictionForm.value.name.trim(),
+      description: jurisdictionForm.value.description.trim(),
+    })
 
-  if (created) {
-    toast.success('Jurisdiction added')
-    addJurisdictionOpen.value = false
-    await loadJurisdictions()
-  } else if (jurisdictionStore.error) {
-    toast.error(jurisdictionStore.error)
+    if (created) {
+      toast.success('Jurisdiction added')
+      addJurisdictionOpen.value = false
+      await loadJurisdictions()
+    } else if (jurisdictionStore.error) {
+      toast.error(jurisdictionStore.error)
+    }
+  } finally {
+    jurisdictionSaving.value = false
   }
 }
 
@@ -263,9 +278,9 @@ watch(
 </script>
 
 <template>
-  <main class="min-h-screen flex-1 bg-[#F5F3F0] px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-    <div class="mx-auto flex max-w-6xl flex-col gap-6">
-      <header class="flex flex-col gap-3 rounded-2xl bg-[#F5F3F0]">
+  <main class="min-h-screen flex-1 px-4 py-6 lg:py-10">
+    <div class="app-container mx-auto flex flex-col gap-6">
+      <header class="flex flex-col gap-3 rounded-2xl">
         <div
           class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center sm:justify-between"
         >
@@ -411,7 +426,7 @@ watch(
             >
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
-                  <h3 class="text-base font-semibold text-gray-900">{{ j.name }}</h3>
+                  <h3 class="text-base font-semibold break-all text-gray-900">{{ j.name }}</h3>
                   <p class="text-sm text-gray-600">{{ j.description }}</p>
                 </div>
                 <span
@@ -451,6 +466,7 @@ watch(
     <ProjectFormModal
       :open="projectModalOpen"
       :mode="projectModalMode"
+      :loading="projectSaving"
       :organizations="organizationOptions"
       :default-organization-id="organizationId"
       :project="project || undefined"
@@ -462,6 +478,7 @@ watch(
     <JurisdictionDialog
       :open="addJurisdictionOpen"
       :form="jurisdictionForm"
+      :loading="jurisdictionSaving"
       title="Create Jurisdiction"
       description="Define the region or legal domain you want to monitor."
       name-label="Jurisdiction Name"
