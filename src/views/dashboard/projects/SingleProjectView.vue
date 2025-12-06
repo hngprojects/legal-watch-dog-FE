@@ -61,6 +61,8 @@ const jurisdictionForm = ref({ name: '', description: '' })
 
 const projectModalOpen = ref(false)
 const projectModalMode = ref<'edit'>('edit')
+const projectSaving = ref(false)
+const jurisdictionSaving = ref(false)
 
 const organizationsRequested = ref(false)
 
@@ -120,14 +122,22 @@ const handleProjectSave = async (payload: {
   organizationId: string
   projectId?: string
 }) => {
-  if (!projectId.value) return
-  await projectStore.updateProject(payload.organizationId, projectId.value, {
-    title: payload.title,
-    description: payload.description,
-  })
-  projectModalOpen.value = false
-  toast.success('Project updated')
-  await loadProject()
+  if (!projectId.value || projectSaving.value) return
+  projectSaving.value = true
+  try {
+    await projectStore.updateProject(payload.organizationId, projectId.value, {
+      title: payload.title,
+      description: payload.description,
+    })
+    projectModalOpen.value = false
+    toast.success('Project updated')
+    await loadProject()
+  } catch (error) {
+    void error
+    toast.error(projectStore.error || 'Could not update project')
+  } finally {
+    projectSaving.value = false
+  }
 }
 
 const deleteProject = async () => {
@@ -145,23 +155,28 @@ const openAddJurisdiction = () => {
 }
 
 const handleCreateJurisdiction = async () => {
-  if (!projectId.value) return
+  if (!projectId.value || jurisdictionSaving.value) return
   if (!jurisdictionForm.value.name.trim()) {
     toast.error('Name is required')
     return
   }
 
-  const created = await jurisdictionStore.addJurisdiction(projectId.value, {
-    name: jurisdictionForm.value.name.trim(),
-    description: jurisdictionForm.value.description.trim(),
-  })
+  jurisdictionSaving.value = true
+  try {
+    const created = await jurisdictionStore.addJurisdiction(projectId.value, {
+      name: jurisdictionForm.value.name.trim(),
+      description: jurisdictionForm.value.description.trim(),
+    })
 
-  if (created) {
-    toast.success('Jurisdiction added')
-    addJurisdictionOpen.value = false
-    await loadJurisdictions()
-  } else if (jurisdictionStore.error) {
-    toast.error(jurisdictionStore.error)
+    if (created) {
+      toast.success('Jurisdiction added')
+      addJurisdictionOpen.value = false
+      await loadJurisdictions()
+    } else if (jurisdictionStore.error) {
+      toast.error(jurisdictionStore.error)
+    }
+  } finally {
+    jurisdictionSaving.value = false
   }
 }
 
@@ -451,6 +466,7 @@ watch(
     <ProjectFormModal
       :open="projectModalOpen"
       :mode="projectModalMode"
+      :loading="projectSaving"
       :organizations="organizationOptions"
       :default-organization-id="organizationId"
       :project="project || undefined"
@@ -462,6 +478,7 @@ watch(
     <JurisdictionDialog
       :open="addJurisdictionOpen"
       :form="jurisdictionForm"
+      :loading="jurisdictionSaving"
       title="Create Jurisdiction"
       description="Define the region or legal domain you want to monitor."
       name-label="Jurisdiction Name"

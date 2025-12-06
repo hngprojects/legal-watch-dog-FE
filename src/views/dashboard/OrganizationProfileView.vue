@@ -106,6 +106,7 @@ const projectModalMode = ref<'edit' | 'create'>('create')
 const editingProject = ref<{ id?: string; title?: string; description?: string | null } | null>(
   null,
 )
+const projectSaving = ref(false)
 const organizationOptions = computed(() =>
   orgId.value && organization.value ? [{ id: orgId.value, name: organization.value.name }] : [],
 )
@@ -147,32 +148,48 @@ const handleProjectSave = async (payload: {
 }) => {
   const orgForAction = orgId.value
   if (!orgForAction) return
+  if (projectSaving.value) return
+  projectSaving.value = true
 
   const targetProjectId = payload.projectId || editingProject.value?.id
 
   if (projectModalMode.value === 'edit' && targetProjectId) {
-    await projectStore.updateProject(orgForAction, targetProjectId, {
-      title: payload.title,
-      description: payload.description,
-    })
-    projectModalOpen.value = false
-    editingProject.value = null
+    try {
+      await projectStore.updateProject(orgForAction, targetProjectId, {
+        title: payload.title,
+        description: payload.description,
+      })
+      projectModalOpen.value = false
+      editingProject.value = null
 
-    toast.success('Project updated successfully')
-    await loadProjects()
+      toast.success('Project updated successfully')
+      await loadProjects()
+    } catch (error) {
+      void error
+      toast.error(projectStore.error || 'Could not update project')
+    } finally {
+      projectSaving.value = false
+    }
     return
   }
 
-  const created = await projectStore.addProject({
-    title: payload.title,
-    description: payload.description,
-    organization_id: orgForAction,
-  })
+  try {
+    const created = await projectStore.addProject({
+      title: payload.title,
+      description: payload.description,
+      organization_id: orgForAction,
+    })
 
-  if (created) {
-    projectModalOpen.value = false
-    toast.success('Project created successfully')
-    await loadProjects()
+    if (created) {
+      projectModalOpen.value = false
+      toast.success('Project created successfully')
+      await loadProjects()
+    }
+  } catch (error) {
+    void error
+    toast.error(projectStore.error || 'Could not create project')
+  } finally {
+    projectSaving.value = false
   }
 }
 
@@ -951,6 +968,7 @@ watch(
   <ProjectFormModal
     :open="projectModalOpen"
     :mode="projectModalMode"
+    :loading="projectSaving"
     :organizations="organizationOptions"
     :default-organization-id="orgId"
     :project="editingProject || undefined"

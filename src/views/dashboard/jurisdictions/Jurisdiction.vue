@@ -82,9 +82,11 @@ const activeTab = ref<'analysis' | 'sources'>('sources')
 
 const showSuggestedSources = ref(false)
 const showInlineEdit = ref(false)
+const editSaving = ref(false)
 
 const subJurisdictionModalOpen = ref(false)
 const addSourceModalOpen = ref(false)
+const subJurisdictionSaving = ref(false)
 
 const editForm = ref({ name: '', description: '' })
 const subJurisdictionForm = ref({ name: '', description: '' })
@@ -500,6 +502,8 @@ const startEdit = () => {
 }
 
 const saveEdit = async () => {
+  if (editSaving.value) return
+  editSaving.value = true
   const payload = {
     name: editForm.value.name,
     description: editForm.value.description,
@@ -523,6 +527,8 @@ const saveEdit = async () => {
     const msg = jurisdictionStore.error || 'Failed to update jurisdiction'
     toast.error(msg)
     void error
+  } finally {
+    editSaving.value = false
   }
 }
 
@@ -570,20 +576,27 @@ const closeSubJurisdictionModal = () => {
 }
 
 const createSubJurisdiction = async () => {
-  if (!jurisdiction.value) return
+  if (!jurisdiction.value || subJurisdictionSaving.value) return
 
   if (!subJurisdictionForm.value.name.trim()) return toast.error('Name required')
   if (!subJurisdictionForm.value.description.trim()) return toast.error('Description required')
 
-  const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
-    name: subJurisdictionForm.value.name.trim(),
-    description: subJurisdictionForm.value.description.trim(),
-    parent_id: jurisdiction.value.id,
-  })
+  subJurisdictionSaving.value = true
+  try {
+    const created = await jurisdictionStore.addJurisdiction(jurisdiction.value.project_id, {
+      name: subJurisdictionForm.value.name.trim(),
+      description: subJurisdictionForm.value.description.trim(),
+      parent_id: jurisdiction.value.id,
+    })
 
-  if (created) {
-    closeSubJurisdictionModal()
-    toast.success(`"${created.name}" added successfully`)
+    if (created) {
+      closeSubJurisdictionModal()
+      toast.success(`"${created.name}" added successfully`)
+    } else if (jurisdictionStore.error) {
+      toast.error(jurisdictionStore.error)
+    }
+  } finally {
+    subJurisdictionSaving.value = false
   }
 }
 
@@ -972,6 +985,7 @@ onMounted(() => {
     <JurisdictionDialog
       :open="subJurisdictionModalOpen"
       :form="subJurisdictionForm"
+      :loading="subJurisdictionSaving"
       @update:open="(value) => !value && closeSubJurisdictionModal()"
       @update:form="updateSubJurisdictionForm"
       @submit="createSubJurisdiction"
@@ -1019,7 +1033,14 @@ onMounted(() => {
             <button type="button" class="btn--secondary btn--lg" @click="showInlineEdit = false">
               Cancel
             </button>
-            <button type="submit" class="btn--default btn--lg">Save Changes</button>
+            <button
+              type="submit"
+              class="btn--default btn--lg"
+              :disabled="editSaving"
+              :aria-busy="editSaving"
+            >
+              {{ editSaving ? 'Saving...' : 'Save Changes' }}
+            </button>
           </DialogFooter>
         </form>
       </DialogScrollContent>
