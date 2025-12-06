@@ -3,7 +3,7 @@ export type ProjectStatus = 'active' | 'paused' | 'completed'
 export interface Project {
   id: string
   title: string
-  description: string
+  description: string | null
   master_prompt?: string | null
   org_id: string
   created_at: string
@@ -13,7 +13,7 @@ export interface Project {
 
 export interface CreateProjectPayload {
   title: string
-  description: string
+  description?: string | null
   master_prompt?: string | null
   organization_id: string
 }
