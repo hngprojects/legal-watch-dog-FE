@@ -54,6 +54,7 @@ export const routes = [
   },
   {
     path: '/',
+    name: 'landing',
     component: LandingLayout,
     children: [
       { path: '', name: 'home', component: HomeView },
@@ -82,9 +83,9 @@ export const routes = [
         name: 'faq',
         component: () => import('@/views/FAQView.vue'),
       },
-      { path: '/blog', name: 'blog', component: () => import('@/views/BlogView.vue') },
+      { path: 'blog', name: 'blog', component: () => import('@/views/BlogView.vue') },
       {
-        path: '/blog/:id',
+        path: 'blog/:id',
         name: 'blog-detail',
         component: () => import('@/views/BlogDetailView.vue'),
         props: true,
