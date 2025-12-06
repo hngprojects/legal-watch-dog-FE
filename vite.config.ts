@@ -16,7 +16,6 @@ export default defineConfig({
     includedRoutes: (_, routes) => {
       const landingLayoutRoute = routes.find((r) => r.path === '/' && r.name === 'landing')
 
-      console.log(routes, landingLayoutRoute)
       const landingPagePaths =
         landingLayoutRoute?.children
           ?.map((child) => `/${child.path}`)
