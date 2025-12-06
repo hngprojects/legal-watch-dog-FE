@@ -133,9 +133,7 @@ const generateToken = () => {
         class="flex w-full flex-col items-center justify-between gap-9 space-y-2 overflow-hidden sm:flex-row"
       >
         <div class="flex flex-col gap-3 space-y-2 sm:w-1/2">
-          <label class="text-sm font-semibold text-[#0F172A]">
-            Resource owner
-          </label>
+          <label class="text-sm font-semibold text-[#0F172A]"> Resource owner </label>
           <Select v-model="resourceOwner">
             <SelectTrigger
               id="resource-owner"
@@ -156,9 +154,7 @@ const generateToken = () => {
           </p>
         </div>
         <div class="flex flex-col gap-3 space-y-2 sm:w-1/2">
-          <label class="text-sm font-semibold text-[#0F172A]">
-            Organization
-          </label>
+          <label class="text-sm font-semibold text-[#0F172A]"> Organization </label>
           <Select v-model="organization">
             <SelectTrigger
               id="organization"
