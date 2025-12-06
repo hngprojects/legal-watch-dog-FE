@@ -148,57 +148,73 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="app-container min-h-screen py-8 sm:py-12 lg:py-16">
-    <div class="mx-auto">
-      <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-20">
-        <!-- Left Column - Contact Info -->
-        <div class="flex flex-col">
-          <h1 class="mb-4 text-3xl font-bold text-[#1F1F1F] sm:text-4xl lg:text-[48px]">
-            Contact Us
-          </h1>
+  <div class="relative min-h-screen overflow-hidden py-8 sm:py-12 lg:py-16">
+    <!-- Radial Gradient Background -->
+    <div
+      class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+      style="
+        background: radial-gradient(
+          ellipse,
+          #f8d9c5 0%,
+          rgba(248, 217, 197, 0.5) 40%,
+          rgba(247, 247, 247, 0.8) 70%,
+          #f7f7f7 100%
+        );
+      "
+    ></div>
 
-          <p
-            class="mb-8 max-w-md text-sm leading-relaxed text-[#6B7280] sm:mb-10 sm:text-base lg:mb-12"
-          >
-            Have any enquiry? you have come to the right place. Get in touch with us through the
-            form and we will get back to you as soon as possible
-          </p>
+    <!-- Content Container -->
+    <div class="app-container relative z-10">
+      <div class="mx-auto">
+        <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-20">
+          <!-- Left Column - Contact Info -->
+          <div class="flex flex-col">
+            <h1 class="mb-4 text-3xl font-bold text-[#1F1F1F] sm:text-4xl lg:text-[48px]">
+              Contact Us
+            </h1>
 
-          <!-- Contact Info Items -->
-          <div class="flex flex-col gap-5 sm:gap-6">
-            <!-- Email -->
-            <div class="flex items-start gap-3 sm:items-center sm:gap-4">
-              <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
-                style="background: #f1a75f"
-              >
-                <img :src="EmailIcon" alt="Email" class="h-5 w-5 sm:h-6 sm:w-6" />
-              </div>
-              <div class="flex flex-col justify-center">
-                <p class="mt-3 text-sm font-medium text-[#1F1F1F] sm:text-base lg:mt-0">
-                  info@emerj.net
-                </p>
-              </div>
-            </div>
+            <p
+              class="mb-8 max-w-md text-sm leading-relaxed text-[#6B7280] sm:mb-10 sm:text-base lg:mb-12"
+            >
+              Have any enquiry? you have come to the right place. Get in touch with us through the
+              form and we will get back to you as soon as possible
+            </p>
 
-            <!-- Office Address -->
-            <div class="flex items-start gap-3 sm:items-center sm:gap-4">
-              <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
-                style="background: #f1a75f"
-              >
-                <img :src="OfficeIcon" alt="Office" class="h-5 w-5 sm:h-6 sm:w-6" />
+            <!-- Contact Info Items -->
+            <div class="flex flex-col gap-5 sm:gap-6">
+              <!-- Email -->
+              <div class="flex items-start gap-3 sm:items-center sm:gap-4">
+                <div
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                  style="background: #f1a75f"
+                >
+                  <img :src="EmailIcon" alt="Email" class="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+                <div class="flex flex-col justify-center">
+                  <p class="mt-3 text-sm font-medium text-[#1F1F1F] sm:text-base lg:mt-0">
+                    info@emerj.net
+                  </p>
+                </div>
               </div>
-              <div class="flex flex-col justify-center">
-                <p class="mt-3 text-sm font-medium text-[#1F1F1F] sm:text-base lg:mt-0">
-                  Emerj LLC 30 N Gould St Ste R, Sheridan,<br />
-                  Wyoming, 82801, United States
-                </p>
-              </div>
-            </div>
 
-            <!-- Phone -->
-            <!-- <div class="flex items-start gap-3 sm:items-center sm:gap-4">
+              <!-- Office Address -->
+              <div class="flex items-start gap-3 sm:items-center sm:gap-4">
+                <div
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
+                  style="background: #f1a75f"
+                >
+                  <img :src="OfficeIcon" alt="Office" class="h-5 w-5 sm:h-6 sm:w-6" />
+                </div>
+                <div class="flex flex-col justify-center">
+                  <p class="mt-3 text-sm font-medium text-[#1F1F1F] sm:text-base lg:mt-0">
+                    Emerj LLC 30 N Gould St Ste R, Sheridan,<br />
+                    Wyoming, 82801, United States
+                  </p>
+                </div>
+              </div>
+
+              <!-- Phone -->
+              <!-- <div class="flex items-start gap-3 sm:items-center sm:gap-4">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
                 style="background: #f1a75f">
                 <img :src="PhoneIcon" alt="Phone" class="h-5 w-5 sm:h-6 sm:w-6" />
@@ -209,140 +225,145 @@ const handleSubmit = async () => {
                 </p>
               </div>
             </div> -->
-          </div>
-        </div>
-
-        <!-- Right Column - Form -->
-        <div class="flex flex-col">
-          <form @submit.prevent="handleSubmit" class="flex flex-col gap-5 sm:gap-6">
-            <!-- Full Name -->
-            <div>
-              <label for="fullName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                Full Name
-              </label>
-              <Input
-                id="fullName"
-                v-model="form.fullName"
-                type="text"
-                placeholder="John Doe"
-                class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
-              />
-              <p v-if="errors.fullName" class="mt-1 text-sm text-red-600">
-                {{ errors.fullName }}
-              </p>
             </div>
+          </div>
 
-            <!-- Phone Number -->
-            <div>
-              <label for="phoneNumber" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                Phone Number
-              </label>
-              <div class="relative">
+          <!-- Right Column - Form -->
+          <div class="flex flex-col">
+            <form @submit.prevent="handleSubmit" class="flex flex-col gap-5 sm:gap-6">
+              <!-- Full Name -->
+              <div>
+                <label for="fullName" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+                  Full Name
+                </label>
                 <Input
-                  id="phoneNumber"
-                  v-model="form.phoneNumber"
-                  type="tel"
-                  placeholder="+15550000000"
+                  id="fullName"
+                  v-model="form.fullName"
+                  type="text"
+                  placeholder="John Doe"
                   class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
                 />
-              </div>
-              <p v-if="errors.phoneNumber" class="mt-1 text-sm text-red-600">
-                {{ errors.phoneNumber }}
-              </p>
-            </div>
-
-            <!-- Company's Email Address -->
-            <div>
-              <label for="email" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                Company's Email Address
-              </label>
-              <Input
-                id="email"
-                v-model="form.email"
-                type="email"
-                placeholder="olivia@untitledui.com"
-                class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
-              />
-              <p v-if="errors.email" class="mt-1 text-sm text-red-600">
-                {{ errors.email }}
-              </p>
-            </div>
-
-            <!-- Message -->
-            <div>
-              <label for="message" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
-                Message
-              </label>
-              <textarea
-                id="message"
-                v-model="form.message"
-                @input="updateCharacterCount"
-                :maxlength="maxCharacters"
-                rows="5"
-                placeholder="Add message"
-                class="sm:rows-6 w-full resize-none rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#1F1F1F] placeholder-[#9CA3AF] transition-all outline-none focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-              ></textarea>
-              <div
-                class="mt-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0"
-              >
-                <div class="order-2 sm:order-1">
-                  <p v-if="errors.message" class="text-sm text-red-600">
-                    {{ errors.message }}
-                  </p>
-                </div>
-                <p class="order-1 text-sm text-[#6B7280] sm:order-2">
-                  {{ characterCount }}/{{ maxCharacters }} characters
+                <p v-if="errors.fullName" class="mt-1 text-sm text-red-600">
+                  {{ errors.fullName }}
                 </p>
               </div>
-            </div>
 
-            <!-- Agreement Section -->
-            <div class="rounded-lg p-3 sm:p-4" style="background: #fffaeb">
-              <div class="flex items-start gap-3">
-                <div class="flex h-5 w-5 shrink-0 items-center justify-center">
-                  <img :src="AlertIcon" alt="Alert" class="h-4 w-4 sm:h-5 sm:w-5" />
+              <!-- Phone Number -->
+              <div>
+                <label for="phoneNumber" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+                  Phone Number
+                </label>
+                <div class="relative">
+                  <Input
+                    id="phoneNumber"
+                    v-model="form.phoneNumber"
+                    type="tel"
+                    placeholder="+15550000000"
+                    class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
+                  />
                 </div>
-                <div class="flex-1">
-                  <h4 class="mb-2 text-sm font-semibold text-[#1F1F1F]">Agreement</h4>
-                  <div class="flex items-start gap-2">
-                    <input
-                      id="agreement"
-                      v-model="form.agreement"
-                      type="checkbox"
-                      class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#D1D5DB] text-[#401903] focus:ring-2 focus:ring-[#401903]/20"
-                    />
-                    <label
-                      for="agreement"
-                      class="cursor-pointer text-xs leading-relaxed text-[#6B7280] sm:text-sm"
-                    >
-                      By completing and submitting this form, I agree to have this website store my
-                      submitted information so they can respond to my inquiry or send occasional
-                      updates. For information on how to unsubscribe, as well as our privacy
-                      practices and commitment to protecting your privacy, please refer to our
-                      <RouterLink to="/privacy-policy" class="font-medium text-[#401903] underline">
-                        privacy policy
-                      </RouterLink>
-                      .
-                    </label>
+                <p v-if="errors.phoneNumber" class="mt-1 text-sm text-red-600">
+                  {{ errors.phoneNumber }}
+                </p>
+              </div>
+
+              <!-- Company's Email Address -->
+              <div>
+                <label for="email" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+                  Company's Email Address
+                </label>
+                <Input
+                  id="email"
+                  v-model="form.email"
+                  type="email"
+                  placeholder="olivia@untitledui.com"
+                  class="h-12 w-full rounded-lg border border-[#E5E7EB] bg-white px-4 text-base text-[#1F1F1F] placeholder-[#9CA3AF] focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 sm:h-[52px]"
+                />
+                <p v-if="errors.email" class="mt-1 text-sm text-red-600">
+                  {{ errors.email }}
+                </p>
+              </div>
+
+              <!-- Message -->
+              <div>
+                <label for="message" class="mb-2 block text-sm font-medium text-[#1F1F1F]">
+                  Message
+                </label>
+                <textarea
+                  id="message"
+                  v-model="form.message"
+                  @input="updateCharacterCount"
+                  :maxlength="maxCharacters"
+                  rows="5"
+                  placeholder="Add message"
+                  class="sm:rows-6 w-full resize-none rounded-lg border border-[#E5E7EB] bg-white px-4 py-3 text-base text-[#1F1F1F] placeholder-[#9CA3AF] transition-all outline-none focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                ></textarea>
+                <div
+                  class="mt-2 flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-0"
+                >
+                  <div class="order-2 sm:order-1">
+                    <p v-if="errors.message" class="text-sm text-red-600">
+                      {{ errors.message }}
+                    </p>
                   </div>
-                  <p v-if="errors.agreement" class="mt-2 text-sm text-red-600">
-                    {{ errors.agreement }}
+                  <p class="order-1 text-sm text-[#6B7280] sm:order-2">
+                    {{ characterCount }}/{{ maxCharacters }} characters
                   </p>
                 </div>
               </div>
-            </div>
 
-            <!-- Submit Button -->
-            <Button
-              type="submit"
-              @click="handleSubmit"
-              :disabled="isSubmitting"
-              class="btn--default btn--lg btn--full text-center"
-            >
-              <span v-if="!isSubmitting">Submit</span>
-              <span v-else>Submitting...</span>
-            </Button>
-          </form>
+              <!-- Agreement Section -->
+              <div class="rounded-lg p-3 sm:p-4" style="background: #fffaeb">
+                <div class="flex items-start gap-3">
+                  <div class="flex h-5 w-5 shrink-0 items-center justify-center">
+                    <img :src="AlertIcon" alt="Alert" class="h-4 w-4 sm:h-5 sm:w-5" />
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="mb-2 text-sm font-semibold text-[#1F1F1F]">Agreement</h4>
+                    <div class="flex items-start gap-2">
+                      <input
+                        id="agreement"
+                        v-model="form.agreement"
+                        type="checkbox"
+                        class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#D1D5DB] text-[#401903] focus:ring-2 focus:ring-[#401903]/20"
+                      />
+                      <label
+                        for="agreement"
+                        class="cursor-pointer text-xs leading-relaxed text-[#6B7280] sm:text-sm"
+                      >
+                        By completing and submitting this form, I agree to have this website store
+                        my submitted information so they can respond to my inquiry or send
+                        occasional updates. For information on how to unsubscribe, as well as our
+                        privacy practices and commitment to protecting your privacy, please refer to
+                        our
+                        <RouterLink
+                          to="/privacy-policy"
+                          class="font-medium text-[#401903] underline"
+                        >
+                          privacy policy
+                        </RouterLink>
+                        .
+                      </label>
+                    </div>
+                    <p v-if="errors.agreement" class="mt-2 text-sm text-red-600">
+                      {{ errors.agreement }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <Button
+                type="submit"
+                @click="handleSubmit"
+                :disabled="isSubmitting"
+                class="btn--default btn--lg btn--full text-center"
+              >
+                <span v-if="!isSubmitting">Submit</span>
+                <span v-else>Submitting...</span>
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

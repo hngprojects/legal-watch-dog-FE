@@ -123,8 +123,23 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="blogs-page bg-slate-100">
-    <div class="app-container mx-auto px-6 lg:px-8">
+  <div class="blogs-page relative overflow-hidden">
+    <!-- Radial Gradient Background -->
+    <div
+      class="pointer-events-none absolute top-0 left-1/2 z-0 h-[800px] w-[1600px] -translate-x-1/2 -translate-y-[60%] rounded-[50%]"
+      style="
+        background: radial-gradient(
+          ellipse,
+          #f8d9c5 0%,
+          rgba(248, 217, 197, 0.5) 40%,
+          rgba(247, 247, 247, 0.8) 70%,
+          #f7f7f7 100%
+        );
+      "
+    ></div>
+
+    <!-- Content -->
+    <div class="app-container relative z-10 mx-auto px-6 lg:px-8">
       <section class="pt-20 pb-16 text-center">
         <div
           class="shadow-4xl mb-4 inline-flex items-center space-x-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-[#3F1A0F]"
