@@ -233,6 +233,11 @@ export const routes = [
         name: 'payment-plan',
         component: () => import('@/views/dashboard/payments/PlanView.vue'),
       },
+      {
+        path: 'api',
+        name: 'api-access',
+        component: () => import('@/views/dashboard/api/APIAccessView.vue'),
+      },
     ],
   },
   {
