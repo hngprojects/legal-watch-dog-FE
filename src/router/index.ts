@@ -85,7 +85,7 @@ export const routes = [
       },
       { path: 'blog', name: 'blog', component: () => import('@/views/BlogView.vue') },
       {
-        path: 'blog/:id',
+        path: 'blog/:slug',
         name: 'blog-detail',
         component: () => import('@/views/BlogDetailView.vue'),
         props: true,
