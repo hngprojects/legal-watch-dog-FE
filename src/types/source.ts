@@ -22,6 +22,41 @@ export interface SourceRevision {
   was_change_detected: boolean
 }
 
+export type ScrapeJobStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'
+
+export interface ScrapeJobResult {
+  status?: string
+  change_detected?: boolean
+  change_summary?: string
+}
+
+export interface ScrapeJob {
+  id: string
+  source_id: string
+  status: ScrapeJobStatus
+  is_baseline: boolean
+  result?: ScrapeJobResult | null
+  error_message?: string | null
+  data_revision_id?: string | null
+  created_at?: string
+  started_at?: string | null
+  completed_at?: string | null
+}
+
+export interface ScrapeJobsResponse {
+  items: ScrapeJob[]
+  total: number
+  page: number
+  per_page: number
+}
+
+export interface ScrapeJobTriggerResponse {
+  job_id: string
+  source_id: string
+  status: ScrapeJobStatus
+  is_baseline: boolean
+}
+
 export interface Source {
   id: string
   jurisdiction_id: string
@@ -81,6 +116,8 @@ export interface SuggestSourcesRequest {
   jurisdiction_name: string
   jurisdiction_description: string
   project_description: string
+  jurisdiction_prompt?: string | null
+  search_query?: string
 }
 
 export interface SuggestSourcesResponse {

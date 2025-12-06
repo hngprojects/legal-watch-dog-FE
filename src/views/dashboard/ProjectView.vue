@@ -6,7 +6,6 @@ import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'vue-sonner'
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,6 +27,7 @@ const route = useRoute()
 const showProjectModal = ref(false)
 const projectModalMode = ref<'create' | 'edit'>('create')
 const organizationsRequested = ref(false)
+const projectSaving = ref(false)
 
 const inviteForm = ref({
   email: '',
@@ -88,16 +88,19 @@ const closeProjectModal = () => {
 
 const handleProjectSave = async (payload: {
   title: string
-  description: string
+  description: string | null
   organizationId: string
   projectId?: string
 }) => {
   projectStore.setError(null)
+  if (projectSaving.value) return
+  projectSaving.value = true
 
   const orgIdToUse = payload.organizationId || organizationId.value
 
   if (!orgIdToUse) {
     projectStore.setError('Select an organization before creating a project.')
+    projectSaving.value = false
     return
   }
 
@@ -108,12 +111,13 @@ const handleProjectSave = async (payload: {
         title: payload.title,
         description: payload.description,
       })
-
       toast.success('Project updated successfully.')
       closeProjectModal()
-    } catch {
+    } catch (error) {
+      void error
       toast.error(projectStore.error || 'Could not update project')
     }
+    projectSaving.value = false
     return
   }
 
@@ -134,8 +138,11 @@ const handleProjectSave = async (payload: {
         params: { organizationId: orgIdToUse },
       })
     }
-  } catch {
+  } catch (error) {
+    void error
     toast.error(projectStore.error || 'Could not create project')
+  } finally {
+    projectSaving.value = false
   }
 }
 
@@ -432,6 +439,7 @@ watch(
   <ProjectFormModal
     :open="showProjectModal"
     :mode="projectModalMode"
+    :loading="projectSaving"
     :organizations="organizationOptions"
     :default-organization-id="organizationId || organizations[0]?.id"
     :error="projectStore.error"
