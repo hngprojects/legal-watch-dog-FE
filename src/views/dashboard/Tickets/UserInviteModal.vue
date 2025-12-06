@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   open: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
   (e: 'close'): void
+  (e: 'invite', emails: string[]): void
 }>()
 
 const emailInput = ref<HTMLInputElement | null>(null)
@@ -19,6 +20,11 @@ const focusInput = () => {
   emailInput.value?.focus()
 }
 
+const resetState = () => {
+  inputValue.value = ''
+  emails.value = []
+}
+
 const addEmail = () => {
   const value = inputValue.value.trim()
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -26,8 +32,17 @@ const addEmail = () => {
   if (value && emailRegex.test(value) && !emails.value.includes(value)) {
     emails.value.push(value)
     inputValue.value = ''
-  } else if (value && !emailRegex.test(value)) {
   }
+}
+
+const submitInvites = () => {
+  addEmail()
+  if (!emails.value.length) return
+
+  emit('invite', [...emails.value])
+  emit('update:open', false)
+  emit('close')
+  resetState()
 }
 
 const removeEmail = (index: number) => {
@@ -46,6 +61,18 @@ const handleKeydown = (e: KeyboardEvent) => {
 const handleBlur = () => {
   addEmail()
 }
+
+const closeModal = () => {
+  emit('update:open', false)
+  emit('close')
+}
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (!isOpen) resetState()
+  },
+)
 </script>
 
 <template>
@@ -57,10 +84,7 @@ const handleBlur = () => {
         <button
           type="button"
           class="mb-6 -ml-1 text-[#4B4B4B] transition-colors hover:text-black focus:outline-none"
-          @click="
-            emit('update:open', false)
-            emit('close')
-          "
+          @click="closeModal"
           aria-label="Go back"
         >
           <svg
@@ -144,7 +168,7 @@ const handleBlur = () => {
             type="button"
             class="w-full rounded-lg bg-[#3E1C05] px-4 py-3.5 text-[15px] font-semibold text-white shadow-sm transition-all hover:bg-[#3E1C05]/90 disabled:cursor-not-allowed disabled:opacity-50"
             :disabled="emails.length === 0 && !inputValue"
-            @click="addEmail"
+            @click="submitInvites"
           >
             Invite User
           </button>
@@ -152,10 +176,7 @@ const handleBlur = () => {
           <button
             type="button"
             class="w-full rounded-lg py-2 text-[14px] font-semibold text-[#1A1A1A] transition-colors hover:bg-gray-50"
-            @click="
-              emit('update:open', false)
-              emit('close')
-            "
+            @click="closeModal"
           >
             Maybe Later
           </button>

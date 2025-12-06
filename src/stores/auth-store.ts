@@ -74,10 +74,20 @@ interface ResetPasswordDraft {
 
 const TOKEN_KEY = 'lwd_access_token'
 const REFRESH_TOKEN_KEY = 'lwd_refresh_token'
+const COOKIE_REFRESH_KEY = 'lwd_request_token'
 const EMAIL_KEY = 'lwd_user_email'
 const REMEMBER_ME_KEY = 'lwd_remember_me'
 
-const getStoredValue = (key: string) => localStorage.getItem(key) ?? sessionStorage.getItem(key)
+const getCookieValue = (key: string) => {
+  if (typeof document === 'undefined') return null
+  const match = document.cookie.match(new RegExp(`(?:^|; )${key}=([^;]*)`))
+  return match && match[1] ? decodeURIComponent(match[1]) : null
+}
+
+const getStoredValue = (key: string, cookieKey?: string) =>
+  localStorage.getItem(key) ??
+  sessionStorage.getItem(key) ??
+  getCookieValue(String(cookieKey ?? key))
 
 const clearStoredValue = (key: string) => {
   localStorage.removeItem(key)
@@ -102,16 +112,18 @@ const setStoredRememberPreference = (remember: boolean) => {
 
 export const useAuthStore = defineStore('auth', {
   state: (): State => ({
-    accessToken: getStoredValue(TOKEN_KEY),
-    refreshToken: getStoredValue(REFRESH_TOKEN_KEY),
+    accessToken: import.meta.env.SSR ? null : getStoredValue(TOKEN_KEY),
+    refreshToken: import.meta.env.SSR
+      ? null
+      : getStoredValue(REFRESH_TOKEN_KEY, COOKIE_REFRESH_KEY),
     user: null,
-    email: getStoredValue(EMAIL_KEY),
+    email: import.meta.env.SSR ? null : getStoredValue(EMAIL_KEY),
     organisation: null,
     otpPurpose: null,
     resetToken: null,
     signupDraft: null,
     resetPasswordDraft: null,
-    rememberMePreference: getStoredRememberPreference(),
+    rememberMePreference: import.meta.env.SSR ? false : getStoredRememberPreference(),
   }),
 
   getters: {

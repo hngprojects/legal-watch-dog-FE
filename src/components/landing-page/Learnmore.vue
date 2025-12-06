@@ -8,7 +8,7 @@
               level="h1"
               class="mb-4 max-w-[710px] text-2xl leading-tight font-bold text-[#3F1A0F] sm:text-3xl"
             >
-              Expert Assistance for Your Legal & Compliance Monitoring
+              Expert Assistance for Your & Compliance Monitoring
             </TypographyHeading>
             <TypographyText class="text-lg text-gray-600">
               Connect with verified specialists who understand compliance. Whether you need document
@@ -214,12 +214,12 @@ const specialistTasks = [
   {
     title: 'Document Analysis',
     description:
-      'Expert review and analysis of legal documents, contracts, and regulatory filings to ensure compliance.',
+      'Expert review and analysis of documents, contracts, and regulatory filings to ensure compliance.',
   },
   {
     title: 'Risk Assessment',
     description:
-      'Comprehensive evaluation of potential legal and compliance risks specific to your industry.',
+      'Comprehensive evaluation of potential and compliance risks specific to your industry.',
   },
   {
     title: 'Watchdog Task Management',

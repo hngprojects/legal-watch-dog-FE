@@ -7,15 +7,34 @@ import {
   DialogScrollContent,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { withDefaults } from 'vue'
 
-defineProps<{
-  open: boolean
-  form: { name: string; description: string; prompt: string }
-}>()
+const props = withDefaults(
+  defineProps<{
+    open: boolean
+    form: { name: string; description: string }
+    title?: string
+    description?: string
+    nameLabel?: string
+    namePlaceholder?: string
+    descriptionLabel?: string
+    descriptionPlaceholder?: string
+    submitText?: string
+  }>(),
+  {
+    title: 'Define your Sub-Jurisdiction',
+    description: 'Define a specific legal domain or region to monitor',
+    nameLabel: 'Sub-Jurisdiction Name',
+    namePlaceholder: 'e.g Global Visa Monitoring',
+    descriptionLabel: 'Description',
+    descriptionPlaceholder: 'What legal areas will you monitor?',
+    submitText: 'Create Sub-Jurisdiction',
+  },
+)
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
-  (e: 'update:form', payload: Partial<{ name: string; description: string; prompt: string }>): void
+  (e: 'update:form', payload: Partial<{ name: string; description: string }>): void
   (e: 'submit'): void
   (e: 'cancel'): void
 }>()
@@ -23,32 +42,33 @@ const emit = defineEmits<{
 
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
-    <DialogScrollContent class="sm:max-w-[520px]">
+    <DialogScrollContent class="sm:max-w-[560px]">
       <DialogHeader>
-        <DialogTitle>Define your Sub-Jurisdiction</DialogTitle>
-        <DialogDescription>Define a specific domain or region to monitor</DialogDescription>
+        <DialogTitle>{{ props.title }}</DialogTitle>
+        <DialogDescription>{{ props.description }}</DialogDescription>
       </DialogHeader>
 
       <form @submit.prevent="emit('submit')" class="space-y-5">
         <div>
-          <label class="mb-2 block text-sm font-medium text-gray-900">Sub-Jurisdiction Name</label>
+          <label class="mb-2 block text-sm font-medium text-gray-900">{{ props.nameLabel }}</label>
           <input
             :value="form.name"
             type="text"
             required
-            placeholder="e.g Global Visa Monitoring"
+            :placeholder="props.namePlaceholder"
             class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
             @input="emit('update:form', { name: ($event.target as HTMLInputElement).value })"
           />
         </div>
 
         <div>
-          <label class="mb-2 block text-sm font-medium text-gray-900">Description</label>
+          <label class="mb-2 block text-sm font-medium text-gray-900">{{
+            props.descriptionLabel
+          }}</label>
           <textarea
             :value="form.description"
             rows="4"
-            required
-            placeholder="What areas will you monitor?"
+            :placeholder="props.descriptionPlaceholder"
             class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm placeholder-gray-400 focus:border-[#401903] focus:ring-2 focus:ring-[#401903]/20 focus:outline-none"
             @input="
               emit('update:form', { description: ($event.target as HTMLTextAreaElement).value })
@@ -61,7 +81,7 @@ const emit = defineEmits<{
             Cancel
           </button>
 
-          <button type="submit" class="btn--default btn--lg">Create Sub-Jurisdiction</button>
+          <button type="submit" class="btn--default btn--lg">{{ props.submitText }}</button>
         </DialogFooter>
       </form>
     </DialogScrollContent>

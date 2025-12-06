@@ -54,7 +54,7 @@ import Timeline from '@/assets/Images/Timeline.png'
               <p
                 class="max-w-full text-sm leading-relaxed font-semibold text-white/80 sm:max-w-sm sm:text-base lg:text-[1.05rem]"
               >
-                Turn Complex legal jargon into plain English summaries you can act on immediately
+                Turn Complex jargon into plain English summaries you can act on immediately
               </p>
             </div>
 
@@ -136,7 +136,7 @@ import Timeline from '@/assets/Images/Timeline.png'
       <div class="rounded-2xl bg-white p-6 shadow-xl sm:p-8 md:p-10">
         <div class="mx-auto max-w-3xl space-y-4 text-center sm:space-y-6">
           <h2 class="text-2xl leading-tight font-bold sm:text-3xl lg:text-4xl">
-            Your Global Legal Pulse,<br class="hidden sm:block" />
+            Your Global Pulse,<br class="hidden sm:block" />
             All in One Map
           </h2>
 

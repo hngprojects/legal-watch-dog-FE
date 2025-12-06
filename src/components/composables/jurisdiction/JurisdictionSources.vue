@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Plus, FilePlus } from 'lucide-vue-next'
-import aiIcon from '@/assets/icons/ai_icon.png'
+import { computed } from 'vue'
+import { Plus, Search } from 'lucide-vue-next'
 import type { Source, SourceRevision } from '@/types/source'
+import type { Ticket } from '@/types/ticket'
 
-defineProps<{
+const props = defineProps<{
   sources: Source[]
   sourcesLoading: boolean
   sourcesError: string | null
@@ -14,6 +14,7 @@ defineProps<{
   latestRevision: (sourceId: string) => SourceRevision | undefined
   formatRevisionLabel: (rev: { scraped_at: string }) => string
   renderSummary: (summary?: string | null) => string
+  ticketForRevision?: (revisionId: string | undefined) => Ticket | undefined
 }>()
 
 const emit = defineEmits<{
@@ -23,59 +24,74 @@ const emit = defineEmits<{
   (e: 'toggle-source', sourceId: string): void
   (e: 'edit', source: Source): void
   (e: 'delete', source: Source): void
+  (e: 'open-ticket', payload: { source: Source; revision: SourceRevision }): void
 }>()
 
-const showHeaderMenu = ref(false)
-const showEmptyStateMenu = ref(false)
+const latestRevisionBySource = computed<Record<string, SourceRevision | undefined>>(() => {
+  const map: Record<string, SourceRevision | undefined> = {}
+  props.sources.forEach((source) => {
+    map[source.id] = props.latestRevision(source.id)
+  })
+  return map
+})
 
-const closeMenus = () => {
-  showHeaderMenu.value = false
-  showEmptyStateMenu.value = false
+const formatLatestRevisionLabel = (revision?: SourceRevision) =>
+  revision ? props.formatRevisionLabel(revision) : ''
+
+const openTicket = (source: Source, revision?: SourceRevision) => {
+  if (!revision) return
+  emit('open-ticket', { source, revision })
 }
 
 const handleAddManual = () => {
-  closeMenus()
   emit('add-manual')
 }
 
 const handleAddAi = () => {
-  closeMenus()
   emit('add-ai')
+}
+
+const handleScrape = (source: Source) => {
+  // Guard to prevent accidental double-triggering
+  if (props.scraping[source.id]) return
+  emit('scrape', source)
+}
+
+const hasTicket = (revisionId?: string) => {
+  if (!revisionId || !props.ticketForRevision) return false
+  return Boolean(props.ticketForRevision(revisionId))
 }
 </script>
 
 <template>
+  <div class="flex items-center gap-2">
+    <div class="relative w-full sm:w-64">
+      <Search
+        :size="16"
+        class="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400 sm:size-[18px]"
+      />
+      <input
+        type="text"
+        placeholder="Auto source search"
+        class="text-md focus:border-accent-main focus:ring-accent-main/20 w-full rounded-lg border border-gray-200 bg-white py-2 pr-3 pl-10 text-gray-700 shadow-sm outline-none focus:ring-2"
+        @keydown.enter.prevent="handleAddAi"
+      />
+    </div>
+    <button @click="handleAddAi" class="btn--secondary btn--sm btn--with-icon">
+      <FileSearchCorner size="16" />
+      Search
+    </button>
+  </div>
   <div class="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
     <div>
       <h3 class="text-lg font-semibold text-[#1F1F1F]">Sources</h3>
       <p class="text-xs text-gray-500">Trigger scraping per source and view results.</p>
     </div>
-
-    <div class="relative">
-      <button
-        @click.stop="showHeaderMenu = !showHeaderMenu"
-        class="btn--default btn--with-icon btn--sm md:btn--lg"
-      >
-        <Plus :size="16" class="sm:size-[18px]" />
-        <span class="hidden sm:inline">Add Source</span>
-        <span class="sm:hidden">Add</span>
-      </button>
-
-      <div
-        v-if="showHeaderMenu"
-        class="absolute top-full z-50 mt-2 w-60 space-y-2 rounded-xl bg-white p-1 shadow-lg ring-1 ring-black/5 sm:right-0"
-      >
-        <button @click="handleAddManual" class="btn--secondary btn--sm lg:btn--lg btn--with-icon">
-          <FilePlus :size="18" />
-          Add Source Manually
-        </button>
-
-        <button @click="handleAddAi" class="btn--secondary btn--sm md:btn--lg btn--with-icon">
-          <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-          AI Suggested sources
-        </button>
-      </div>
-    </div>
+    <button @click="handleAddManual" class="btn--default btn--with-icon btn--sm md:btn--lg">
+      <Plus :size="16" class="sm:size-[18px]" />
+      <span class="hidden sm:inline">Add Source</span>
+      <span class="sm:hidden">Add</span>
+    </button>
   </div>
 
   <div v-if="sourcesLoading" class="space-y-2">
@@ -93,35 +109,6 @@ const handleAddAi = () => {
     >
       <p class="text-sm text-gray-500">No sources added yet.</p>
       <p class="text-xs text-gray-400">Add a source to begin scraping.</p>
-
-      <div class="relative mt-4 inline-block">
-        <button
-          @click.stop="showEmptyStateMenu = !showEmptyStateMenu"
-          class="btn--default btn--sm md:btn--lg btn--with-icon"
-        >
-          <Plus :size="16" />
-          <span class="hidden sm:inline">Add Source</span>
-          <span class="sm:hidden">Add</span>
-        </button>
-
-        <div
-          v-if="showEmptyStateMenu"
-          class="absolute top-full left-1/2 z-50 mt-2 w-60 -translate-x-1/2 rounded-xl bg-white p-1 text-left shadow-lg ring-1 ring-black/5"
-        >
-          <button @click="handleAddManual" class="btn btn--sm btn--with-icon">
-            <FilePlus :size="18" />
-            Add Source Manually
-          </button>
-
-          <button
-            @click="handleAddAi"
-            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-[#401903] hover:bg-gray-50"
-          >
-            <img :src="aiIcon" alt="AI" class="h-4 w-4 object-contain" />
-            AI Suggested sources
-          </button>
-        </div>
-      </div>
     </div>
 
     <div v-else class="space-y-3">
@@ -132,13 +119,11 @@ const handleAddAi = () => {
       >
         <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
           <!-- Source Info - full width on mobile, constrained on larger screens -->
-          <div class="max-w-full min-w-0 flex-1 sm:max-w-none">
+          <div class="max-w-full min-w-0 flex-1 sm:max-w-[60%] lg:max-w-[65%]">
             <p class="truncate text-xs font-semibold text-gray-900 sm:text-sm md:text-base">
               {{ source.name }}
             </p>
-            <p
-              class="truncate text-[11px] break-all text-gray-500 sm:text-xs sm:break-normal md:text-sm"
-            >
+            <p class="text-[11px] text-gray-500 sm:max-w-[48ch] sm:truncate sm:text-xs md:text-sm">
               {{ source.url }}
             </p>
             <p class="mt-1 text-[11px] tracking-wide text-gray-400 uppercase">
@@ -147,8 +132,9 @@ const handleAddAi = () => {
           </div>
 
           <!-- Action Buttons - stacked & centered on mobile, inline on desktop -->
-          <div class="flex flex-wrap justify-start gap-2 sm:justify-end">
+          <div class="flex flex-wrap justify-start gap-2 sm:flex-none sm:justify-end">
             <button
+              type="button"
               class="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-3.5 sm:py-2 sm:text-sm"
               :class="
                 scraping[source.id]
@@ -156,7 +142,7 @@ const handleAddAi = () => {
                   : 'bg-[#401903] text-white hover:bg-[#301403]'
               "
               :disabled="scraping[source.id]"
-              @click="emit('scrape', source)"
+              @click="handleScrape(source)"
             >
               {{ scraping[source.id] ? 'Scraping...' : 'Scrape Now' }}
             </button>
@@ -192,29 +178,31 @@ const handleAddAi = () => {
           v-if="expandedSources[source.id]"
           class="mt-3 rounded-lg bg-gray-50 p-3 text-xs text-gray-800"
         >
-          <div v-if="latestRevision(source.id)" class="space-y-2">
+          <div v-if="latestRevisionBySource[source.id]" class="space-y-2">
             <div class="flex items-start justify-between gap-3">
               <div class="space-y-1">
                 <p class="text-[11px] font-semibold tracking-wide text-gray-500 uppercase">
-                  Scraped {{ formatRevisionLabel(latestRevision(source.id)!) }}
+                  Scraped {{ formatLatestRevisionLabel(latestRevisionBySource[source.id]) }}
                 </p>
                 <p class="text-sm font-semibold text-gray-900">
                   {{
-                    latestRevision(source.id)?.ai_summary ||
-                    latestRevision(source.id)?.extracted_data?.title ||
+                    latestRevisionBySource[source.id]?.ai_summary ||
+                    latestRevisionBySource[source.id]?.extracted_data?.title ||
                     'No summary available'
                   }}
                 </p>
                 <span
                   class="inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase"
                   :class="
-                    latestRevision(source.id)?.was_change_detected
+                    latestRevisionBySource[source.id]?.was_change_detected
                       ? 'bg-green-100 text-green-700'
                       : 'bg-gray-100 text-gray-600'
                   "
                 >
                   {{
-                    latestRevision(source.id)?.was_change_detected ? 'Change Detected' : 'No Change'
+                    latestRevisionBySource[source.id]?.was_change_detected
+                      ? 'Change Detected'
+                      : 'No Change'
                   }}
                 </span>
               </div>
@@ -231,11 +219,28 @@ const handleAddAi = () => {
               class="prose prose-sm mt-2 max-w-none text-gray-800"
               v-html="
                 renderSummary(
-                  latestRevision(source.id)?.ai_markdown_summary ||
-                    latestRevision(source.id)?.ai_summary,
+                  latestRevisionBySource[source.id]?.ai_markdown_summary ||
+                    latestRevisionBySource[source.id]?.ai_summary,
                 )
               "
             />
+
+            <div
+              v-if="latestRevisionBySource[source.id]?.was_change_detected"
+              class="mt-4 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <p class="text-xs text-gray-600">
+                A change was detected in this revision. Create or open a ticket to collaborate.
+              </p>
+              <button
+                class="btn--default btn--sm sm:btn--lg"
+                @click="openTicket(source, latestRevisionBySource[source.id])"
+              >
+                {{
+                  hasTicket(latestRevisionBySource[source.id]?.id) ? 'View ticket' : 'Open ticket'
+                }}
+              </button>
+            </div>
           </div>
 
           <div v-else class="text-sm text-gray-600">No revisions found for this source yet.</div>

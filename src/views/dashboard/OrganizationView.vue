@@ -4,6 +4,8 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { toast } from 'vue-sonner'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -109,8 +111,9 @@ const acceptInvite = async (token: string) => {
       await organizationStore.fetchOrganizations(userId)
     }
     await refreshInvitations()
-  } catch {
+  } catch (err) {
     toast.error(invitationStore.error || 'Could not accept invitation')
+    void err
   }
 }
 

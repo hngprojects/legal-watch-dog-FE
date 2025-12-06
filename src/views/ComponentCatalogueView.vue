@@ -22,7 +22,7 @@ const buttonState = reactive({
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-[#f8f5f1] via-white to-[#eef2f7] text-gray-900">
+  <div class="min-h-screen bg-linear-to-br from-[#f8f5f1] via-white to-[#eef2f7] text-gray-900">
     <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[240px_1fr] lg:px-8">
       <aside class="lg:sticky lg:top-8">
         <div

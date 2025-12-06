@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { ref, onUnmounted, watch, computed, onMounted } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import BrandLogo from '../reusable/BrandLogo.vue'
 import { Button } from '../ui/button'
 import { useAuthStore } from '@/stores/auth-store'
 
 import UserDropdown from '@/views/dashboard/UserDropdown.vue'
 import UserAvatar from '@/components/dashboard/UserAvatar.vue'
-import Swal from '@/lib/swal'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
+import { toast } from 'vue-sonner'
 import OrganizationSwitcher from '@/components/dashboard/OrganizationSwitcher.vue'
 import Notification from '@/components/dashboard/Notification.vue'
 
 const router = useRouter()
+const { confirm: openConfirm } = useConfirmDialog()
+const route = useRoute()
 
 type NavLink = {
   name: string
@@ -46,30 +49,36 @@ onMounted(async () => {
   }
 })
 
-const navLinks: NavLink[] = [
-  {
-    name: 'Industries',
-    dropdown: [
-      { name: 'Healthcare', to: '/coming-soon', description: 'Solutions for healthcare providers' },
-      { name: 'Finance', to: '/coming-soon', description: 'Financial services solutions' },
-      { name: 'Retail', to: '/coming-soon', description: 'Retail and e-commerce' },
-      { name: 'Manufacturing', to: '/coming-soon', description: 'Manufacturing solutions' },
-      { name: 'Education', to: '/coming-soon', description: 'Educational institutions' },
-    ],
-  },
-  { name: 'Pricing', to: '/pricing' },
-  {
-    name: 'Resources',
-    dropdown: [
-      { name: 'Blog', to: '/coming-soon', description: 'Latest articles and insights' },
-      { name: 'Documentation', to: '/coming-soon', description: 'Technical documentation' },
-      { name: 'Case Studies', to: '/coming-soon', description: 'Success stories' },
-      { name: 'Guides', to: '/coming-soon', description: 'How-to guides and tutorials' },
-      { name: 'Webinars', to: '/coming-soon', description: 'Live and recorded sessions' },
-    ],
-  },
-  { name: 'Partners', to: '/coming-soon' },
-]
+const isDashboard = route.path.includes('/dashboard')
+const navLinks: NavLink[] = isDashboard
+  ? []
+  : [
+      {
+        name: 'Company',
+        dropdown: [
+          { name: 'About Us', to: '/about-us', description: 'Get to know us' },
+          { name: 'FAQ', to: '/faq', description: 'Frequently asked questions' },
+          { name: 'Blog', to: '/blog', description: 'Latest articles and insights' },
+          { name: 'Careers', to: '/careers', description: 'Want to join us?' },
+        ],
+      },
+      { name: 'Pricing', to: '/pricing' },
+      // {
+      //   name: 'Industries',
+      //   dropdown: [
+      //     {
+      //       name: 'Healthcare',
+      //       to: '/coming-soon',
+      //       description: 'Solutions for healthcare providers',
+      //     },
+      //     { name: 'Finance', to: '/coming-soon', description: 'Financial services solutions' },
+      //     { name: 'Retail', to: '/coming-soon', description: 'Retail and e-commerce' },
+      //     { name: 'Manufacturing', to: '/coming-soon', description: 'Manufacturing solutions' },
+      //     { name: 'Education', to: '/coming-soon', description: 'Educational institutions' },
+      //   ],
+      // },
+      { name: 'Contact Us', to: '/contact-us' },
+    ]
 
 let bodyOverflow: string | null = null
 const toggleBodyScroll = (lock: boolean) => {
@@ -109,22 +118,21 @@ const closeDropdown = () => {
   activeDropdown.value = null
 }
 
-const handleLogout = async () => {
-  const result = await Swal.fire({
-    icon: 'warning',
+const handleLogout = () => {
+  openConfirm({
     title: 'Log out?',
-    text: 'You will need to sign in again to access your dashboard.',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, log me out',
-    cancelButtonText: 'Stay logged in',
-    confirmButtonColor: '#DC2626',
+    description: 'You will need to sign in again to access your dashboard.',
+    confirmText: 'Log out',
+    cancelText: 'Cancel',
+    async onConfirm() {
+      isMenuOpen.value = false
+
+      await authStore.logout()
+      toast.success('You have been logged out')
+
+      router.replace({ name: 'login' })
+    },
   })
-
-  if (!result.isConfirmed) return
-
-  isMenuOpen.value = false
-  await authStore.logout()
-  router.replace({ name: 'login' })
 }
 
 const isNotificationsOpen = ref(false)
@@ -435,82 +443,19 @@ onUnmounted(() => {
         </div>
 
         <!-- Navigation Links -->
-        <nav class="flex flex-col gap-1 bg-white p-4 sm:gap-2 sm:p-6">
-          <template v-for="link in navLinks" :key="link.name">
-            <!-- Dropdown in Mobile -->
-            <div v-if="link.dropdown" class="space-y-1">
-              <button
-                @click="toggleDropdown(link.name)"
-                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-base text-gray-600 transition-colors hover:bg-gray-100 sm:text-lg"
-              >
-                {{ link.name }}
-                <svg
-                  class="h-5 w-5 transition-transform"
-                  :class="{ 'rotate-180': activeDropdown === link.name }"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-              <!-- Mobile Dropdown Items -->
-              <Transition
-                enter-active-class="transition-all duration-200"
-                enter-from-class="opacity-0 max-h-0"
-                enter-to-class="opacity-100 max-h-96"
-                leave-active-class="transition-all duration-200"
-                leave-from-class="opacity-100 max-h-96"
-                leave-to-class="opacity-0 max-h-0"
-              >
-                <div v-if="activeDropdown === link.name" class="ml-4 space-y-1 overflow-hidden">
-                  <RouterLink
-                    v-for="item in link.dropdown"
-                    :key="item.name"
-                    :to="item.to"
-                    @click="closeMenu"
-                    class="block rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50"
-                  >
-                    {{ item.name }}
-                  </RouterLink>
-                </div>
-              </Transition>
-            </div>
-
-            <!-- Regular Link in Mobile -->
-            <RouterLink
-              v-else
-              :to="link.to!"
-              @click="closeMenu"
-              class="rounded-lg px-3 py-2.5 text-base text-gray-600 transition-colors hover:bg-gray-100 sm:text-lg"
-            >
-              {{ link.name }}
-            </RouterLink>
-          </template>
-        </nav>
-
-        <!-- Action Buttons -->
-        <div class="space-y-5 border-t p-4 sm:space-y-4 sm:p-6">
-          <template v-if="isAuthenticated">
-            <!-- User Dropdown on Mobile/Tablet -->
-            <div class="mb-4">
-              <UserDropdown @logout="handleLogout" @navigate="closeMenu">
+        <template v-if="!isDashboard">
+          <nav class="flex flex-col gap-1 bg-white p-4 sm:gap-2 sm:p-6">
+            <template v-for="link in navLinks" :key="link.name">
+              <!-- Dropdown in Mobile -->
+              <div v-if="link.dropdown" class="space-y-1">
                 <button
-                  class="hover:bg-accent-main/20 flex w-full cursor-pointer items-center gap-3 rounded-lg bg-gray-50 p-3 transition-colors"
+                  @click="toggleDropdown(link.name)"
+                  class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-base text-gray-600 transition-colors hover:bg-gray-100 sm:text-lg"
                 >
-                  <UserAvatar :name="displayName" :image-url="avatarUrl" :size="40" />
-                  <div class="min-w-0 flex-1 text-left">
-                    <p class="truncate text-sm font-semibold text-gray-800">{{ displayName }}</p>
-                    <p class="text-xs text-gray-500">View profile & settings</p>
-                  </div>
+                  {{ link.name }}
                   <svg
-                    class="h-5 w-5 text-gray-400"
+                    class="h-5 w-5 transition-transform"
+                    :class="{ 'rotate-180': activeDropdown === link.name }"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -523,6 +468,57 @@ onUnmounted(() => {
                     />
                   </svg>
                 </button>
+
+                <!-- Mobile Dropdown Items -->
+                <Transition
+                  enter-active-class="transition-all duration-200"
+                  enter-from-class="opacity-0 max-h-0"
+                  enter-to-class="opacity-100 max-h-96"
+                  leave-active-class="transition-all duration-200"
+                  leave-from-class="opacity-100 max-h-96"
+                  leave-to-class="opacity-0 max-h-0"
+                >
+                  <div v-if="activeDropdown === link.name" class="ml-4 space-y-1 overflow-hidden">
+                    <RouterLink
+                      v-for="item in link.dropdown"
+                      :key="item.name"
+                      :to="item.to"
+                      @click="closeMenu"
+                      class="block rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50"
+                    >
+                      {{ item.name }}
+                    </RouterLink>
+                  </div>
+                </Transition>
+              </div>
+
+              <!-- Regular Link in Mobile -->
+              <RouterLink
+                v-else
+                :to="link.to!"
+                @click="closeMenu"
+                class="rounded-lg px-3 py-2.5 text-base text-gray-600 transition-colors hover:bg-gray-100 sm:text-lg"
+              >
+                {{ link.name }}
+              </RouterLink>
+            </template>
+          </nav>
+        </template>
+
+        <!-- Action Buttons -->
+        <div class="space-y-5 border-t p-4 sm:space-y-4 sm:p-6">
+          <template v-if="isAuthenticated">
+            <!-- User Dropdown on Mobile/Tablet -->
+            <div class="mb-4">
+              <UserDropdown @logout="handleLogout" @navigate="closeMenu">
+                <div
+                  class="flex w-full cursor-pointer items-center gap-3 rounded-lg bg-gray-50 p-3 transition-colors"
+                >
+                  <UserAvatar :name="displayName" :image-url="avatarUrl" :size="40" />
+                  <div class="min-w-0 flex-1 text-left">
+                    <p class="truncate text-sm font-semibold text-gray-800">{{ displayName }}</p>
+                  </div>
+                </div>
               </UserDropdown>
             </div>
 
