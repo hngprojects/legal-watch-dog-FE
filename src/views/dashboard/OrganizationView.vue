@@ -90,6 +90,8 @@ const goToOrganization = (organizationId: string) => {
 }
 
 const goToInvitations = () => router.push({ name: 'invitations' })
+const goToMembers = (organizationId: string) =>
+  router.push({ name: 'organization-members', params: { organizationId } })
 
 const hasMoreOrganizations = computed(() => organizationStore.hasMoreOrganizations)
 
@@ -287,6 +289,7 @@ onMounted(async () => {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem @click.stop="goToMembers(org.id)"> Members </DropdownMenuItem>
                 <DropdownMenuItem @click.stop="openEditOrganization(org)"> Edit </DropdownMenuItem>
                 <DropdownMenuItem class="text-red-600" @click.stop="confirmDeleteOrganization(org)">
                   Delete

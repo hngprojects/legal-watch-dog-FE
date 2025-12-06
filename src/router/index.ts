@@ -183,6 +183,15 @@ export const routes = [
         component: () => import('@/views/dashboard/OrganizationProfileView.vue'),
       },
       {
+        path: 'organizations/:organizationId/members',
+        name: 'organization-members',
+        component: () => import('@/views/dashboard/OrganizationMembersView.vue'),
+        alias: [
+          '/organizations/:organizationId/members',
+          '/organizations/:organizationId/invitations',
+        ],
+      },
+      {
         path: 'organizations/:organizationId/projects',
         name: 'organization-projects',
         component: ProjectView,
