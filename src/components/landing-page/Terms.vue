@@ -2,7 +2,7 @@
   <div class="terms-page flex min-h-screen flex-col bg-white">
     <main class="grow bg-[#F8FAFC]">
       <div class="mx-auto max-w-4xl px-6 py-20 lg:px-8">
-        <div class="mb-12 text-center">
+        <div class="text-center">
           <TypographyHeading
             level="h1"
             class="mb-2 text-4xl font-extrabold text-gray-900 md:text-5xl"
@@ -14,7 +14,7 @@
           </TypographyText>
         </div>
 
-        <div class="border border-gray-100 p-8 md:p-12">
+        <div class="border border-gray-100 md:p-12">
           <TypographyText class="mb-8 text-base leading-relaxed text-gray-700">
             Welcome to Legal Watch Dog Terms and Conditions. Please review these terms and
             conditions carefully. These terms govern your use of our website, web application and
