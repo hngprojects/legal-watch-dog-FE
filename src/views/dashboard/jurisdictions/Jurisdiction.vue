@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Plus, Settings } from 'lucide-vue-next'
 import { marked } from 'marked'
@@ -7,6 +7,7 @@ import DOMPurify from 'dompurify'
 import { toast } from 'vue-sonner'
 import type { Jurisdiction } from '@/api/jurisdiction'
 import type { Source, ScrapeFrequency, SourceType } from '@/types/source'
+import type { ScrapeJob } from '@/types/source'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
 import {
@@ -111,15 +112,24 @@ const sourceForm = ref<{
 const sources = computed(() => sourceStore.sources)
 const sourcesLoading = computed(() => sourceStore.loading)
 const sourcesError = computed(() => sourceStore.error)
+const scrapeJobs = computed(() => sourceStore.scrapeJobs)
+const scrapeJobsLoading = computed(() => sourceStore.scrapeJobsLoading)
+const scrapeJobsError = computed(() => sourceStore.scrapeJobsError)
+const activeScrapeJobs = computed(() => sourceStore.activeScrapeJobs)
+const revisionsLoading = computed(() => sourceStore.revisionsLoading)
+const revisionsError = computed(() => sourceStore.revisionsError)
 const editingSourceId = ref<string | null>(null)
-const scrapeErrors = ref<Record<string, string>>({})
 const scraping = ref<Record<string, boolean>>({})
 const expandedSources = ref<Record<string, boolean>>({})
 const selectedSourceId = ref<string>('')
 const selectedRevisionA = ref<string | null>(null)
 const selectedRevisionB = ref<string | null>(null)
+const jobPollers = ref<Record<string, ReturnType<typeof setTimeout> | null>>({})
+const jobPollCounts = ref<Record<string, number>>({})
 
 const revisionLimit = 5
+const JOB_POLL_INTERVAL = 4000
+const JOB_POLL_LIMIT = 45
 const revisions = computed(() => sourceStore.revisions)
 const revisionOptions = computed(() =>
   selectedSourceId.value ? revisions.value[selectedSourceId.value] || [] : [],
@@ -182,6 +192,11 @@ const loadJurisdiction = async (id: string) => {
 
   if (jurisdiction.value) {
     await sourceStore.fetchSources(jurisdiction.value.id)
+    await Promise.allSettled(
+      (sources.value || []).map(async (src) => {
+        await fetchScrapeDataForSource(src.id)
+      }),
+    )
   }
 
   loading.value = false
@@ -201,6 +216,66 @@ const parseApiError = (err: unknown, fallback: string) => {
   return fallback
 }
 
+const isJobActive = (job?: ScrapeJob | null) =>
+  job?.status === 'PENDING' || job?.status === 'IN_PROGRESS'
+
+const clearJobPoller = (sourceId: string) => {
+  const timer = jobPollers.value[sourceId]
+  if (timer) clearTimeout(timer)
+  jobPollers.value[sourceId] = null
+  jobPollCounts.value[sourceId] = 0
+}
+
+const scheduleJobPoll = (sourceId: string, jobId: string) => {
+  clearJobPoller(sourceId)
+  jobPollCounts.value[sourceId] = 0
+
+  const poll = async () => {
+    const nextCount = (jobPollCounts.value[sourceId] || 0) + 1
+    jobPollCounts.value[sourceId] = nextCount
+
+    if (nextCount >= JOB_POLL_LIMIT) {
+      clearJobPoller(sourceId)
+      toast.error('Scrape status check timed out. Please refresh.')
+      return
+    }
+
+    try {
+      const job = await sourceStore.fetchScrapeJobStatus(sourceId, jobId)
+      if (job && !isJobActive(job)) {
+        clearJobPoller(sourceId)
+        await sourceStore.fetchScrapeJobs(sourceId)
+        await fetchRevisionsForSource(sourceId)
+
+        if (job.status === 'COMPLETED') {
+          toast.success('Scrape finished')
+        } else if (job.status === 'FAILED') {
+          toast.error(job.error_message || 'Scrape failed')
+        }
+        return
+      }
+    } catch (err) {
+      if (nextCount >= JOB_POLL_LIMIT - 1) {
+        clearJobPoller(sourceId)
+        toast.error(parseApiError(err, 'Scrape status polling failed'))
+        return
+      }
+    }
+
+    jobPollers.value[sourceId] = setTimeout(poll, JOB_POLL_INTERVAL)
+  }
+
+  jobPollers.value[sourceId] = setTimeout(poll, JOB_POLL_INTERVAL)
+}
+
+const hydrateActiveJob = (sourceId: string, job?: ScrapeJob | null) => {
+  if (job && isJobActive(job)) {
+    scheduleJobPoll(sourceId, job.id)
+  } else {
+    clearJobPoller(sourceId)
+  }
+}
+
 const fetchRevisionsForSource = async (sourceId: string, page = 1) => {
   const skip = (page - 1) * revisionLimit
 
@@ -212,11 +287,23 @@ const fetchRevisionsForSource = async (sourceId: string, page = 1) => {
   }
 }
 
+const fetchScrapeDataForSource = async (sourceId: string) => {
+  try {
+    const [active] = await Promise.all([
+      sourceStore.fetchActiveScrapeJob(sourceId),
+      sourceStore.fetchScrapeJobs(sourceId, { page: 1, per_page: 10 }),
+    ])
+    hydrateActiveJob(sourceId, active)
+  } catch (err) {
+    console.error('Failed to load scrape jobs', err)
+  }
+}
+
 const toggleSourceExpansion = async (sourceId: string) => {
   expandedSources.value[sourceId] = !expandedSources.value[sourceId]
 
   if (expandedSources.value[sourceId]) {
-    await fetchRevisionsForSource(sourceId)
+    await Promise.all([fetchRevisionsForSource(sourceId), fetchScrapeDataForSource(sourceId)])
   }
 }
 
@@ -224,20 +311,24 @@ const triggerScrape = async (source: Source) => {
   if (scraping.value[source.id]) return
 
   scraping.value[source.id] = true
-  scrapeErrors.value[source.id] = ''
 
   try {
-    const res = await sourceStore.scrapeSource(source.id)
-    const message = (res as { message?: string })?.message ?? 'Scrape completed successfully.'
+    const job = await sourceStore.scrapeSource(source.id)
+    const message = job?.status
+      ? job.status === 'IN_PROGRESS'
+        ? 'Scrape started.'
+        : 'Scrape job queued.'
+      : 'Scrape triggered.'
 
     toast.success(message)
 
     expandedSources.value[source.id] = true
-    await fetchRevisionsForSource(source.id)
+    hydrateActiveJob(source.id, job)
+    await Promise.all([fetchScrapeDataForSource(source.id), fetchRevisionsForSource(source.id)])
   } catch (err) {
     const msg = sourceStore.error || parseApiError(err, 'Failed to trigger scrape')
-    scrapeErrors.value[source.id] = msg
     toast.error(msg)
+    void fetchScrapeDataForSource(source.id)
   } finally {
     scraping.value[source.id] = false
   }
@@ -686,6 +777,12 @@ watch(
 onMounted(() => {
   loadJurisdiction(jurisdictionId.value)
 })
+
+onUnmounted(() => {
+  Object.values(jobPollers.value).forEach((timer) => {
+    if (timer) clearTimeout(timer)
+  })
+})
 </script>
 
 <template>
@@ -885,8 +982,14 @@ onMounted(() => {
             :sources-loading="sourcesLoading"
             :sources-error="sourcesError"
             :scraping="scraping"
-            :scrape-errors="scrapeErrors"
             :expanded-sources="expandedSources"
+            :active-jobs="activeScrapeJobs"
+            :scrape-jobs="scrapeJobs"
+            :scrape-jobs-loading="scrapeJobsLoading"
+            :scrape-jobs-error="scrapeJobsError"
+            :revisions-by-source="revisions"
+            :revisions-loading="revisionsLoading"
+            :revisions-error="revisionsError"
             :latest-revision="latestRevision"
             :format-revision-label="formatRevisionLabel"
             :render-summary="renderSummary"
@@ -898,6 +1001,8 @@ onMounted(() => {
             @edit="startEditSource"
             @delete="deleteSource"
             @open-ticket="handleOpenTicket"
+            @refresh-scrape-data="fetchScrapeDataForSource"
+            @refresh-revisions="fetchRevisionsForSource"
           />
         </div>
 
