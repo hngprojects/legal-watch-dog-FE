@@ -145,34 +145,42 @@
         </div>
 
         <div v-if="displayedPosts.length" class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-10">
-          <article
+          <RouterLink
             v-for="post in displayedPosts"
             :key="post.id"
-            class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md"
+            :to="`/blog/${post.slug}`"
+            custom
+            v-slot="{ href, navigate }"
           >
-            <img :src="post.mainImage" :alt="post.title" class="h-48 w-full object-cover" />
-            <div class="p-6">
-              <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
-                <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]">
-                  {{ post.category }}
-                </span>
-                <span class="text-gray-500">| {{ post.date }}</span>
+            <article
+              :href="href"
+              @click="navigate"
+              class="group cursor-pointer overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition duration-300 ease-in-out hover:border-gray-200 hover:shadow-xl"
+            >
+              <img
+                :src="post.mainImage"
+                :alt="post.title"
+                class="h-48 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+              />
+              <div class="p-6">
+                <div class="mb-3 flex items-center space-x-3 text-xs font-semibold">
+                  <span class="rounded-full bg-gray-100 px-3 py-1 text-[#F79009]">
+                    {{ post.category }}
+                  </span>
+                  <span class="text-gray-500">| {{ post.date }}</span>
+                </div>
+                <TypographyHeading
+                  level="h3"
+                  class="mb-3 text-xl font-bold text-gray-900 transition duration-150 group-hover:text-[#3F1A0F]"
+                >
+                  {{ post.title }}
+                </TypographyHeading>
+                <TypographyText class="mb-4 text-gray-600">
+                  {{ getPreview(post) }}
+                </TypographyText>
               </div>
-              <TypographyHeading level="h3" class="mb-3 text-xl font-bold text-gray-900">
-                {{ post.title }}
-              </TypographyHeading>
-              <TypographyText class="mb-4 text-gray-600">
-                {{ getPreview(post) }}
-              </TypographyText>
-              <RouterLink
-                :to="`/blog/${post.slug}`"
-                class="text-primary flex items-center space-x-1 text-sm font-semibold transition duration-150 hover:text-orange-600"
-              >
-                <span>Learn More</span>
-                <span class="text-primary">→</span>
-              </RouterLink>
-            </div>
-          </article>
+            </article>
+          </RouterLink>
         </div>
 
         <div
@@ -184,7 +192,7 @@
 
         <div class="mt-12 flex justify-center" v-if="canToggle">
           <Button
-            class="mt-6 cursor-pointer self-center px-6 text-sm sm:mt-7 sm:px-8 sm:text-base lg:mt-8"
+            class="mt-6 cursor-pointer self-center px-[50px] text-sm sm:mt-7 sm:px-[120px] sm:text-base lg:mt-8"
             size="lg"
             variant="default"
             @click="toggleMoreCards"
@@ -193,36 +201,6 @@
           </Button>
         </div>
       </section>
-
-      <!-- <section class="-mx-6 bg-gray-50/50 py-20 text-center lg:-mx-8">
-        <div class="mx-auto max-w-xl px-6">
-          <TypographyHeading
-            level="h3"
-            class="mb-4 text-center text-2xl leading-tight font-bold text-gray-900 md:text-3xl"
-          >
-            Stay ahead of legal changes by
-            <span class="font-extrabold text-[#3F1A0F]">subscribing</span> to our newsletter.
-          </TypographyHeading>
-
-          <TypographyText class="mb-8 text-center text-base text-gray-600">
-            Join our newsletmter to get early alerts on regulation updates, price fluctuations, and
-            compliance insights that matter to your business.
-          </TypographyText>
-
-          <div class="mx-auto max-w-sm">
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              class="focus-visible:ring-brand-primary mb-4 border-gray-300 bg-white py-6 text-center focus-visible:ring-offset-0"
-            />
-            <Button
-              class="w-full rounded-lg bg-[#3F1A0F] py-6 text-white transition duration-200 hover:bg-[#3f1a0fab]"
-            >
-              Subscribe
-            </Button>
-          </div>
-        </div>
-      </section> -->
     </div>
   </div>
 </template>
@@ -291,9 +269,10 @@ watch(filteredPosts, (posts) => {
   }
 })
 
-watch(slides, () => {
-  if (currentSlide.value >= slides.value.length) {
-    currentSlide.value = 0
+watch(slides, (newSlides) => {
+  const maxIndex = newSlides.length - 1
+  if (currentSlide.value > maxIndex) {
+    currentSlide.value = maxIndex >= 0 ? maxIndex : 0
   }
 })
 

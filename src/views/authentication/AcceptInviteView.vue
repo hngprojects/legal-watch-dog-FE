@@ -1,23 +1,25 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { useInvitationStore } from '@/stores/invitation-store'
 import { useInvitationPrompt } from '@/composables/useInvitationPrompt'
+import { useConfirmDialog } from '@/composables/useConfirmDialog'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const invitationStore = useInvitationStore()
 const { promptToAcceptInvite } = useInvitationPrompt()
+const { confirm: openConfirm } = useConfirmDialog()
 
 const accepting = ref(false)
 
 onMounted(async () => {
   const token = typeof route.params.token === 'string' ? route.params.token : ''
   if (!token) {
-    await Swal.fire('Invalid invitation link', 'No invitation token found.', 'error')
+    toast.error('Invalid invitation link. No invitation token found.')
     router.replace({ name: 'home' })
     return
   }
@@ -25,6 +27,7 @@ onMounted(async () => {
   invitationStore.setToken(token)
   authStore.syncAuthFromStorage()
 
+  // If already authenticated → go straight to accepting flow
   if (authStore.isAuthenticated) {
     await promptToAcceptInvite(token, {
       onProcessingChange: (isProcessing) => {
@@ -34,30 +37,31 @@ onMounted(async () => {
     return
   }
 
-  const result = await Swal.fire({
+  // Otherwise show confirm dialog with Login / Signup / Cancel options
+  openConfirm({
     title: 'Sign in to accept invite',
-    text: 'To accept this invitation, please sign in. If you already have an account, log in; otherwise create one.',
-    icon: 'info',
-    showDenyButton: true,
-    showCancelButton: true,
-    confirmButtonText: 'Login',
-    denyButtonText: 'Sign up',
-    cancelButtonText: 'Maybe later',
-    customClass: {
-      actions: 'flex flex-wrap gap-2',
-      denyButton: 'btn--default btn--sm md:btn--lg',
-      confirmButton: 'btn--default btn--sm md:btn--lg',
-      cancelButton: 'btn--secondary btn--sm md:btn--lg',
+    description:
+      'To accept this invitation, please sign in. If you already have an account, login; otherwise create one.',
+    confirmText: 'Login',
+    cancelText: 'Maybe later',
+    onCancel() {
+      router.replace({ name: 'home' })
+    },
+    async onConfirm() {
+      router.push({ name: 'login', query: { redirect: route.fullPath } })
     },
   })
 
-  if (result.isConfirmed) {
-    router.push({ name: 'login', query: { redirect: route.fullPath } })
-  } else if (result.isDenied) {
-    router.push({ name: 'signup', query: { redirect: route.fullPath } })
-  } else {
-    router.replace({ name: 'home' })
-  }
+  // Add "Sign up" as a *secondary action* using a second confirm after cancel
+  openConfirm({
+    title: 'Don’t have an account?',
+    description: 'Create an account to continue with your invitation.',
+    confirmText: 'Sign up',
+    cancelText: 'Back',
+    onConfirm() {
+      router.push({ name: 'signup', query: { redirect: route.fullPath } })
+    },
+  })
 })
 </script>
 

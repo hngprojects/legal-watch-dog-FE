@@ -24,6 +24,10 @@ const dropdownLinks = [
     name: 'Organizations',
   },
   {
+    to: 'invitations',
+    name: 'Invitations',
+  },
+  {
     to: 'billing',
     name: 'Billing',
   },

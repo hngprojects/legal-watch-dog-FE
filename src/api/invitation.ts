@@ -19,4 +19,13 @@ export const invitationService = {
   listMyInvitations: () => api.get<ApiResponse<InvitationsPayload>>('/users/me/invitations'),
   acceptInvitation: (token: string) =>
     api.post<ApiResponse<{ message?: string }>>(`/auth/invitations/${token}/accept`),
+  listOrganizationInvitations: (organizationId: string, params?: Record<string, unknown>) =>
+    api.get<ApiResponse<InvitationsPayload>>(
+      `/organizations/${organizationId}/invitations`,
+      params ? { params } : undefined,
+    ),
+  cancelOrganizationInvitation: (organizationId: string, invitationId: string) =>
+    api.delete<ApiResponse<unknown>>(
+      `/organizations/${organizationId}/invitations/${invitationId}`,
+    ),
 }

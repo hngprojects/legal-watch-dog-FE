@@ -192,7 +192,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { ChevronDown } from 'lucide-vue-next'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
 
 // Modal state
 const showHireSpecialistModal = ref(false)
@@ -207,7 +207,7 @@ const closeHireSpecialistModal = () => {
 
 const submitHireForm = async () => {
   closeHireSpecialistModal()
-  await Swal.fire('Request Submitted', 'Your specialist request is being reviewed.', 'success')
+  toast.success('Your specialist request is being reviewed.')
 }
 
 const specialistTasks = [

@@ -102,6 +102,8 @@ export const useBillingStore = defineStore('billing', {
       } catch (error) {
         if ((error as AxiosError).status === 404) {
           return false
+        } else {
+          return false
         }
       }
 
@@ -117,7 +119,12 @@ export const useBillingStore = defineStore('billing', {
           this.account_id = res.data.data.id
         }
       } catch (error) {
-        this.setError((error as BillingErrorResponse).message)
+        const err = (error as AxiosError).response?.data as BillingErrorResponse
+        if (err.status_code === 403) {
+          this.setError('You cannot access billing information for this organization')
+          return
+        }
+        this.setError(err.message)
       }
     },
 
@@ -136,7 +143,12 @@ export const useBillingStore = defineStore('billing', {
         }
         return status
       } catch (error) {
-        this.setError((error as BillingErrorResponse).message)
+        const err = (error as AxiosError).response?.data as BillingErrorResponse
+        if (err.status_code === 403) {
+          this.setError('You cannot access billing information for this organization')
+          return
+        }
+        this.setError(err.message)
       }
     },
 
@@ -151,7 +163,8 @@ export const useBillingStore = defineStore('billing', {
 
         return res.data.data.checkout_url
       } catch (error) {
-        this.setError((error as BillingErrorResponse).message)
+        const err = (error as AxiosError).response?.data as BillingErrorResponse
+        this.setError(err.message)
       }
     },
 
@@ -166,7 +179,12 @@ export const useBillingStore = defineStore('billing', {
 
         return res.data.data as BillingHistoryEntry[]
       } catch (error) {
-        this.setError((error as BillingErrorResponse).message)
+        const err = (error as AxiosError).response?.data as BillingErrorResponse
+        if (err.status_code === 403) {
+          this.setError('You cannot access billing information for this organization')
+          return
+        }
+        this.setError(err.message)
       }
     },
 
@@ -181,7 +199,8 @@ export const useBillingStore = defineStore('billing', {
 
         return res.data.data
       } catch (error) {
-        this.setError((error as BillingErrorResponse).message)
+        const err = (error as AxiosError).response?.data as BillingErrorResponse
+        this.setError(err.message)
       } finally {
         this.setLoading(false)
       }
@@ -197,7 +216,8 @@ export const useBillingStore = defineStore('billing', {
 
         return res.data.data
       } catch (error) {
-        this.setError((error as BillingErrorResponse).message)
+        const err = (error as AxiosError).response?.data as BillingErrorResponse
+        this.setError(err.message)
       }
     },
 

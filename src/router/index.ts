@@ -167,6 +167,12 @@ export const routes = [
         alias: '/organizations',
       },
       {
+        path: 'invitations',
+        name: 'invitations',
+        component: () => import('@/views/dashboard/InvitationsView.vue'),
+        alias: '/invitations',
+      },
+      {
         path: 'profile',
         name: 'profile',
         component: () => import('@/views/dashboard/profile/ProfileView.vue'),
@@ -175,6 +181,15 @@ export const routes = [
         path: 'organizations/:organizationId',
         name: 'organization-profile',
         component: () => import('@/views/dashboard/OrganizationProfileView.vue'),
+      },
+      {
+        path: 'organizations/:organizationId/members',
+        name: 'organization-members',
+        component: () => import('@/views/dashboard/OrganizationMembersView.vue'),
+        alias: [
+          '/organizations/:organizationId/members',
+          '/organizations/:organizationId/invitations',
+        ],
       },
       {
         path: 'organizations/:organizationId/projects',
