@@ -5,22 +5,23 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/project-store'
 import { useOrganizationStore } from '@/stores/organization-store'
 import { useAuthStore } from '@/stores/auth-store'
-import Swal from '@/lib/swal'
+import { toast } from 'vue-sonner'
+
 import {
   Breadcrumb,
   BreadcrumbItem,
-  // BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  // BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import ProjectFormModal from '@/components/dashboard/ProjectFormModal.vue'
 
 const projectStore = useProjectStore()
 const organizationStore = useOrganizationStore()
 const authStore = useAuthStore()
+
 const { projects, loading, error } = storeToRefs(projectStore)
 const { organizations } = storeToRefs(organizationStore)
+
 const router = useRouter()
 const route = useRoute()
 
@@ -32,7 +33,7 @@ const inviteForm = ref({
   email: '',
   role: 'Member',
 })
-// const inviteSending = ref(false)
+
 const inviteMessage = ref<string | null>(null)
 const inviteError = ref<string | null>(null)
 
@@ -40,23 +41,26 @@ const organizationId = computed(() => {
   const id = route.params.organizationId
   return typeof id === 'string' ? id : ''
 })
-// const hasOrganization = computed(() => Boolean(organizationId.value))
+
 const organizationName = computed(() => {
   const currentId = organizationId.value
   if (!currentId) return ''
   return organizations.value.find((org) => org.id === currentId)?.name || 'Organization'
 })
+
 const organizationOptions = computed(() =>
   organizations.value.map((org) => ({ id: org.id, name: org.name })),
 )
 
 const ensureOrganizations = async () => {
   if (organizations.value.length || organizationsRequested.value) return
+
   let userId = authStore.user?.id
   if (!userId) {
     const loaded = await authStore.loadCurrentUser?.()
     userId = loaded?.id
   }
+
   if (userId) {
     organizationsRequested.value = true
     await organizationStore.fetchOrganizations(userId)
@@ -97,21 +101,23 @@ const handleProjectSave = async (payload: {
     return
   }
 
+  // EDIT PROJECT
   if (projectModalMode.value === 'edit' && payload.projectId) {
     try {
       await projectStore.updateProject(orgIdToUse, payload.projectId, {
         title: payload.title,
         description: payload.description,
       })
-      await Swal.fire('Updated', 'Project updated successfully.', 'success')
+
+      toast.success('Project updated successfully.')
       closeProjectModal()
-    } catch (error) {
-      void error
-      await Swal.fire('Update failed', projectStore.error || 'Could not update project', 'error')
+    } catch {
+      toast.error(projectStore.error || 'Could not update project')
     }
     return
   }
 
+  // CREATE PROJECT
   try {
     const newProject = await projectStore.addProject({
       title: payload.title,
@@ -120,60 +126,18 @@ const handleProjectSave = async (payload: {
     })
 
     if (newProject) {
-      await Swal.fire('Created', 'Project created successfully.', 'success')
+      toast.success('Project created successfully.')
       closeProjectModal()
+
       router.push({
         name: 'organization-projects',
         params: { organizationId: orgIdToUse },
       })
     }
-  } catch (error) {
-    void error
-    await Swal.fire('Create failed', projectStore.error || 'Could not create project', 'error')
+  } catch {
+    toast.error(projectStore.error || 'Could not create project')
   }
 }
-
-// const sendInvitation = async () => {
-//   inviteError.value = null
-//   inviteMessage.value = null
-
-//   if (!organizationId.value) {
-//     inviteError.value = 'Select an organization before inviting teammates.'
-//     return
-//   }
-
-//   if (!inviteForm.value.email.trim()) {
-//     inviteError.value = 'Email is required'
-//     return
-//   }
-
-//   inviteSending.value = true
-//   try {
-//     const { data } = await organizationService.inviteMember(organizationId.value, {
-//       invited_email: inviteForm.value.email.trim(),
-//       role_name: inviteForm.value.role,
-//     })
-
-//     const message = data.message || data.data?.message || 'Invitation sent successfully.'
-
-//     inviteMessage.value = message
-//     await Swal.fire('Invitation sent', message, 'success')
-//     inviteForm.value.email = ''
-//   } catch (error) {
-//     const err = error as OrganizationErrorResponse
-//     if (!err.response) {
-//       inviteError.value = 'Network error: Unable to reach server'
-//     } else {
-//       inviteError.value =
-//         err.response.data?.detail?.[0]?.msg ||
-//         err.response.data?.message ||
-//         'Failed to send invitation'
-//     }
-//     await Swal.fire('Could not send invite', inviteError.value, 'error')
-//   } finally {
-//     inviteSending.value = false
-//   }
-// }
 
 const goToProject = (id: string) => {
   router.push({
@@ -199,6 +163,7 @@ watch(
     inviteError.value = null
     inviteForm.value.email = ''
     inviteForm.value.role = 'Member'
+
     if (id) {
       projectStore.fetchProjects(id)
     } else {
